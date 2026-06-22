@@ -33,6 +33,12 @@ src/
 - Use CSS variables from globals.css for colors (--accent, --muted, --border, etc).
 - Keep components responsive — mobile-first, max-w-7xl container.
 
+## Branching Strategy
+- **`main`** — production. Deployed to the live site. Never push directly.
+- **`staging`** — default branch. PRs merge here first for review and preview deploys.
+- **Feature branches** — branch off `staging`, open PRs back into `staging`.
+- When staging is ready, merge `staging` → `main` to deploy to production.
+
 ## Commands
 - `npm run dev` — start dev server
 - `npm run build` — production build
