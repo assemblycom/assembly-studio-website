@@ -1,13 +1,30 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "PP Mori";
+  src: url("/fonts/PPMori-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "PP Mori";
+  src: url("/fonts/PPMori-SemiBold.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #0a0a0a;
   --muted: #f5f5f5;
   --muted-foreground: #737373;
   --border: #e5e5e5;
-  --accent: #6366f1;
+  --accent: #0a0a0a;
   --accent-foreground: #ffffff;
+  --font-pp-mori: "PP Mori", system-ui, sans-serif;
 }
 
 @theme inline {
@@ -18,7 +35,7 @@
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-pp-mori);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -29,7 +46,7 @@
     --muted: #1a1a1a;
     --muted-foreground: #a3a3a3;
     --border: #262626;
-    --accent: #818cf8;
+    --accent: #ededed;
     --accent-foreground: #ffffff;
   }
 }

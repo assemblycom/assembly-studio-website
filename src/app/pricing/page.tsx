@@ -8,55 +8,177 @@ export const metadata: Metadata = {
     "Simple, transparent pricing for Assembly Studio. Start free and scale as you grow.",
 };
 
-const PLANS = [
+interface PlanFeatureGroup {
+  label: string;
+  items: string[];
+}
+
+interface Plan {
+  name: string;
+  price: string;
+  period: string;
+  subtitle: string;
+  description: string;
+  featureGroups: PlanFeatureGroup[];
+  cta: string;
+  highlighted: boolean;
+}
+
+const PLANS: Plan[] = [
   {
-    name: "Starter",
-    price: "Free",
+    name: "Free",
+    price: "$0",
     period: "",
-    description: "For individuals exploring AI workflows.",
-    features: [
-      "Up to 3 workflows",
-      "1,000 runs per month",
-      "Community support",
-      "Core templates",
+    subtitle: "Free forever",
+    description: "Try Studio with a live client.",
+    featureGroups: [
+      {
+        label: "Fundamentals",
+        items: [
+          "5 active contacts",
+          "1 internal user",
+          "30 build credits / month",
+        ],
+      },
+      {
+        label: "Includes",
+        items: [
+          "CRM",
+          "Client experience",
+          "App builder",
+          "Messaging and team inbox",
+          "Billing and payments",
+          "Contracts, forms, file-sharing, and tasks",
+        ],
+      },
+      {
+        label: "Support",
+        items: ["Community support"],
+      },
     ],
     cta: "Get started",
     highlighted: false,
   },
   {
-    name: "Pro",
-    price: "$49",
-    period: "/month",
-    description: "For teams building production workflows.",
-    features: [
-      "Unlimited workflows",
-      "10,000 runs per month",
-      "Priority support",
-      "All templates",
-      "Team collaboration",
-      "Custom integrations",
+    name: "Starter",
+    price: "$29",
+    period: "/mo",
+    subtitle: "Billed monthly",
+    description: "For solo firms getting set up.",
+    featureGroups: [
+      {
+        label: "Fundamentals",
+        items: [
+          "50 active contacts",
+          "1 internal user",
+          "100 build credits / month",
+        ],
+      },
+      {
+        label: "Everything in Free, plus",
+        items: [
+          "API, Zapier & Make",
+          "Custom domain for client experience",
+          "Custom email domain for notifications",
+        ],
+      },
+      {
+        label: "Support",
+        items: ["Email support"],
+      },
     ],
-    cta: "Start free trial",
+    cta: "Get started",
+    highlighted: false,
+  },
+  {
+    name: "Professional",
+    price: "$99",
+    period: "/mo",
+    subtitle: "Billed monthly",
+    description: "For growing teams serving more clients.",
+    featureGroups: [
+      {
+        label: "Fundamentals",
+        items: [
+          "500 active contacts",
+          "3 internal users (+$39/user)",
+          "300 build credits / month",
+        ],
+      },
+      {
+        label: "Everything in Starter, plus",
+        items: [
+          "Full white-labeling",
+          "App visibility",
+          "Automations",
+          "Multi-company clients",
+        ],
+      },
+      {
+        label: "Support",
+        items: ["Priority email support"],
+      },
+    ],
+    cta: "Get started",
     highlighted: true,
   },
   {
-    name: "Enterprise",
-    price: "Custom",
-    period: "",
-    description: "For organizations with advanced requirements.",
-    features: [
-      "Unlimited everything",
-      "SSO & SAML",
-      "Dedicated support",
-      "Custom SLA",
-      "Data residency",
-      "Audit logging",
-      "HIPAA & SOC 2",
+    name: "Advanced",
+    price: "$299",
+    period: "/mo",
+    subtitle: "Billed monthly",
+    description: "For scaling firms with compliance needs.",
+    featureGroups: [
+      {
+        label: "Fundamentals",
+        items: [
+          "Unlimited active contacts",
+          "5 internal users (+$59/user)",
+          "1,000 build credits / month",
+        ],
+      },
+      {
+        label: "Everything in Pro, plus",
+        items: [
+          "Audit log",
+          "Client access permissions",
+          "Advanced security",
+          "HIPAA compliance",
+        ],
+      },
+      {
+        label: "Support",
+        items: [
+          "Priority email support",
+          "Priority call support",
+          "Personalized onboarding",
+        ],
+      },
     ],
-    cta: "Contact sales",
+    cta: "Get started",
     highlighted: false,
   },
 ];
+
+function CheckIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      className="shrink-0 text-accent"
+    >
+      <path
+        d="M4 8l2.5 2.5L12 5.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export default function PricingPage() {
   return (
@@ -68,25 +190,29 @@ export default function PricingPage() {
             Simple, transparent pricing
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Start free, scale as you grow. No hidden fees, no surprises.
+            Start free, scale as you grow. Save ~17% when billed annually.
           </p>
         </div>
       </section>
 
       {/* Plans */}
       <Section>
-        <div className="grid gap-8 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {PLANS.map((plan) => (
             <div
               key={plan.name}
               className={`flex flex-col rounded-xl border p-8 ${
                 plan.highlighted
-                  ? "border-accent bg-accent/5"
+                  ? "border-foreground"
                   : "border-border"
               }`}
             >
               <h3 className="text-lg font-medium">{plan.name}</h3>
-              <div className="mt-4 flex items-baseline">
+              <p className="mt-1 min-h-[40px] text-sm text-muted-foreground">
+                {plan.description}
+              </p>
+
+              <div className="mt-6 flex items-baseline">
                 <span className="text-4xl font-medium">{plan.price}</span>
                 {plan.period && (
                   <span className="ml-1 text-muted-foreground">
@@ -94,46 +220,41 @@ export default function PricingPage() {
                   </span>
                 )}
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {plan.description}
+              <p className="mt-1 min-h-[16px] text-xs text-muted-foreground">
+                {plan.subtitle}
               </p>
-
-              <ul className="mt-8 flex flex-1 flex-col gap-3">
-                {plan.features.map((feature) => (
-                  <li
-                    key={feature}
-                    className="flex items-center gap-2 text-sm"
-                  >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      className="shrink-0 text-accent"
-                    >
-                      <path
-                        d="M4 8l2.5 2.5L12 5.5"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
 
               <a
                 href={APP_URL}
-                className={`mt-8 rounded-lg px-6 py-3 text-center text-sm transition-opacity hover:opacity-90 ${
+                className={`mt-6 rounded-lg px-6 py-3 text-center text-sm transition-opacity hover:opacity-90 ${
                   plan.highlighted
-                    ? "bg-accent text-accent-foreground"
+                    ? "bg-foreground text-background"
                     : "border border-border text-foreground hover:bg-muted"
                 }`}
               >
                 {plan.cta}
               </a>
+
+              <div className="mt-8 flex flex-1 flex-col gap-6">
+                {plan.featureGroups.map((group) => (
+                  <div key={group.label}>
+                    <p className="text-sm font-medium">{group.label}</p>
+                    <ul className="mt-3 flex flex-col gap-2.5">
+                      {group.items.map((item) => (
+                        <li
+                          key={item}
+                          className="flex items-start gap-2 text-sm text-muted-foreground"
+                        >
+                          <span className="mt-0.5">
+                            <CheckIcon />
+                          </span>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>

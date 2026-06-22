@@ -5,29 +5,29 @@ import { Section } from "@/components/ui/section";
 
 const FAQS = [
   {
-    question: "What is Assembly Studio?",
+    question: "How do I get access to Assembly Studio?",
     answer:
-      "Assembly Studio is a no-code platform for building, deploying, and managing AI-powered workflows. It lets teams create custom AI agents that automate complex business processes.",
+      "Access rolls out in waves, with waitlist members receiving priority access. Founding members receive additional benefits including an exclusive plan and personalized onboarding.",
   },
   {
-    question: "Do I need technical skills to use it?",
+    question: "What can I actually build?",
     answer:
-      "No. Assembly Studio is designed for business users. You describe what you want in plain language, and the platform builds it for you. Templates are available for common use cases.",
+      "Assembly Studio works well for client-facing workflows. Examples include year-end checklists (accounting), deliverable reviews (consulting), case trackers (law), approval flows (marketing), and mood board approvals (design). Any describable client workflow is buildable.",
   },
   {
-    question: "How does pricing work?",
+    question: "Do I need to know how to code?",
     answer:
-      "We offer flexible plans based on your team size and usage. Visit our pricing page for detailed information, or contact sales for enterprise plans.",
+      "No coding required. Describe your desired app in plain English, and Assembly Studio generates it. Refinements happen through conversation.",
   },
   {
-    question: "Is my data secure?",
+    question: "What if I already have an Assembly.com workspace?",
     answer:
-      "Yes. Assembly Studio is built with enterprise-grade security including SOC 2 compliance, end-to-end encryption, and role-based access controls. Visit our security page for details.",
+      "Currently, Assembly Studio operates independently from existing Assembly.com workspaces and cannot be combined. Future integration is planned.",
   },
   {
-    question: "Can I integrate with my existing tools?",
+    question: "How do I get in touch with the team?",
     answer:
-      "Assembly Studio integrates with popular business tools including Slack, Salesforce, HubSpot, Jira, and more. Custom integrations are available via our API.",
+      "Contact the team at studio@assembly.com for Assembly Studio inquiries.",
   },
 ];
 
