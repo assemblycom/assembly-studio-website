@@ -28,49 +28,44 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-function GlanceCard({ study }: { study: CaseStudy }) {
+function MetaCard({ study }: { study: CaseStudy }) {
   if (!study.glance) return null;
   return (
-    <aside className="md:sticky md:top-28">
-      <h2 className="text-2xl font-medium tracking-tight">
-        {study.company} at a Glance
-      </h2>
+    <aside className="h-fit rounded-xl border border-border p-6 md:sticky md:top-24">
+      <p className="font-medium">{study.company}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{study.industry}</p>
 
-      <dl className="mt-8 space-y-6 text-sm">
+      <dl className="mt-6 space-y-5 text-sm">
         {study.glance.founded && (
           <div>
-            <dt className="font-medium">Founded</dt>
-            <dd className="mt-1 text-muted-foreground">
-              {study.glance.founded}
-            </dd>
+            <dt className="text-muted-foreground">Founded</dt>
+            <dd className="mt-0.5 font-medium">{study.glance.founded}</dd>
           </div>
         )}
         <div>
-          <dt className="font-medium">Running on Assembly since</dt>
-          <dd className="mt-1 text-muted-foreground">
-            {study.glance.runningSince}
-          </dd>
+          <dt className="text-muted-foreground">On Assembly since</dt>
+          <dd className="mt-0.5 font-medium">{study.glance.runningSince}</dd>
         </div>
         <div>
-          <dt className="font-medium">Company URL</dt>
-          <dd className="mt-1">
+          <dt className="text-muted-foreground">Website</dt>
+          <dd className="mt-0.5">
             <a
               href={study.glance.companyUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-muted-foreground transition-colors hover:text-foreground"
+              className="font-medium transition-colors hover:text-muted-foreground"
             >
               {study.glance.companyUrl.replace(/^https?:\/\//, "")}
             </a>
           </dd>
         </div>
         <div>
-          <dt className="font-medium">Apps in use</dt>
-          <dd className="mt-3 flex flex-wrap gap-2">
+          <dt className="text-muted-foreground">Apps in use</dt>
+          <dd className="mt-2 flex flex-wrap gap-1.5">
             {study.glance.apps.map((app) => (
               <span
                 key={app}
-                className="rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase text-muted-foreground"
+                className="rounded-md border border-border px-2 py-0.5 text-xs text-muted-foreground"
               >
                 {app}
               </span>
@@ -112,7 +107,7 @@ function BodyBlock({ block }: { block: ContentBlock }) {
     case "quote":
       return (
         <figure className="mt-10 border-l-2 border-accent pl-6">
-          <blockquote className="text-lg leading-relaxed">
+          <blockquote className="text-xl leading-relaxed">
             “{block.text}”
           </blockquote>
           {block.attribution && (
@@ -135,6 +130,29 @@ function BodyBlock({ block }: { block: ContentBlock }) {
   }
 }
 
+function StoryNavCard({
+  study,
+  direction,
+}: {
+  study: CaseStudy;
+  direction: "Previous" | "Next";
+}) {
+  return (
+    <Link
+      href={`/customers/${study.slug}`}
+      className="group rounded-xl border border-border p-6 transition-colors hover:border-foreground/20"
+    >
+      <span className="text-xs uppercase tracking-widest text-muted-foreground">
+        {direction}
+      </span>
+      <p className="mt-2 text-xs font-medium text-muted-foreground">
+        {study.company}
+      </p>
+      <h3 className="mt-1 text-sm font-medium leading-snug">{study.headline}</h3>
+    </Link>
+  );
+}
+
 export default async function CaseStudyPage({ params }: Props) {
   const { slug } = await params;
   const study = getCaseStudyBySlug(slug);
@@ -142,16 +160,31 @@ export default async function CaseStudyPage({ params }: Props) {
 
   const hasRichBody = Boolean(study.body && study.glance);
 
+  const index = CASE_STUDIES.findIndex((s) => s.slug === slug);
+  const prev = index > 0 ? CASE_STUDIES[index - 1] : null;
+  const next =
+    index < CASE_STUDIES.length - 1 ? CASE_STUDIES[index + 1] : null;
+
   return (
     <>
-      <section className="px-6 pb-16 pt-24 md:pt-32">
-        <div className="mx-auto max-w-3xl">
-          <Link
-            href="/customers"
-            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+      {/* Hero */}
+      <section className="px-6 pt-24 md:pt-32">
+        <div className="mx-auto max-w-5xl">
+          <nav
+            aria-label="Breadcrumb"
+            className="flex items-center gap-2 text-sm text-muted-foreground"
           >
-            &larr; All customers
-          </Link>
+            <Link
+              href="/customers"
+              className="transition-colors hover:text-foreground"
+            >
+              Customers
+            </Link>
+            <span aria-hidden className="text-muted-foreground/50">
+              /
+            </span>
+            <span className="text-foreground">{study.company}</span>
+          </nav>
 
           <div className="mt-6 flex items-center gap-3">
             <span className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
@@ -159,10 +192,12 @@ export default async function CaseStudyPage({ params }: Props) {
             </span>
           </div>
 
-          <h1 className="mt-6 text-4xl font-medium tracking-tight md:text-5xl">
+          <h1 className="mt-6 max-w-3xl text-4xl font-medium tracking-tight md:text-5xl">
             {study.headline}
           </h1>
-          <p className="mt-4 text-lg text-muted-foreground">{study.summary}</p>
+          <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
+            {study.summary}
+          </p>
 
           <div className="mt-8 flex flex-wrap gap-8">
             {study.stats.map((stat) => (
@@ -174,14 +209,22 @@ export default async function CaseStudyPage({ params }: Props) {
               </div>
             ))}
           </div>
+
+          {/* Hero image */}
+          <div
+            role="img"
+            aria-label={`${study.company} client experience`}
+            className="mt-12 flex aspect-[2/1] w-full items-center justify-center rounded-xl border border-border bg-muted"
+          >
+            <span className="text-sm text-muted-foreground">Placeholder</span>
+          </div>
         </div>
       </section>
 
       {hasRichBody ? (
-        <Section className="border-t border-border">
-          <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-[18rem_minmax(0,1fr)] md:gap-16">
-            <GlanceCard study={study} />
-            <div>
+        <Section className="pt-16 md:pt-20">
+          <div className="mx-auto grid max-w-5xl gap-12 md:grid-cols-[minmax(0,1fr)_16rem] md:gap-16">
+            <article>
               {study.body!.map((block, i) => (
                 <BodyBlock key={i} block={block} />
               ))}
@@ -192,7 +235,9 @@ export default async function CaseStudyPage({ params }: Props) {
               >
                 Start building
               </a>
-            </div>
+            </article>
+
+            <MetaCard study={study} />
           </div>
         </Section>
       ) : (
@@ -251,6 +296,21 @@ export default async function CaseStudyPage({ params }: Props) {
             </div>
           </Section>
         </>
+      )}
+
+      {/* More customer stories */}
+      {(prev || next) && (
+        <Section className="border-t border-border">
+          <div className="mx-auto max-w-5xl">
+            <p className="text-sm text-muted-foreground">
+              More customer stories
+            </p>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              {prev && <StoryNavCard study={prev} direction="Previous" />}
+              {next && <StoryNavCard study={next} direction="Next" />}
+            </div>
+          </div>
+        </Section>
       )}
     </>
   );

@@ -2,61 +2,42 @@
 
 import { useState, useRef, useEffect } from "react";
 import { APP_URL } from "@/lib/constants";
+import { TEMPLATES, TEMPLATE_CATEGORIES } from "@/lib/templates";
 
-const CATEGORIES = [
-  {
-    label: "Onboarding",
-    items: [
-      { title: "New client intake", desc: "Company details, contacts, services, budget" },
-      { title: "Onboarding wizard", desc: "Multi-step flow with saved progress" },
-      { title: "Document collection", desc: "Requested docs with upload checklist" },
-    ],
-  },
-  {
-    label: "Workflows",
-    items: [
-      { title: "Approval flow", desc: "Route requests through reviewers" },
-      { title: "Task assignment", desc: "Assign and track deliverables" },
-      { title: "Status updates", desc: "Automated progress reports to clients" },
-    ],
-  },
-  {
-    label: "Portals",
-    items: [
-      { title: "Client dashboard", desc: "Branded hub for files, tasks, messages" },
-      { title: "Partner portal", desc: "External collaboration workspace" },
-      { title: "Knowledge base", desc: "Self-service help center for clients" },
-    ],
-  },
-  {
-    label: "Communication",
-    items: [
-      { title: "Secure messaging", desc: "Threaded conversations with clients" },
-      { title: "Email notifications", desc: "Automated alerts and reminders" },
-      { title: "Announcement feed", desc: "Broadcast updates to all clients" },
-    ],
-  },
-  {
-    label: "Finance",
-    items: [
-      { title: "Invoice collection", desc: "Send and track client payments" },
-      { title: "Contract signing", desc: "E-signatures with audit trail" },
-      { title: "Billing dashboard", desc: "Payment history and statements" },
-    ],
-  },
-  {
-    label: "Reporting",
-    items: [
-      { title: "Client analytics", desc: "Engagement and activity metrics" },
-      { title: "Custom reports", desc: "Filtered views of portal data" },
-      { title: "Export to CSV", desc: "Download data for external tools" },
-    ],
-  },
+// Derived from the shared template data so the hero categories always match
+// the templates page (all 10 categories, in order).
+const CATEGORIES = TEMPLATE_CATEGORIES.map((label) => ({
+  label,
+  items: TEMPLATES.filter((t) => t.category === label).map((t) => ({
+    title: t.title,
+    desc: t.description,
+  })),
+})).filter((c) => c.items.length > 0);
+
+// Customer names shown in the "trusted by" strip.
+const TRUSTED_BY = [
+  "Capital One",
+  "Collective",
+  "Ditto",
+  "Heritage Law",
+  "Waymaker",
+  "Aura",
+  "CoverPanda",
 ];
 
 export function Hero() {
   const [open, setOpen] = useState<number | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const chipsRef = useRef<HTMLDivElement>(null);
+
+  const scrollChips = () => {
+    const el = chipsRef.current;
+    if (!el) return;
+    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+    // Direct assignment always moves the element; CSS scroll-smooth animates it
+    // in real browsers.
+    el.scrollLeft = atEnd ? 0 : Math.min(el.scrollLeft + 220, el.scrollWidth);
+  };
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -99,74 +80,87 @@ export function Hero() {
           </a>
 
           {/* Category chips + dropdown */}
-          <div ref={panelRef} className="relative mt-4">
-            <div className="flex items-center gap-2">
-              <div className="flex flex-1 items-center gap-2 overflow-x-auto scrollbar-none">
-                {CATEGORIES.map((cat, i) => (
-                  <button
-                    key={cat.label}
-                    onClick={() => setOpen(open === i ? null : i)}
-                    className={`shrink-0 rounded-full border px-3 py-1 text-xs transition-colors ${
-                      open === i
-                        ? "border-foreground bg-foreground text-background"
-                        : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
-                    }`}
-                  >
-                    {cat.label}
-                  </button>
-                ))}
+          <div ref={panelRef} className="mt-4">
+            <div className="relative">
+              <div className="flex items-center gap-2">
+                <div
+                  ref={chipsRef}
+                  className="flex flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                >
+                  {CATEGORIES.map((cat, i) => (
+                    <button
+                      key={cat.label}
+                      onClick={() => setOpen(open === i ? null : i)}
+                      className={`shrink-0 rounded-lg border px-3 py-1 text-xs transition-colors ${
+                        open === i
+                          ? "border-foreground bg-foreground text-background"
+                          : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
+                      }`}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={scrollChips}
+                  aria-label="Show more categories"
+                  className="shrink-0 rounded-lg p-1 text-muted-foreground transition-colors hover:text-foreground"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+                    <path
+                      d="M6 3l5 5-5 5"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
               </div>
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 16 16"
-                fill="none"
-                className="shrink-0 text-muted-foreground"
-              >
-                <path
-                  d="M6 3l5 5-5 5"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+
+              {/* Dropdown panel — absolute overlay anchored to the chip row;
+                  opens into the reserved space below without moving anything. */}
+              {open !== null && (
+                <div className="absolute left-0 right-0 top-full z-20 mt-2 max-h-[228px] overflow-y-auto rounded-xl border border-border bg-background text-left shadow-lg">
+                  {CATEGORIES[open].items.map((item) => (
+                    <a
+                      key={item.title}
+                      href={APP_URL}
+                      className="flex items-center gap-4 border-b border-border px-5 py-4 text-left transition-colors last:border-0 hover:bg-muted"
+                    >
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+                        <div className="h-5 w-5 rounded bg-muted-foreground/20" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{item.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {item.desc}
+                        </p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Dropdown panel */}
-            {open !== null && (
-              <div className="absolute left-0 right-0 z-10 mt-2 rounded-xl border border-border bg-background shadow-lg">
-                {CATEGORIES[open].items.map((item) => (
-                  <a
-                    key={item.title}
-                    href={APP_URL}
-                    className="flex items-center gap-4 border-b border-border px-5 py-4 text-left transition-colors last:border-0 hover:bg-muted"
-                  >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
-                      <div className="h-5 w-5 rounded bg-muted-foreground/20" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium">{item.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {item.desc}
-                      </p>
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
+            {/* Reserve a fixed area below the chips so the dropdown opens into
+                empty space and the content below never shifts or gets covered. */}
+            <div aria-hidden className="h-[244px]" />
           </div>
         </div>
 
         <p className="mt-12 text-sm text-muted-foreground">
           Trusted by teams at leading firms
         </p>
-        <div className="mt-4 flex items-center justify-center gap-8 opacity-40">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-8 w-24 rounded bg-muted-foreground/20"
-            />
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+          {TRUSTED_BY.map((name) => (
+            <span
+              key={name}
+              className="text-base font-medium text-muted-foreground"
+            >
+              {name}
+            </span>
           ))}
         </div>
       </div>

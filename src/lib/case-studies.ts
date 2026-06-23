@@ -32,6 +32,8 @@ export interface CaseStudy {
   // simple challenge/solution/results template.
   glance?: GlanceInfo;
   body?: ContentBlock[];
+  // Given more visual weight on the customers index (spans a wider card).
+  featured?: boolean;
 }
 
 export const CASE_STUDIES: CaseStudy[] = [
@@ -39,6 +41,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "capital-one-luxury-travel",
     company: "Capital One Luxury Travel",
     industry: "Travel & Hospitality",
+    featured: true,
     headline:
       "How Capital One Luxury Travel Balanced 'Build vs. Buy' with Assembly",
     summary:

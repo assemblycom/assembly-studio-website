@@ -1,5 +1,5 @@
 import { Hero } from "@/components/home/hero";
-import { CoreFlow } from "@/components/home/core-flow";
+import { HowItWorks } from "@/components/home/how-it-works";
 import { Templates } from "@/components/home/templates";
 import { Comparison } from "@/components/home/comparison";
 import { Testimonials } from "@/components/home/testimonials";
@@ -10,10 +10,10 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <CoreFlow />
+      <HowItWorks />
       <Templates />
-      <Comparison />
       <Testimonials />
+      <Comparison />
       <FAQ />
       <CTA />
     </>

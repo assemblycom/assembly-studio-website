@@ -1,6 +1,9 @@
+import Link from "next/link";
 import { Section } from "@/components/ui/section";
-import { TEMPLATES } from "@/lib/templates";
+import { getFeaturedTemplates } from "@/lib/templates";
 import { APP_URL } from "@/lib/constants";
+
+const featuredTemplates = getFeaturedTemplates(6);
 
 export function Templates() {
   return (
@@ -15,16 +18,16 @@ export function Templates() {
             ship it to your clients.
           </p>
         </div>
-        <a
-          href={APP_URL}
+        <Link
+          href="/templates"
           className="hidden shrink-0 rounded-full border border-border px-4 py-1.5 text-sm text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground md:inline-block"
         >
           See all
-        </a>
+        </Link>
       </div>
 
       <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {TEMPLATES.map((template) => (
+        {featuredTemplates.map((template) => (
           <a
             key={template.slug}
             href={APP_URL}

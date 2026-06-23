@@ -2,16 +2,26 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NAV_LINKS, APP_URL } from "@/lib/constants";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Lock background scroll while the mobile menu overlay is open.
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, [mobileMenuOpen]);
+
   return (
     <>
       {/* Mobile header — full-width bar */}
-      <header className="fixed left-0 right-0 top-0 z-50 flex h-14 items-center justify-between border-b border-border bg-background/80 px-6 backdrop-blur-md md:hidden">
+      <header className="fixed left-0 right-0 top-0 z-50 flex h-14 items-center justify-between bg-background/80 px-6 backdrop-blur-md md:hidden">
         <Link href="/" className="flex items-center">
           <Image
             src="/images/logo-mark.svg"
@@ -38,45 +48,45 @@ export function Header() {
         </button>
       </header>
 
-      {/* Desktop header — centered floating pill */}
-      <header className="fixed left-0 right-0 top-0 z-50 hidden justify-center px-6 pt-4 md:flex">
-        <nav className="flex h-12 items-center gap-1 rounded-full border border-border bg-background/80 px-2 shadow-sm backdrop-blur-md">
-          <Link href="/" className="flex items-center px-3">
+      {/* Desktop header — full-width bar */}
+      <header className="fixed left-0 right-0 top-0 z-50 hidden bg-background/80 backdrop-blur-md md:block">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+          <Link href="/" className="flex items-center">
             <Image
               src="/images/logo-mark.svg"
               alt="Assembly Studio"
-              width={20}
-              height={20}
+              width={22}
+              height={22}
               priority
             />
           </Link>
 
-          <ul className="flex items-center">
-            {NAV_LINKS.map((link) => (
-              <li key={link.href}>
-                {link.external ? (
-                  <a
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    {link.label}
-                  </a>
-                ) : (
-                  <Link
-                    href={link.href}
-                    className="rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                  >
-                    {link.label}
-                  </Link>
-                )}
-              </li>
-            ))}
-          </ul>
+          <nav className="flex items-center gap-1">
+            <ul className="flex items-center">
+              {NAV_LINKS.map((link) => (
+                <li key={link.href}>
+                  {link.external ? (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      href={link.href}
+                      className="rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      {link.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
 
-          <div className="mx-1 h-5 w-px bg-border" />
-          <div className="flex items-center gap-1">
+            <div className="mx-2 h-5 w-px bg-border" />
             <a
               href={APP_URL}
               className="rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -89,8 +99,8 @@ export function Header() {
             >
               Get started
             </a>
-          </div>
-        </nav>
+          </nav>
+        </div>
       </header>
 
       {/* Mobile full-screen menu */}

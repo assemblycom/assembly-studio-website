@@ -2,55 +2,61 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Section } from "@/components/ui/section";
 import { CASE_STUDIES } from "@/lib/case-studies";
+import { APP_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Customers",
   description:
-    "See how teams use Assembly Studio to build AI-powered client experiences — no code required.",
+    "Trusted by consulting, accounting, real estate, law, marketing, and tech firms with 1M+ clients and counting.",
 };
 
 export default function CustomersPage() {
   return (
     <>
-      <section className="px-6 pb-16 pt-24 text-center md:pt-32">
+      <section className="px-6 pb-10 pt-24 text-center md:pt-32">
         <div className="mx-auto max-w-3xl">
           <h1 className="text-4xl font-medium tracking-tight md:text-5xl">
-            Built by teams like yours
+            Made for tech-enabled professional service firms
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Real companies using Assembly to ship client-facing workflows — in
-            days, not months.
+            Trusted by consulting, accounting, real estate, law, marketing, and
+            tech firms with 1M+ clients and counting.
           </p>
+          <a
+            href={APP_URL}
+            className="mt-8 inline-block rounded-full bg-foreground px-6 py-3 text-sm text-background transition-opacity hover:opacity-90"
+          >
+            Start trial
+          </a>
         </div>
       </section>
 
-      <Section>
-        <div className="grid gap-6 md:grid-cols-2">
+      <Section className="pt-4 md:pt-6">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {CASE_STUDIES.map((study) => (
             <Link
               key={study.slug}
               href={`/customers/${study.slug}`}
-              className="group overflow-hidden rounded-xl border border-border transition-colors hover:border-foreground/20"
+              className={`group flex flex-col overflow-hidden rounded-2xl border border-border transition-colors hover:border-foreground/30 ${
+                study.featured ? "sm:col-span-2" : ""
+              }`}
             >
-              {/* Image placeholder */}
-              <div className="aspect-[2/1] bg-muted" />
+              {/* Logo / media tile */}
+              <div className="aspect-[16/10] bg-muted" />
 
-              <div className="p-6">
-                {/* Industry tag */}
-                <span className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted-foreground">
+              <div className="flex flex-1 flex-col p-6">
+                <span className="text-xs uppercase tracking-wide text-muted-foreground">
                   {study.industry}
                 </span>
-
-                {/* Company + headline */}
-                <p className="mt-3 text-xs font-medium text-muted-foreground">
-                  {study.company}
-                </p>
-                <h3 className="mt-1 text-sm font-medium leading-snug">
+                <h3
+                  className={`mt-2 font-medium leading-snug ${
+                    study.featured ? "text-2xl" : "text-base"
+                  }`}
+                >
                   {study.headline}
                 </h3>
 
-                {/* Stats row */}
-                <div className="mt-4 flex gap-6 border-t border-border pt-4">
+                <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3 border-t border-border pt-5">
                   {study.stats.map((stat) => (
                     <div key={stat.label}>
                       <p className="text-lg font-medium">{stat.value}</p>

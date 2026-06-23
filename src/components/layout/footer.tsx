@@ -18,6 +18,14 @@ const FOOTER_SECTIONS = [
       { label: "About", href: "https://assembly.com", external: true },
     ],
   },
+  {
+    title: "Social",
+    links: [
+      { label: "X (Twitter)", href: "https://x.com", external: true },
+      { label: "LinkedIn", href: "https://linkedin.com", external: true },
+      { label: "YouTube", href: "https://youtube.com", external: true },
+    ],
+  },
 ];
 
 export function Footer() {
@@ -25,7 +33,7 @@ export function Footer() {
     <footer className="border-t border-border bg-muted">
       {/* Footer links */}
       <div className="mx-auto max-w-7xl px-6 py-16">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-3">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           <div className="col-span-2 md:col-span-1">
             <Image
               src="/images/logo-full.svg"
@@ -94,7 +102,7 @@ export function Footer() {
             href={APP_URL}
             className="flex items-center gap-3 transition-opacity hover:opacity-80"
           >
-            <div className="h-10 w-10 overflow-hidden rounded-full bg-muted-foreground/20" />
+            <div className="h-10 w-10 overflow-hidden rounded-lg bg-muted-foreground/20" />
             <span className="text-sm font-medium">Watch Demo</span>
           </a>
         </div>
