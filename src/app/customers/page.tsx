@@ -18,36 +18,48 @@ export default function CustomersPage() {
             Built by teams like yours
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Real companies using Assembly Studio to ship AI-powered workflows to
-            their clients — in days, not months.
+            Real companies using Assembly to ship client-facing workflows — in
+            days, not months.
           </p>
         </div>
       </section>
 
       <Section>
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           {CASE_STUDIES.map((study) => (
             <Link
               key={study.slug}
               href={`/customers/${study.slug}`}
-              className="group flex flex-col rounded-xl border border-border p-8 transition-colors hover:border-foreground/20"
+              className="group overflow-hidden rounded-xl border border-border transition-colors hover:border-foreground/20"
             >
-              <span className="text-xs text-muted-foreground">
-                {study.industry}
-              </span>
-              <h3 className="mt-2 text-lg font-medium group-hover:text-accent">
-                {study.headline}
-              </h3>
-              <p className="mt-3 flex-1 text-sm text-muted-foreground">
-                {study.summary}
-              </p>
-              <div className="mt-6 border-t border-border pt-6">
-                <span className="text-2xl font-medium text-accent">
-                  {study.metric}
+              {/* Image placeholder */}
+              <div className="aspect-[2/1] bg-muted" />
+
+              <div className="p-6">
+                {/* Industry tag */}
+                <span className="rounded-full border border-border px-2.5 py-0.5 text-xs text-muted-foreground">
+                  {study.industry}
                 </span>
-                <span className="ml-2 text-sm text-muted-foreground">
-                  {study.metricLabel}
-                </span>
+
+                {/* Company + headline */}
+                <p className="mt-3 text-xs font-medium text-muted-foreground">
+                  {study.company}
+                </p>
+                <h3 className="mt-1 text-sm font-medium leading-snug">
+                  {study.headline}
+                </h3>
+
+                {/* Stats row */}
+                <div className="mt-4 flex gap-6 border-t border-border pt-4">
+                  {study.stats.map((stat) => (
+                    <div key={stat.label}>
+                      <p className="text-lg font-medium">{stat.value}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {stat.label}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </Link>
           ))}

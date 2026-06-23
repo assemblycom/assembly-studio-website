@@ -1,13 +1,75 @@
+"use client";
+
+import { useState, useRef, useEffect } from "react";
 import { APP_URL } from "@/lib/constants";
 
-const SUGGESTED_PROMPTS = [
-  "Build an onboarding wizard",
-  "Create a client approvals workflow",
-  "Set up automated ticket routing",
-  "Design a community space",
+const CATEGORIES = [
+  {
+    label: "Onboarding",
+    items: [
+      { title: "New client intake", desc: "Company details, contacts, services, budget" },
+      { title: "Onboarding wizard", desc: "Multi-step flow with saved progress" },
+      { title: "Document collection", desc: "Requested docs with upload checklist" },
+    ],
+  },
+  {
+    label: "Workflows",
+    items: [
+      { title: "Approval flow", desc: "Route requests through reviewers" },
+      { title: "Task assignment", desc: "Assign and track deliverables" },
+      { title: "Status updates", desc: "Automated progress reports to clients" },
+    ],
+  },
+  {
+    label: "Portals",
+    items: [
+      { title: "Client dashboard", desc: "Branded hub for files, tasks, messages" },
+      { title: "Partner portal", desc: "External collaboration workspace" },
+      { title: "Knowledge base", desc: "Self-service help center for clients" },
+    ],
+  },
+  {
+    label: "Communication",
+    items: [
+      { title: "Secure messaging", desc: "Threaded conversations with clients" },
+      { title: "Email notifications", desc: "Automated alerts and reminders" },
+      { title: "Announcement feed", desc: "Broadcast updates to all clients" },
+    ],
+  },
+  {
+    label: "Finance",
+    items: [
+      { title: "Invoice collection", desc: "Send and track client payments" },
+      { title: "Contract signing", desc: "E-signatures with audit trail" },
+      { title: "Billing dashboard", desc: "Payment history and statements" },
+    ],
+  },
+  {
+    label: "Reporting",
+    items: [
+      { title: "Client analytics", desc: "Engagement and activity metrics" },
+      { title: "Custom reports", desc: "Filtered views of portal data" },
+      { title: "Export to CSV", desc: "Download data for external tools" },
+    ],
+  },
 ];
 
 export function Hero() {
+  const [open, setOpen] = useState<number | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setOpen(null);
+      }
+    }
+    if (open !== null) {
+      document.addEventListener("mousedown", handleClick);
+      return () => document.removeEventListener("mousedown", handleClick);
+    }
+  }, [open]);
+
   return (
     <section className="px-6 pb-20 pt-24 md:pb-28 md:pt-32">
       <div className="mx-auto max-w-4xl text-center">
@@ -36,15 +98,63 @@ export function Hero() {
             </div>
           </a>
 
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
-            {SUGGESTED_PROMPTS.map((prompt) => (
-              <span
-                key={prompt}
-                className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
+          {/* Category chips + dropdown */}
+          <div ref={panelRef} className="relative mt-4">
+            <div className="flex items-center gap-2">
+              <div className="flex flex-1 items-center gap-2 overflow-x-auto scrollbar-none">
+                {CATEGORIES.map((cat, i) => (
+                  <button
+                    key={cat.label}
+                    onClick={() => setOpen(open === i ? null : i)}
+                    className={`shrink-0 rounded-full border px-3 py-1 text-xs transition-colors ${
+                      open === i
+                        ? "border-foreground bg-foreground text-background"
+                        : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                className="shrink-0 text-muted-foreground"
               >
-                {prompt}
-              </span>
-            ))}
+                <path
+                  d="M6 3l5 5-5 5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+
+            {/* Dropdown panel */}
+            {open !== null && (
+              <div className="absolute left-0 right-0 z-10 mt-2 rounded-xl border border-border bg-background shadow-lg">
+                {CATEGORIES[open].items.map((item) => (
+                  <a
+                    key={item.title}
+                    href={APP_URL}
+                    className="flex items-center gap-4 border-b border-border px-5 py-4 text-left transition-colors last:border-0 hover:bg-muted"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+                      <div className="h-5 w-5 rounded bg-muted-foreground/20" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">{item.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.desc}
+                      </p>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
