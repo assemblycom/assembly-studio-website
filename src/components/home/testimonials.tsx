@@ -26,7 +26,7 @@ const TESTIMONIALS = [
 
 export function Testimonials() {
   return (
-    <Section id="testimonials" className="bg-muted">
+    <Section id="testimonials">
       <div className="text-center">
         <h2 className="text-3xl font-medium tracking-tight md:text-4xl">
           What our customers say

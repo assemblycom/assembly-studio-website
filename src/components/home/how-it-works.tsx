@@ -104,12 +104,9 @@ export function HowItWorks() {
 
         {/* Content */}
         <div className="flex flex-col gap-16 md:gap-28">
-          {STEPS.map((step, i) => (
+          {STEPS.map((step) => (
             <div key={step.id} id={step.id} className="scroll-mt-24">
-              <span className="text-xs uppercase tracking-widest text-muted-foreground">
-                Step {i + 1}
-              </span>
-              <h3 className="mt-3 text-2xl font-medium tracking-tight md:text-3xl">
+              <h3 className="text-2xl font-medium tracking-tight md:text-3xl">
                 {step.title}
               </h3>
               <p className="mt-4 max-w-xl text-lg text-muted-foreground">

@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { APP_URL } from "@/lib/constants";
 import { TEMPLATES, TEMPLATE_CATEGORIES } from "@/lib/templates";
 
-// Derived from the shared template data so the hero categories always match
-// the templates page (all 10 categories, in order).
+// Category chips + the templates shown for the selected category.
 const CATEGORIES = TEMPLATE_CATEGORIES.map((label) => ({
   label,
   items: TEMPLATES.filter((t) => t.category === label).map((t) => ({
@@ -14,7 +13,16 @@ const CATEGORIES = TEMPLATE_CATEGORIES.map((label) => ({
   })),
 })).filter((c) => c.items.length > 0);
 
-// Customer names shown in the "trusted by" strip.
+// Rotating example prompts for the entry box.
+const PROMPTS = [
+  "a client onboarding portal",
+  "an approvals workflow",
+  "a billing dashboard",
+  "a project tracker",
+  "a document collection flow",
+];
+
+// Customer names shown in the logo marquee.
 const TRUSTED_BY = [
   "Capital One",
   "Collective",
@@ -26,138 +34,203 @@ const TRUSTED_BY = [
 ];
 
 export function Hero() {
-  const [open, setOpen] = useState<number | null>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const [selected, setSelected] = useState<number | null>(0);
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(false);
+  const [promptIdx, setPromptIdx] = useState(0);
   const chipsRef = useRef<HTMLDivElement>(null);
 
-  const scrollChips = () => {
+  const updateArrows = () => {
     const el = chipsRef.current;
     if (!el) return;
-    const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
-    // Direct assignment always moves the element; CSS scroll-smooth animates it
-    // in real browsers.
-    el.scrollLeft = atEnd ? 0 : Math.min(el.scrollLeft + 220, el.scrollWidth);
+    setCanLeft(el.scrollLeft > 1);
+    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
   };
 
   useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
-        setOpen(null);
-      }
-    }
-    if (open !== null) {
-      document.addEventListener("mousedown", handleClick);
-      return () => document.removeEventListener("mousedown", handleClick);
-    }
-  }, [open]);
+    updateArrows();
+    const el = chipsRef.current;
+    el?.addEventListener("scroll", updateArrows, { passive: true });
+    window.addEventListener("resize", updateArrows);
+    return () => {
+      el?.removeEventListener("scroll", updateArrows);
+      window.removeEventListener("resize", updateArrows);
+    };
+  }, []);
+
+  useEffect(() => {
+    const id = setInterval(
+      () => setPromptIdx((i) => (i + 1) % PROMPTS.length),
+      2800,
+    );
+    return () => clearInterval(id);
+  }, []);
+
+  const scrollChips = (dir: number) => {
+    const el = chipsRef.current;
+    if (!el) return;
+    el.scrollLeft = Math.max(
+      0,
+      Math.min(el.scrollLeft + dir * 220, el.scrollWidth),
+    );
+    updateArrows();
+  };
+
+  // Only fade the edges that have more content to scroll toward, so the first
+  // and last chips are never dimmed.
+  const chipsMask =
+    canLeft && canRight
+      ? "linear-gradient(to right, transparent, #000 7%, #000 93%, transparent)"
+      : canRight
+        ? "linear-gradient(to right, #000 93%, transparent)"
+        : canLeft
+          ? "linear-gradient(to right, transparent, #000 7%)"
+          : "none";
 
   return (
-    <section className="px-6 pb-20 pt-24 md:pb-28 md:pt-32">
-      <div className="mx-auto max-w-4xl text-center">
-        <h1 className="text-4xl font-medium tracking-tight md:text-6xl">
+    <section className="px-6 pb-20 pt-24 md:pt-32">
+      <div className="mx-auto max-w-2xl text-center">
+        {/* Trust badge */}
+        <div className="flex justify-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-border py-1 pl-1 pr-3 text-xs text-muted-foreground">
+            <span className="flex -space-x-1.5">
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className="size-5 rounded-full border-2 border-background bg-muted-foreground/30"
+                />
+              ))}
+            </span>
+            Trusted by 1,000+ teams
+          </span>
+        </div>
+
+        <h1 className="mt-6 text-4xl font-medium tracking-tight md:text-6xl">
           The AI app builder for
           <br />
           client-facing experiences
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-          Build apps that ship to your client portal, work with your existing
-          contacts, and honor your team&apos;s permissions and brand. No code, no
-          infrastructure, no developer required.
+          Build apps for your client portal — no code, no infrastructure, no
+          developer required.
         </p>
 
-        <div className="mx-auto mt-10 max-w-xl">
-          <a href={APP_URL} className="block">
-            <div className="rounded-2xl border border-border bg-muted p-5 text-left transition-colors hover:border-foreground/20">
-              <p className="text-muted-foreground">
-                Describe what you want to build...
-              </p>
-              <div className="mt-10 flex items-center justify-end">
-                <span className="rounded-full bg-foreground px-4 py-1.5 text-sm text-background">
-                  Start building
-                </span>
-              </div>
-            </div>
-          </a>
-
-          {/* Category chips + dropdown */}
-          <div ref={panelRef} className="mt-4">
-            <div className="relative">
-              <div className="flex items-center gap-2">
-                <div
-                  ref={chipsRef}
-                  className="flex flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-                >
-                  {CATEGORIES.map((cat, i) => (
-                    <button
-                      key={cat.label}
-                      onClick={() => setOpen(open === i ? null : i)}
-                      className={`shrink-0 rounded-lg border px-3 py-1 text-xs transition-colors ${
-                        open === i
-                          ? "border-foreground bg-foreground text-background"
-                          : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
-                      }`}
-                    >
-                      {cat.label}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  onClick={scrollChips}
-                  aria-label="Show more categories"
-                  className="shrink-0 rounded-lg p-1 text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
-                    <path
-                      d="M6 3l5 5-5 5"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Dropdown panel — absolute overlay anchored to the chip row;
-                  opens into the reserved space below without moving anything. */}
-              {open !== null && (
-                <div className="absolute left-0 right-0 top-full z-20 mt-2 max-h-[228px] overflow-y-auto rounded-xl border border-border bg-background text-left shadow-lg">
-                  {CATEGORIES[open].items.map((item) => (
-                    <a
-                      key={item.title}
-                      href={APP_URL}
-                      className="flex items-center gap-4 border-b border-border px-5 py-4 text-left transition-colors last:border-0 hover:bg-muted"
-                    >
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted">
-                        <div className="h-5 w-5 rounded bg-muted-foreground/20" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">{item.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {item.desc}
-                        </p>
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Reserve a fixed area below the chips so the dropdown opens into
-                empty space and the content below never shifts or gets covered. */}
-            <div aria-hidden className="h-[244px]" />
+        {/* Describe-to-build entry */}
+        <a
+          href={APP_URL}
+          className="mt-8 flex min-h-[150px] flex-col rounded-2xl border border-border bg-muted p-6 text-left transition-colors hover:border-foreground/20"
+        >
+          <p className="text-base text-muted-foreground">
+            Assembly Studio, build{" "}
+            <span
+              key={promptIdx}
+              className="inline-block animate-fade-in text-foreground/80"
+            >
+              {PROMPTS[promptIdx]}
+            </span>
+          </p>
+          <div className="mt-auto flex items-center justify-end pt-10">
+            <span className="rounded-full bg-foreground px-4 py-1.5 text-sm text-background">
+              Start building
+            </span>
           </div>
+        </a>
+
+        {/* Category chips — left edge aligns with the entry box; scroll
+            controls grouped on the right. */}
+        <div className="mt-4 flex items-center gap-1.5">
+          <div
+            ref={chipsRef}
+            style={{ maskImage: chipsMask, WebkitMaskImage: chipsMask }}
+            className="flex flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {CATEGORIES.map((cat, i) => (
+              <button
+                key={cat.label}
+                onClick={() => setSelected(selected === i ? null : i)}
+                className={`shrink-0 rounded-[4px] border px-3 py-1 text-xs transition-colors ${
+                  selected === i
+                    ? "sticky left-0 z-10 border-foreground bg-foreground text-background"
+                    : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => scrollChips(-1)}
+            aria-label="Scroll categories left"
+            className={`shrink-0 p-1 transition-colors ${
+              canLeft
+                ? "text-muted-foreground hover:text-foreground"
+                : "pointer-events-none text-transparent"
+            }`}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+              <path
+                d="M10 3l-5 5 5 5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollChips(1)}
+            aria-label="Scroll categories right"
+            className={`shrink-0 p-1 transition-colors ${
+              canRight
+                ? "text-muted-foreground hover:text-foreground"
+                : "pointer-events-none text-transparent"
+            }`}
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
+              <path
+                d="M6 3l5 5-5 5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
         </div>
 
-        <p className="mt-12 text-sm text-muted-foreground">
-          Trusted by teams at leading firms
-        </p>
-        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
-          {TRUSTED_BY.map((name) => (
+        {/* Templates for the selected category — height reserved so the content
+            below never shifts when the panel is toggled. */}
+        <div className="mt-2 min-h-[204px]">
+          {selected !== null && (
+            <div className="rounded-xl border border-border bg-background p-1.5 text-left">
+              {CATEGORIES[selected].items.slice(0, 3).map((item) => (
+                <a
+                  key={item.title}
+                  href={APP_URL}
+                  className="flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:bg-muted"
+                >
+                  <div className="size-10 shrink-0 rounded-lg bg-muted" />
+                  <div>
+                    <p className="text-sm font-medium">{item.title}</p>
+                    <p className="text-xs text-muted-foreground">{item.desc}</p>
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Logo marquee — narrow centered window (~3 at a time), auto-scroll */}
+      <div className="mx-auto mt-14 max-w-md overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_18%,black_82%,transparent)]">
+        <div className="flex w-max animate-marquee items-center gap-12">
+          {[...TRUSTED_BY, ...TRUSTED_BY].map((name, i) => (
             <span
-              key={name}
-              className="text-base font-medium text-muted-foreground"
+              key={i}
+              className="shrink-0 text-base font-medium text-muted-foreground"
             >
               {name}
             </span>

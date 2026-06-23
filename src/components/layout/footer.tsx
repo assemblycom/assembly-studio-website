@@ -21,7 +21,7 @@ const FOOTER_SECTIONS = [
   {
     title: "Social",
     links: [
-      { label: "X (Twitter)", href: "https://x.com", external: true },
+      { label: "X", href: "https://x.com", external: true },
       { label: "LinkedIn", href: "https://linkedin.com", external: true },
       { label: "YouTube", href: "https://youtube.com", external: true },
     ],
