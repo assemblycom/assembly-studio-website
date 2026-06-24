@@ -6,7 +6,8 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
 
-const ANNOUNCE_KEY = "studio-ga-announcement-dismissed";
+// Bump the suffix to re-show the bar to everyone (e.g. for a new announcement).
+const ANNOUNCE_KEY = "studio-ga-announcement-dismissed-v2";
 
 /**
  * Home gets the Zoox-style treatment: the footer is a rounded sheet that lifts
