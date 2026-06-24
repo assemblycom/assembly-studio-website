@@ -1,4 +1,4 @@
-import { HeroSwitcher } from "@/components/home/hero-switcher";
+import { Hero } from "@/components/home/hero";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { Templates } from "@/components/home/templates";
 import { Comparison } from "@/components/home/comparison";
@@ -9,7 +9,7 @@ import { CTA } from "@/components/home/cta";
 export default function HomePage() {
   return (
     <>
-      <HeroSwitcher />
+      <Hero />
       <HowItWorks />
       <Templates />
       <Testimonials />
