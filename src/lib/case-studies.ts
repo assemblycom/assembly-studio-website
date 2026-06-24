@@ -36,6 +36,26 @@ export interface CaseStudy {
   featured?: boolean;
 }
 
+// Maps each detailed industry label to a broader filter group used on the
+// customers index. Keeps the filter pill set short while industries stay
+// specific on each card. Order here defines pill order.
+export const INDUSTRY_GROUPS: { label: string; match: string[] }[] = [
+  { label: "Accounting", match: ["Accounting"] },
+  { label: "Real Estate", match: ["Real Estate"] },
+  { label: "Legal", match: ["Legal"] },
+  { label: "Healthcare", match: ["Healthcare"] },
+  { label: "Marketing & Design", match: ["Marketing", "Web Development"] },
+  { label: "Professional Services", match: ["Professional Services"] },
+  { label: "Hospitality", match: ["Travel", "Hospitality"] },
+];
+
+export function getIndustryGroup(industry: string): string | null {
+  const group = INDUSTRY_GROUPS.find((g) =>
+    g.match.some((m) => industry.includes(m)),
+  );
+  return group?.label ?? null;
+}
+
 export const CASE_STUDIES: CaseStudy[] = [
   {
     slug: "capital-one-luxury-travel",

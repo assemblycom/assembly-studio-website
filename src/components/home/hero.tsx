@@ -38,7 +38,10 @@ export function Hero() {
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
   const [promptIdx, setPromptIdx] = useState(0);
+  const [userInput, setUserInput] = useState("");
+  const [boxFocused, setBoxFocused] = useState(false);
   const chipsRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const updateArrows = () => {
     const el = chipsRef.current;
@@ -116,25 +119,59 @@ export function Hero() {
         </p>
 
         {/* Describe-to-build entry */}
-        <a
-          href={APP_URL}
-          className="mt-8 flex min-h-[150px] flex-col rounded-2xl border border-border bg-muted p-6 text-left transition-colors hover:border-foreground/20"
+        <div
+          onClick={() => inputRef.current?.focus()}
+          className={`mt-8 flex min-h-[150px] cursor-text flex-col rounded-2xl border bg-muted p-6 text-left transition-colors ${
+            boxFocused ? "border-foreground/30" : "border-border hover:border-foreground/20"
+          }`}
         >
-          <p className="text-base text-muted-foreground">
-            Assembly Studio, build{" "}
-            <span
-              key={promptIdx}
-              className="inline-block animate-fade-in text-foreground/80"
+          {/* The input is always full-width and left-aligned, so nothing reflows
+              on focus. The "Assembly Studio, build …" overlay simply crossfades
+              out (and the placeholder fades in) — no layout jump, no jitter. */}
+          <div className="relative text-base">
+            <input
+              ref={inputRef}
+              type="text"
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              onFocus={() => setBoxFocused(true)}
+              onBlur={() => setBoxFocused(false)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && userInput.trim()) window.open(APP_URL);
+              }}
+              className="w-full bg-transparent text-foreground/80 caret-foreground/70 outline-none"
+              aria-label="Describe what to build"
+              autoComplete="off"
+              spellCheck={false}
+            />
+            <div
+              aria-hidden="true"
+              className={`pointer-events-none absolute inset-0 flex items-baseline whitespace-nowrap transition-opacity duration-500 ${
+                boxFocused || userInput ? "opacity-0" : "opacity-100"
+              }`}
             >
-              {PROMPTS[promptIdx]}
-            </span>
-          </p>
-          <div className="mt-auto flex items-center justify-end pt-10">
-            <span className="rounded-full bg-foreground px-4 py-1.5 text-sm text-background">
-              Start building
-            </span>
+              <span className="text-muted-foreground">
+                Assembly Studio, build&nbsp;
+              </span>
+              <span
+                key={promptIdx}
+                className="animate-prompt text-foreground/80"
+              >
+                {PROMPTS[promptIdx]}
+              </span>
+            </div>
           </div>
-        </a>
+
+          <div className="mt-auto flex items-center justify-end pt-10">
+            <a
+              href={APP_URL}
+              onClick={(e) => e.stopPropagation()}
+              className="rounded-full bg-foreground px-4 py-1.5 text-sm text-background transition-opacity hover:opacity-90"
+            >
+              Start building
+            </a>
+          </div>
+        </div>
 
         {/* Category chips — left edge aligns with the entry box; scroll
             controls grouped on the right. */}

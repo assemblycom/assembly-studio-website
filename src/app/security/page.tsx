@@ -8,8 +8,6 @@ export const metadata: Metadata = {
     "Enterprise-grade security for your client portals. SOC 2 Type II, HIPAA-ready, end-to-end encrypted, and built for regulated industries.",
 };
 
-const CERTIFICATIONS = ["SOC 2 Type II", "HIPAA", "GDPR", "CCPA"];
-
 type IconName =
   | "shield"
   | "lock"
@@ -18,7 +16,11 @@ type IconName =
   | "globe"
   | "doc"
   | "cross"
-  | "target";
+  | "target"
+  | "clock"
+  | "download"
+  | "trash"
+  | "eye";
 
 interface Feature {
   icon: IconName;
@@ -26,54 +28,92 @@ interface Feature {
   description: string;
 }
 
-const FEATURES: Feature[] = [
+const GROUPS: { label: string; lead: string; features: Feature[] }[] = [
   {
-    icon: "shield",
-    title: "SOC 2 Type II",
-    description:
-      "Independently audited controls for security, availability, and confidentiality.",
+    label: "Encryption & access",
+    lead: "Only the right people ever reach your clients' data — and it's encrypted the entire way.",
+    features: [
+      {
+        icon: "lock",
+        title: "End-to-end encryption",
+        description:
+          "Encrypted in transit (TLS 1.3) and at rest (AES-256), always.",
+      },
+      {
+        icon: "users",
+        title: "Role-based access",
+        description:
+          "Fine-grained permissions so people only ever see what they should.",
+      },
+      {
+        icon: "key",
+        title: "SSO & SAML",
+        description:
+          "Enterprise single sign-on with SAML 2.0 for secure access.",
+      },
+      {
+        icon: "doc",
+        title: "Audit logging",
+        description:
+          "A complete, exportable trail of every action for compliance.",
+      },
+    ],
   },
   {
-    icon: "lock",
-    title: "End-to-end encryption",
-    description:
-      "Data is encrypted in transit (TLS 1.3) and at rest (AES-256), always.",
+    label: "Built for regulated industries",
+    lead: "The controls accounting, legal, healthcare, and financial teams are required to have.",
+    features: [
+      {
+        icon: "shield",
+        title: "SOC 2 Type II",
+        description:
+          "Audited controls for security, availability, and confidentiality.",
+      },
+      {
+        icon: "cross",
+        title: "HIPAA ready",
+        description:
+          "A BAA is available for teams handling protected health information.",
+      },
+      {
+        icon: "globe",
+        title: "Data residency",
+        description:
+          "Choose where your data lives to meet regional requirements.",
+      },
+      {
+        icon: "target",
+        title: "Penetration tested",
+        description:
+          "Regular third-party pen testing with published advisories.",
+      },
+    ],
   },
   {
-    icon: "users",
-    title: "Role-based access",
-    description:
-      "Fine-grained permissions so people only ever see what they should.",
-  },
-  {
-    icon: "key",
-    title: "SSO & SAML",
-    description:
-      "Enterprise single sign-on with SAML 2.0 for seamless, secure access.",
-  },
-  {
-    icon: "globe",
-    title: "Data residency",
-    description:
-      "Choose where your data lives to meet regional compliance requirements.",
-  },
-  {
-    icon: "doc",
-    title: "Audit logging",
-    description:
-      "A complete, exportable trail of every action for compliance and forensics.",
-  },
-  {
-    icon: "cross",
-    title: "HIPAA ready",
-    description:
-      "A BAA is available for healthcare teams handling protected health information.",
-  },
-  {
-    icon: "target",
-    title: "Penetration tested",
-    description:
-      "Regular third-party pen testing with published security advisories.",
+    label: "Your data, your control",
+    lead: "You decide how long data lives, where the keys are, and when it's gone.",
+    features: [
+      {
+        icon: "clock",
+        title: "Retention controls",
+        description: "Set how long data is kept — and when it's purged.",
+      },
+      {
+        icon: "key",
+        title: "Bring your own keys",
+        description: "Manage your own encryption keys (BYOK) on enterprise.",
+      },
+      {
+        icon: "download",
+        title: "Export anytime",
+        description: "Your data is yours — export it in full whenever you need.",
+      },
+      {
+        icon: "trash",
+        title: "Delete on request",
+        description: "Full deletion when a contract ends, verified and logged.",
+      },
+    ],
   },
 ];
 
@@ -148,6 +188,32 @@ function Glyph({ name }: { name: IconName }) {
           <circle cx="10" cy="10" r="0.5" fill="currentColor" />
         </svg>
       );
+    case "clock":
+      return (
+        <svg {...common}>
+          <circle cx="10" cy="10" r="7" />
+          <path d="M10 6v4l2.5 2.5" />
+        </svg>
+      );
+    case "download":
+      return (
+        <svg {...common}>
+          <path d="M10 3v9m0 0l-3.5-3.5M10 12l3.5-3.5M4 15h12" />
+        </svg>
+      );
+    case "trash":
+      return (
+        <svg {...common}>
+          <path d="M4 6h12M8 6V4.5a1 1 0 011-1h2a1 1 0 011 1V6M6.5 6l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" />
+        </svg>
+      );
+    case "eye":
+      return (
+        <svg {...common}>
+          <path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5z" />
+          <circle cx="10" cy="10" r="2.5" />
+        </svg>
+      );
   }
 }
 
@@ -158,61 +224,68 @@ export default function SecurityPage() {
       <section className="px-6 pb-10 pt-24 text-center md:pt-32">
         <div className="mx-auto max-w-3xl">
           <h1 className="text-4xl font-medium tracking-tight md:text-5xl">
-            Security you can build on
+            Your clients&apos; data is in safe hands
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Your clients&apos; data is the most sensitive thing you handle.
-            Assembly is built from the ground up with the controls and
-            certifications regulated industries require.
+            Assembly is built from the ground up with the encryption, access
+            controls, and certifications that regulated industries require — on
+            by default, for every plan.
           </p>
+          <a
+            href="mailto:security@assembly.com"
+            className="mt-8 inline-block rounded-full border border-border px-6 py-3 text-sm transition-colors hover:bg-muted"
+          >
+            Visit our Trust Center
+          </a>
         </div>
+
+        {/* Placeholder for a future hero visual */}
+        <div className="mx-auto mt-12 aspect-[16/7] max-w-5xl rounded-2xl bg-muted" />
       </section>
 
-      {/* Certifications */}
-      <Section className="pt-4 md:pt-6">
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          {CERTIFICATIONS.map((cert) => (
-            <div
-              key={cert}
-              className="flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium"
-            >
-              <span className="text-accent">
-                <Glyph name="shield" />
-              </span>
-              {cert}
+      {/* Grouped principles */}
+      {GROUPS.map((group, gi) => (
+        <Section key={group.label} className={gi === 0 ? "pt-16 md:pt-24" : "pt-0"}>
+          <div className="grid gap-8 md:grid-cols-[1fr_2fr] md:gap-12">
+            <div className="md:sticky md:top-24 md:self-start">
+              <h2 className="text-2xl font-medium tracking-tight md:text-3xl">
+                {group.label}
+              </h2>
+              <p className="mt-3 text-muted-foreground">{group.lead}</p>
             </div>
-          ))}
-        </div>
-      </Section>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {group.features.map((feature) => (
+                <div
+                  key={feature.title}
+                  className="rounded-2xl border border-border p-6"
+                >
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-muted">
+                    <Glyph name={feature.icon} />
+                  </div>
+                  <h3 className="mt-4 text-base font-medium">
+                    {feature.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {feature.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Section>
+      ))}
 
-      {/* Feature cards */}
+      {/* Testimonial */}
       <Section className="pt-0">
-        <div className="text-center">
-          <h2 className="text-3xl font-medium tracking-tight md:text-4xl">
-            How we protect your data
-          </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-            Comprehensive controls designed for regulated industries and
-            enterprise requirements — on by default.
-          </p>
-        </div>
-
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {FEATURES.map((feature) => (
-            <div
-              key={feature.title}
-              className="rounded-2xl border border-border p-6"
-            >
-              <div className="flex size-10 items-center justify-center rounded-lg bg-muted">
-                <Glyph name={feature.icon} />
-              </div>
-              <h3 className="mt-4 text-base font-medium">{feature.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                {feature.description}
-              </p>
-            </div>
-          ))}
-        </div>
+        <figure className="mx-auto max-w-3xl text-center">
+          <blockquote className="text-xl font-normal leading-relaxed tracking-tight md:text-2xl">
+            &ldquo;Assembly cleared every box our compliance team had — SOC 2,
+            HIPAA, SSO, audit logs — without slowing the rollout down.&rdquo;
+          </blockquote>
+          <figcaption className="mt-6 text-sm text-muted-foreground">
+            Phillip LaRue · Capital One
+          </figcaption>
+        </figure>
       </Section>
 
       {/* Responsible disclosure */}

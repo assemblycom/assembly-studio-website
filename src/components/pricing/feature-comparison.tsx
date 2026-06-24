@@ -192,7 +192,7 @@ export function FeatureComparison() {
           {/* Groups */}
           {GROUPS.map((group) => (
             <Fragment key={group.label}>
-              <div className="px-0 pb-2 pt-10 text-xs font-medium uppercase tracking-widest text-muted-foreground">
+              <div className="px-0 pb-2 pt-10 text-sm font-medium text-foreground">
                 {group.label}
               </div>
               {group.rows.map((row) => (

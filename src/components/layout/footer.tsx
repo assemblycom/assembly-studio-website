@@ -1,22 +1,19 @@
 import Image from "next/image";
 import Link from "next/link";
-import { APP_URL, DOCS_URL } from "@/lib/constants";
+import { APP_URL, type NavLink } from "@/lib/constants";
 
-const FOOTER_SECTIONS = [
+const FOOTER_SECTIONS: { title: string; links: NavLink[] }[] = [
   {
     title: "Product",
     links: [
       { label: "Pricing", href: "/pricing" },
       { label: "Security", href: "/security" },
-      { label: "Docs", href: DOCS_URL, external: true },
+      { label: "Docs", href: "#", disabled: true },
     ],
   },
   {
     title: "Company",
-    links: [
-      { label: "Customers", href: "/customers" },
-      { label: "About", href: "https://assembly.com", external: true },
-    ],
+    links: [{ label: "Customers", href: "/customers" }],
   },
   {
     title: "Social",
@@ -28,9 +25,13 @@ const FOOTER_SECTIONS = [
   },
 ];
 
-export function Footer() {
+export function Footer({ rounded = false }: { rounded?: boolean }) {
   return (
-    <footer className="border-t border-border bg-muted">
+    <footer
+      className={`border-t border-border bg-muted ${
+        rounded ? "rounded-b-[2.5rem]" : ""
+      }`}
+    >
       {/* Footer links */}
       <div className="mx-auto max-w-7xl px-6 py-16">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
@@ -51,8 +52,15 @@ export function Footer() {
               <p className="text-sm font-medium">{section.title}</p>
               <ul className="mt-3 flex flex-col gap-2">
                 {section.links.map((link) => (
-                  <li key={link.href}>
-                    {link.external ? (
+                  <li key={link.label}>
+                    {link.disabled ? (
+                      <span
+                        aria-disabled="true"
+                        className="cursor-default text-sm text-muted-foreground"
+                      >
+                        {link.label}
+                      </span>
+                    ) : link.external ? (
                       <a
                         href={link.href}
                         target="_blank"

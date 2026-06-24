@@ -81,23 +81,23 @@ function BodyBlock({ block }: { block: ContentBlock }) {
   switch (block.type) {
     case "heading":
       return (
-        <h2 className="mt-12 text-2xl font-medium tracking-tight first:mt-0">
+        <h2 className="mt-16 text-2xl font-medium tracking-tight first:mt-0 md:text-3xl">
           {block.text}
         </h2>
       );
     case "paragraph":
       return (
-        <p className="mt-5 text-muted-foreground leading-relaxed">
+        <p className="mt-6 text-lg leading-[1.75] text-muted-foreground">
           {block.text}
         </p>
       );
     case "list":
       return (
-        <ul className="mt-5 space-y-3">
+        <ul className="mt-6 space-y-3.5">
           {block.items.map((item) => (
             <li key={item} className="flex items-start gap-3">
-              <span className="mt-2 size-1.5 shrink-0 rounded-full bg-accent" />
-              <span className="text-muted-foreground leading-relaxed">
+              <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-accent" />
+              <span className="text-lg leading-[1.75] text-muted-foreground">
                 {item}
               </span>
             </li>
@@ -106,13 +106,13 @@ function BodyBlock({ block }: { block: ContentBlock }) {
       );
     case "quote":
       return (
-        <figure className="mt-10 border-l-2 border-accent pl-6">
-          <blockquote className="text-xl leading-relaxed">
-            “{block.text}”
+        <figure className="my-14">
+          <blockquote className="text-2xl font-normal leading-snug tracking-tight text-foreground md:text-3xl">
+            &ldquo;{block.text}&rdquo;
           </blockquote>
           {block.attribution && (
-            <figcaption className="mt-4 text-sm text-muted-foreground">
-              — {block.attribution}
+            <figcaption className="mt-6 text-sm text-muted-foreground">
+              {block.attribution}
             </figcaption>
           )}
         </figure>
@@ -122,7 +122,7 @@ function BodyBlock({ block }: { block: ContentBlock }) {
         <div
           role="img"
           aria-label={block.alt}
-          className="mt-10 flex aspect-[16/9] w-full items-center justify-center rounded-xl border border-border bg-muted"
+          className="mt-12 flex aspect-[16/9] w-full items-center justify-center rounded-2xl border border-border bg-muted"
         >
           <span className="text-sm text-muted-foreground">Placeholder</span>
         </div>
@@ -142,9 +142,7 @@ function StoryNavCard({
       href={`/customers/${study.slug}`}
       className="group rounded-xl border border-border p-6 transition-colors hover:border-foreground/20"
     >
-      <span className="text-xs uppercase tracking-widest text-muted-foreground">
-        {direction}
-      </span>
+      <span className="text-xs text-foreground">{direction}</span>
       <p className="mt-2 text-xs font-medium text-muted-foreground">
         {study.company}
       </p>
@@ -231,7 +229,7 @@ export default async function CaseStudyPage({ params }: Props) {
 
               <a
                 href={APP_URL}
-                className="mt-12 inline-block rounded-lg bg-foreground px-6 py-3 text-sm text-background transition-opacity hover:opacity-90"
+                className="mt-14 inline-block rounded-full bg-foreground px-6 py-3 text-sm text-background transition-opacity hover:opacity-90"
               >
                 Start building
               </a>
@@ -242,37 +240,34 @@ export default async function CaseStudyPage({ params }: Props) {
         </Section>
       ) : (
         <>
-          <Section className="bg-muted">
-            <div className="mx-auto max-w-3xl">
-              <div className="grid gap-12 md:grid-cols-2">
-                <div>
-                  <h2 className="text-xl font-medium">The challenge</h2>
-                  <p className="mt-4 text-muted-foreground leading-relaxed">
-                    {study.challenge}
-                  </p>
-                </div>
-                <div>
-                  <h2 className="text-xl font-medium">The solution</h2>
-                  <p className="mt-4 text-muted-foreground leading-relaxed">
-                    {study.solution}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Section>
-
           <Section>
-            <div className="mx-auto max-w-3xl">
-              <h2 className="text-xl font-medium">Results</h2>
-              <ul className="mt-6 grid gap-4 sm:grid-cols-2">
+            <div className="mx-auto max-w-2xl">
+              <h2 className="text-2xl font-medium tracking-tight md:text-3xl">
+                The challenge
+              </h2>
+              <p className="mt-6 text-lg leading-[1.75] text-muted-foreground">
+                {study.challenge}
+              </p>
+
+              <h2 className="mt-16 text-2xl font-medium tracking-tight md:text-3xl">
+                The solution
+              </h2>
+              <p className="mt-6 text-lg leading-[1.75] text-muted-foreground">
+                {study.solution}
+              </p>
+
+              <h2 className="mt-16 text-2xl font-medium tracking-tight md:text-3xl">
+                Results
+              </h2>
+              <ul className="mt-6 space-y-4">
                 {study.results.map((result) => (
                   <li key={result} className="flex items-start gap-3">
                     <svg
-                      width="20"
-                      height="20"
+                      width="22"
+                      height="22"
                       viewBox="0 0 20 20"
                       fill="none"
-                      className="mt-0.5 shrink-0 text-accent"
+                      className="mt-1 shrink-0 text-accent"
                     >
                       <path
                         d="M5 10l3.5 3.5L15 7"
@@ -282,14 +277,14 @@ export default async function CaseStudyPage({ params }: Props) {
                         strokeLinejoin="round"
                       />
                     </svg>
-                    <span className="text-sm">{result}</span>
+                    <span className="text-lg leading-[1.75]">{result}</span>
                   </li>
                 ))}
               </ul>
 
               <a
                 href={APP_URL}
-                className="mt-10 inline-block rounded-lg bg-foreground px-6 py-3 text-sm text-background transition-opacity hover:opacity-90"
+                className="mt-12 inline-block rounded-full bg-foreground px-6 py-3 text-sm text-background transition-opacity hover:opacity-90"
               >
                 Start building
               </a>

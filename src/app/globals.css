@@ -42,6 +42,9 @@
 @theme {
   --animate-marquee: marquee 32s linear infinite;
   --animate-fade-in: fade-in 0.4s ease both;
+  /* Opacity-only fade for the rotating hero prompt — no vertical movement, so
+     the text swap reads as a clean crossfade rather than a jitter. */
+  --animate-prompt: prompt-in 0.6s ease both;
   @keyframes marquee {
     from {
       transform: translateX(0);
@@ -60,6 +63,14 @@
       transform: translateY(0);
     }
   }
+  @keyframes prompt-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -72,6 +83,12 @@
     --accent: #ededed;
     --accent-foreground: #ffffff;
   }
+}
+
+html {
+  /* Overscroll color — the footer carries the DIA gradient glow; here we just
+     tint the rubber-band bounce area to match so it feels continuous. */
+  background-color: var(--muted);
 }
 
 body {

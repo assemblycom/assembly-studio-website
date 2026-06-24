@@ -4,13 +4,15 @@ export interface NavLink {
   label: string;
   href: string;
   external?: boolean;
+  // Visible but not yet linked anywhere (e.g. Docs is still in progress).
+  disabled?: boolean;
 }
 
 export const NAV_LINKS: NavLink[] = [
   { label: "Customers", href: "/customers" },
   { label: "Templates", href: "/templates" },
   { label: "Security", href: "/security" },
-  { label: "Docs", href: "https://docs.assembly.com", external: true },
+  { label: "Docs", href: "#", disabled: true },
   { label: "Pricing", href: "/pricing" },
 ];
 

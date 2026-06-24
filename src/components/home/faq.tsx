@@ -46,7 +46,7 @@ function FAQItem({
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between py-5 text-left"
       >
-        <span className="text-sm font-medium">{question}</span>
+        <span className="text-base font-normal">{question}</span>
         <svg
           width="20"
           height="20"

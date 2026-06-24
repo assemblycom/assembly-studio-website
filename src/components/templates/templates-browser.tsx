@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import type { Template } from "@/lib/templates";
 import { TEMPLATE_CATEGORIES } from "@/lib/templates";
-import { APP_URL } from "@/lib/constants";
 
 interface Props {
   templates: Template[];
@@ -95,9 +95,9 @@ export function TemplatesBrowser({ templates }: Props) {
       {filtered.length > 0 ? (
         <div className="mt-4 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filtered.map((template) => (
-            <a
+            <Link
               key={template.slug}
-              href={APP_URL}
+              href={`/templates/${template.slug}`}
               className="group overflow-hidden rounded-xl border border-border transition-colors hover:border-foreground/20"
             >
               <div className="aspect-[5/3] bg-muted" />
@@ -110,7 +110,7 @@ export function TemplatesBrowser({ templates }: Props) {
                   {template.category}
                 </span>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       ) : (

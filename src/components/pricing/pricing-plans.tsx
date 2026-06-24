@@ -177,6 +177,39 @@ function planSubtitle(plan: Plan, billing: Billing) {
   return billing === "yearly" ? "Billed annually" : "Billed monthly";
 }
 
+/**
+ * A single odometer digit: a vertical 0–9 strip that slides to the target digit
+ * whenever `value` changes, giving the firecrawl-style rolling price effect.
+ */
+function RollingDigit({ value }: { value: number }) {
+  return (
+    <span className="relative inline-flex h-[1em] overflow-hidden tabular-nums">
+      <span
+        className="flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        style={{ transform: `translateY(-${value}em)` }}
+      >
+        {Array.from({ length: 10 }, (_, n) => (
+          <span key={n} className="flex h-[1em] items-center leading-none">
+            {n}
+          </span>
+        ))}
+      </span>
+    </span>
+  );
+}
+
+function AnimatedPrice({ value }: { value: number }) {
+  const digits = String(value).split("");
+  return (
+    <span className="inline-flex items-baseline text-4xl font-medium">
+      <span>$</span>
+      {digits.map((d, i) => (
+        <RollingDigit key={i} value={Number(d)} />
+      ))}
+    </span>
+  );
+}
+
 export function PricingPlans() {
   const [billing, setBilling] = useState<Billing>("monthly");
 
@@ -242,7 +275,7 @@ export function PricingPlans() {
               </p>
 
               <div className="mt-6 flex items-baseline">
-                <span className="text-4xl font-medium">${price}</span>
+                <AnimatedPrice value={price} />
                 {plan.priceMonthly > 0 && (
                   <span className="ml-1 text-muted-foreground">/mo</span>
                 )}

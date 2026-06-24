@@ -65,7 +65,14 @@ export function Header() {
             <ul className="flex items-center">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
-                  {link.external ? (
+                  {link.disabled ? (
+                    <span
+                      aria-disabled="true"
+                      className="cursor-default rounded-full px-3 py-1.5 text-sm text-muted-foreground"
+                    >
+                      {link.label}
+                    </span>
+                  ) : link.external ? (
                     <a
                       href={link.href}
                       target="_blank"
@@ -153,7 +160,14 @@ export function Header() {
           <ul className="flex flex-1 flex-col gap-1 px-6 pt-6">
             {NAV_LINKS.map((link) => (
               <li key={link.href}>
-                {link.external ? (
+                {link.disabled ? (
+                  <span
+                    aria-disabled="true"
+                    className="block py-3 text-lg text-muted-foreground"
+                  >
+                    {link.label}
+                  </span>
+                ) : link.external ? (
                   <a
                     href={link.href}
                     target="_blank"

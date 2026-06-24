@@ -79,7 +79,7 @@ export function HowItWorks() {
                   <button
                     onClick={() => scrollTo(step.id)}
                     aria-current={isActive ? "true" : undefined}
-                    className="flex items-center gap-3 text-left text-xs uppercase tracking-widest transition-colors"
+                    className="flex items-center gap-3 text-left text-sm transition-colors"
                   >
                     <span
                       className={`h-px transition-all ${
