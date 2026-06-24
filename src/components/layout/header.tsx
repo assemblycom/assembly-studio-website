@@ -5,8 +5,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { NAV_LINKS, APP_URL } from "@/lib/constants";
 
-export function Header() {
+export function Header({ offsetTop = false }: { offsetTop?: boolean }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const topClass = offsetTop ? "top-10" : "top-0";
 
   // Lock background scroll while the mobile menu overlay is open.
   useEffect(() => {
@@ -21,7 +22,7 @@ export function Header() {
   return (
     <>
       {/* Mobile header — full-width bar */}
-      <header className="fixed left-0 right-0 top-0 z-50 flex h-14 items-center justify-between bg-background/80 px-6 backdrop-blur-md md:hidden">
+      <header className={`fixed left-0 right-0 ${topClass} z-50 flex h-14 items-center justify-between bg-background/80 px-6 backdrop-blur-md md:hidden`}>
         <Link href="/" className="flex items-center">
           <Image
             src="/images/logo-mark.svg"
@@ -49,7 +50,7 @@ export function Header() {
       </header>
 
       {/* Desktop header — full-width bar */}
-      <header className="fixed left-0 right-0 top-0 z-50 hidden bg-background/80 backdrop-blur-md md:block">
+      <header className={`fixed left-0 right-0 ${topClass} z-50 hidden bg-background/80 backdrop-blur-md md:block`}>
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Link href="/" className="flex items-center">
             <Image
