@@ -93,19 +93,20 @@ export function Hero() {
   return (
     <section className="px-6 pb-20 pt-24 md:pt-32">
       <div className="mx-auto max-w-2xl text-center">
-        {/* Trust badge */}
+        {/* Watch-the-demo pill */}
         <div className="flex justify-center">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border py-1 pl-1 pr-3 text-xs text-muted-foreground">
-            <span className="flex -space-x-1.5">
-              {[0, 1, 2].map((i) => (
-                <span
-                  key={i}
-                  className="size-5 rounded-full border-2 border-background bg-muted-foreground/30"
-                />
-              ))}
+          <a
+            href={APP_URL}
+            className="group inline-flex items-center gap-2.5 rounded-full bg-foreground py-1.5 pl-5 pr-1.5 text-sm text-background transition-opacity hover:opacity-90"
+          >
+            <span className="text-background/60">See what&apos;s new.</span>
+            <span className="font-medium">Watch the demo</span>
+            <span className="flex size-7 items-center justify-center rounded-full bg-background text-foreground">
+              <svg width="9" height="9" viewBox="0 0 10 10" fill="currentColor" aria-hidden>
+                <path d="M2 1l6 4-6 4z" />
+              </svg>
             </span>
-            Trusted by 1,000+ teams
-          </span>
+          </a>
         </div>
 
         <h1 className="mt-6 text-4xl font-medium tracking-tight md:text-6xl">
