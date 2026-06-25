@@ -9,7 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@types/matter-js": "^0.20.2",
     "@types/three": "^0.184.1",
+    "matter-js": "^0.20.0",
     "next": "16.2.9",
     "react": "19.2.4",
     "react-dom": "19.2.4",

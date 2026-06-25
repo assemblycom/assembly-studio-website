@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
-import { KineticStudio } from "@/components/layout/kinetic-studio";
+import { GravityStudio } from "@/components/layout/gravity-studio";
 
 // Bump the suffix to re-show the bar to everyone (e.g. for a new announcement).
 const ANNOUNCE_KEY = "studio-ga-announcement-dismissed-v2";
@@ -53,9 +53,9 @@ export function RootShell({ children }: { children: React.ReactNode }) {
       {/* Dark panel revealed below the footer — kinetic "Studio" typography. */}
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-0 h-[45vh] overflow-hidden bg-[#101010]"
+        className="fixed inset-x-0 bottom-0 z-0 h-[45vh] overflow-hidden bg-[#101010]"
       >
-        <KineticStudio />
+        <GravityStudio />
       </div>
       {/* White content wrapper (square bottom). */}
       <div className="relative z-10 flex min-h-screen flex-col bg-background">
@@ -66,8 +66,9 @@ export function RootShell({ children }: { children: React.ReactNode }) {
       <div className="relative z-10">
         <Footer rounded />
       </div>
-      {/* Gap that reveals the dark panel below the footer */}
-      <div aria-hidden className="h-[30vh]" />
+      {/* Gap that reveals the dark panel below the footer (lets the cursor
+          reach the physics canvas underneath) */}
+      <div aria-hidden className="pointer-events-none h-[30vh]" />
     </>
   );
 }
