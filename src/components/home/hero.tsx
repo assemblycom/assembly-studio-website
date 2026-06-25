@@ -93,23 +93,7 @@ export function Hero() {
   return (
     <section className="px-6 pb-20 pt-24 md:pt-32">
       <div className="mx-auto max-w-2xl text-center">
-        {/* Watch-the-demo pill */}
-        <div className="flex justify-center">
-          <a
-            href={APP_URL}
-            className="group inline-flex items-center gap-2.5 rounded-full bg-foreground py-1.5 pl-5 pr-1.5 text-sm text-background transition-opacity hover:opacity-90"
-          >
-            <span className="text-background/60">See what&apos;s new.</span>
-            <span className="font-medium">Watch the demo</span>
-            <span className="flex size-7 items-center justify-center rounded-full bg-background text-foreground">
-              <svg width="9" height="9" viewBox="0 0 10 10" fill="currentColor" aria-hidden>
-                <path d="M2 1l6 4-6 4z" />
-              </svg>
-            </span>
-          </a>
-        </div>
-
-        <h1 className="mt-6 text-4xl font-medium tracking-tight md:text-6xl">
+        <h1 className="text-4xl font-medium tracking-tight md:text-6xl">
           The AI app builder for
           <br />
           client-facing experiences
