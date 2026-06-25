@@ -32,9 +32,11 @@ export function KineticStudio() {
       bctx.fillStyle = "#ffffff";
       bctx.textAlign = "center";
       bctx.textBaseline = "middle";
-      const size = Math.min(W * 0.3, H * 0.92);
+      // The footer covers the top of the panel; place the word low so the
+      // whole of it sits in the strip revealed below the footer.
+      const size = Math.min(W * 0.2, H * 0.46);
       bctx.font = `500 ${size}px "PP Mori", system-ui, sans-serif`;
-      bctx.fillText("Studio", W / 2, H / 2);
+      bctx.fillText("Studio", W / 2, H * 0.72);
     };
 
     const resize = () => {
