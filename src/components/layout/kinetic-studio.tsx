@@ -4,10 +4,10 @@ import { useEffect, useRef } from "react";
 
 /**
  * Kinetic typography — a web translation of Tim Rodenbröker's "Kinetic
- * Typography 1": the word is rendered to an offscreen buffer, then sampled in
- * thin horizontal strips, each offset by a travelling sine wave for the
- * signature sliced/flowing distortion. White "Studio" in PP Mori on the
- * near-black panel revealed below the footer.
+ * Typography 1": "Studio" is rendered to an offscreen buffer, then sampled in
+ * thin horizontal strips, each offset by a travelling sine wave. A gentle base
+ * wave keeps the word readable; on hover the strips near the cursor distort
+ * more and lean toward it (an interactive ripple that eases back out).
  */
 export function KineticStudio() {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -26,14 +26,18 @@ export function KineticStudio() {
     let H = 0;
     let raf = 0;
 
+    // Pointer interaction (device-pixel coords) with eased hover strength.
+    let pointerX = 0;
+    let pointerY = -1;
+    let hover = 0;
+    let targetHover = 0;
+
     const drawText = () => {
       if (W < 2 || H < 2) return;
       bctx.clearRect(0, 0, W, H);
       bctx.fillStyle = "#ffffff";
       bctx.textAlign = "center";
       bctx.textBaseline = "middle";
-      // The footer covers the top of the panel; place the word low so the
-      // whole of it sits in the strip revealed below the footer.
       const size = Math.min(W * 0.2, H * 0.46);
       bctx.font = `500 ${size}px "PP Mori", system-ui, sans-serif`;
       bctx.fillText("Studio", W / 2, H * 0.72);
@@ -44,13 +48,27 @@ export function KineticStudio() {
       ctx.fillStyle = "#101010";
       ctx.fillRect(0, 0, W, H);
       const step = Math.max(2, Math.round(2 * dpr));
-      const amp = W * 0.055;
+      const ampBase = W * 0.04;
+      const ampHover = W * 0.09;
+      const sigma = H * 0.22;
       for (let y = 0; y < H; y += step) {
         const sh = Math.min(step, H - y);
         if (sh <= 0) break;
-        const off = Math.sin(y * 0.008 + t * 0.0014) * amp;
+        let off = Math.sin(y * 0.008 + t * 0.0014) * ampBase;
+        if (hover > 0.001) {
+          const dy = y - pointerY;
+          const infl = Math.exp(-(dy * dy) / (2 * sigma * sigma)) * hover;
+          off += Math.sin(y * 0.03 + t * 0.004) * ampHover * infl;
+          off += (pointerX - W / 2) * 0.18 * infl;
+        }
         ctx.drawImage(buffer, 0, y, W, sh, off, y, W, sh);
       }
+    };
+
+    const render = (t: number) => {
+      hover += (targetHover - hover) * 0.08;
+      paint(t);
+      raf = requestAnimationFrame(render);
     };
 
     const measure = () => {
@@ -68,17 +86,25 @@ export function KineticStudio() {
       paint(0);
     };
 
-    const render = (t: number) => {
-      paint(t);
-      raf = requestAnimationFrame(render);
+    const onMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const inside =
+        e.clientX >= rect.left &&
+        e.clientX <= rect.right &&
+        e.clientY >= rect.top &&
+        e.clientY <= rect.bottom;
+      targetHover = inside ? 1 : 0;
+      if (inside) {
+        pointerX = ((e.clientX - rect.left) / rect.width) * W;
+        pointerY = ((e.clientY - rect.top) / rect.height) * H;
+      }
     };
 
-    // ResizeObserver fires once the panel has real dimensions (covers any
-    // cold-load layout race) and on every resize.
     const ro = new ResizeObserver(measure);
     ro.observe(canvas);
     measure();
     raf = requestAnimationFrame(render);
+    window.addEventListener("mousemove", onMove, { passive: true });
     document.fonts?.ready
       ?.then(() => {
         drawText();
@@ -89,6 +115,7 @@ export function KineticStudio() {
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
+      window.removeEventListener("mousemove", onMove);
     };
   }, []);
 
