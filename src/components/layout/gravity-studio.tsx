@@ -36,7 +36,7 @@ export function GravityStudio() {
     const build = () => {
       Composite.clear(engine.world, false);
       letters = [];
-      const size = Math.min(W * 0.16, H * 0.5);
+      const size = Math.min(W * 0.2, H * 0.82);
       ctx.font = font(size);
 
       const wallT = Math.max(H, 400);
@@ -50,7 +50,7 @@ export function GravityStudio() {
       word.forEach((ch, i) => {
         const w = ctx.measureText(ch).width + size * 0.12;
         const h = size * 0.92;
-        const x = W * 0.5 + (i - (n - 1) / 2) * (W * 0.09);
+        const x = W * 0.5 + (i - (n - 1) / 2) * (W * 0.14);
         const y = -h * 1.5 - i * h * 0.9;
         const body = Bodies.rectangle(x, y, Math.max(w, size * 0.25), h, {
           restitution: 0.35,
@@ -81,7 +81,7 @@ export function GravityStudio() {
     mouse.pixelRatio = dpr;
     const mc = MouseConstraint.create(engine, {
       mouse,
-      constraint: { stiffness: 0.18, render: { visible: false } },
+      constraint: { stiffness: 0.7, damping: 0.1, render: { visible: false } },
     });
     Composite.add(engine.world, mc);
 
