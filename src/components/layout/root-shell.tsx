@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
-import { GravityStudio } from "@/components/layout/gravity-studio";
 
 // Bump the suffix to re-show the bar to everyone (e.g. for a new announcement).
 const ANNOUNCE_KEY = "studio-ga-announcement-dismissed-v2";
@@ -50,13 +49,11 @@ export function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       {bar}
-      {/* Dark panel revealed below the footer — kinetic "Studio" typography. */}
+      {/* Dark panel revealed below the footer. */}
       <div
         aria-hidden
         className="fixed inset-x-0 bottom-0 z-0 h-[45vh] overflow-hidden bg-[#101010]"
-      >
-        <GravityStudio />
-      </div>
+      />
       {/* White content wrapper (square bottom). */}
       <div className="relative z-10 flex min-h-screen flex-col bg-background">
         <Header offsetTop={announce} />
