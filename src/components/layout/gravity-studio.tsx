@@ -50,14 +50,18 @@ export function GravityStudio() {
       word.forEach((ch, i) => {
         const w = ctx.measureText(ch).width + size * 0.12;
         const h = size * 0.92;
-        const x = W * 0.5 + (i - (n - 1) / 2) * (W * 0.14);
-        const y = -h * 1.5 - i * h * 0.9;
+        // Cluster the drop points near the centre with jitter + stagger so the
+        // letters tumble and land on top of each other rather than in a row.
+        const x = W * (0.32 + Math.random() * 0.36);
+        const y = -h - Math.random() * h * 2 - i * h * 1.4;
         const body = Bodies.rectangle(x, y, Math.max(w, size * 0.25), h, {
-          restitution: 0.35,
+          restitution: 0.45,
           friction: 0.4,
-          frictionAir: 0.008,
+          frictionAir: 0.006,
           chamfer: { radius: 6 },
+          angle: (Math.random() - 0.5) * 1.1,
         });
+        Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.25);
         body.plugin = { char: ch, size };
         letters.push(body);
       });
@@ -77,8 +81,8 @@ export function GravityStudio() {
     };
 
     const mouse = Mouse.create(canvas);
-    // Map CSS coords → device-pixel canvas space.
-    mouse.pixelRatio = dpr;
+    // Matter already scales by the canvas backing-store ratio; leave pixelRatio
+    // at 1 so coordinates aren't double-scaled (which broke dragging).
     const mc = MouseConstraint.create(engine, {
       mouse,
       constraint: { stiffness: 0.7, damping: 0.1, render: { visible: false } },
