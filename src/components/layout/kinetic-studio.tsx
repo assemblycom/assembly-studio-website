@@ -44,11 +44,11 @@ export function KineticStudio() {
       ctx.fillStyle = "#101010";
       ctx.fillRect(0, 0, W, H);
       const step = Math.max(2, Math.round(2 * dpr));
-      const amp = W * 0.13;
+      const amp = W * 0.055;
       for (let y = 0; y < H; y += step) {
         const sh = Math.min(step, H - y);
         if (sh <= 0) break;
-        const off = Math.sin(y * 0.018 + t * 0.0016) * amp;
+        const off = Math.sin(y * 0.008 + t * 0.0014) * amp;
         ctx.drawImage(buffer, 0, y, W, sh, off, y, W, sh);
       }
     };
