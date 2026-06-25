@@ -22,7 +22,7 @@ export function GravityStudio() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     const engine = Engine.create();
-    engine.gravity.y = 1.1;
+    engine.gravity.y = 1;
 
     let W = 0;
     let H = 0;
@@ -36,32 +36,31 @@ export function GravityStudio() {
     const build = () => {
       Composite.clear(engine.world, false);
       letters = [];
-      const size = Math.min(W * 0.2, H * 0.82);
+      const size = Math.min(W * 0.15, H * 0.58);
       ctx.font = font(size);
 
-      const wallT = Math.max(H, 400);
+      // Thick, oversized walls fully enclose the panel so nothing tunnels out.
+      const wallT = Math.max(W, H) * 2;
       Composite.add(engine.world, [
-        Bodies.rectangle(W / 2, H + wallT / 2, W * 3, wallT, { isStatic: true }),
-        Bodies.rectangle(-wallT / 2, H / 2, wallT, H * 4, { isStatic: true }),
-        Bodies.rectangle(W + wallT / 2, H / 2, wallT, H * 4, { isStatic: true }),
+        Bodies.rectangle(W / 2, H + wallT / 2 - 2, W * 4, wallT, { isStatic: true }),
+        Bodies.rectangle(-wallT / 2 + 2, H / 2, wallT, H * 8, { isStatic: true }),
+        Bodies.rectangle(W + wallT / 2 - 2, H / 2, wallT, H * 8, { isStatic: true }),
       ]);
 
-      const n = word.length;
       word.forEach((ch, i) => {
-        const w = ctx.measureText(ch).width + size * 0.12;
-        const h = size * 0.92;
-        // Cluster the drop points near the centre with jitter + stagger so the
-        // letters tumble and land on top of each other rather than in a row.
-        const x = W * (0.32 + Math.random() * 0.36);
-        const y = -h - Math.random() * h * 2 - i * h * 1.4;
-        const body = Bodies.rectangle(x, y, Math.max(w, size * 0.25), h, {
-          restitution: 0.45,
-          friction: 0.4,
-          frictionAir: 0.006,
-          chamfer: { radius: 6 },
-          angle: (Math.random() - 0.5) * 1.1,
+        const w = ctx.measureText(ch).width + size * 0.16;
+        const h = size * 0.95;
+        // Tight central cluster + gentle stagger so they stack and touch.
+        const x = W * (0.42 + Math.random() * 0.16);
+        const y = -h * 1.1 - i * h * 0.75;
+        const body = Bodies.rectangle(x, y, Math.max(w, size * 0.3), h, {
+          restitution: 0.12,
+          friction: 0.55,
+          frictionAir: 0.012,
+          chamfer: { radius: 5 },
+          angle: (Math.random() - 0.5) * 0.45,
         });
-        Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.25);
+        Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.1);
         body.plugin = { char: ch, size };
         letters.push(body);
       });
