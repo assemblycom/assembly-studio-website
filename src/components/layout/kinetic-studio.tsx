@@ -22,8 +22,8 @@ export function KineticStudio() {
     const buffer = document.createElement("canvas");
     const bctx = buffer.getContext("2d")!;
 
-    let W = 1;
-    let H = 1;
+    let W = 0;
+    let H = 0;
     let raf = 0;
 
     const drawText = () => {
@@ -39,18 +39,8 @@ export function KineticStudio() {
       bctx.fillText("Studio", W / 2, H * 0.72);
     };
 
-    const resize = () => {
-      const rect = canvas.getBoundingClientRect();
-      W = Math.max(1, Math.round(rect.width * dpr));
-      H = Math.max(1, Math.round(rect.height * dpr));
-      canvas.width = W;
-      canvas.height = H;
-      buffer.width = W;
-      buffer.height = H;
-      drawText();
-    };
-
     const paint = (t: number) => {
+      if (W < 2 || H < 2) return;
       ctx.fillStyle = "#101010";
       ctx.fillRect(0, 0, W, H);
       const step = Math.max(2, Math.round(2 * dpr));
@@ -63,29 +53,42 @@ export function KineticStudio() {
       }
     };
 
+    const measure = () => {
+      const rect = canvas.getBoundingClientRect();
+      const w = Math.max(1, Math.round(rect.width * dpr));
+      const h = Math.max(1, Math.round(rect.height * dpr));
+      if (w === W && h === H) return;
+      W = w;
+      H = h;
+      canvas.width = W;
+      canvas.height = H;
+      buffer.width = W;
+      buffer.height = H;
+      drawText();
+      paint(0);
+    };
+
     const render = (t: number) => {
       paint(t);
       raf = requestAnimationFrame(render);
     };
 
-    resize();
-    // Paint once synchronously so it shows immediately (rAF is paused in
-    // hidden tabs); the rAF loop then animates it when the tab is visible.
-    paint(0);
+    // ResizeObserver fires once the panel has real dimensions (covers any
+    // cold-load layout race) and on every resize.
+    const ro = new ResizeObserver(measure);
+    ro.observe(canvas);
+    measure();
     raf = requestAnimationFrame(render);
-    // Re-draw the buffer once the custom font is ready (first paint may use the
-    // fallback otherwise).
     document.fonts?.ready
       ?.then(() => {
         drawText();
         paint(0);
       })
       .catch(() => {});
-    window.addEventListener("resize", resize);
 
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("resize", resize);
+      ro.disconnect();
     };
   }, []);
 
