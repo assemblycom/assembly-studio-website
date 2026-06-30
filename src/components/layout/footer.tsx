@@ -94,13 +94,28 @@ export function Footer({ rounded = false }: { rounded?: boolean }) {
               Ask AI about Assembly Studio
             </p>
             <div className="mt-3 flex items-center gap-2">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background"
+              {[
+                { src: "/images/ai-chatgpt.svg", label: "ChatGPT" },
+                { src: "/images/ai-claude.svg", label: "Claude" },
+                { src: "/images/ai-gemini.svg", label: "Gemini" },
+                { src: "/images/ai-vector.svg", label: "Grok" },
+              ].map((ai) => (
+                <a
+                  key={ai.label}
+                  href={APP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Ask ${ai.label} about Assembly Studio`}
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background transition-colors hover:border-foreground/20"
                 >
-                  <div className="h-4 w-4 rounded-full bg-muted-foreground/30" />
-                </div>
+                  <Image
+                    src={ai.src}
+                    alt={ai.label}
+                    width={18}
+                    height={18}
+                    className="h-[18px] w-[18px] object-contain"
+                  />
+                </a>
               ))}
             </div>
           </div>
