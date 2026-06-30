@@ -25,20 +25,6 @@ function PlayIcon({ className = "" }: { className?: string }) {
   );
 }
 
-function ArrowIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 20 20" fill="none" className={className} aria-hidden>
-      <path
-        d="M4 10h11M11 5.5 15.5 10 11 14.5"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 /** Pulls the first quote out of a study's rich body, if any. */
 function firstQuote(study: CaseStudy): { text: string; attribution?: string } | null {
   const block = study.body?.find((b) => b.type === "quote");
@@ -84,11 +70,6 @@ function FeaturedCard({ study }: { study: CaseStudy }) {
             </div>
           ))}
         </dl>
-
-        <span className="mt-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors group-hover:text-foreground">
-          Watch story
-          <ArrowIcon className="size-4 transition-transform group-hover:translate-x-0.5" />
-        </span>
       </div>
     </Link>
   );
