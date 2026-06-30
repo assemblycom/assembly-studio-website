@@ -56,43 +56,40 @@ function FeaturedCard({ study }: { study: CaseStudy }) {
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className="group flex w-full flex-col overflow-hidden rounded-3xl border border-border bg-background transition-colors hover:border-foreground/30"
+      className="group flex w-full flex-col overflow-hidden rounded-3xl border border-border bg-background transition-all duration-200 hover:border-foreground/20 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
     >
       {/* Video media — distinct from the flat tiles used by classic cards */}
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted">
-        <span className="absolute left-5 top-5 rounded-full bg-background/90 px-3 py-1 text-xs text-foreground backdrop-blur">
-          Featured story
+      <div className="relative aspect-video w-full overflow-hidden bg-muted">
+        <span className="absolute left-4 top-4 rounded-full bg-background/70 px-2.5 py-1 text-xs text-muted-foreground backdrop-blur">
+          Featured
         </span>
-        <span className="absolute bottom-5 right-5 rounded-full bg-foreground/85 px-2.5 py-1 text-xs text-background backdrop-blur">
-          2:14
-        </span>
-        <span className="absolute left-1/2 top-1/2 flex size-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-foreground text-background transition-transform group-hover:scale-105">
-          <PlayIcon className="ml-0.5 size-7" />
+        <span className="absolute left-1/2 top-1/2 flex size-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 shadow-sm ring-1 ring-foreground/10 backdrop-blur transition-transform duration-200 group-hover:scale-105">
+          <PlayIcon className="ml-0.5 size-5 text-foreground" />
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col p-7 md:p-8">
-        <span className="text-xs uppercase tracking-wider text-muted-foreground">
+      <div className="flex flex-1 flex-col p-8">
+        <span className="text-xs uppercase tracking-wide text-muted-foreground">
           {study.company}
-          {study.glance?.runningSince && ` · Customer since ${study.glance.runningSince}`}
         </span>
-        <h3 className="mt-3 text-xl font-medium leading-snug tracking-tight md:text-2xl">
+        <h3 className="mt-2.5 text-xl font-medium leading-snug tracking-tight">
           {study.headline}
         </h3>
         <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
           {study.summary}
         </p>
 
-        <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3 border-t border-border pt-5">
+        {/* Stats — kept quiet so the headline stays the focal point */}
+        <div className="mt-8 flex flex-wrap gap-x-10 gap-y-4">
           {study.stats.map((stat) => (
             <div key={stat.label}>
-              <p className="text-xl font-medium">{stat.value}</p>
+              <p className="text-base font-medium">{stat.value}</p>
               <p className="mt-0.5 text-xs text-muted-foreground">{stat.label}</p>
             </div>
           ))}
         </div>
 
-        <span className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
+        <span className="mt-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors group-hover:text-foreground">
           Watch story
           <ArrowIcon className="size-4 transition-transform group-hover:translate-x-0.5" />
         </span>
