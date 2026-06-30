@@ -52,7 +52,7 @@ function FeaturedCard({ study }: { study: CaseStudy }) {
       </div>
 
       <div className="flex flex-1 flex-col p-8">
-        <span className="text-xs uppercase tracking-wide text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           {study.company}
         </span>
         <h3 className="mt-2.5 text-xl font-medium leading-snug tracking-tight">
@@ -88,7 +88,7 @@ function MediaCard({ study }: { study: CaseStudy }) {
     >
       <div className="aspect-[16/10] bg-muted" />
       <div className="flex flex-1 flex-col p-6">
-        <span className="text-xs uppercase tracking-wide text-muted-foreground">
+        <span className="text-xs text-muted-foreground">
           {study.industry}
         </span>
         <h3 className="mt-2.5 line-clamp-2 text-base font-medium leading-snug">
