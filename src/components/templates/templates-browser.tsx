@@ -3,17 +3,20 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { Template } from "@/lib/templates";
-import { TEMPLATE_CATEGORIES } from "@/lib/templates";
+import { TEMPLATE_CATEGORIES, TEMPLATE_INDUSTRIES } from "@/lib/templates";
+import { SIGNUP_URL } from "@/lib/constants";
 
 interface Props {
   templates: Template[];
 }
 
 const ALL = "All";
+const ALL_INDUSTRIES = "All industries";
 
 export function TemplatesBrowser({ templates }: Props) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState(ALL);
+  const [industry, setIndustry] = useState(ALL_INDUSTRIES);
 
   const categories = useMemo(() => {
     const present = new Set(templates.map((t) => t.category));
@@ -25,44 +28,79 @@ export function TemplatesBrowser({ templates }: Props) {
     return [ALL, ...ordered, ...extras];
   }, [templates]);
 
+  const industries = useMemo(() => {
+    const present = new Set(templates.flatMap((t) => t.industries ?? []));
+    return [ALL_INDUSTRIES, ...TEMPLATE_INDUSTRIES.filter((i) => present.has(i))];
+  }, [templates]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return templates.filter((t) => {
-      const matchesCategory = category === ALL || t.category === category;
-      if (!matchesCategory) return false;
+      if (category !== ALL && t.category !== category) return false;
+      if (industry !== ALL_INDUSTRIES && !(t.industries ?? []).includes(industry))
+        return false;
       if (!q) return true;
-      const haystack = [t.title, t.description, t.category, ...t.features]
+      const haystack = [t.title, t.description, t.category, ...t.features, ...(t.industries ?? [])]
         .join(" ")
         .toLowerCase();
       return haystack.includes(q);
     });
-  }, [templates, query, category]);
+  }, [templates, query, category, industry]);
 
   return (
     <div>
       {/* Toolbar */}
       <div className="flex flex-col gap-4">
-        <div className="relative">
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 20 20"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
-          >
-            <circle cx="9" cy="9" r="6" />
-            <path d="M14 14l4 4" strokeLinecap="round" />
-          </svg>
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search templates…"
-            aria-label="Search templates"
-            className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/30"
-          />
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <div className="relative flex-1">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+            >
+              <circle cx="9" cy="9" r="6" />
+              <path d="M14 14l4 4" strokeLinecap="round" />
+            </svg>
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search templates…"
+              aria-label="Search templates"
+              className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/30"
+            />
+          </div>
+
+          {/* Industry filter */}
+          <div className="relative sm:w-56">
+            <select
+              value={industry}
+              onChange={(e) => setIndustry(e.target.value)}
+              aria-label="Filter by industry"
+              className="w-full appearance-none rounded-lg border border-border bg-background py-2.5 pl-4 pr-10 text-sm outline-none transition-colors hover:border-foreground/30 focus:border-foreground/30"
+            >
+              {industries.map((i) => (
+                <option key={i} value={i}>
+                  {i}
+                </option>
+              ))}
+            </select>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+            >
+              <path d="M6 8l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -95,22 +133,39 @@ export function TemplatesBrowser({ templates }: Props) {
       {filtered.length > 0 ? (
         <div className="mt-4 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filtered.map((template) => (
-            <Link
+            <article
               key={template.slug}
-              href={`/templates/${template.slug}`}
-              className="group overflow-hidden rounded-xl border border-border transition-colors hover:border-foreground/20"
+              className="group relative overflow-hidden rounded-xl border border-border transition-colors hover:border-foreground/20"
             >
-              <div className="aspect-[5/3] bg-muted" />
-              <div className="p-4">
-                <h3 className="text-sm font-medium">{template.title}</h3>
-                <p className="mt-1.5 text-sm text-muted-foreground">
-                  {template.description}
-                </p>
-                <span className="mt-3 inline-block rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
-                  {template.category}
-                </span>
-              </div>
-            </Link>
+              <Link href={`/templates/${template.slug}`} className="block">
+                <div className="aspect-[5/3] bg-muted" />
+                <div className="p-4">
+                  <h3 className="text-sm font-medium">{template.title}</h3>
+                  <p className="mt-1.5 text-sm text-muted-foreground">
+                    {template.description}
+                  </p>
+                  <span className="mt-3 inline-block rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
+                    {template.category}
+                  </span>
+                </div>
+              </Link>
+
+              {/* Quick "use template" affordance — separate from the card link */}
+              <a
+                href={SIGNUP_URL}
+                aria-label={`Build off the ${template.title} template`}
+                className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full bg-background/90 text-foreground opacity-0 shadow-sm backdrop-blur transition-opacity hover:bg-foreground hover:text-background focus-visible:opacity-100 group-hover:opacity-100"
+              >
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden>
+                  <path
+                    d="M10 4.5v11M4.5 10h11"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </a>
+            </article>
           ))}
         </div>
       ) : (

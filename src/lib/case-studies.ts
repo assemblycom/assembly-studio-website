@@ -650,6 +650,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "ditto-by-dbc",
     company: "Ditto by DBC",
     industry: "Marketing & Design",
+    featured: true,
     headline:
       "Scaling Secure, Data-Driven Campaigns with Assembly: How DBC Launched Ditto",
     summary:
