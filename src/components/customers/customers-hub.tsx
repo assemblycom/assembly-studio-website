@@ -60,9 +60,6 @@ function FeaturedCard({ study }: { study: CaseStudy }) {
     >
       {/* Video media — distinct from the flat tiles used by classic cards */}
       <div className="relative aspect-video w-full overflow-hidden bg-muted">
-        <span className="absolute left-4 top-4 rounded-full bg-background/70 px-2.5 py-1 text-xs text-muted-foreground backdrop-blur">
-          Featured
-        </span>
         <span className="absolute left-1/2 top-1/2 flex size-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 shadow-sm ring-1 ring-foreground/10 backdrop-blur transition-transform duration-200 group-hover:scale-105">
           <PlayIcon className="ml-0.5 size-5 text-foreground" />
         </span>
@@ -75,21 +72,20 @@ function FeaturedCard({ study }: { study: CaseStudy }) {
         <h3 className="mt-2.5 text-xl font-medium leading-snug tracking-tight">
           {study.headline}
         </h3>
-        <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-          {study.summary}
-        </p>
 
-        {/* Stats — kept quiet so the headline stays the focal point */}
-        <div className="mt-8 flex flex-wrap gap-x-10 gap-y-4">
+        {/* Stats — a tidy 3-up row, kept quiet under the headline */}
+        <dl className="mt-auto grid grid-cols-3 gap-4 pt-7">
           {study.stats.map((stat) => (
             <div key={stat.label}>
-              <p className="text-base font-medium">{stat.value}</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">{stat.label}</p>
+              <dt className="text-lg font-medium">{stat.value}</dt>
+              <dd className="mt-0.5 text-xs leading-snug text-muted-foreground">
+                {stat.label}
+              </dd>
             </div>
           ))}
-        </div>
+        </dl>
 
-        <span className="mt-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors group-hover:text-foreground">
+        <span className="mt-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors group-hover:text-foreground">
           Watch story
           <ArrowIcon className="size-4 transition-transform group-hover:translate-x-0.5" />
         </span>
@@ -159,7 +155,8 @@ export function CustomersHub() {
   return (
     <>
       {/* Featured tier */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <h2 className="text-sm text-muted-foreground">Featured stories</h2>
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
         {featured.map((study) => (
           <FeaturedCard key={study.slug} study={study} />
         ))}
