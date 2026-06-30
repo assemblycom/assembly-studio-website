@@ -107,17 +107,19 @@ function MediaCard({ study }: { study: CaseStudy }) {
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-background transition-colors hover:border-foreground/30"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-background transition-all duration-200 hover:border-foreground/20 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
     >
       <div className="aspect-[16/10] bg-muted" />
       <div className="flex flex-1 flex-col p-6">
-        <span className="text-xs text-muted-foreground">{study.industry}</span>
-        <h3 className="mt-2 line-clamp-2 text-base font-medium leading-snug">
+        <span className="text-xs uppercase tracking-wide text-muted-foreground">
+          {study.industry}
+        </span>
+        <h3 className="mt-2.5 line-clamp-2 text-base font-medium leading-snug">
           {study.headline}
         </h3>
         {stat && (
-          <div className="mt-auto flex items-baseline gap-2 pt-5">
-            <span className="text-lg font-medium">{stat.value}</span>
+          <div className="mt-auto flex items-baseline gap-2 pt-6">
+            <span className="text-base font-medium">{stat.value}</span>
             <span className="text-xs text-muted-foreground">{stat.label}</span>
           </div>
         )}
@@ -131,9 +133,9 @@ function QuoteCard({ study }: { study: CaseStudy }) {
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className="group flex flex-col justify-between rounded-2xl bg-muted p-6 transition-colors hover:bg-muted/70"
+      className="group flex flex-col justify-between rounded-2xl border border-transparent bg-muted p-6 transition-all duration-200 hover:border-border hover:bg-background hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
     >
-      <blockquote className="text-lg font-medium leading-snug tracking-tight text-foreground">
+      <blockquote className="text-base font-medium leading-relaxed tracking-tight text-foreground">
         &ldquo;{quote?.text ?? study.summary}&rdquo;
       </blockquote>
       <div className="mt-6">
