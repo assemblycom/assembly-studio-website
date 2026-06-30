@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Section } from "@/components/ui/section";
-import { CustomersBrowser } from "@/components/customers/customers-browser";
+import { CustomersHub } from "@/components/customers/customers-hub";
 import { CustomersHero } from "@/components/customers/customers-hero";
 
 export const metadata: Metadata = {
@@ -15,7 +15,7 @@ export default function CustomersPage() {
       <CustomersHero />
 
       <Section className="pt-4 md:pt-6">
-        <CustomersBrowser />
+        <CustomersHub />
       </Section>
     </>
   );

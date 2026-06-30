@@ -4,7 +4,15 @@ import { notFound } from "next/navigation";
 import { Section } from "@/components/ui/section";
 import { TEMPLATES, getTemplateBySlug } from "@/lib/templates";
 import { TemplateGallery } from "@/components/templates/template-gallery";
-import { APP_URL } from "@/lib/constants";
+import { SIGNUP_URL } from "@/lib/constants";
+
+// Customization points common to every Assembly template.
+const CUSTOMIZABLE = [
+  "Branding, colors, and your own domain",
+  "Fields, sections, and the steps clients see",
+  "Automations, reminders, and notifications",
+  "Access and permissions per client or team",
+];
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -80,12 +88,25 @@ export default async function TemplateDetailPage({ params }: Props) {
                 {template.description}
               </p>
 
+              {template.industries && template.industries.length > 0 && (
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {template.industries.map((industry) => (
+                    <span
+                      key={industry}
+                      className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground"
+                    >
+                      {industry}
+                    </span>
+                  ))}
+                </div>
+              )}
+
               <div className="mt-6">
                 <a
-                  href={APP_URL}
+                  href={SIGNUP_URL}
                   className="inline-block rounded-full bg-foreground px-6 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
                 >
-                  Use this template
+                  Build off this template
                 </a>
               </div>
 
@@ -123,11 +144,34 @@ export default async function TemplateDetailPage({ params }: Props) {
               minutes. No code required.
             </p>
 
+            <h3 className="mt-12 text-lg font-medium">What you can customize</h3>
+            <ul className="mt-5 space-y-3.5">
+              {CUSTOMIZABLE.map((item) => (
+                <li key={item} className="flex items-start gap-3">
+                  <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-accent" />
+                  <span className="text-lg leading-[1.6] text-muted-foreground">
+                    {item}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
             <h3 className="mt-12 text-lg font-medium">Perfect for</h3>
             <p className="mt-3 text-muted-foreground">
-              {template.category} workflows at consulting, accounting, legal,
-              real estate, and other client-facing firms.
+              {(template.industries && template.industries.length > 0
+                ? template.industries.join(", ").replace(/, ([^,]*)$/, ", and $1")
+                : "consulting, accounting, legal, and real estate")}{" "}
+              firms running {template.category.toLowerCase()} workflows.
             </p>
+
+            <div className="mt-10">
+              <a
+                href={SIGNUP_URL}
+                className="inline-block rounded-full bg-foreground px-6 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
+              >
+                Build off this template
+              </a>
+            </div>
           </div>
         </div>
       </section>

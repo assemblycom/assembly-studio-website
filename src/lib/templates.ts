@@ -6,6 +6,8 @@ export interface Template {
   category: string;
   longDescription: string;
   features: string[];
+  /** Industry tags — drives the secondary "Industry" filter. */
+  industries?: string[];
   /** Surfaced in the curated set on the homepage. */
   featured?: boolean;
 }
@@ -24,7 +26,55 @@ export const TEMPLATE_CATEGORIES = [
   "Education",
 ] as const;
 
-export const TEMPLATES: Template[] = [
+// Industry tags for the secondary filter, alphabetical.
+export const TEMPLATE_INDUSTRIES = [
+  "Accounting",
+  "Consulting",
+  "Education",
+  "Financial services",
+  "Healthcare",
+  "Legal",
+  "Marketing",
+  "Real estate",
+  "Technology",
+] as const;
+
+// Industry tags kept out of the template objects to keep that list readable.
+// Each template carries 2–4 industries it most naturally serves.
+const INDUSTRY_BY_SLUG: Record<string, string[]> = {
+  "new-client-intake": ["Accounting", "Legal", "Consulting", "Marketing"],
+  "onboarding-wizard": ["Consulting", "Marketing", "Technology", "Financial services"],
+  "document-collection": ["Accounting", "Legal", "Real estate", "Financial services"],
+  "pdf-to-digital-intake": ["Legal", "Healthcare", "Accounting", "Real estate"],
+  "client-performance-dashboard": ["Marketing", "Consulting", "Financial services"],
+  "retainer-usage-overview": ["Marketing", "Consulting", "Legal"],
+  "monthly-client-report": ["Marketing", "Accounting", "Consulting"],
+  "client-engagement-dashboard": ["Marketing", "Consulting", "Technology"],
+  "data-visualization": ["Financial services", "Consulting", "Technology", "Accounting"],
+  "client-project-tracker": ["Marketing", "Consulting", "Technology", "Real estate"],
+  "case-status-page": ["Legal", "Real estate", "Healthcare"],
+  "deliverable-progress": ["Marketing", "Consulting", "Technology"],
+  "time-tracker": ["Legal", "Accounting", "Consulting"],
+  "goal-tracker": ["Consulting", "Healthcare", "Education"],
+  "content-approval-flow": ["Marketing", "Consulting"],
+  "design-approval": ["Marketing", "Technology"],
+  "markup-comments": ["Marketing", "Technology", "Consulting"],
+  "client-support-requests": ["Technology", "Marketing", "Consulting"],
+  "service-request-intake": ["Consulting", "Technology", "Real estate"],
+  "internal-ticketing": ["Technology", "Consulting", "Financial services"],
+  "proposal-builder": ["Marketing", "Consulting", "Accounting", "Legal"],
+  "client-ai-assistant": ["Technology", "Healthcare", "Financial services", "Education"],
+  "client-discussion-forum": ["Education", "Technology", "Marketing"],
+  "community-qa": ["Education", "Technology"],
+  "internal-communications-app": ["Technology", "Consulting", "Healthcare"],
+  "client-resource-library": ["Education", "Consulting", "Healthcare", "Financial services"],
+  "internal-resource-library": ["Consulting", "Technology", "Healthcare"],
+  "data-room": ["Financial services", "Legal", "Real estate", "Accounting"],
+  "course-player": ["Education", "Healthcare", "Consulting"],
+  "certification-flow": ["Education", "Healthcare", "Financial services"],
+};
+
+const BASE_TEMPLATES: Template[] = [
   // Onboarding
   {
     slug: "new-client-intake",
@@ -351,6 +401,12 @@ export const TEMPLATES: Template[] = [
     features: ["Lessons", "Final quiz", "Downloadable certificate", "Progress tracking"],
   },
 ];
+
+// Merge industry tags onto each template from the slug map above.
+export const TEMPLATES: Template[] = BASE_TEMPLATES.map((t) => ({
+  ...t,
+  industries: INDUSTRY_BY_SLUG[t.slug] ?? [],
+}));
 
 export function getTemplateBySlug(slug: string): Template | undefined {
   return TEMPLATES.find((t) => t.slug === slug);
