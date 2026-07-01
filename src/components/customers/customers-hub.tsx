@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CASE_STUDIES, type CaseStudy } from "@/lib/case-studies";
+import { CASE_STUDIES, caseStudyImage, type CaseStudy } from "@/lib/case-studies";
 import { VideoPlayer } from "@/components/customers/video-player";
 
 /**
@@ -35,7 +35,12 @@ function FeaturedCard({ study }: { study: CaseStudy }) {
   return (
     <article className="group flex w-full flex-col overflow-hidden rounded-3xl border border-border bg-background transition-all duration-200 hover:border-foreground/20 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
       {/* Video media — play the story inline, right on the card */}
-      <VideoPlayer videoUrl={study.videoUrl} label={`Play ${study.company} story`} iconOnly />
+      <VideoPlayer
+        videoUrl={study.videoUrl}
+        poster={caseStudyImage(study)}
+        label={`Play ${study.company} story`}
+        iconOnly
+      />
 
       {/* Text — click through to the full story */}
       <Link href={`/customers/${study.slug}`} className="flex flex-1 flex-col p-8">
@@ -71,7 +76,14 @@ function MediaCard({ study }: { study: CaseStudy }) {
       href={`/customers/${study.slug}`}
       className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-background transition-all duration-200 hover:border-foreground/20 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
     >
-      <div className="aspect-[16/10] bg-muted" />
+      <div className="aspect-[16/10] overflow-hidden bg-muted">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={caseStudyImage(study)}
+          alt=""
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+        />
+      </div>
       <div className="flex flex-1 flex-col p-6">
         <span className="text-xs text-muted-foreground">
           {study.industry}

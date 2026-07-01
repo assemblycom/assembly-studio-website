@@ -37,6 +37,14 @@ export interface CaseStudy {
   // Featured stories lead with a video on the detail page. When a URL is set
   // it plays inline; otherwise a video-style placeholder is shown.
   videoUrl?: string;
+  // Card thumbnail / video poster image.
+  image?: string;
+}
+
+// Card thumbnail — falls back to a deterministic placeholder photo per slug so
+// the layout can be tested with imagery before real assets exist.
+export function caseStudyImage(study: CaseStudy): string {
+  return study.image ?? `https://picsum.photos/seed/${study.slug}/1200/675`;
 }
 
 // Maps each detailed industry label to a broader filter group used on the
@@ -68,6 +76,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     // Placeholder sample clip — swap for the real customer video.
     videoUrl:
       "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    image: "/images/customers/capital-one-luxury-travel.jpg",
     headline:
       "How Capital One Luxury Travel Balanced 'Build vs. Buy' with Assembly",
     summary:
@@ -186,6 +195,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "valuenode-accounting",
     company: "ValueNode Accounting",
     industry: "Accounting & CPA",
+    image: "/images/customers/valuenode-accounting.jpg",
     headline:
       "How ValueNode Accounting Built a Fully Digital CPA Practice with Assembly",
     summary:
@@ -288,6 +298,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "metta-health",
     company: "Metta Health",
     industry: "Healthcare",
+    image: "/images/customers/metta-health.jpg",
     headline:
       "How Metta Health Scales HIPAA-Compliant Patient Authorizations with Assembly",
     summary:
@@ -470,6 +481,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "jungle-luxe",
     company: "Jungle Luxe",
     industry: "Real Estate & Property Management",
+    image: "/images/customers/jungle-luxe.jpg",
     headline:
       "How Jungle Luxe Brings Peace of Mind to International Property Owners with Assembly",
     summary:
@@ -567,6 +579,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "zen-aegis",
     company: "Zen Aegis",
     industry: "Professional Services",
+    image: "/images/customers/zen-aegis.jpg",
     headline:
       "How Zen Aegis Saves Clients 40+ Hours a Week With Secure, Automated Portal Software",
     summary:
@@ -660,6 +673,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     // Placeholder sample clip — swap for the real customer video.
     videoUrl:
       "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+    image: "/images/customers/ditto-by-dbc.jpg",
     headline:
       "Scaling Secure, Data-Driven Campaigns with Assembly: How DBC Launched Ditto",
     summary:

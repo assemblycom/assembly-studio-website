@@ -85,9 +85,9 @@ export function Footer({ rounded = false }: { rounded?: boolean }) {
         </div>
       </div>
 
-      {/* AI + Demo banner */}
+      {/* AI banner */}
       <div className="border-t border-border">
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-8 md:flex-row md:items-center md:justify-between">
+        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-8">
           {/* Ask AI */}
           <div>
             <p className="text-sm text-muted-foreground">
@@ -119,15 +119,6 @@ export function Footer({ rounded = false }: { rounded?: boolean }) {
               ))}
             </div>
           </div>
-
-          {/* Watch Demo */}
-          <a
-            href={APP_URL}
-            className="flex items-center gap-3 transition-opacity hover:opacity-80"
-          >
-            <div className="h-10 w-10 overflow-hidden rounded-lg bg-muted-foreground/20" />
-            <span className="text-sm font-medium">Watch Demo</span>
-          </a>
         </div>
       </div>
     </footer>

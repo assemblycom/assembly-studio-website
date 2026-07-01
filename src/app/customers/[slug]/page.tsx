@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Section } from "@/components/ui/section";
 import {
   CASE_STUDIES,
+  caseStudyImage,
   getCaseStudyBySlug,
   type CaseStudy,
   type ContentBlock,
@@ -207,16 +208,18 @@ export default async function CaseStudyPage({ params }: Props) {
           {study.featured ? (
             <VideoPlayer
               videoUrl={study.videoUrl}
+              poster={caseStudyImage(study)}
               label="Watch the story"
               className="mt-12 rounded-xl"
             />
           ) : (
-            <div
-              role="img"
-              aria-label={`${study.company} client experience`}
-              className="mt-12 flex aspect-[2/1] w-full items-center justify-center rounded-xl border border-border bg-muted"
-            >
-              <span className="text-sm text-muted-foreground">Placeholder</span>
+            <div className="mt-12 aspect-[2/1] w-full overflow-hidden rounded-xl border border-border bg-muted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={caseStudyImage(study)}
+                alt={`${study.company} client experience`}
+                className="h-full w-full object-cover"
+              />
             </div>
           )}
         </div>
