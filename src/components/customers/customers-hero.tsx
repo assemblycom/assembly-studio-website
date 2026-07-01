@@ -13,7 +13,7 @@ const TUNNEL_IMAGES = CASE_STUDIES.map((s) => s.image).filter(
  */
 export function CustomersHero() {
   return (
-    <section className="pt-24 text-center md:pt-32">
+    <section className="flex min-h-screen flex-col pt-24 text-center md:pt-32">
       <div className="mx-auto max-w-3xl px-6">
         <h1 className="text-4xl font-medium tracking-tight md:text-5xl">
           Made for tech-enabled professional service firms

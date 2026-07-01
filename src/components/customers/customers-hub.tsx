@@ -1,39 +1,40 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { CASE_STUDIES, caseStudyImage, type CaseStudy } from "@/lib/case-studies";
+import {
+  CASE_STUDIES,
+  caseStudyImage,
+  getIndustryGroup,
+  INDUSTRY_GROUPS,
+  type CaseStudy,
+} from "@/lib/case-studies";
 import { VideoPlayer } from "@/components/customers/video-player";
 
 /**
  * Customers hub — a curated landing for customer stories.
  *
- * Two tiers, visually distinct:
- *  - Featured: the 1–2 flagship stories, rendered as large cards with a video
- *    affordance.
- *  - Hub: the remaining stories as a blended grid — most are media cards, a
- *    couple render as text-only quote cards to break up the rhythm.
+ * Cards are content-first (Intercom-style): every card stands on its own with a
+ * company wordmark, a short blurb, and one headline metric — so a story reads
+ * just as well with no photo as with one. No empty media placeholders.
+ *
+ *  - Featured: the 1–2 flagship stories, wide cards that lead with inline video.
+ *  - Hub: the remaining stories as a tight, uniform stat-card grid.
  *
  * Every card links straight to its full case-study page. The page is capped at
  * ~10 items so the hub stays curated.
  */
 
 const HUB_LIMIT = 8; // featured (2) + hub (8) = 10 items total
-const QUOTE_SLOTS = new Set([2, 5]); // hub indices rendered as text-only cards
-
-/** Pulls the first quote out of a study's rich body, if any. */
-function firstQuote(study: CaseStudy): { text: string; attribution?: string } | null {
-  const block = study.body?.find((b) => b.type === "quote");
-  if (block && block.type === "quote") {
-    return { text: block.text, attribution: block.attribution };
-  }
-  return null;
-}
 
 /* ------------------------------------------------------------------ */
-/* Featured card — large, with a video play affordance                 */
+/* Featured card — wide, media on one side, story on the other         */
 /* ------------------------------------------------------------------ */
 
 function FeaturedCard({ study }: { study: CaseStudy }) {
+  const stat = study.stats[0];
   return (
-    <article className="group flex w-full flex-col overflow-hidden rounded-xl border border-border bg-background transition-colors duration-200 hover:border-foreground/30">
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-background transition-colors duration-200 hover:border-foreground/30">
       {/* Video media — play the story inline, right on the card */}
       <VideoPlayer
         videoUrl={study.videoUrl}
@@ -42,83 +43,88 @@ function FeaturedCard({ study }: { study: CaseStudy }) {
         iconOnly
       />
 
-      {/* Text — click through to the full story */}
-      <Link href={`/customers/${study.slug}`} className="flex flex-1 flex-col p-8">
-        <span className="text-xs text-muted-foreground">{study.company}</span>
-        <h3 className="mt-2.5 text-xl font-medium leading-snug tracking-tight">
+      {/* Story — click through to the full case study */}
+      <Link
+        href={`/customers/${study.slug}`}
+        className="flex flex-1 flex-col p-7 md:p-8"
+      >
+        <h3 className="text-xl font-medium leading-snug tracking-tight">
           {study.headline}
         </h3>
+        <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+          {study.summary}
+        </p>
 
-        {/* Stats — a tidy 3-up row, kept quiet under the headline */}
-        <dl className="mt-auto grid grid-cols-3 gap-4 pt-7">
-          {study.stats.map((stat) => (
-            <div key={stat.label}>
-              <dt className="text-lg font-medium">{stat.value}</dt>
-              <dd className="mt-0.5 text-xs leading-snug text-muted-foreground">
-                {stat.label}
-              </dd>
+        {stat && (
+          <div className="mt-auto pt-8">
+            <div className="text-5xl font-medium leading-none tracking-tight">
+              {stat.value}
             </div>
-          ))}
-        </dl>
+            <div className="mt-3 text-sm text-muted-foreground">
+              {stat.label}
+            </div>
+          </div>
+        )}
       </Link>
     </article>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* Hub cards — classic media card + text-only quote card               */
+/* Hub card — a uniform top "visual" zone (photo, or a big-stat tile     */
+/* when there's no photo) over a wordmark + headline footer. Mixing the  */
+/* two reads as an intentional, organic grid rather than a broken one.   */
 /* ------------------------------------------------------------------ */
 
-function MediaCard({ study }: { study: CaseStudy }) {
+function StoryCard({ study }: { study: CaseStudy }) {
   const stat = study.stats[0];
-  return (
-    <Link
-      href={`/customers/${study.slug}`}
-      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-background transition-colors duration-200 hover:border-foreground/30"
-    >
-      <div className="aspect-[16/10] overflow-hidden bg-muted">
-        {caseStudyImage(study) && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={caseStudyImage(study)}
-            alt=""
-            className="h-full w-full object-cover object-[50%_20%]"
-          />
-        )}
-      </div>
-      <div className="flex flex-1 flex-col p-6">
-        <span className="text-xs text-muted-foreground">
-          {study.industry}
-        </span>
-        <h3 className="mt-2.5 line-clamp-2 text-base font-medium leading-snug">
+  const image = caseStudyImage(study);
+
+  // Photo-less card: company + headline sit at the top, the metric anchors the
+  // bottom — content on both edges keeps the composition balanced.
+  if (!image) {
+    return (
+      <Link
+        href={`/customers/${study.slug}`}
+        className="group flex flex-col rounded-2xl border border-border bg-background p-6 transition-colors duration-200 hover:border-foreground/30"
+      >
+        <span className="text-sm text-muted-foreground">{study.company}</span>
+        <h3 className="mt-3 line-clamp-3 text-lg font-medium leading-snug tracking-tight">
           {study.headline}
         </h3>
         {stat && (
-          <div className="mt-auto flex items-baseline gap-2 pt-6">
-            <span className="text-base font-medium">{stat.value}</span>
-            <span className="text-xs text-muted-foreground">{stat.label}</span>
+          <div className="mt-auto pt-8">
+            <div className="text-6xl font-medium leading-none tracking-tight">
+              {stat.value}
+            </div>
+            <div className="mt-3 text-sm text-muted-foreground">
+              {stat.label}
+            </div>
           </div>
         )}
-      </div>
-    </Link>
-  );
-}
+      </Link>
+    );
+  }
 
-function QuoteCard({ study }: { study: CaseStudy }) {
-  const quote = firstQuote(study);
+  // Photo card: image on top, company + headline below.
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className="group flex flex-col justify-between rounded-xl bg-muted p-7 transition-colors duration-200 hover:bg-[#ededed]"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-background transition-colors duration-200 hover:border-foreground/30"
     >
-      <blockquote className="text-lg font-medium leading-snug tracking-tight text-foreground">
-        {quote?.text ?? study.summary}
-      </blockquote>
-      <div className="mt-6">
-        <p className="text-sm font-medium">{study.company}</p>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          {quote?.attribution ?? study.industry}
-        </p>
+      <div className="aspect-[16/10] overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={image}
+          alt=""
+          className="h-full w-full object-cover object-[50%_20%]"
+        />
+      </div>
+      <div className="flex flex-col p-6">
+        <span className="text-sm text-muted-foreground">{study.company}</span>
+        <h3 className="mt-3 line-clamp-2 text-base font-medium leading-snug tracking-tight">
+          {study.headline}
+        </h3>
       </div>
     </Link>
   );
@@ -129,30 +135,70 @@ function QuoteCard({ study }: { study: CaseStudy }) {
 /* ------------------------------------------------------------------ */
 
 export function CustomersHub() {
+  const [active, setActive] = useState("All");
+
+  // Only offer pills for industry groups that actually have a story.
+  const groups = useMemo(() => {
+    const present = new Set(
+      CASE_STUDIES.map((s) => getIndustryGroup(s.industry)).filter(Boolean),
+    );
+    return [
+      "All",
+      ...INDUSTRY_GROUPS.map((g) => g.label).filter((l) => present.has(l)),
+    ];
+  }, []);
+
   const featured = CASE_STUDIES.filter((s) => s.featured).slice(0, 2);
   const hub = CASE_STUDIES.filter((s) => !s.featured).slice(0, HUB_LIMIT);
+  const filtered =
+    active === "All"
+      ? null
+      : CASE_STUDIES.filter((s) => getIndustryGroup(s.industry) === active);
 
   return (
     <>
-      {/* Featured tier */}
-      <h2 className="text-sm text-muted-foreground">Featured stories</h2>
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        {featured.map((study) => (
-          <FeaturedCard key={study.slug} study={study} />
+      {/* Industry filter — a single edge-to-edge scroll row on mobile, wrapping
+          normally once there's room. */}
+      <div className="-mx-6 flex gap-2 overflow-x-auto px-6 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
+        {groups.map((group) => (
+          <button
+            key={group}
+            type="button"
+            onClick={() => setActive(group)}
+            className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-1.5 text-sm transition-colors duration-200 ${
+              active === group
+                ? "border-foreground bg-foreground text-background"
+                : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+            }`}
+          >
+            {group}
+          </button>
         ))}
       </div>
 
-      {/* Blended hub */}
-      <h2 className="mt-16 text-sm text-muted-foreground">More customer stories</h2>
-      <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {hub.map((study, i) =>
-          QUOTE_SLOTS.has(i) && firstQuote(study) ? (
-            <QuoteCard key={study.slug} study={study} />
-          ) : (
-            <MediaCard key={study.slug} study={study} />
-          ),
-        )}
-      </div>
+      {active === "All" ? (
+        <>
+          {/* Featured tier */}
+          <div className="mt-8 grid gap-5 lg:grid-cols-2">
+            {featured.map((study) => (
+              <FeaturedCard key={study.slug} study={study} />
+            ))}
+          </div>
+
+          {/* Hub grid */}
+          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {hub.map((study) => (
+              <StoryCard key={study.slug} study={study} />
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered!.map((study) => (
+            <StoryCard key={study.slug} study={study} />
+          ))}
+        </div>
+      )}
     </>
   );
 }

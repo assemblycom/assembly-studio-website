@@ -32,49 +32,71 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 function MetaCard({ study }: { study: CaseStudy }) {
   if (!study.glance) return null;
-  return (
-    <aside className="h-fit rounded-xl border border-border p-6 md:sticky md:top-28">
-      <p className="font-medium">{study.company}</p>
-      <p className="mt-1 text-sm text-muted-foreground">{study.industry}</p>
+  const g = study.glance;
 
-      <dl className="mt-6 space-y-5 text-sm">
-        {study.glance.founded && (
-          <div>
-            <dt className="text-muted-foreground">Founded</dt>
-            <dd className="mt-0.5 font-medium">{study.glance.founded}</dd>
+  // Monogram stand-in for a customer logo — first letters of the first two words.
+  const monogram = study.company
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
+
+  // Fact rows, in the order they should read down the card.
+  const rows = [
+    { label: "Industry", value: study.industry },
+    ...(g.founded ? [{ label: "Founded", value: g.founded }] : []),
+    { label: "On Assembly since", value: g.runningSince },
+    {
+      label: "Website",
+      value: (
+        <a
+          href={g.companyUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="transition-colors hover:text-foreground"
+        >
+          {g.companyUrl.replace(/^https?:\/\//, "").replace(/\/$/, "")}
+        </a>
+      ),
+    },
+  ];
+
+  return (
+    <aside className="flex h-fit flex-col gap-4 md:sticky md:top-28">
+      {/* Facts panel — logo, name, and the at-a-glance rows */}
+      <div className="overflow-hidden rounded-lg bg-muted">
+        <div className="flex flex-col items-center px-6 pb-6 pt-8">
+          <div className="flex size-24 items-center justify-center rounded-full bg-background ring-1 ring-border">
+            <span className="text-2xl font-medium tracking-tight">
+              {monogram}
+            </span>
           </div>
-        )}
-        <div>
-          <dt className="text-muted-foreground">On Assembly since</dt>
-          <dd className="mt-0.5 font-medium">{study.glance.runningSince}</dd>
+          <p className="mt-4 text-center font-medium tracking-tight">
+            {study.company}
+          </p>
         </div>
-        <div>
-          <dt className="text-muted-foreground">Website</dt>
-          <dd className="mt-0.5">
-            <a
-              href={study.glance.companyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium transition-colors hover:text-muted-foreground"
+
+        <dl className="border-t border-border/70">
+          {rows.map((row) => (
+            <div
+              key={row.label}
+              className="border-b border-border/70 px-6 py-4"
             >
-              {study.glance.companyUrl.replace(/^https?:\/\//, "")}
-            </a>
-          </dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Apps in use</dt>
-          <dd className="mt-2 flex flex-wrap gap-1.5">
-            {study.glance.apps.map((app) => (
-              <span
-                key={app}
-                className="rounded-md bg-muted px-2 py-0.5 text-xs text-foreground"
-              >
-                {app}
-              </span>
-            ))}
-          </dd>
-        </div>
-      </dl>
+              <dt className="text-sm text-foreground">{row.label}</dt>
+              <dd className="mt-0.5 text-sm text-muted-foreground">
+                {row.value}
+              </dd>
+            </div>
+          ))}
+          <div className="px-6 py-4">
+            <dt className="text-sm text-foreground">Apps in use</dt>
+            <dd className="mt-0.5 text-sm text-muted-foreground">
+              {g.apps.join(", ")}
+            </dd>
+          </div>
+        </dl>
+      </div>
     </aside>
   );
 }
@@ -175,7 +197,7 @@ export default async function CaseStudyPage({ params }: Props) {
   return (
     <>
       {/* Hero */}
-      <section className="px-6 pt-24 md:pt-32">
+      <section className="px-6 pt-36 md:pt-44">
         <div className="mx-auto max-w-5xl text-center">
           <nav
             aria-label="Breadcrumb"
@@ -196,7 +218,7 @@ export default async function CaseStudyPage({ params }: Props) {
           <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-medium tracking-tight md:text-5xl">
             {study.headline}
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
+          <p className="mx-auto mt-8 max-w-2xl text-lg text-muted-foreground">
             {study.summary}
           </p>
 
