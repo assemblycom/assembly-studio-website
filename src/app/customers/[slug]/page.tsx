@@ -139,12 +139,14 @@ function RelatedCard({ study }: { study: CaseStudy }) {
       className="group flex flex-col overflow-hidden rounded-2xl border border-border transition-all duration-200 hover:border-foreground/20 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
     >
       <div className="aspect-[16/9] overflow-hidden bg-muted">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={caseStudyImage(study)}
-          alt=""
-          className="h-full w-full object-cover object-[50%_20%] transition-transform duration-300 group-hover:scale-[1.03]"
-        />
+        {caseStudyImage(study) && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={caseStudyImage(study)}
+            alt=""
+            className="h-full w-full object-cover object-[50%_20%] transition-transform duration-300 group-hover:scale-[1.03]"
+          />
+        )}
       </div>
       <div className="p-6">
         <p className="text-xs text-muted-foreground">{study.company}</p>

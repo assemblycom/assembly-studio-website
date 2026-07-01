@@ -41,10 +41,10 @@ export interface CaseStudy {
   image?: string;
 }
 
-// Card thumbnail — falls back to a deterministic placeholder photo per slug so
-// the layout can be tested with imagery before real assets exist.
-export function caseStudyImage(study: CaseStudy): string {
-  return study.image ?? `https://picsum.photos/seed/${study.slug}/1200/675`;
+// Card thumbnail — only the real provided image, or undefined (show a plain
+// gray placeholder). No stock/placeholder photos.
+export function caseStudyImage(study: CaseStudy): string | undefined {
+  return study.image;
 }
 
 // Maps each detailed industry label to a broader filter group used on the
