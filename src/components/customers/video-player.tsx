@@ -35,7 +35,7 @@ export function VideoPlayer({
           controls
           autoPlay
           playsInline
-          className="h-full w-full object-cover object-top"
+          className="h-full w-full object-cover object-center"
         />
       ) : (
         <button
@@ -49,7 +49,7 @@ export function VideoPlayer({
             <img
               src={poster}
               alt=""
-              className="absolute inset-0 h-full w-full object-cover object-top"
+              className="absolute inset-0 h-full w-full object-cover object-center"
             />
           )}
           {iconOnly ? (
