@@ -132,7 +132,7 @@ export function CustomersHero() {
               style={{ backgroundColor: card.color }}
             >
               <span
-                className="absolute -top-3 left-2 z-10 rounded-md px-2.5 py-0.5 text-xs text-neutral-900"
+                className="absolute left-3 top-3 z-10 rounded-md px-2.5 py-0.5 text-xs text-neutral-900"
                 style={{ backgroundColor: card.color }}
               >
                 {card.name}
