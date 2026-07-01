@@ -18,14 +18,14 @@ interface CardDef {
 }
 
 const CARDS: CardDef[] = [
-  { name: "Capital One", color: "#bfe0ef", image: "/images/customers/capital-one-luxury-travel.jpg", rot: -3 },
-  { name: "ValueNode", color: "#c9e9b6", image: "/images/customers/valuenode-accounting.jpg", rot: 4 },
-  { name: "Metta Health", color: "#f6d3a6", image: "/images/customers/metta-health.jpg", rot: 5 },
-  { name: "Zen Aegis", color: "#c6e8e0", image: "/images/customers/zen-aegis.jpg", rot: -4 },
-  { name: "Collective", color: "#d9cdf0", image: "/images/customers/collective-cpa.jpg", rot: -5 },
-  { name: "Jungle Luxe", color: "#f0e4a3", image: "/images/customers/jungle-luxe.jpg", rot: 5 },
-  { name: "Ditto", color: "#f4c9d6", image: "/images/customers/ditto-by-dbc.jpg", rot: 3 },
-  { name: "Heritage Law", color: "#f3c9c0", image: "/images/customers/heritage-law-partners.jpg", rot: 6 },
+  { name: "Capital One", color: "#7DA4FF", image: "/images/customers/capital-one-luxury-travel.jpg", rot: -3 },
+  { name: "ValueNode", color: "#5BE4C2", image: "/images/customers/valuenode-accounting.jpg", rot: 4 },
+  { name: "Metta Health", color: "#FF9092", image: "/images/customers/metta-health.jpg", rot: 5 },
+  { name: "Zen Aegis", color: "#C5B3FF", image: "/images/customers/zen-aegis.jpg", rot: -4 },
+  { name: "Collective", color: "#D6F990", image: "/images/customers/collective-cpa.jpg", rot: -5 },
+  { name: "Jungle Luxe", color: "#FFDAFC", image: "/images/customers/jungle-luxe.jpg", rot: 5 },
+  { name: "Ditto", color: "#5BE4C2", image: "/images/customers/ditto-by-dbc.jpg", rot: 3 },
+  { name: "Heritage Law", color: "#C5B3FF", image: "/images/customers/heritage-law-partners.jpg", rot: 6 },
 ];
 
 const RX = 620; // horizontal orbit radius (px)
@@ -50,7 +50,7 @@ export function CustomersHero() {
     const frame = () => {
       if (!dragging) {
         // Rotate only while hovered; otherwise just let drag momentum settle.
-        const auto = hovering ? 0.16 : 0;
+        const auto = hovering ? 0.06 : 0;
         angle += auto + velocity;
         velocity *= 0.94;
         if (Math.abs(velocity) < 0.001) velocity = 0;
