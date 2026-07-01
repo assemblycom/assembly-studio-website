@@ -841,6 +841,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "collective-cpa",
     company: "Collective CPA & Advisors",
     industry: "Accounting & Advisory",
+    image: "/images/customers/collective-cpa.jpg",
     headline:
       "How Collective CPA & Advisors Unifies Accounting Services for Clients",
     summary:
@@ -920,6 +921,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "heritage-law-partners",
     company: "Heritage Law Partners",
     industry: "Legal & Estate Planning",
+    image: "/images/customers/heritage-law-partners.jpg",
     headline:
       "How Heritage Law Partners Delivers Exceptional Client Service with Assembly",
     summary:
