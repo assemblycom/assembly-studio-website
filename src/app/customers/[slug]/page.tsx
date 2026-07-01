@@ -95,13 +95,13 @@ function BodyBlock({ block }: { block: ContentBlock }) {
       );
     case "list":
       return (
-        <ul className="mt-7 space-y-3.5">
+        <ul className="mt-7 list-disc space-y-2.5 pl-5 marker:text-foreground/40">
           {block.items.map((item) => (
-            <li key={item} className="flex items-start gap-3.5">
-              <span className="mt-[0.62rem] size-1.5 shrink-0 rounded-full bg-foreground/50" />
-              <span className="text-[1.0625rem] leading-[1.6] text-foreground/80">
-                {item}
-              </span>
+            <li
+              key={item}
+              className="pl-1.5 text-[1.0625rem] leading-[1.7] text-foreground/80"
+            >
+              {item}
             </li>
           ))}
         </ul>
