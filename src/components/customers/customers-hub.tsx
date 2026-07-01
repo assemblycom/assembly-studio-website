@@ -33,7 +33,7 @@ function firstQuote(study: CaseStudy): { text: string; attribution?: string } | 
 
 function FeaturedCard({ study }: { study: CaseStudy }) {
   return (
-    <article className="group flex w-full flex-col overflow-hidden rounded-xl border border-border bg-background transition-all duration-200 hover:border-foreground/20 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
+    <article className="group flex w-full flex-col overflow-hidden rounded-xl border border-border bg-background transition-colors duration-200 hover:border-foreground/30">
       {/* Video media — play the story inline, right on the card */}
       <VideoPlayer
         videoUrl={study.videoUrl}
@@ -74,7 +74,7 @@ function MediaCard({ study }: { study: CaseStudy }) {
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-background transition-all duration-200 hover:border-foreground/20 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
+      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-background transition-colors duration-200 hover:border-foreground/30"
     >
       <div className="aspect-[16/10] overflow-hidden bg-muted">
         {caseStudyImage(study) && (
@@ -109,10 +109,16 @@ function QuoteCard({ study }: { study: CaseStudy }) {
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className="group flex flex-col justify-between rounded-xl border border-transparent bg-muted p-6 transition-all duration-200 hover:border-border hover:bg-background hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
+      className="group flex flex-col justify-center rounded-xl bg-muted p-7 transition-colors duration-200 hover:bg-[#ededed]"
     >
-      <blockquote className="text-base font-medium leading-relaxed tracking-tight text-foreground">
-        &ldquo;{quote?.text ?? study.summary}&rdquo;
+      <span
+        aria-hidden
+        className="font-serif text-5xl leading-[0.4] text-foreground/15"
+      >
+        &ldquo;
+      </span>
+      <blockquote className="mt-3 text-lg font-medium leading-snug tracking-tight text-foreground">
+        {quote?.text ?? study.summary}
       </blockquote>
       <div className="mt-6">
         <p className="text-sm font-medium">{study.company}</p>
