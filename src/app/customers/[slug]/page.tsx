@@ -144,7 +144,7 @@ function RelatedCard({ study }: { study: CaseStudy }) {
           <img
             src={caseStudyImage(study)}
             alt=""
-            className="h-full w-full object-cover object-[50%_20%] transition-transform duration-300 group-hover:scale-[1.03]"
+            className="h-full w-full object-cover object-[50%_20%]"
           />
         )}
       </div>
