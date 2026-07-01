@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CASE_STUDIES, type CaseStudy } from "@/lib/case-studies";
+import { VideoPlayer } from "@/components/customers/video-player";
 
 /**
  * Customers hub — a curated landing for customer stories.
@@ -17,14 +18,6 @@ import { CASE_STUDIES, type CaseStudy } from "@/lib/case-studies";
 const HUB_LIMIT = 8; // featured (2) + hub (8) = 10 items total
 const QUOTE_SLOTS = new Set([2, 5]); // hub indices rendered as text-only cards
 
-function PlayIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
-      <path d="M9 7.5v9a.75.75 0 0 0 1.14.64l7.2-4.5a.75.75 0 0 0 0-1.28l-7.2-4.5A.75.75 0 0 0 9 7.5Z" />
-    </svg>
-  );
-}
-
 /** Pulls the first quote out of a study's rich body, if any. */
 function firstQuote(study: CaseStudy): { text: string; attribution?: string } | null {
   const block = study.body?.find((b) => b.type === "quote");
@@ -40,22 +33,13 @@ function firstQuote(study: CaseStudy): { text: string; attribution?: string } | 
 
 function FeaturedCard({ study }: { study: CaseStudy }) {
   return (
-    <Link
-      href={`/customers/${study.slug}`}
-      className="group flex w-full flex-col overflow-hidden rounded-3xl border border-border bg-background transition-all duration-200 hover:border-foreground/20 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
-    >
-      {/* Video media — dark video-still surface, distinct from classic tiles */}
-      <div className="relative aspect-video w-full overflow-hidden bg-[#1f1f1f]">
-        <span className="absolute left-1/2 top-1/2 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-neutral-900 shadow-sm transition-colors group-hover:bg-white/90">
-          <PlayIcon className="size-4" />
-          Watch story
-        </span>
-      </div>
+    <article className="group flex w-full flex-col overflow-hidden rounded-3xl border border-border bg-background transition-all duration-200 hover:border-foreground/20 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
+      {/* Video media — play the story inline, right on the card */}
+      <VideoPlayer videoUrl={study.videoUrl} label={`Play ${study.company} story`} iconOnly />
 
-      <div className="flex flex-1 flex-col p-8">
-        <span className="text-xs text-muted-foreground">
-          {study.company}
-        </span>
+      {/* Text — click through to the full story */}
+      <Link href={`/customers/${study.slug}`} className="flex flex-1 flex-col p-8">
+        <span className="text-xs text-muted-foreground">{study.company}</span>
         <h3 className="mt-2.5 text-xl font-medium leading-snug tracking-tight">
           {study.headline}
         </h3>
@@ -71,8 +55,8 @@ function FeaturedCard({ study }: { study: CaseStudy }) {
             </div>
           ))}
         </dl>
-      </div>
-    </Link>
+      </Link>
+    </article>
   );
 }
 

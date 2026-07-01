@@ -65,6 +65,9 @@ export const CASE_STUDIES: CaseStudy[] = [
     company: "Capital One Luxury Travel",
     industry: "Travel & Hospitality",
     featured: true,
+    // Placeholder sample clip — swap for the real customer video.
+    videoUrl:
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
     headline:
       "How Capital One Luxury Travel Balanced 'Build vs. Buy' with Assembly",
     summary:
@@ -654,6 +657,9 @@ export const CASE_STUDIES: CaseStudy[] = [
     company: "Ditto by DBC",
     industry: "Marketing & Design",
     featured: true,
+    // Placeholder sample clip — swap for the real customer video.
+    videoUrl:
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
     headline:
       "Scaling Secure, Data-Driven Campaigns with Assembly: How DBC Launched Ditto",
     summary:

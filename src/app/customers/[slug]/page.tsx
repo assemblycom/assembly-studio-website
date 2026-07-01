@@ -8,6 +8,7 @@ import {
   type CaseStudy,
   type ContentBlock,
 } from "@/lib/case-studies";
+import { VideoPlayer } from "@/components/customers/video-player";
 import { APP_URL } from "@/lib/constants";
 
 interface Props {
@@ -204,29 +205,11 @@ export default async function CaseStudyPage({ params }: Props) {
 
           {/* Hero media — featured stories lead with a video */}
           {study.featured ? (
-            study.videoUrl ? (
-              <video
-                controls
-                playsInline
-                aria-label={`${study.company} customer story`}
-                className="mt-12 aspect-video w-full rounded-xl border border-border bg-muted"
-              >
-                <source src={study.videoUrl} type="video/mp4" />
-              </video>
-            ) : (
-              <div
-                role="img"
-                aria-label={`${study.company} customer story video`}
-                className="relative mt-12 flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl bg-[#1f1f1f]"
-              >
-                <span className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-neutral-900 shadow-sm transition-colors group-hover:bg-white/90">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="size-4" aria-hidden>
-                    <path d="M9 7.5v9a.75.75 0 0 0 1.14.64l7.2-4.5a.75.75 0 0 0 0-1.28l-7.2-4.5A.75.75 0 0 0 9 7.5Z" />
-                  </svg>
-                  Watch the story
-                </span>
-              </div>
-            )
+            <VideoPlayer
+              videoUrl={study.videoUrl}
+              label="Watch the story"
+              className="mt-12 rounded-xl"
+            />
           ) : (
             <div
               role="img"
