@@ -109,15 +109,9 @@ function QuoteCard({ study }: { study: CaseStudy }) {
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className="group flex flex-col justify-center rounded-xl bg-muted p-7 transition-colors duration-200 hover:bg-[#ededed]"
+      className="group flex flex-col rounded-xl bg-muted p-7 transition-colors duration-200 hover:bg-[#ededed]"
     >
-      <span
-        aria-hidden
-        className="font-serif text-5xl leading-[0.4] text-foreground/15"
-      >
-        &ldquo;
-      </span>
-      <blockquote className="mt-3 text-lg font-medium leading-snug tracking-tight text-foreground">
+      <blockquote className="text-lg font-medium leading-snug tracking-tight text-foreground">
         {quote?.text ?? study.summary}
       </blockquote>
       <div className="mt-6">
