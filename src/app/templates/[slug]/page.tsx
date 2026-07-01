@@ -89,14 +89,12 @@ export default async function TemplateDetailPage({ params }: Props) {
               </p>
 
               {template.industries && template.industries.length > 0 && (
-                <div className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
-                  {template.industries.map((industry, i) => (
-                    <span key={industry} className="inline-flex items-center">
-                      {i > 0 && (
-                        <span aria-hidden className="mr-2 text-muted-foreground/40">
-                          ·
-                        </span>
-                      )}
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {template.industries.map((industry) => (
+                    <span
+                      key={industry}
+                      className="rounded-md bg-muted px-2.5 py-1 text-xs text-muted-foreground"
+                    >
                       {industry}
                     </span>
                   ))}
