@@ -49,15 +49,17 @@ export function StudioWordmark() {
     <div
       aria-hidden
       ref={wrapRef}
-      className="pointer-events-none flex size-full select-none items-end overflow-hidden pb-[3vh]"
+      className="pointer-events-none flex size-full select-none items-center overflow-hidden"
     >
       <div
         ref={wordRef}
         className="whitespace-nowrap pl-[2vw] font-medium uppercase leading-none text-white"
         style={{
-          fontSize: "30vh",
+          fontSize: "34vh",
           transformOrigin: "left center",
-          transform: `scaleX(${scaleX})`,
+          // Nudge down a touch so the footer edge and the viewport bottom leave
+          // roughly equal black margins above and below the word.
+          transform: `scaleX(${scaleX}) translateY(3vh)`,
           transition: isReset
             ? "none"
             : "transform 0.3s cubic-bezier(0.7, 0, 0.2, 1)",
