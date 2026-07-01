@@ -46,8 +46,8 @@ function FeaturedCard({ study }: { study: CaseStudy }) {
     >
       {/* Video media — distinct from the flat tiles used by classic cards */}
       <div className="relative aspect-video w-full overflow-hidden bg-muted">
-        <span className="absolute left-1/2 top-1/2 flex size-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 shadow-sm ring-1 ring-foreground/10 backdrop-blur transition-transform duration-200 group-hover:scale-105">
-          <PlayIcon className="ml-0.5 size-5 text-foreground" />
+        <span className="absolute left-1/2 top-1/2 flex size-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-white ring-1 ring-white/30 backdrop-blur-sm transition-transform duration-200 group-hover:scale-105">
+          <PlayIcon className="ml-0.5 size-6" />
         </span>
       </div>
 

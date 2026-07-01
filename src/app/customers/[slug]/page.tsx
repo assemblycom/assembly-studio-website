@@ -184,12 +184,6 @@ export default async function CaseStudyPage({ params }: Props) {
             <span className="text-foreground">{study.company}</span>
           </nav>
 
-          <div className="mt-6 flex items-center gap-3">
-            <span className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
-              {study.industry}
-            </span>
-          </div>
-
           <h1 className="mt-6 max-w-3xl text-4xl font-medium tracking-tight md:text-5xl">
             {study.headline}
           </h1>
@@ -225,8 +219,8 @@ export default async function CaseStudyPage({ params }: Props) {
                 aria-label={`${study.company} customer story video`}
                 className="relative mt-12 flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl border border-border bg-muted"
               >
-                <span className="flex size-16 items-center justify-center rounded-full bg-background/80 shadow-sm ring-1 ring-foreground/10 backdrop-blur">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="ml-1 size-7 text-foreground" aria-hidden>
+                <span className="flex size-20 items-center justify-center rounded-full bg-black/30 text-white ring-1 ring-white/30 backdrop-blur-sm transition-transform duration-200 group-hover:scale-105">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="ml-1 size-7" aria-hidden>
                     <path d="M9 7.5v9a.75.75 0 0 0 1.14.64l7.2-4.5a.75.75 0 0 0 0-1.28l-7.2-4.5A.75.75 0 0 0 9 7.5Z" />
                   </svg>
                 </span>
