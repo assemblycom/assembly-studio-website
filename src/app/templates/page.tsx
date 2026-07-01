@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Section } from "@/components/ui/section";
 import { TemplatesBrowser } from "@/components/templates/templates-browser";
 import { TEMPLATES } from "@/lib/templates";
+import { SIGNUP_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Templates",
@@ -21,6 +22,12 @@ export default function TemplatesPage() {
             Prebuilt workflows you can deploy and customize — so you can launch
             in days, not months.
           </p>
+          <a
+            href={SIGNUP_URL}
+            className="mt-8 inline-block rounded-full bg-foreground px-6 py-3 text-sm text-background transition-opacity hover:opacity-90"
+          >
+            Start free trial
+          </a>
         </div>
       </section>
 
