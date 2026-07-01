@@ -219,10 +219,11 @@ export default async function CaseStudyPage({ params }: Props) {
                 aria-label={`${study.company} customer story video`}
                 className="relative mt-12 flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl bg-[#1f1f1f]"
               >
-                <span className="flex size-14 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/25 backdrop-blur">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="ml-0.5 size-5" aria-hidden>
+                <span className="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-neutral-900 shadow-sm transition-colors group-hover:bg-white/90">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="size-4" aria-hidden>
                     <path d="M9 7.5v9a.75.75 0 0 0 1.14.64l7.2-4.5a.75.75 0 0 0 0-1.28l-7.2-4.5A.75.75 0 0 0 9 7.5Z" />
                   </svg>
+                  Watch the story
                 </span>
               </div>
             )
