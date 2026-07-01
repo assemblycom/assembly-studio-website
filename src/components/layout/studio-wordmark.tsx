@@ -55,7 +55,7 @@ export function StudioWordmark() {
         ref={wordRef}
         className="whitespace-nowrap pl-[2vw] font-medium uppercase leading-none text-white"
         style={{
-          fontSize: "38vh",
+          fontSize: "30vh",
           transformOrigin: "left center",
           transform: `scaleX(${scaleX})`,
           transition: isReset
