@@ -208,14 +208,39 @@ export default async function CaseStudyPage({ params }: Props) {
             ))}
           </div>
 
-          {/* Hero image */}
-          <div
-            role="img"
-            aria-label={`${study.company} client experience`}
-            className="mt-12 flex aspect-[2/1] w-full items-center justify-center rounded-xl border border-border bg-muted"
-          >
-            <span className="text-sm text-muted-foreground">Placeholder</span>
-          </div>
+          {/* Hero media — featured stories lead with a video */}
+          {study.featured ? (
+            study.videoUrl ? (
+              <video
+                controls
+                playsInline
+                aria-label={`${study.company} customer story`}
+                className="mt-12 aspect-video w-full rounded-xl border border-border bg-muted"
+              >
+                <source src={study.videoUrl} type="video/mp4" />
+              </video>
+            ) : (
+              <div
+                role="img"
+                aria-label={`${study.company} customer story video`}
+                className="relative mt-12 flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl border border-border bg-muted"
+              >
+                <span className="flex size-16 items-center justify-center rounded-full bg-background/80 shadow-sm ring-1 ring-foreground/10 backdrop-blur">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="ml-1 size-7 text-foreground" aria-hidden>
+                    <path d="M9 7.5v9a.75.75 0 0 0 1.14.64l7.2-4.5a.75.75 0 0 0 0-1.28l-7.2-4.5A.75.75 0 0 0 9 7.5Z" />
+                  </svg>
+                </span>
+              </div>
+            )
+          ) : (
+            <div
+              role="img"
+              aria-label={`${study.company} client experience`}
+              className="mt-12 flex aspect-[2/1] w-full items-center justify-center rounded-xl border border-border bg-muted"
+            >
+              <span className="text-sm text-muted-foreground">Placeholder</span>
+            </div>
+          )}
         </div>
       </section>
 

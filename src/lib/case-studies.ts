@@ -34,6 +34,9 @@ export interface CaseStudy {
   body?: ContentBlock[];
   // Given more visual weight on the customers index (spans a wider card).
   featured?: boolean;
+  // Featured stories lead with a video on the detail page. When a URL is set
+  // it plays inline; otherwise a video-style placeholder is shown.
+  videoUrl?: string;
 }
 
 // Maps each detailed industry label to a broader filter group used on the
