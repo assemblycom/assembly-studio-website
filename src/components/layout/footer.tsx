@@ -86,8 +86,8 @@ export function Footer({ rounded = false }: { rounded?: boolean }) {
       </div>
 
       {/* AI banner */}
-      <div className="border-t border-border">
-        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 py-8">
+      <div>
+        <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 pb-8">
           {/* Ask AI */}
           <div>
             <p className="text-sm text-muted-foreground">
