@@ -196,8 +196,11 @@ export default async function CaseStudyPage({ params }: Props) {
 
   return (
     <>
-      {/* Hero */}
-      <section className="px-6 pt-36 md:pt-44">
+      {/* Hero — video stories get breathing room from the media below; stories
+          without a video need extra padding under the stats instead. */}
+      <section
+        className={`px-6 pt-36 md:pt-44 ${study.featured ? "" : "pb-8 md:pb-12"}`}
+      >
         <div className="mx-auto max-w-5xl text-center">
           <nav
             aria-label="Breadcrumb"
