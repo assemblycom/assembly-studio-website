@@ -217,10 +217,10 @@ export default async function CaseStudyPage({ params }: Props) {
               <div
                 role="img"
                 aria-label={`${study.company} customer story video`}
-                className="relative mt-12 flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl border border-border bg-muted"
+                className="relative mt-12 flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl bg-[#1f1f1f]"
               >
-                <span className="flex size-20 items-center justify-center rounded-full bg-black/30 text-white ring-1 ring-white/30 backdrop-blur-sm transition-transform duration-200 group-hover:scale-105">
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="ml-1 size-7" aria-hidden>
+                <span className="flex size-16 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/25 backdrop-blur">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="ml-0.5 size-6" aria-hidden>
                     <path d="M9 7.5v9a.75.75 0 0 0 1.14.64l7.2-4.5a.75.75 0 0 0 0-1.28l-7.2-4.5A.75.75 0 0 0 9 7.5Z" />
                   </svg>
                 </span>
