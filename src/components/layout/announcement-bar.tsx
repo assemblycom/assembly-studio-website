@@ -11,10 +11,10 @@ import { APP_URL } from "@/lib/constants";
 export function AnnouncementBar({ onDismiss }: { onDismiss: () => void }) {
   return (
     <div className="fixed inset-x-0 top-0 z-[60] h-10 bg-foreground text-background">
-      <div className="flex h-full items-center justify-center px-12">
+      <div className="flex h-full items-center justify-center px-4 sm:px-12">
         <a
           href={APP_URL}
-          className="group inline-flex items-center gap-2 text-sm"
+          className="group inline-flex min-w-0 max-w-full items-center gap-2 text-sm"
         >
           <span className="rounded-full bg-background/20 px-2 py-0.5 text-xs font-medium">
             New
@@ -34,7 +34,7 @@ export function AnnouncementBar({ onDismiss }: { onDismiss: () => void }) {
         type="button"
         onClick={onDismiss}
         aria-label="Dismiss announcement"
-        className="absolute right-4 top-1/2 -translate-y-1/2 text-background/70 transition-colors hover:text-background"
+        className="absolute right-4 top-1/2 hidden -translate-y-1/2 text-background/70 transition-colors hover:text-background sm:block"
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
           <path

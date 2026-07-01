@@ -107,6 +107,51 @@ body {
   color: var(--foreground);
 }
 
+/* Shimmering outline for the hero input. A light sweep travels across a
+   1.5px border ring (drawn with a masked ::before), fading in when the box is
+   focused. Kept monochrome to stay on the black-and-white brand — reads as a
+   premium sheen rather than a rainbow. */
+@keyframes shimmer-sweep {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+.shimmer-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(
+    100deg,
+    rgba(10, 10, 10, 0) 20%,
+    rgba(10, 10, 10, 0.5) 50%,
+    rgba(10, 10, 10, 0) 80%
+  );
+  background-size: 200% 100%;
+  -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+  -webkit-mask-clip: content-box, border-box;
+  -webkit-mask-composite: xor;
+  mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+  mask-clip: content-box, border-box;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  animation: shimmer-sweep 2.6s linear infinite;
+  pointer-events: none;
+}
+.shimmer-border[data-focused="true"]::before {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shimmer-border::before {
+    animation: none;
+  }
+}
+
 /* On-brand focus ring (replaces the browser's default blue outline). */
 @layer base {
   a:focus-visible,

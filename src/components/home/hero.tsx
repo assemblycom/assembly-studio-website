@@ -26,11 +26,10 @@ function IconChevron({ className }: IconProps) {
     </svg>
   );
 }
-function IconReturn({ className }: IconProps) {
+function IconPaperclip({ className }: IconProps) {
   return (
-    <svg className={className} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M9 10l-4 4 4 4" />
-      <path d="M5 14h11a4 4 0 0 0 4-4V6" />
+    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
     </svg>
   );
 }
@@ -63,28 +62,26 @@ const SUGGESTIONS = [
 export function Hero() {
   const [userInput, setUserInput] = useState("");
   const [boxFocused, setBoxFocused] = useState(false);
-  const [open, setOpen] = useState(false);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const rowRef = useRef<HTMLDivElement>(null);
 
-  const query = userInput.trim().toLowerCase();
-  const matches =
-    query.length > 0
-      ? SUGGESTIONS.filter((s) => s.toLowerCase().includes(query) && s.toLowerCase() !== query).slice(0, 5)
-      : [];
-  const showTypeahead = open && matches.length > 0;
-
-  // Close the typeahead on outside click.
-  useEffect(() => {
-    const onDoc = (e: MouseEvent) => {
-      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, []);
+  // Inline contextual completion — the first suggestion that continues what the
+  // user has typed, surfaced as ghost text they can accept with Tab or →. No
+  // dropdown; the hint lives right in the field.
+  const ghost =
+    userInput.trim().length > 0
+      ? SUGGESTIONS.find(
+          (s) =>
+            s.toLowerCase().startsWith(userInput.toLowerCase()) &&
+            s.length > userInput.length,
+        )?.slice(userInput.length) ?? ""
+      : "";
+  const acceptGhost = () => {
+    if (ghost) setUserInput(userInput + ghost);
+  };
 
   const updateArrows = () => {
     const el = rowRef.current;
@@ -104,56 +101,75 @@ export function Hero() {
   };
   const pick = (prompt: string) => {
     setUserInput(prompt);
-    setOpen(false);
     inputRef.current?.focus();
   };
 
   return (
-    <section className="px-6 pb-24 pt-24 md:pt-28">
-      <div className="mx-auto max-w-3xl text-center">
-        <h1 className="text-4xl font-medium tracking-tight md:text-6xl">
+    <section className="pb-24 pt-24 md:pt-28">
+      <div className="mx-auto max-w-7xl px-6">
+        <h1 className="mx-auto max-w-3xl text-center text-4xl font-medium tracking-tight md:text-6xl">
           The AI app builder for client-facing experiences
         </h1>
-        <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
-          Describe what you need and Assembly builds it — apps for your client
-          portal, no code, no infrastructure required.
-        </p>
 
-        {/* Glass panel: entry box + template row */}
-        <div className="mx-auto mt-9 max-w-2xl rounded-3xl border border-border bg-gradient-to-b from-muted/70 to-muted/20 p-2.5 text-left backdrop-blur-sm">
-          {/* Box + typeahead anchor */}
-          <div ref={wrapRef} className="relative">
+        {/* Entry box + typeahead anchor */}
+        <div ref={wrapRef} className="relative mx-auto mt-9 max-w-2xl">
+          <div className="shimmer-border relative rounded-2xl" data-focused={boxFocused}>
             <div
               onClick={() => inputRef.current?.focus()}
-              className={`flex min-h-[140px] cursor-text flex-col rounded-2xl border bg-background p-4 shadow-sm transition-colors ${
-                boxFocused ? "border-foreground/30" : "border-border"
+              className={`flex min-h-[152px] cursor-text flex-col rounded-2xl border bg-background p-4 shadow-sm transition-all duration-200 ${
+                boxFocused ? "border-foreground/20 shadow-md" : "border-border"
               }`}
             >
-              <textarea
-                ref={inputRef}
-                value={userInput}
-                onChange={(e) => {
-                  setUserInput(e.target.value);
-                  setOpen(true);
-                }}
-                onFocus={() => {
-                  setBoxFocused(true);
-                  setOpen(true);
-                }}
-                onBlur={() => setBoxFocused(false)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    submit();
-                  }
-                }}
-                rows={3}
-                placeholder="Describe the app you want to build…"
-                aria-label="Describe what to build"
-                spellCheck={false}
-                className="w-full flex-1 resize-none bg-transparent px-1 text-base leading-relaxed text-foreground/80 caret-foreground/70 outline-none placeholder:text-muted-foreground"
-              />
-              <div className="mt-3 flex items-center justify-end">
+              <div className="relative flex-1">
+                {/* Ghost completion sits behind the textarea, aligned to the
+                    typed text; the typed portion is transparent so only the
+                    suggested remainder shows through. */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 whitespace-pre-wrap break-words px-1 text-base leading-relaxed text-transparent"
+                >
+                  {userInput}
+                  <span className="text-muted-foreground/50">{ghost}</span>
+                </div>
+                <textarea
+                  ref={inputRef}
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  onFocus={() => setBoxFocused(true)}
+                  onBlur={() => setBoxFocused(false)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      submit();
+                    } else if (
+                      ghost &&
+                      (e.key === "Tab" ||
+                        (e.key === "ArrowRight" &&
+                          e.currentTarget.selectionStart === userInput.length))
+                    ) {
+                      e.preventDefault();
+                      acceptGhost();
+                    }
+                  }}
+                  rows={3}
+                  placeholder="Describe the app you want to build…"
+                  aria-label="Describe what to build"
+                  spellCheck={false}
+                  className="relative h-full w-full resize-none bg-transparent px-1 text-base leading-relaxed text-foreground/80 caret-foreground/70 outline-none placeholder:text-muted-foreground"
+                />
+              </div>
+              <div className="mt-4 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(APP_URL);
+                  }}
+                  className="flex items-center gap-2 rounded-full bg-muted px-3.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground active:scale-[0.98]"
+                >
+                  <IconPaperclip className="size-4" />
+                  Attach files
+                </button>
                 <button
                   type="button"
                   onClick={(e) => {
@@ -162,34 +178,17 @@ export function Hero() {
                   }}
                   disabled={!userInput.trim()}
                   aria-label="Build it"
-                  className="flex size-9 items-center justify-center rounded-full bg-foreground text-background transition-opacity hover:opacity-90 disabled:opacity-30"
+                  className="flex size-9 items-center justify-center rounded-full bg-foreground text-background transition-all hover:opacity-90 active:scale-95 disabled:opacity-30 disabled:active:scale-100"
                 >
                   <IconArrow />
                 </button>
               </div>
             </div>
-
-            {/* Typeahead — contextual suggestions while typing */}
-            {showTypeahead && (
-              <div className="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-2xl border border-border bg-background p-1.5 shadow-xl">
-                <p className="px-3 pb-1 pt-2 text-xs text-muted-foreground">Suggestions</p>
-                {matches.map((s) => (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => pick(s)}
-                    className="group flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
-                  >
-                    <span className="truncate">{s}</span>
-                    <IconReturn className="shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
+        </div>
 
-          {/* Start from a template — pinned below */}
-          <div className="px-2 pb-1 pt-4">
+        {/* Start from a template — left-aligned to the box, which stays centered */}
+        <div className="mx-auto mt-8 max-w-2xl">
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">Start from a template</p>
               <div className="flex items-center gap-1">
@@ -232,18 +231,16 @@ export function Hero() {
               </a>
             </div>
           </div>
-        </div>
       </div>
 
-      {/* Logos carousel */}
-      <div className="mt-20">
-        <p className="text-center text-sm text-muted-foreground">Trusted by teams at</p>
-        <div className="mx-auto mt-8 max-w-5xl overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)]">
-          <div className="flex w-max animate-marquee items-center gap-16">
+      {/* Logos carousel — centered, set apart from the hero */}
+      <div className="mx-auto mt-28 max-w-7xl px-6 md:mt-32">
+        <div className="mx-auto max-w-2xl overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]">
+          <div className="flex w-max animate-marquee items-center gap-12">
             {["Capital One", "Collective", "Ditto", "Heritage Law", "Waymaker", "Aura", "CoverPanda", "Northwind"]
               .concat(["Capital One", "Collective", "Ditto", "Heritage Law", "Waymaker", "Aura", "CoverPanda", "Northwind"])
               .map((name, i) => (
-                <span key={i} className="shrink-0 text-lg font-medium text-muted-foreground">
+                <span key={i} className="shrink-0 text-base font-medium text-muted-foreground">
                   {name}
                 </span>
               ))}
