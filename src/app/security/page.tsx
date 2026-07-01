@@ -232,15 +232,14 @@ export default function SecurityPage() {
             by default, for every plan.
           </p>
           <a
-            href="mailto:security@assembly.com"
-            className="mt-8 inline-block rounded-full border border-border px-6 py-3 text-sm transition-colors hover:bg-muted"
+            href="https://trust.assembly.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-8 inline-block rounded-full bg-foreground px-6 py-3 text-sm text-background transition-opacity hover:opacity-90"
           >
             Visit our Trust Center
           </a>
         </div>
-
-        {/* Placeholder for a future hero visual */}
-        <div className="mx-auto mt-12 aspect-[16/7] max-w-5xl rounded-2xl bg-muted" />
       </section>
 
       {/* Grouped principles */}

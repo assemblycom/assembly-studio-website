@@ -179,7 +179,7 @@ export function FeatureComparison() {
         <div className="min-w-[760px] md:min-w-0">
           {/* Sticky plan header */}
           <div
-            className={`${GRID} sticky top-16 z-20 items-end border-b border-border bg-background py-4`}
+            className={`${GRID} sticky top-24 z-20 items-end border-b border-border bg-background py-4`}
           >
             <div className="text-lg font-medium">Features</div>
             {PLAN_NAMES.map((name) => (
