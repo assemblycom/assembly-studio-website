@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { Template } from "@/lib/templates";
 import { TEMPLATE_CATEGORIES, TEMPLATE_INDUSTRIES } from "@/lib/templates";
-import { SIGNUP_URL } from "@/lib/constants";
 
 interface Props {
   templates: Template[];
@@ -149,22 +148,6 @@ export function TemplatesBrowser({ templates }: Props) {
                   </span>
                 </div>
               </Link>
-
-              {/* Quick "use template" affordance — separate from the card link */}
-              <a
-                href={SIGNUP_URL}
-                aria-label={`Build off the ${template.title} template`}
-                className="absolute right-3 top-3 flex size-9 items-center justify-center rounded-full bg-background/90 text-foreground opacity-0 shadow-sm backdrop-blur transition-opacity hover:bg-foreground hover:text-background focus-visible:opacity-100 group-hover:opacity-100"
-              >
-                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden>
-                  <path
-                    d="M10 4.5v11M4.5 10h11"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </a>
             </article>
           ))}
         </div>
