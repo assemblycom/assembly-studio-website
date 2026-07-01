@@ -85,29 +85,42 @@
   }
 }
 
-/* Kinetic footer wordmark — the condensed word pans sideways and stretches so
-   you never see it all at once, echoing the Batata Letters piece. Defined as a
-   plain keyframes (not a @theme token) so it hot-reloads and is applied via an
-   inline `animation` shorthand on the element. */
-@keyframes studio-pan {
+/* Kinetic footer wordmark — a per-letter "snap": each letter fast-stretches
+   (scaleX 0.81 → 1.2 → 0.81) with a small vertical bob, staggered down the word
+   via a per-letter delay, then holds and loops. Echoes the Batata Letters piece.
+   Plain keyframes (not a @theme token) so it hot-reloads.
+
+   Cycle = (letters-1)·hold(0.22s) + snap(0.08s) + finalHold(0.9s) ≈ 2.1s for
+   "STUDIO" (6). The snap happens in the first ~4% of the cycle; the rest holds
+   the compressed resting state. */
+.studio-letter {
+  display: inline-block;
+  transform-origin: center;
+  transform: scaleX(0.81) translateY(0.02em);
+  will-change: transform;
+  animation: studio-snap 2.1s ease-out infinite;
+  animation-delay: calc(var(--i) * 0.22s);
+}
+
+@keyframes studio-snap {
   0% {
-    transform: translateX(0) scaleX(0.72);
+    transform: scaleX(0.81) translateY(0.02em);
   }
-  35% {
-    transform: translateX(-30%) scaleX(0.9);
+  2% {
+    transform: scaleX(1.2) translateY(-0.08em);
   }
-  60% {
-    transform: translateX(-6%) scaleX(1.18);
+  4% {
+    transform: scaleX(0.81) translateY(0.02em);
   }
   100% {
-    transform: translateX(-24%) scaleX(0.82);
+    transform: scaleX(0.81) translateY(0.02em);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .studio-wordmark {
-    animation: none !important;
-    transform: scaleX(0.82);
+  .studio-letter {
+    animation: none;
+    transform: scaleX(0.81);
   }
 }
 
