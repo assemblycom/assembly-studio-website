@@ -42,13 +42,16 @@ export function CustomersHero() {
     let angle = 0;
     let velocity = 0;
     let dragging = false;
+    let hovering = false;
     let lastX = 0;
     let raf = 0;
     const N = CARDS.length;
 
     const frame = () => {
       if (!dragging) {
-        angle += 0.12 + velocity;
+        // Rotate only while hovered; otherwise just let drag momentum settle.
+        const auto = hovering ? 0.16 : 0;
+        angle += auto + velocity;
         velocity *= 0.94;
         if (Math.abs(velocity) < 0.001) velocity = 0;
       }
@@ -85,14 +88,24 @@ export function CustomersHero() {
       dragging = false;
       container.style.cursor = "grab";
     };
+    const onEnter = () => {
+      hovering = true;
+    };
+    const onLeave = () => {
+      hovering = false;
+    };
 
     container.addEventListener("pointerdown", onDown);
+    container.addEventListener("pointerenter", onEnter);
+    container.addEventListener("pointerleave", onLeave);
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp);
 
     return () => {
       cancelAnimationFrame(raf);
       container.removeEventListener("pointerdown", onDown);
+      container.removeEventListener("pointerenter", onEnter);
+      container.removeEventListener("pointerleave", onLeave);
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
     };
@@ -119,7 +132,7 @@ export function CustomersHero() {
               style={{ backgroundColor: card.color }}
             >
               <span
-                className="absolute -top-3 left-2 z-10 rounded-md px-2.5 py-0.5 text-xs text-neutral-900 shadow-sm"
+                className="absolute -top-3 left-2 z-10 rounded-md px-2.5 py-0.5 text-xs text-neutral-900"
                 style={{ backgroundColor: card.color }}
               >
                 {card.name}
