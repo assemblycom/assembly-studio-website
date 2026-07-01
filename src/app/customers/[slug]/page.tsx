@@ -67,7 +67,7 @@ function MetaCard({ study }: { study: CaseStudy }) {
             {study.glance.apps.map((app) => (
               <span
                 key={app}
-                className="rounded-md border border-border px-2 py-0.5 text-xs text-muted-foreground"
+                className="rounded-md bg-muted px-2 py-0.5 text-xs text-foreground"
               >
                 {app}
               </span>

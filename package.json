@@ -9,10 +9,14 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
+    "@react-three/postprocessing": "^3.0.4",
     "@types/matter-js": "^0.20.2",
     "@types/three": "^0.184.1",
     "matter-js": "^0.20.0",
     "next": "16.2.9",
+    "postprocessing": "^6.39.2",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "three": "^0.184.0"

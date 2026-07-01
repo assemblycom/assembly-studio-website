@@ -85,6 +85,32 @@
   }
 }
 
+/* Kinetic footer wordmark — the condensed word pans sideways and stretches so
+   you never see it all at once, echoing the Batata Letters piece. Defined as a
+   plain keyframes (not a @theme token) so it hot-reloads and is applied via an
+   inline `animation` shorthand on the element. */
+@keyframes studio-pan {
+  0% {
+    transform: translateX(0) scaleX(0.72);
+  }
+  35% {
+    transform: translateX(-30%) scaleX(0.9);
+  }
+  60% {
+    transform: translateX(-6%) scaleX(1.18);
+  }
+  100% {
+    transform: translateX(-24%) scaleX(0.82);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-wordmark {
+    animation: none !important;
+    transform: scaleX(0.82);
+  }
+}
+
 /* Gentle idle float for the customers hero cards. */
 @keyframes float {
   0%,
