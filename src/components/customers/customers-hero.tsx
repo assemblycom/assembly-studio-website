@@ -4,53 +4,66 @@ import { useEffect, useRef } from "react";
 import { APP_URL } from "@/lib/constants";
 
 /**
- * Customers hero — a 3D ring of portrait cards that slowly rotates in a circle
- * and can be dragged to spin (Webflow-community style). Each card is a colored
- * frame with a name tag on top and a gray placeholder image. The headline sits
- * in front. Hidden on mobile to keep it clean.
+ * Customers hero — customer portrait cards that orbit the headline on a large
+ * ellipse (Webflow-community style). The ring slowly auto-rotates and can be
+ * dragged to spin; cards stay upright (readable tags) and scale slightly by
+ * depth for a 3D feel. Kept clear of the centered headline. Desktop-only.
  */
 
 interface CardDef {
   name: string;
   color: string;
+  image: string;
+  rot: number; // resting tilt
 }
 
 const CARDS: CardDef[] = [
-  { name: "Capital One", color: "#bfe0ef" },
-  { name: "ValueNode", color: "#c9e9b6" },
-  { name: "Ditto", color: "#f4c9d6" },
-  { name: "Metta Health", color: "#f6d3a6" },
-  { name: "Jungle Luxe", color: "#f0e4a3" },
-  { name: "Zen Aegis", color: "#c6e8e0" },
-  { name: "Orca", color: "#d9cdf0" },
-  { name: "Heritage Law", color: "#f3c9c0" },
+  { name: "Capital One", color: "#bfe0ef", image: "/images/customers/capital-one-luxury-travel.jpg", rot: -3 },
+  { name: "ValueNode", color: "#c9e9b6", image: "/images/customers/valuenode-accounting.jpg", rot: 4 },
+  { name: "Metta Health", color: "#f6d3a6", image: "/images/customers/metta-health.jpg", rot: 5 },
+  { name: "Zen Aegis", color: "#c6e8e0", image: "/images/customers/zen-aegis.jpg", rot: -4 },
+  { name: "Collective", color: "#d9cdf0", image: "/images/customers/collective-cpa.jpg", rot: -5 },
+  { name: "Jungle Luxe", color: "#f0e4a3", image: "/images/customers/jungle-luxe.jpg", rot: 5 },
+  { name: "Ditto", color: "#f4c9d6", image: "/images/customers/ditto-by-dbc.jpg", rot: 3 },
+  { name: "Heritage Law", color: "#f3c9c0", image: "/images/customers/heritage-law-partners.jpg", rot: 6 },
 ];
 
-const RADIUS = 460; // ring radius (px)
-const STEP = 360 / CARDS.length;
+const RX = 620; // horizontal orbit radius (px)
+const RY = 340; // vertical orbit radius (px)
 
 export function CustomersHero() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const ringRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const container = containerRef.current;
-    const ring = ringRef.current;
-    if (!container || !ring) return;
+    if (!container) return;
 
     let angle = 0;
     let velocity = 0;
     let dragging = false;
     let lastX = 0;
     let raf = 0;
+    const N = CARDS.length;
 
     const frame = () => {
       if (!dragging) {
-        angle += 0.1 + velocity;
-        velocity *= 0.93;
+        angle += 0.12 + velocity;
+        velocity *= 0.94;
         if (Math.abs(velocity) < 0.001) velocity = 0;
       }
-      ring.style.transform = `translateZ(-${RADIUS}px) rotateX(-8deg) rotateY(${angle}deg)`;
+      const base = (angle * Math.PI) / 180;
+      cardRefs.current.forEach((el, i) => {
+        if (!el) return;
+        const th = base + (i / N) * Math.PI * 2;
+        const tx = Math.cos(th) * RX;
+        const ty = Math.sin(th) * RY;
+        const depth = (Math.sin(th) + 1) / 2; // 0 = back/top, 1 = front/bottom
+        const scale = 0.78 + depth * 0.3;
+        el.style.transform = `translate(-50%, -50%) translate(${tx}px, ${ty}px) scale(${scale}) rotate(${CARDS[i].rot}deg)`;
+        el.style.zIndex = String(Math.round(depth * 20));
+        el.style.opacity = String(0.72 + depth * 0.28);
+      });
       raf = requestAnimationFrame(frame);
     };
     raf = requestAnimationFrame(frame);
@@ -64,8 +77,8 @@ export function CustomersHero() {
     const onMove = (e: PointerEvent) => {
       if (!dragging) return;
       const dx = e.clientX - lastX;
-      angle += dx * 0.25;
-      velocity = dx * 0.25;
+      angle += dx * 0.2;
+      velocity = dx * 0.2;
       lastX = e.clientX;
     };
     const onUp = () => {
@@ -86,42 +99,41 @@ export function CustomersHero() {
   }, []);
 
   return (
-    <section className="relative flex min-h-[86vh] items-center overflow-hidden px-6 py-24">
-      {/* 3D rotating ring (desktop only) */}
+    <section className="relative flex min-h-[92vh] items-center overflow-hidden px-6 py-24">
+      {/* Orbiting cards (desktop only) */}
       <div
         ref={containerRef}
         aria-hidden
         className="absolute inset-0 hidden cursor-grab touch-none select-none md:block"
-        style={{ perspective: "1200px" }}
       >
-        <div
-          ref={ringRef}
-          className="absolute left-1/2 top-1/2"
-          style={{ transformStyle: "preserve-3d", transform: `translateZ(-${RADIUS}px)` }}
-        >
-          {CARDS.map((card, i) => (
+        {CARDS.map((card, i) => (
+          <div
+            key={card.name}
+            ref={(el) => {
+              cardRefs.current[i] = el;
+            }}
+            className="absolute left-1/2 top-1/2 w-40"
+          >
             <div
-              key={card.name}
-              className="absolute -left-[70px] -top-[105px]"
-              style={{ transform: `rotateY(${i * STEP}deg) translateZ(${RADIUS}px)` }}
+              className="relative rounded-2xl p-1.5 shadow-lg"
+              style={{ backgroundColor: card.color }}
             >
-              <div className="relative w-[140px]">
-                <span
-                  className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md px-3 py-1 text-xs text-neutral-900 shadow-sm"
-                  style={{ backgroundColor: card.color }}
-                >
-                  {card.name}
-                </span>
-                <div
-                  className="rounded-2xl p-2 shadow-lg"
-                  style={{ backgroundColor: card.color }}
-                >
-                  <div className="aspect-[3/4] rounded-lg bg-muted" />
-                </div>
-              </div>
+              <span
+                className="absolute -top-3 left-2 z-10 rounded-md px-2.5 py-0.5 text-xs text-neutral-900 shadow-sm"
+                style={{ backgroundColor: card.color }}
+              >
+                {card.name}
+              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={card.image}
+                alt=""
+                draggable={false}
+                className="aspect-[3/4] w-full rounded-xl object-cover object-[50%_20%]"
+              />
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
 
       <div className="pointer-events-none relative z-10 mx-auto max-w-2xl text-center">
