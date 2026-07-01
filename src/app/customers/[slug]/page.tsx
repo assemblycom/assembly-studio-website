@@ -89,17 +89,17 @@ function BodyBlock({ block }: { block: ContentBlock }) {
       );
     case "paragraph":
       return (
-        <p className="mt-6 text-lg leading-[1.75] text-muted-foreground">
+        <p className="mt-7 text-[1.0625rem] leading-[1.8] text-foreground/80">
           {block.text}
         </p>
       );
     case "list":
       return (
-        <ul className="mt-6 space-y-3.5">
+        <ul className="mt-7 space-y-4">
           {block.items.map((item) => (
             <li key={item} className="flex items-start gap-3">
-              <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-accent" />
-              <span className="text-lg leading-[1.75] text-muted-foreground">
+              <span className="mt-[0.7rem] size-1.5 shrink-0 rounded-full bg-foreground/40" />
+              <span className="text-[1.0625rem] leading-[1.8] text-foreground/80">
                 {item}
               </span>
             </li>
@@ -108,12 +108,12 @@ function BodyBlock({ block }: { block: ContentBlock }) {
       );
     case "quote":
       return (
-        <figure className="my-14">
-          <blockquote className="text-2xl font-normal leading-snug tracking-tight text-foreground md:text-3xl">
+        <figure className="my-16 border-l-2 border-border pl-6">
+          <blockquote className="text-2xl font-normal leading-[1.4] tracking-tight text-foreground">
             &ldquo;{block.text}&rdquo;
           </blockquote>
           {block.attribution && (
-            <figcaption className="mt-6 text-sm text-muted-foreground">
+            <figcaption className="mt-5 text-sm text-muted-foreground">
               {block.attribution}
             </figcaption>
           )}
