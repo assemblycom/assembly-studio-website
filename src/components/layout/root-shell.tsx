@@ -51,7 +51,7 @@ export function RootShell({ children }: { children: React.ReactNode }) {
     <>
       {bar}
       {/* Dark panel revealed below the footer — home for the kinetic wordmark. */}
-      <div className="fixed inset-x-0 bottom-0 z-0 h-[45vh] overflow-hidden bg-[#101010]">
+      <div className="fixed inset-x-0 bottom-0 z-0 h-[60vh] overflow-hidden bg-[#101010]">
         <StudioWordmark />
       </div>
       {/* White content wrapper (square bottom). */}
@@ -63,9 +63,9 @@ export function RootShell({ children }: { children: React.ReactNode }) {
       <div className="relative z-10">
         <Footer rounded />
       </div>
-      {/* Gap that reveals the dark panel below the footer (lets the cursor
-          reach the physics canvas underneath) */}
-      <div aria-hidden className="pointer-events-none h-[30vh]" />
+      {/* Gap that reveals the dark panel below the footer — its height is the
+          visible dark strip the wordmark sits in. */}
+      <div aria-hidden className="pointer-events-none h-[42vh]" />
     </>
   );
 }
