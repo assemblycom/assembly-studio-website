@@ -35,11 +35,11 @@ const BOTTOM_SAFE = 40;
 function CardFace({ card }: { card: CardDef }) {
   return (
     <div
-      className="relative w-full rounded-lg p-[3px] shadow-lg"
+      className="relative w-full rounded p-[3px] shadow-lg"
       style={{ backgroundColor: card.color }}
     >
       <span
-        className="absolute bottom-full right-1 z-10 mb-1.5 whitespace-nowrap rounded-md px-2.5 py-1 text-xs text-neutral-900"
+        className="absolute bottom-full -right-[3px] z-10 mb-1.5 whitespace-nowrap rounded px-2.5 py-1 text-xs text-neutral-900"
         style={{ backgroundColor: card.color }}
       >
         {card.name}
@@ -49,7 +49,7 @@ function CardFace({ card }: { card: CardDef }) {
         src={card.image}
         alt=""
         draggable={false}
-        className="aspect-[3/4] w-full rounded-md object-cover object-[50%_20%]"
+        className="aspect-[3/4] w-full rounded-sm object-cover object-[50%_20%]"
       />
     </div>
   );
