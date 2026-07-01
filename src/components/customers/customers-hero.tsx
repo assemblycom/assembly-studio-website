@@ -4,17 +4,18 @@ import { useEffect, useRef } from "react";
 import { APP_URL } from "@/lib/constants";
 
 /**
- * Customers hero — customer portrait cards that orbit the headline on a large
- * ellipse (Webflow-community style). The ring slowly auto-rotates and can be
- * dragged to spin; cards stay upright (readable tags) and scale slightly by
- * depth for a 3D feel. Kept clear of the centered headline. Desktop-only.
+ * Customers hero — customer portrait cards that orbit the headline on an
+ * ellipse (Webflow-community style). The ring rotates only on hover and can be
+ * dragged to spin. Radii are measured from the container with safe margins so
+ * cards never tuck under the nav or spill past the section. On mobile the cards
+ * become a gentle marquee strip. Cards stay upright; tags read clearly.
  */
 
 interface CardDef {
   name: string;
   color: string;
   image: string;
-  rot: number; // resting tilt
+  rot: number;
 }
 
 const CARDS: CardDef[] = [
@@ -28,8 +29,31 @@ const CARDS: CardDef[] = [
   { name: "Heritage Law", color: "#C5B3FF", image: "/images/customers/heritage-law-partners.jpg", rot: 6 },
 ];
 
-const RX = 620; // horizontal orbit radius (px)
-const RY = 340; // vertical orbit radius (px)
+const TOP_SAFE = 120; // clears the fixed announcement bar + nav
+const BOTTOM_SAFE = 40;
+
+function CardFace({ card }: { card: CardDef }) {
+  return (
+    <div
+      className="relative w-full rounded-2xl p-1 shadow-lg"
+      style={{ backgroundColor: card.color }}
+    >
+      <span
+        className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md px-2.5 py-0.5 text-xs text-neutral-900"
+        style={{ backgroundColor: card.color }}
+      >
+        {card.name}
+      </span>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={card.image}
+        alt=""
+        draggable={false}
+        className="aspect-[3/4] w-full rounded-xl object-cover object-[50%_20%]"
+      />
+    </div>
+  );
+}
 
 export function CustomersHero() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -45,11 +69,30 @@ export function CustomersHero() {
     let hovering = false;
     let lastX = 0;
     let raf = 0;
+    const dims = { rx: 300, ry: 200, offsetY: 0 };
     const N = CARDS.length;
+
+    const measure = () => {
+      const W = container.clientWidth;
+      const H = container.clientHeight;
+      if (!W || !H) return;
+      const cardW = Math.min(Math.max(W * 0.115, 116), 168);
+      const cardH = (cardW * 4) / 3 + 22; // photo + room for the tab tag
+      cardRefs.current.forEach((el) => {
+        if (el) el.style.width = `${cardW}px`;
+      });
+      const usableH = H - TOP_SAFE - BOTTOM_SAFE;
+      const cy = TOP_SAFE + usableH / 2;
+      dims.offsetY = cy - H / 2;
+      dims.rx = Math.max(150, W / 2 - cardW / 2 - 16);
+      dims.ry = Math.max(90, usableH / 2 - cardH / 2);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(container);
 
     const frame = () => {
       if (!dragging) {
-        // Rotate only while hovered; otherwise just let drag momentum settle.
         const auto = hovering ? 0.06 : 0;
         angle += auto + velocity;
         velocity *= 0.94;
@@ -59,13 +102,13 @@ export function CustomersHero() {
       cardRefs.current.forEach((el, i) => {
         if (!el) return;
         const th = base + (i / N) * Math.PI * 2;
-        const tx = Math.cos(th) * RX;
-        const ty = Math.sin(th) * RY;
-        const depth = (Math.sin(th) + 1) / 2; // 0 = back/top, 1 = front/bottom
-        const scale = 0.78 + depth * 0.3;
+        const tx = Math.cos(th) * dims.rx;
+        const ty = Math.sin(th) * dims.ry + dims.offsetY;
+        const depth = (Math.sin(th) + 1) / 2;
+        const scale = 0.8 + depth * 0.26;
         el.style.transform = `translate(-50%, -50%) translate(${tx}px, ${ty}px) scale(${scale}) rotate(${CARDS[i].rot}deg)`;
         el.style.zIndex = String(Math.round(depth * 20));
-        el.style.opacity = String(0.72 + depth * 0.28);
+        el.style.opacity = String(0.74 + depth * 0.26);
       });
       raf = requestAnimationFrame(frame);
     };
@@ -103,6 +146,7 @@ export function CustomersHero() {
 
     return () => {
       cancelAnimationFrame(raf);
+      ro.disconnect();
       container.removeEventListener("pointerdown", onDown);
       container.removeEventListener("pointerenter", onEnter);
       container.removeEventListener("pointerleave", onLeave);
@@ -112,8 +156,8 @@ export function CustomersHero() {
   }, []);
 
   return (
-    <section className="relative flex min-h-[92vh] items-center overflow-hidden px-6 py-24">
-      {/* Orbiting cards (desktop only) */}
+    <section className="relative flex min-h-[88vh] flex-col items-center justify-center overflow-hidden px-6 pb-8 pt-28 md:min-h-[92vh] md:pt-24">
+      {/* Orbiting cards (tablet + desktop) */}
       <div
         ref={containerRef}
         aria-hidden
@@ -127,24 +171,7 @@ export function CustomersHero() {
             }}
             className="absolute left-1/2 top-1/2 w-40"
           >
-            <div
-              className="relative rounded-2xl p-1.5 shadow-lg"
-              style={{ backgroundColor: card.color }}
-            >
-              <span
-                className="absolute left-3 top-3 z-10 rounded-md px-2.5 py-0.5 text-xs text-neutral-900"
-                style={{ backgroundColor: card.color }}
-              >
-                {card.name}
-              </span>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={card.image}
-                alt=""
-                draggable={false}
-                className="aspect-[3/4] w-full rounded-xl object-cover object-[50%_20%]"
-              />
-            </div>
+            <CardFace card={card} />
           </div>
         ))}
       </div>
@@ -163,6 +190,20 @@ export function CustomersHero() {
         >
           Start trial
         </a>
+      </div>
+
+      {/* Mobile: a gentle marquee strip of the same cards */}
+      <div
+        aria-hidden
+        className="pointer-events-none relative z-10 mt-12 w-screen overflow-hidden pt-4 md:hidden"
+      >
+        <div className="flex w-max animate-marquee gap-4 px-4">
+          {[...CARDS, ...CARDS].map((card, i) => (
+            <div key={i} className="w-28 shrink-0">
+              <CardFace card={card} />
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
