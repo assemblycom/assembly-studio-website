@@ -36,10 +36,10 @@ export function TemplateGallery({
             onClick={() => setActive(i)}
             aria-label={`View preview ${i + 1}`}
             aria-current={active === i}
-            className={`aspect-[4/3] w-24 rounded-lg border bg-muted transition-colors ${
+            className={`aspect-[4/3] w-24 rounded-lg border bg-muted transition-all ${
               active === i
-                ? "border-foreground ring-1 ring-foreground"
-                : "border-border hover:border-foreground/40"
+                ? "border-foreground/25 ring-2 ring-foreground/10"
+                : "border-border opacity-60 hover:opacity-100"
             }`}
           />
         ))}

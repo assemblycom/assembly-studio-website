@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 function CheckIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden>
+    <svg width="12" height="12" viewBox="0 0 20 20" fill="none" aria-hidden>
       <path
         d="M5 10l3.5 3.5L15 7"
         stroke="currentColor"
@@ -89,12 +89,14 @@ export default async function TemplateDetailPage({ params }: Props) {
               </p>
 
               {template.industries && template.industries.length > 0 && (
-                <div className="mt-5 flex flex-wrap gap-2">
-                  {template.industries.map((industry) => (
-                    <span
-                      key={industry}
-                      className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground"
-                    >
+                <div className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+                  {template.industries.map((industry, i) => (
+                    <span key={industry} className="inline-flex items-center">
+                      {i > 0 && (
+                        <span aria-hidden className="mr-2 text-muted-foreground/40">
+                          ·
+                        </span>
+                      )}
                       {industry}
                     </span>
                   ))}
@@ -111,17 +113,17 @@ export default async function TemplateDetailPage({ params }: Props) {
               </div>
 
               {/* Key highlights */}
-              <div className="mt-8 rounded-2xl border border-border bg-muted/40 p-6">
-                <h2 className="text-lg font-medium">Key highlights</h2>
-                <ul className="mt-5 space-y-5">
+              <div className="mt-10">
+                <h2 className="text-sm font-medium text-muted-foreground">
+                  Key highlights
+                </h2>
+                <ul className="mt-4 space-y-3">
                   {template.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-3">
-                      <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-background text-accent">
+                    <li key={feature} className="flex items-center gap-3">
+                      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-foreground/[0.06] text-foreground">
                         <CheckIcon />
                       </span>
-                      <span className="text-sm font-medium leading-8">
-                        {feature}
-                      </span>
+                      <span className="text-sm">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -178,7 +180,7 @@ export default async function TemplateDetailPage({ params }: Props) {
 
       {/* Related */}
       {related.length > 0 && (
-        <Section className="mt-8 border-t border-border">
+        <Section className="mt-8">
           <div className="mx-auto max-w-6xl">
             <p className="text-sm text-muted-foreground">
               More {template.category} templates
