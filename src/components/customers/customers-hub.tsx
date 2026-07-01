@@ -81,7 +81,7 @@ function MediaCard({ study }: { study: CaseStudy }) {
         <img
           src={caseStudyImage(study)}
           alt=""
-          className="h-full w-full object-cover object-top transition-transform duration-300 group-hover:scale-[1.03]"
+          className="h-full w-full object-cover object-[50%_20%] transition-transform duration-300 group-hover:scale-[1.03]"
         />
       </div>
       <div className="flex flex-1 flex-col p-6">
