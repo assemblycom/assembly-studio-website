@@ -95,11 +95,11 @@ function BodyBlock({ block }: { block: ContentBlock }) {
       );
     case "list":
       return (
-        <ul className="mt-7 space-y-4">
+        <ul className="mt-7 space-y-3.5">
           {block.items.map((item) => (
-            <li key={item} className="flex items-start gap-3">
-              <span className="mt-[0.7rem] size-1.5 shrink-0 rounded-full bg-foreground/40" />
-              <span className="text-[1.0625rem] leading-[1.8] text-foreground/80">
+            <li key={item} className="flex items-start gap-3.5">
+              <span className="mt-[0.62rem] size-1.5 shrink-0 rounded-full bg-foreground/50" />
+              <span className="text-[1.0625rem] leading-[1.6] text-foreground/80">
                 {item}
               </span>
             </li>
@@ -132,23 +132,26 @@ function BodyBlock({ block }: { block: ContentBlock }) {
   }
 }
 
-function StoryNavCard({
-  study,
-  direction,
-}: {
-  study: CaseStudy;
-  direction: "Previous" | "Next";
-}) {
+function RelatedCard({ study }: { study: CaseStudy }) {
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className="group rounded-xl border border-border p-6 transition-colors hover:border-foreground/20"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-border transition-all duration-200 hover:border-foreground/20 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
     >
-      <span className="text-xs text-foreground">{direction}</span>
-      <p className="mt-2 text-xs font-medium text-muted-foreground">
-        {study.company}
-      </p>
-      <h3 className="mt-1 text-sm font-medium leading-snug">{study.headline}</h3>
+      <div className="aspect-[16/9] overflow-hidden bg-muted">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={caseStudyImage(study)}
+          alt=""
+          className="h-full w-full object-cover object-[50%_20%] transition-transform duration-300 group-hover:scale-[1.03]"
+        />
+      </div>
+      <div className="p-6">
+        <p className="text-xs text-muted-foreground">{study.company}</p>
+        <h3 className="mt-1.5 text-base font-medium leading-snug">
+          {study.headline}
+        </h3>
+      </div>
     </Link>
   );
 }
@@ -161,9 +164,11 @@ export default async function CaseStudyPage({ params }: Props) {
   const hasRichBody = Boolean(study.body && study.glance);
 
   const index = CASE_STUDIES.findIndex((s) => s.slug === slug);
-  const prev = index > 0 ? CASE_STUDIES[index - 1] : null;
-  const next =
-    index < CASE_STUDIES.length - 1 ? CASE_STUDIES[index + 1] : null;
+  // The next two stories (wrapping) for a "keep reading" pair — no prev/next.
+  const related = [
+    ...CASE_STUDIES.slice(index + 1),
+    ...CASE_STUDIES.slice(0, index),
+  ].slice(0, 2);
 
   return (
     <>
@@ -291,15 +296,16 @@ export default async function CaseStudyPage({ params }: Props) {
       )}
 
       {/* More customer stories */}
-      {(prev || next) && (
+      {related.length > 0 && (
         <Section>
           <div className="mx-auto max-w-5xl">
             <p className="text-sm text-muted-foreground">
               More customer stories
             </p>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              {prev && <StoryNavCard study={prev} direction="Previous" />}
-              {next && <StoryNavCard study={next} direction="Next" />}
+            <div className="mt-6 grid gap-6 sm:grid-cols-2">
+              {related.map((s) => (
+                <RelatedCard key={s.slug} study={s} />
+              ))}
             </div>
           </div>
         </Section>
