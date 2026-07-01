@@ -33,7 +33,7 @@ function firstQuote(study: CaseStudy): { text: string; attribution?: string } | 
 
 function FeaturedCard({ study }: { study: CaseStudy }) {
   return (
-    <article className="group flex w-full flex-col overflow-hidden rounded-3xl border border-border bg-background transition-all duration-200 hover:border-foreground/20 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
+    <article className="group flex w-full flex-col overflow-hidden rounded-xl border border-border bg-background transition-all duration-200 hover:border-foreground/20 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]">
       {/* Video media — play the story inline, right on the card */}
       <VideoPlayer
         videoUrl={study.videoUrl}
@@ -74,7 +74,7 @@ function MediaCard({ study }: { study: CaseStudy }) {
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-background transition-all duration-200 hover:border-foreground/20 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
+      className="group flex flex-col overflow-hidden rounded-xl border border-border bg-background transition-all duration-200 hover:border-foreground/20 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
     >
       <div className="aspect-[16/10] overflow-hidden bg-muted">
         {caseStudyImage(study) && (
@@ -109,7 +109,7 @@ function QuoteCard({ study }: { study: CaseStudy }) {
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className="group flex flex-col justify-between rounded-2xl border border-transparent bg-muted p-6 transition-all duration-200 hover:border-border hover:bg-background hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
+      className="group flex flex-col justify-between rounded-xl border border-transparent bg-muted p-6 transition-all duration-200 hover:border-border hover:bg-background hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
     >
       <blockquote className="text-base font-medium leading-relaxed tracking-tight text-foreground">
         &ldquo;{quote?.text ?? study.summary}&rdquo;

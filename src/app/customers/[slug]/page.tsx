@@ -136,7 +136,7 @@ function RelatedCard({ study }: { study: CaseStudy }) {
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-border transition-all duration-200 hover:border-foreground/20 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
+      className="group flex flex-col overflow-hidden rounded-xl border border-border transition-all duration-200 hover:border-foreground/20 hover:shadow-[0_8px_30px_-12px_rgba(0,0,0,0.12)]"
     >
       <div className="aspect-[16/9] overflow-hidden bg-muted">
         {caseStudyImage(study) && (

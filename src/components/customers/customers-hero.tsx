@@ -39,7 +39,7 @@ function CardFace({ card }: { card: CardDef }) {
       style={{ backgroundColor: card.color }}
     >
       <span
-        className="absolute bottom-full left-1/2 z-10 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2.5 py-1 text-xs text-neutral-900"
+        className="absolute bottom-full right-1 z-10 mb-1.5 whitespace-nowrap rounded-md px-2.5 py-1 text-xs text-neutral-900"
         style={{ backgroundColor: card.color }}
       >
         {card.name}
@@ -181,8 +181,7 @@ export function CustomersHero() {
           Made for tech-enabled professional service firms
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
-          Trusted by consulting, accounting, real estate, law, marketing, and
-          tech firms with 1M+ clients and counting.
+          Trusted by professional service firms with 1M+ clients and counting.
         </p>
         <a
           href={APP_URL}
