@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 function MetaCard({ study }: { study: CaseStudy }) {
   if (!study.glance) return null;
   return (
-    <aside className="h-fit rounded-xl border border-border p-6 md:sticky md:top-24">
+    <aside className="h-fit rounded-xl border border-border p-6 md:sticky md:top-28">
       <p className="font-medium">{study.company}</p>
       <p className="mt-1 text-sm text-muted-foreground">{study.industry}</p>
 
@@ -204,23 +204,14 @@ export default async function CaseStudyPage({ params }: Props) {
             ))}
           </div>
 
-          {/* Hero media — featured stories lead with a video */}
-          {study.featured ? (
+          {/* Hero media — only the video (featured) stories lead with media */}
+          {study.featured && (
             <VideoPlayer
               videoUrl={study.videoUrl}
               poster={caseStudyImage(study)}
               label="Watch the story"
               className="mt-12 rounded-xl"
             />
-          ) : (
-            <div className="mt-12 aspect-[2/1] w-full overflow-hidden rounded-xl border border-border bg-muted">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={caseStudyImage(study)}
-                alt={`${study.company} client experience`}
-                className="h-full w-full object-cover object-[50%_20%]"
-              />
-            </div>
           )}
         </div>
       </section>
@@ -301,7 +292,7 @@ export default async function CaseStudyPage({ params }: Props) {
 
       {/* More customer stories */}
       {(prev || next) && (
-        <Section className="border-t border-border">
+        <Section>
           <div className="mx-auto max-w-5xl">
             <p className="text-sm text-muted-foreground">
               More customer stories
