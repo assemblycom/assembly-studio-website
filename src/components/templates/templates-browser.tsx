@@ -215,7 +215,7 @@ export function TemplatesBrowser({ templates }: Props) {
                   <p className="mt-1.5 text-sm text-muted-foreground">
                     {template.description}
                   </p>
-                  <span className="mt-3 inline-block rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
+                  <span className="mt-3 inline-block rounded-full bg-muted px-3 py-1 text-xs text-foreground">
                     {template.category}
                   </span>
                 </div>
