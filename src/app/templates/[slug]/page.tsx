@@ -60,11 +60,52 @@ export default async function TemplateDetailPage({ params }: Props) {
       <section className="px-6 pt-24 md:pt-28">
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-10 lg:grid-cols-[1.6fr_1fr] lg:gap-14">
-            {/* Left — preview gallery */}
-            <TemplateGallery title={template.title} />
+            {/* Left — gallery + about (keeps the sidebar sticky alongside) */}
+            <div>
+              <TemplateGallery title={template.title} />
 
-            {/* Right — info + CTAs + highlights */}
-            <div className="lg:sticky lg:top-24 lg:self-start">
+              <div className="mt-16 lg:mt-20">
+                <h2 className="text-2xl font-medium tracking-tight md:text-3xl">
+                  About this template
+                </h2>
+                <p className="mt-6 text-lg leading-[1.75] text-foreground/80">
+                  {template.longDescription}
+                </p>
+                <p className="mt-6 text-lg leading-[1.75] text-foreground/80">
+                  Start from this template and describe what you want to change
+                  in plain English — Assembly Studio adapts the layout, fields,
+                  and flow to your firm, then publishes it to your client portal
+                  in minutes. No code required.
+                </p>
+
+                <h3 className="mt-12 text-lg font-medium">
+                  What you can customize
+                </h3>
+                <ul className="mt-5 space-y-3.5">
+                  {CUSTOMIZABLE.map((item) => (
+                    <li key={item} className="flex items-start gap-3">
+                      <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-foreground/40" />
+                      <span className="text-lg leading-[1.6] text-foreground/80">
+                        {item}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                <h3 className="mt-12 text-lg font-medium">Perfect for</h3>
+                <p className="mt-3 text-muted-foreground">
+                  {template.industries && template.industries.length > 0
+                    ? template.industries
+                        .join(", ")
+                        .replace(/, ([^,]*)$/, ", and $1")
+                    : "consulting, accounting, legal, and real estate"}{" "}
+                  firms running {template.category.toLowerCase()} workflows.
+                </p>
+              </div>
+            </div>
+
+            {/* Right — sticky info + CTA + highlights */}
+            <div className="lg:sticky lg:top-28 lg:self-start">
               <nav
                 aria-label="Breadcrumb"
                 className="flex items-center gap-2 text-sm text-muted-foreground"
@@ -129,50 +170,6 @@ export default async function TemplateDetailPage({ params }: Props) {
             </div>
           </div>
 
-          {/* About — under the preview */}
-          <div className="mt-16 max-w-2xl lg:mt-20">
-            <h2 className="text-2xl font-medium tracking-tight md:text-3xl">
-              About this template
-            </h2>
-            <p className="mt-6 text-lg leading-[1.75] text-muted-foreground">
-              {template.longDescription}
-            </p>
-            <p className="mt-6 text-lg leading-[1.75] text-muted-foreground">
-              Start from this template and describe what you want to change in
-              plain English — Assembly Studio adapts the layout, fields, and
-              flow to your firm, then publishes it to your client portal in
-              minutes. No code required.
-            </p>
-
-            <h3 className="mt-12 text-lg font-medium">What you can customize</h3>
-            <ul className="mt-5 space-y-3.5">
-              {CUSTOMIZABLE.map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-accent" />
-                  <span className="text-lg leading-[1.6] text-muted-foreground">
-                    {item}
-                  </span>
-                </li>
-              ))}
-            </ul>
-
-            <h3 className="mt-12 text-lg font-medium">Perfect for</h3>
-            <p className="mt-3 text-muted-foreground">
-              {(template.industries && template.industries.length > 0
-                ? template.industries.join(", ").replace(/, ([^,]*)$/, ", and $1")
-                : "consulting, accounting, legal, and real estate")}{" "}
-              firms running {template.category.toLowerCase()} workflows.
-            </p>
-
-            <div className="mt-10">
-              <a
-                href={SIGNUP_URL}
-                className="inline-block rounded-full bg-foreground px-6 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
-              >
-                Build off this template
-              </a>
-            </div>
-          </div>
         </div>
       </section>
 
