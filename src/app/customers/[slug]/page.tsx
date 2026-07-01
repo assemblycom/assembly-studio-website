@@ -225,11 +225,13 @@ export default async function CaseStudyPage({ params }: Props) {
             {study.summary}
           </p>
 
-          <div className="mt-8 flex flex-wrap justify-center gap-8 sm:gap-12">
+          <div className="mx-auto mt-8 flex max-w-md items-stretch justify-center divide-x divide-border sm:max-w-2xl">
             {study.stats.map((stat) => (
-              <div key={stat.label}>
-                <span className="text-4xl font-medium">{stat.value}</span>
-                <p className="mt-1 text-sm text-muted-foreground">
+              <div key={stat.label} className="flex-1 px-4 text-center sm:px-8">
+                <span className="text-3xl font-medium sm:text-4xl">
+                  {stat.value}
+                </span>
+                <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
                   {stat.label}
                 </p>
               </div>
