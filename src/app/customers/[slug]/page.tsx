@@ -169,10 +169,10 @@ export default async function CaseStudyPage({ params }: Props) {
     <>
       {/* Hero */}
       <section className="px-6 pt-24 md:pt-32">
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-5xl text-center">
           <nav
             aria-label="Breadcrumb"
-            className="flex items-center gap-2 text-sm text-muted-foreground"
+            className="flex items-center justify-center gap-2 text-sm text-muted-foreground"
           >
             <Link
               href="/customers"
@@ -186,14 +186,14 @@ export default async function CaseStudyPage({ params }: Props) {
             <span className="text-foreground">{study.company}</span>
           </nav>
 
-          <h1 className="mt-6 max-w-3xl text-4xl font-medium tracking-tight md:text-5xl">
+          <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-medium tracking-tight md:text-5xl">
             {study.headline}
           </h1>
-          <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
             {study.summary}
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-8">
+          <div className="mt-8 flex flex-wrap justify-center gap-8 sm:gap-12">
             {study.stats.map((stat) => (
               <div key={stat.label}>
                 <span className="text-4xl font-medium">{stat.value}</span>
