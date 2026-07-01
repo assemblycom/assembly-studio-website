@@ -218,7 +218,7 @@ export default async function CaseStudyPage({ params }: Props) {
               <img
                 src={caseStudyImage(study)}
                 alt={`${study.company} client experience`}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover object-top"
               />
             </div>
           )}
