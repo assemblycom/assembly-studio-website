@@ -35,11 +35,11 @@ const BOTTOM_SAFE = 40;
 function CardFace({ card }: { card: CardDef }) {
   return (
     <div
-      className="relative w-full rounded-2xl p-1 shadow-lg"
+      className="relative w-full rounded-lg p-[3px] shadow-lg"
       style={{ backgroundColor: card.color }}
     >
       <span
-        className="absolute -top-3 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md px-2.5 py-0.5 text-xs text-neutral-900"
+        className="absolute bottom-full left-1/2 z-10 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-md px-2.5 py-1 text-xs text-neutral-900"
         style={{ backgroundColor: card.color }}
       >
         {card.name}
@@ -49,7 +49,7 @@ function CardFace({ card }: { card: CardDef }) {
         src={card.image}
         alt=""
         draggable={false}
-        className="aspect-[3/4] w-full rounded-xl object-cover object-[50%_20%]"
+        className="aspect-[3/4] w-full rounded-md object-cover object-[50%_20%]"
       />
     </div>
   );
@@ -77,7 +77,7 @@ export function CustomersHero() {
       const H = container.clientHeight;
       if (!W || !H) return;
       const cardW = Math.min(Math.max(W * 0.115, 116), 168);
-      const cardH = (cardW * 4) / 3 + 22; // photo + room for the tab tag
+      const cardH = (cardW * 4) / 3 + 40; // photo + room for the tag floating above
       cardRefs.current.forEach((el) => {
         if (el) el.style.width = `${cardW}px`;
       });
@@ -195,7 +195,7 @@ export function CustomersHero() {
       {/* Mobile: a gentle marquee strip of the same cards */}
       <div
         aria-hidden
-        className="pointer-events-none relative z-10 mt-12 w-screen overflow-hidden pt-4 md:hidden"
+        className="pointer-events-none relative z-10 mt-14 w-screen overflow-hidden pt-8 md:hidden"
       >
         <div className="flex w-max animate-marquee gap-4 px-4">
           {[...CARDS, ...CARDS].map((card, i) => (
