@@ -97,12 +97,14 @@ export function Hero() {
             onClick={() => window.open(APP_URL)}
             className="group inline-flex items-center gap-3 rounded-full border border-border bg-muted/50 py-1.5 pl-1.5 pr-4 text-left transition-colors hover:bg-muted"
           >
-            <span className="flex size-9 items-center justify-center rounded-full border border-border bg-background text-foreground transition-transform group-hover:scale-105">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground transition-transform group-hover:scale-105">
               <IconPlay className="size-3.5" />
             </span>
             <span className="leading-tight">
-              <span className="block text-sm font-medium">Watch how it works</span>
-              <span className="block text-xs text-muted-foreground">
+              <span className="block whitespace-nowrap text-sm font-medium">
+                Watch how it works
+              </span>
+              <span className="block whitespace-nowrap text-xs text-muted-foreground">
                 2-minute demo
               </span>
             </span>
