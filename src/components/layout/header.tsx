@@ -20,7 +20,7 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
   // Soft smoked-glass capsule — a muted, translucent charcoal (not near-black)
   // with a faint ring and a light shadow.
   const pill =
-    "rounded-full bg-foreground/70 text-background shadow-[0_10px_30px_-20px_rgba(0,0,0,0.3)] ring-1 ring-white/10 backdrop-blur-md";
+    "rounded-full bg-foreground/70 text-background shadow-[0_6px_20px_-16px_rgba(0,0,0,0.15)] ring-1 ring-white/10 backdrop-blur-md";
 
   // Keep the same rail width at rest and when scrolled so the capsule doesn't
   // visibly shrink. The scrolled outer gutter (px-6) sits just inside the hero
@@ -59,7 +59,7 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
           under the nav instead of peeking around the capsule. Desktop only. */}
       <div
         aria-hidden
-        className={`pointer-events-none fixed inset-x-0 top-0 z-40 hidden h-20 bg-background/85 backdrop-blur-md transition-opacity duration-300 [mask-image:linear-gradient(to_bottom,black_80%,transparent)] [-webkit-mask-image:linear-gradient(to_bottom,black_80%,transparent)] md:block ${scrolled ? "opacity-100" : "opacity-0"}`}
+        className={`pointer-events-none fixed inset-x-0 top-0 z-40 hidden h-20 bg-background backdrop-blur-md transition-opacity duration-300 [mask-image:linear-gradient(to_bottom,black_90%,transparent)] [-webkit-mask-image:linear-gradient(to_bottom,black_90%,transparent)] md:block ${scrolled ? "opacity-100" : "opacity-0"}`}
       />
 
       {/* Mobile header — full-bleed bar: just the logo and a grid menu button.

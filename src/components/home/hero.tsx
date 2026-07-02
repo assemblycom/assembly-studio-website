@@ -134,7 +134,7 @@ export function Hero() {
       {/* Floating demo video — small in the corner, click to enlarge. Stays
           put on scroll (fixed). Placeholder — drop in a real <iframe>/<video>. */}
       {videoOpen && !videoExpanded && (
-        <div className="fixed bottom-6 right-6 z-50 w-[340px] max-w-[calc(100vw-2rem)] animate-fade-in overflow-hidden rounded-2xl border border-border bg-background shadow-[0_16px_44px_-26px_rgba(20,20,40,0.3)]">
+        <div className="fixed bottom-6 right-6 z-50 w-[280px] max-w-[calc(100vw-2rem)] animate-fade-in overflow-hidden rounded-2xl border border-border bg-background shadow-[0_16px_44px_-26px_rgba(20,20,40,0.3)]">
           <button
             type="button"
             onClick={() => setVideoOpen(false)}
