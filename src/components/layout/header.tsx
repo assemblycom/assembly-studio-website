@@ -9,7 +9,16 @@ import { NAV_LINKS, APP_URL } from "@/lib/constants";
 // pinned to the top, so it swaps from transparent to a frosted surface.
 const SCROLL_THRESHOLD = 40;
 
-export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
+export function Header({
+  fullWidth = false,
+  scrim = true,
+}: {
+  fullWidth?: boolean;
+  // The scroll scrim masks content dissolving under the floating pill. Pages
+  // that lead with full-bleed imagery (the customers photo tunnel) look worse
+  // with a white band veiling the art, so they opt out.
+  scrim?: boolean;
+}) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -57,14 +66,16 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
       {/* Scrim — a soft, full-width frosted band behind the floating pill that
           fades in on scroll, so page content (and sticky page headers) dissolve
           under the nav instead of peeking around the capsule. Desktop only. */}
-      <div
-        aria-hidden
-        className={`pointer-events-none fixed inset-x-0 top-0 z-40 hidden h-20 bg-background backdrop-blur-md transition-opacity duration-300 [mask-image:linear-gradient(to_bottom,black_90%,transparent)] [-webkit-mask-image:linear-gradient(to_bottom,black_90%,transparent)] md:block ${scrolled ? "opacity-100" : "opacity-0"}`}
-      />
+      {scrim && (
+        <div
+          aria-hidden
+          className={`pointer-events-none fixed inset-x-0 top-0 z-40 hidden h-20 bg-background backdrop-blur-md transition-opacity duration-300 [mask-image:linear-gradient(to_bottom,black_90%,transparent)] [-webkit-mask-image:linear-gradient(to_bottom,black_90%,transparent)] md:block ${scrolled ? "opacity-100" : "opacity-0"}`}
+        />
+      )}
 
       {/* Mobile header — full-bleed bar: just the logo and a grid menu button.
           The CTA lives inside the menu, not the bar. */}
-      <header className={`${position} z-50 flex h-14 items-center justify-between px-6 transition-colors duration-200 md:hidden ${scrolled ? "bg-background/80 backdrop-blur-md" : ""}`}>
+      <header className={`${position} z-50 flex h-14 items-center justify-between px-6 backdrop-blur-md transition-colors duration-200 md:hidden ${scrolled ? "bg-background/80" : "bg-muted/60"}`}>
         <Link href="/" className="flex items-center">
           <Image
             src="/images/logo-mark.svg"

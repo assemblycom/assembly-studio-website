@@ -103,7 +103,11 @@ html {
 }
 
 body {
-  background: var(--background);
+  /* Match the muted canvas (see html above): iOS Safari paints the area behind
+     the collapsing bottom toolbar with the body background, so a white body
+     left a white strip under the gray footer. Page content sits in its own
+     bg-background wrappers, so tinting body only affects the overscroll zones. */
+  background: var(--muted);
   color: var(--foreground);
 }
 

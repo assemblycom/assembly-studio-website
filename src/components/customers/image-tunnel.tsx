@@ -94,6 +94,22 @@ function CylinderWall({ images }: { images: string[] }) {
         );
       });
     }
+    // Feather the top and bottom of the strip to transparent so the photo
+    // band dissolves softly into the page instead of ending in a hard, barrel-
+    // bowed rim against white.
+    if (ctx) {
+      const fade = Math.round(slotH * 0.32);
+      const grad = ctx.createLinearGradient(0, 0, 0, slotH);
+      grad.addColorStop(0, "rgba(0,0,0,0)");
+      grad.addColorStop(fade / slotH, "rgba(0,0,0,1)");
+      grad.addColorStop(1 - fade / slotH, "rgba(0,0,0,1)");
+      grad.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.globalCompositeOperation = "destination-in";
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.globalCompositeOperation = "source-over";
+    }
+
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.wrapS = THREE.RepeatWrapping;
@@ -118,7 +134,12 @@ function CylinderWall({ images }: { images: string[] }) {
       <cylinderGeometry
         args={[SETTINGS.radius, SETTINGS.radius, SETTINGS.height, 240, 1, true]}
       />
-      <meshBasicMaterial map={map} side={THREE.BackSide} toneMapped={false} />
+      <meshBasicMaterial
+        map={map}
+        side={THREE.BackSide}
+        toneMapped={false}
+        transparent
+      />
     </mesh>
   );
 }

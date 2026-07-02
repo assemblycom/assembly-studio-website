@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Section } from "@/components/ui/section";
-import { TEMPLATES, getTemplateBySlug } from "@/lib/templates";
+import { TEMPLATES, getTemplateBySlug, type Template } from "@/lib/templates";
 import { TemplateGallery } from "@/components/templates/template-gallery";
 import { SIGNUP_URL } from "@/lib/constants";
 
@@ -32,6 +32,68 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+/**
+ * Breadcrumb, title, description, industry tags, and the primary CTA. Rendered
+ * twice with responsive visibility: first in the flow on mobile (so the title
+ * leads the page), and inside the sticky sidebar on large screens.
+ */
+function TemplateHeader({
+  template,
+  className = "",
+}: {
+  template: Template;
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      <nav
+        aria-label="Breadcrumb"
+        className="flex items-center gap-2 text-sm text-muted-foreground"
+      >
+        <Link
+          href="/templates"
+          className="transition-colors hover:text-foreground"
+        >
+          Templates
+        </Link>
+        <span aria-hidden className="text-muted-foreground/50">
+          /
+        </span>
+        <span className="text-foreground">{template.category}</span>
+      </nav>
+
+      <h1 className="mt-5 text-3xl font-medium tracking-tight md:text-4xl">
+        {template.title}
+      </h1>
+      <p className="mt-3 text-lg text-muted-foreground">
+        {template.description}
+      </p>
+
+      {template.industries && template.industries.length > 0 && (
+        <div className="mt-5 flex flex-wrap gap-2">
+          {template.industries.map((industry) => (
+            <span
+              key={industry}
+              className="rounded-md bg-muted px-2.5 py-1 text-xs text-muted-foreground"
+            >
+              {industry}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-6">
+        <a
+          href={SIGNUP_URL}
+          className="inline-block rounded-full bg-foreground px-6 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
+        >
+          Build off this template
+        </a>
+      </div>
+    </div>
+  );
+}
+
 function CheckIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 20 20" fill="none" aria-hidden>
@@ -59,12 +121,15 @@ export default async function TemplateDetailPage({ params }: Props) {
     <>
       <section className="px-6 pt-24 md:pt-28">
         <div className="mx-auto max-w-6xl">
-          <div className="grid gap-10 lg:grid-cols-[1.6fr_1fr] lg:gap-14">
+          {/* Mobile: title/CTA lead the page, above the gallery */}
+          <TemplateHeader template={template} className="lg:hidden" />
+
+          <div className="mt-10 grid gap-10 lg:mt-0 lg:grid-cols-[1.6fr_1fr] lg:gap-14">
             {/* Left — gallery + about (keeps the sidebar sticky alongside) */}
             <div>
               <TemplateGallery title={template.title} />
 
-              <div className="mt-16 lg:mt-20">
+              <div className="mt-14 lg:mt-20">
                 <h2 className="text-2xl font-medium tracking-tight md:text-3xl">
                   About this template
                 </h2>
@@ -104,55 +169,16 @@ export default async function TemplateDetailPage({ params }: Props) {
               </div>
             </div>
 
-            {/* Right — sticky info + CTA + highlights */}
+            {/* Right — sticky header + CTA + highlights (desktop). On mobile the
+                header renders above and only the highlights remain here. */}
             <div className="lg:sticky lg:top-28 lg:self-start">
-              <nav
-                aria-label="Breadcrumb"
-                className="flex items-center gap-2 text-sm text-muted-foreground"
-              >
-                <Link
-                  href="/templates"
-                  className="transition-colors hover:text-foreground"
-                >
-                  Templates
-                </Link>
-                <span aria-hidden className="text-muted-foreground/50">
-                  /
-                </span>
-                <span className="text-foreground">{template.category}</span>
-              </nav>
-
-              <h1 className="mt-5 text-3xl font-medium tracking-tight md:text-4xl">
-                {template.title}
-              </h1>
-              <p className="mt-3 text-lg text-muted-foreground">
-                {template.description}
-              </p>
-
-              {template.industries && template.industries.length > 0 && (
-                <div className="mt-5 flex flex-wrap gap-2">
-                  {template.industries.map((industry) => (
-                    <span
-                      key={industry}
-                      className="rounded-md bg-muted px-2.5 py-1 text-xs text-muted-foreground"
-                    >
-                      {industry}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <div className="mt-6">
-                <a
-                  href={SIGNUP_URL}
-                  className="inline-block rounded-full bg-foreground px-6 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
-                >
-                  Build off this template
-                </a>
-              </div>
+              <TemplateHeader
+                template={template}
+                className="hidden lg:block"
+              />
 
               {/* Key highlights */}
-              <div className="mt-10">
+              <div className="mt-12 lg:mt-10">
                 <h2 className="text-sm font-medium text-muted-foreground">
                   Key highlights
                 </h2>

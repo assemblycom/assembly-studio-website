@@ -18,6 +18,10 @@ import { StudioWordmark } from "@/components/layout/studio-wordmark";
 export function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
+  // The customers pages lead with the full-bleed photo tunnel; the scroll scrim
+  // would veil that art, so they skip it. Pricing (sticky comparison header)
+  // and the rest keep it.
+  const showScrim = !pathname.startsWith("/customers");
 
   // The announcement bar only runs on the landing page.
   const bar = <AnnouncementBar />;
@@ -25,7 +29,7 @@ export function RootShell({ children }: { children: React.ReactNode }) {
   if (!isHome) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
-        <Header />
+        <Header scrim={showScrim} />
         <main className="flex-1">{children}</main>
         <Footer />
       </div>

@@ -63,7 +63,7 @@ function MetaCard({ study }: { study: CaseStudy }) {
   ];
 
   return (
-    <aside className="flex h-fit flex-col gap-4 md:sticky md:top-28">
+    <aside className="hidden h-fit flex-col gap-4 md:flex md:sticky md:top-28">
       {/* Facts panel — logo, name, and the at-a-glance rows */}
       <div className="overflow-hidden rounded-lg bg-muted">
         <div className="flex flex-col items-center px-6 pb-6 pt-8">
@@ -201,12 +201,12 @@ export default async function CaseStudyPage({ params }: Props) {
       {/* Hero — video stories get breathing room from the media below; stories
           without a video need extra padding under the stats instead. */}
       <section
-        className={`px-6 pt-36 md:pt-44 ${study.featured ? "" : "pb-8 md:pb-12"}`}
+        className={`px-6 pt-24 md:pt-44 ${study.featured ? "" : "pb-8 md:pb-12"}`}
       >
-        <div className="mx-auto max-w-5xl text-center">
+        <div className="mx-auto max-w-5xl text-left md:text-center">
           <nav
             aria-label="Breadcrumb"
-            className="flex items-center justify-center gap-2 text-sm text-muted-foreground"
+            className="flex items-center justify-start gap-2 text-sm text-muted-foreground md:justify-center"
           >
             <Link
               href="/customers"
@@ -220,20 +220,23 @@ export default async function CaseStudyPage({ params }: Props) {
             <span className="text-foreground">{study.company}</span>
           </nav>
 
-          <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-medium tracking-tight md:text-5xl">
+          <h1 className="mt-6 max-w-3xl text-4xl font-medium tracking-tight md:mx-auto md:text-5xl">
             {study.headline}
           </h1>
-          <p className="mx-auto mt-8 max-w-2xl text-lg text-muted-foreground">
+          <p className="mt-8 max-w-2xl text-lg text-muted-foreground md:mx-auto">
             {study.summary}
           </p>
 
-          <div className="mx-auto mt-8 flex max-w-md items-stretch justify-center divide-x divide-border sm:max-w-2xl">
+          <div className="mt-8 flex max-w-lg items-stretch justify-start divide-x divide-border sm:max-w-2xl md:mx-auto md:justify-center">
             {study.stats.map((stat) => (
-              <div key={stat.label} className="flex-1 px-4 text-center sm:px-8">
+              <div
+                key={stat.label}
+                className="flex-1 px-3 text-left first:pl-0 sm:px-8 sm:text-center sm:first:pl-8 md:text-center"
+              >
                 <span className="text-3xl font-medium sm:text-4xl">
                   {stat.value}
                 </span>
-                <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                <p className="mt-1 text-[0.6875rem] leading-snug text-muted-foreground sm:text-sm">
                   {stat.label}
                 </p>
               </div>
