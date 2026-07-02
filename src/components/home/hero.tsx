@@ -1,7 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Link from "next/link";
 import { APP_URL } from "@/lib/constants";
+import { getFeaturedTemplates } from "@/lib/templates";
 
 // ─────────────────────────────────────────────────────────────────────────
 // HERO — a "watch how it works" pill, the title, then one panel grouping the
@@ -33,12 +35,47 @@ function IconPaperclip({ className }: IconProps) {
   );
 }
 
-// Template quick-starts shown inside the hero panel.
-const TEMPLATES = [
-  { label: "Onboarding", prompt: "a client onboarding app" },
-  { label: "Dashboards", prompt: "a client dashboard" },
-  { label: "Trackers", prompt: "a project tracker for clients" },
+// Small line glyphs for the featured template rows.
+function GlyphUser() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <circle cx="12" cy="8" r="3.4" />
+      <path d="M5.5 20a6.5 6.5 0 0 1 13 0" />
+    </svg>
+  );
+}
+function GlyphChart() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+    </svg>
+  );
+}
+function GlyphList() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M8 6h12M8 12h12M8 18h12M3.5 6h.01M3.5 12h.01M3.5 18h.01" />
+    </svg>
+  );
+}
+function GlyphCheck() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M9 11l3 3L22 4" />
+      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+    </svg>
+  );
+}
+
+// Featured templates shown in the hero as a compact text list (v60 style).
+const FEATURED = getFeaturedTemplates(4);
+const GLYPHS = [
+  <GlyphUser key="u" />,
+  <GlyphChart key="c" />,
+  <GlyphList key="l" />,
+  <GlyphCheck key="k" />,
 ];
+const BADGES: (string | null)[] = ["New", "New", null, null];
 
 // Pool the typeahead draws from — matched by substring against what you type.
 const SUGGESTIONS = [
@@ -61,8 +98,10 @@ const SUGGESTIONS = [
 export function Hero() {
   const [userInput, setUserInput] = useState("");
   const [boxFocused, setBoxFocused] = useState(false);
+  const [hovered, setHovered] = useState<number | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   // Inline contextual completion — the first suggestion that continues what the
   // user has typed, surfaced as ghost text they can accept with Tab or →. No
@@ -82,9 +121,11 @@ export function Hero() {
   const submit = () => {
     if (userInput.trim()) window.open(APP_URL);
   };
-  const pick = (prompt: string) => {
-    setUserInput(prompt);
-    inputRef.current?.focus();
+  // Float the preview near the cursor while hovering the template list.
+  const movePreview = (e: React.PointerEvent) => {
+    const el = previewRef.current;
+    if (!el) return;
+    el.style.transform = `translate(${e.clientX + 28}px, ${e.clientY - 110}px)`;
   };
 
   return (
@@ -193,24 +234,39 @@ export function Hero() {
           </div>
         </div>
 
-          {/* Start from a template — three quick-starts inside the panel */}
-          <div className="px-2 pb-1 pt-4">
-            <p className="text-sm text-muted-foreground">Start from a template</p>
-            <div className="mt-3 grid grid-cols-3 gap-3">
-              {TEMPLATES.map((t) => (
-                <button
-                  key={t.label}
-                  type="button"
-                  onClick={() => pick(t.prompt)}
-                  className="group text-left"
-                >
-                  <div className="aspect-[5/3] w-full rounded-lg border border-border bg-muted-foreground/10 transition-colors group-hover:border-foreground/20" />
-                  <p className="mt-2 truncate text-sm text-foreground/80">
-                    {t.label}
-                  </p>
-                </button>
+          {/* Start from a template — a compact text list; hovering a row
+              floats a preview that follows the cursor (v60 treatment) */}
+          <div className="px-2 pb-1 pt-3">
+            <p className="mb-1 text-sm text-muted-foreground">
+              Start from a template
+            </p>
+            <ul
+              onPointerMove={movePreview}
+              onPointerLeave={() => setHovered(null)}
+            >
+              {FEATURED.map((t, i) => (
+                <li key={t.slug}>
+                  <Link
+                    href={`/templates/${t.slug}`}
+                    onPointerEnter={() => setHovered(i)}
+                    className="group flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-muted/60"
+                  >
+                    <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-colors group-hover:text-foreground">
+                      {GLYPHS[i % GLYPHS.length]}
+                    </span>
+                    <span className="text-[15px] font-medium text-foreground">
+                      {t.title}
+                    </span>
+                    {BADGES[i] && (
+                      <span className="rounded-full border border-border px-1.5 py-0.5 text-[11px] leading-none text-muted-foreground">
+                        {BADGES[i]}
+                      </span>
+                    )}
+                    <IconArrow className="ml-auto size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                  </Link>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
         </div>
       </div>
@@ -227,6 +283,19 @@ export function Hero() {
                 </span>
               ))}
           </div>
+        </div>
+      </div>
+
+      {/* Cursor-following template preview — grey placeholder for now */}
+      <div
+        ref={previewRef}
+        aria-hidden
+        className={`pointer-events-none fixed left-0 top-0 z-40 hidden h-[200px] w-[300px] overflow-hidden rounded-2xl border border-border bg-muted shadow-[0_30px_70px_-40px_rgba(20,20,40,0.5)] transition-[opacity,scale] duration-300 ease-out md:block ${
+          hovered !== null ? "scale-100 opacity-100" : "scale-95 opacity-0"
+        }`}
+      >
+        <div className="flex h-full w-full items-center justify-center px-4 text-center text-sm text-muted-foreground">
+          {hovered !== null ? FEATURED[hovered].title : ""}
         </div>
       </div>
     </section>
