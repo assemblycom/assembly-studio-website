@@ -40,15 +40,33 @@ function IndustryDropdown({
   }, []);
 
   return (
-    <div ref={ref} className="relative sm:w-56">
+    <div ref={ref} className="relative shrink-0 sm:w-56">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-2 rounded-lg border border-border bg-background py-2.5 pl-4 pr-3 text-sm transition-colors hover:border-foreground/30"
+        aria-label="Filter by industry"
+        className={`flex w-full items-center justify-center gap-2 rounded-lg border bg-background px-3 py-2.5 text-sm transition-colors hover:border-foreground/30 sm:justify-between sm:pl-4 sm:pr-3 ${
+          value !== ALL_INDUSTRIES ? "border-foreground/30" : "border-border"
+        }`}
       >
-        <span>{value}</span>
+        <span className="flex min-w-0 items-center gap-2">
+          {/* Sliders/filter glyph — the only affordance on mobile */}
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 20 20"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            className="shrink-0 text-muted-foreground"
+            aria-hidden
+          >
+            <path d="M3 5.5h14M5.5 10h9M8 14.5h4" strokeLinecap="round" />
+          </svg>
+          <span className="hidden truncate sm:inline">{value}</span>
+        </span>
         <svg
           width="16"
           height="16"
@@ -56,15 +74,22 @@ function IndustryDropdown({
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
-          className={`shrink-0 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
+          className={`hidden shrink-0 text-muted-foreground transition-transform sm:block ${open ? "rotate-180" : ""}`}
         >
           <path d="M6 8l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
+      {/* Active-filter dot — only shown on mobile where the label is hidden */}
+      {value !== ALL_INDUSTRIES && (
+        <span
+          aria-hidden
+          className="absolute right-1.5 top-1.5 size-2 rounded-full bg-foreground ring-2 ring-background sm:hidden"
+        />
+      )}
       {open && (
         <ul
           role="listbox"
-          className="absolute left-0 right-0 top-full z-30 mt-2 max-h-72 animate-fade-in overflow-auto rounded-lg border border-border bg-background p-1 shadow-lg"
+          className="absolute right-0 top-full z-30 mt-2 max-h-72 w-56 max-w-[calc(100vw-3rem)] animate-fade-in overflow-auto rounded-lg border border-border bg-background p-1 shadow-lg"
         >
           {options.map((opt) => {
             const selected = opt === value;
@@ -142,8 +167,8 @@ export function TemplatesBrowser({ templates }: Props) {
     <div>
       {/* Toolbar */}
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <div className="relative flex-1">
+        <div className="flex gap-3">
+          <div className="relative min-w-0 flex-1">
             <svg
               width="18"
               height="18"
