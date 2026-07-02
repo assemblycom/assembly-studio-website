@@ -40,9 +40,10 @@ export function Testimonials() {
       </div>
 
       {/* Expanding panels — Square-style. The active panel widens to reveal the
-          full quote; the others collapse to slivers showing the company name.
-          On mobile they stack as full cards (the horizontal expand needs width). */}
-      <div className="mt-12 flex flex-col gap-3 md:h-[420px] md:flex-row">
+          full quote; the others collapse to columns showing the company name
+          (read normally, not rotated). The whole card is a link — click anywhere
+          to read the story. On mobile they stack as full cards. */}
+      <div className="mt-12 flex flex-col gap-3 md:h-[460px] md:flex-row">
         {TESTIMONIALS.map((t, i) => {
           const isActive = i === active;
           return (
@@ -53,16 +54,16 @@ export function Testimonials() {
               onFocus={() => setActive(i)}
               aria-expanded={isActive}
               className={`group relative flex overflow-hidden rounded-2xl border border-border bg-muted text-left transition-[flex-grow,background-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                isActive ? "flex-[6]" : "flex-[1] hover:bg-muted/70"
+                isActive ? "flex-[6]" : "flex-[1] hover:bg-muted/70 md:min-w-[170px]"
               }`}
             >
-              {/* Collapsed label — vertical on desktop, hidden once active */}
+              {/* Collapsed label — horizontal, bottom-left; hidden once active */}
               <span
-                className={`pointer-events-none absolute inset-0 hidden items-end justify-center p-5 transition-opacity duration-300 md:flex ${
+                className={`pointer-events-none absolute inset-x-0 bottom-0 hidden p-6 transition-opacity duration-300 md:block ${
                   isActive ? "opacity-0" : "opacity-100"
                 }`}
               >
-                <span className="whitespace-nowrap text-sm font-medium text-muted-foreground [writing-mode:vertical-rl] [transform:rotate(180deg)]">
+                <span className="whitespace-nowrap text-base font-medium text-muted-foreground">
                   {t.company}
                 </span>
               </span>
@@ -76,20 +77,10 @@ export function Testimonials() {
                 <p className="text-lg leading-relaxed md:text-xl">
                   &ldquo;{t.quote}&rdquo;
                 </p>
-                <div className="mt-6 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <span className="size-10 shrink-0 rounded-full bg-muted-foreground/20" />
-                    <span>
-                      <span className="block text-sm font-medium">
-                        {t.author}
-                      </span>
-                      <span className="block text-sm text-muted-foreground">
-                        {t.company}
-                      </span>
-                    </span>
-                  </div>
-                  <span className="hidden whitespace-nowrap text-sm font-medium text-muted-foreground transition-colors group-hover:text-foreground sm:inline">
-                    Read story →
+                <div className="mt-6">
+                  <span className="block text-base font-medium">{t.author}</span>
+                  <span className="block text-sm text-muted-foreground">
+                    {t.company}
                   </span>
                 </div>
               </div>

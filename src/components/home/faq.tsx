@@ -40,33 +40,48 @@ function FAQItem({
 }) {
   const [open, setOpen] = useState(false);
 
+  // Each question is its own card — spacing between them separates the rows, so
+  // no divider lines are needed. A hairline border + soft shadow gives the white
+  // cards definition against the white page.
   return (
-    <div className="border-b border-border">
+    <div className="overflow-hidden rounded-2xl border border-border bg-muted transition-colors hover:border-foreground/15">
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between py-5 text-left"
+        aria-expanded={open}
+        className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
       >
-        <span className="text-base font-normal">{question}</span>
+        <span className="text-[15px] font-medium text-foreground">
+          {question}
+        </span>
         <svg
           width="20"
           height="20"
           viewBox="0 0 20 20"
           fill="none"
-          className={`shrink-0 text-muted-foreground transition-transform ${open ? "rotate-45" : ""}`}
+          aria-hidden
+          className={`shrink-0 text-muted-foreground transition-transform duration-300 ${open ? "rotate-180" : ""}`}
         >
           <path
-            d="M10 4v12M4 10h12"
+            d="M5 8l5 5 5-5"
             stroke="currentColor"
             strokeWidth="1.5"
             strokeLinecap="round"
+            strokeLinejoin="round"
           />
         </svg>
       </button>
-      {open && (
-        <p className="pb-5 text-sm leading-relaxed text-muted-foreground">
-          {answer}
-        </p>
-      )}
+      {/* Smooth reveal via grid-rows 0fr → 1fr — animates without measuring. */}
+      <div
+        className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <p className="px-6 pb-5 text-sm leading-relaxed text-muted-foreground">
+            {answer}
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -79,7 +94,7 @@ export function FAQ() {
           Frequently asked questions
         </h2>
 
-        <div className="mt-12">
+        <div className="mt-12 space-y-3">
           {FAQS.map((faq) => (
             <FAQItem key={faq.question} {...faq} />
           ))}
