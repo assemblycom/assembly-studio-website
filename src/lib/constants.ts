@@ -16,6 +16,6 @@ export const NAV_LINKS: NavLink[] = [
   { label: "Pricing", href: "/pricing" },
 ];
 
-export const DOCS_URL = "https://docs.assembly.com";
+export const DOCS_URL = "/docs";
 export const APP_URL = "https://app.assembly.com";
 export const SIGNUP_URL = "https://app.assembly.com/signup";
