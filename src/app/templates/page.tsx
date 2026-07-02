@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Section } from "@/components/ui/section";
 import { TemplatesBrowser } from "@/components/templates/templates-browser";
+import { TemplatesCta } from "@/components/templates/templates-cta";
 import { TEMPLATES } from "@/lib/templates";
 import { SIGNUP_URL } from "@/lib/constants";
 
@@ -34,6 +35,8 @@ export default function TemplatesPage() {
       <Section className="pt-4 md:pt-6">
         <TemplatesBrowser templates={TEMPLATES} />
       </Section>
+
+      <TemplatesCta />
     </>
   );
 }
