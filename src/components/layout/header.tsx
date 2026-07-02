@@ -17,11 +17,18 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
   // the logo/CTA sit near the box edges; elsewhere it aligns to page content.
   const innerWidth = fullWidth ? "max-w-none px-8" : "max-w-7xl px-6";
 
-  // Sticky so the nav follows you down the page; the announcement bar above it
-  // is in normal flow and scrolls away. Transparent while it overlaps the top
-  // of the hero box, then a frosted white bar once pinned (Superpower-style).
+  // Sticky so the nav follows you down. At the top it's a transparent, dark-on-
+  // light bar; once scrolled it collapses into a floating dark capsule ("pill")
+  // with light contents, à la Superpower.
   const position = "sticky top-0";
-  const surface = scrolled ? "bg-background/80 backdrop-blur-md" : "";
+  const pill =
+    "rounded-full bg-foreground/90 text-background shadow-[0_16px_40px_-18px_rgba(0,0,0,0.55)] backdrop-blur-md";
+
+  // Content colors flip when the bar goes dark.
+  const linkCls = `rounded-full px-3 py-1.5 text-sm transition-colors ${scrolled ? "text-background/70 hover:text-background" : "text-muted-foreground hover:text-foreground"}`;
+  const disabledCls = `cursor-default rounded-full px-3 py-1.5 text-sm ${scrolled ? "text-background/50" : "text-muted-foreground"}`;
+  const ctaCls = `rounded-full px-4 py-1.5 text-sm transition-[background-color,color,opacity] hover:opacity-90 ${scrolled ? "bg-background text-foreground" : "bg-foreground text-background"}`;
+  const logoInvert = scrolled ? "brightness-0 invert" : "";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > SCROLL_THRESHOLD);
@@ -44,7 +51,7 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
     <>
       {/* Mobile header — full-bleed bar: just the logo and a grid menu button.
           The CTA lives inside the menu, not the bar. */}
-      <header className={`${position} ${surface} z-50 flex h-14 items-center justify-between px-6 transition-colors duration-200 md:hidden`}>
+      <header className={`${position} z-50 flex items-center justify-between transition-all duration-300 md:hidden ${scrolled ? `mx-4 mt-3 h-12 px-5 ${pill}` : "h-14 px-6"}`}>
         <Link href="/" className="flex items-center">
           <Image
             src="/images/logo-mark.svg"
@@ -52,6 +59,7 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
             width={22}
             height={22}
             priority
+            className={logoInvert}
           />
         </Link>
         <button
@@ -73,9 +81,9 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
         </button>
       </header>
 
-      {/* Desktop header — full-width bar */}
-      <header className={`${position} ${surface} z-50 hidden transition-colors duration-200 md:block`}>
-        <div className={`relative mx-auto flex h-16 items-center justify-between ${innerWidth}`}>
+      {/* Desktop header — full-width bar at the top, floating dark pill on scroll */}
+      <header className={`${position} z-50 hidden transition-all duration-300 md:block ${scrolled ? "px-4 pt-3" : ""}`}>
+        <div className={`relative mx-auto flex h-16 items-center justify-between transition-all duration-300 ${scrolled ? `max-w-6xl px-6 ${pill}` : innerWidth}`}>
           <Link href="/" className="flex items-center">
             <Image
               src="/images/logo-mark.svg"
@@ -83,6 +91,7 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
               width={22}
               height={22}
               priority
+              className={logoInvert}
             />
           </Link>
 
@@ -94,7 +103,7 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
                   {link.disabled ? (
                     <span
                       aria-disabled="true"
-                      className="cursor-default rounded-full px-3 py-1.5 text-sm text-muted-foreground"
+                      className={disabledCls}
                     >
                       {link.label}
                     </span>
@@ -103,14 +112,14 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      className={linkCls}
                     >
                       {link.label}
                     </a>
                   ) : (
                     <Link
                       href={link.href}
-                      className="rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      className={linkCls}
                     >
                       {link.label}
                     </Link>
@@ -124,14 +133,11 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
           <div className="flex items-center gap-1">
             <a
               href={APP_URL}
-              className="rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+              className={linkCls}
             >
               Log in
             </a>
-            <a
-              href={APP_URL}
-              className="rounded-full bg-foreground px-4 py-1.5 text-sm text-background transition-opacity hover:opacity-90"
-            >
+            <a href={APP_URL} className={ctaCls}>
               Get started
             </a>
           </div>
