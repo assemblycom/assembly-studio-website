@@ -38,10 +38,10 @@ export function Hero() {
   };
 
   return (
-    <section className="-mt-14 px-3 pb-24 md:-mt-16 md:px-4">
-      {/* Pulled up under the sticky header (56px mobile / 64px desktop) so the
-          transparent nav overlaps its top and reads as "inside the box". */}
-      <div className="relative overflow-hidden rounded-[28px] bg-muted pb-16 pt-20 md:rounded-[32px] md:pb-24 md:pt-28">
+    <section className="-mt-14 pb-24 md:-mt-16 md:px-4">
+      {/* Mobile: full-bleed, no gray card. Desktop (md+): a rounded gray box
+          that the transparent nav overlaps at its top. */}
+      <div className="relative pb-16 pt-20 md:overflow-hidden md:rounded-[32px] md:bg-muted md:pb-24 md:pt-28">
         <div className="mx-auto max-w-7xl px-6">
           {/* Watch-how-it-works pill — eyebrow above the title */}
           <div className="flex justify-center">

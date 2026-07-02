@@ -38,8 +38,8 @@ export function Header() {
 
   return (
     <>
-      {/* Mobile header — logo, a prominent CTA, and a grid menu button, the way
-          Superpower lays out its mobile hero nav. */}
+      {/* Mobile header — full-bleed bar: just the logo and a grid menu button.
+          The CTA lives inside the menu, not the bar. */}
       <header className={`${position} ${surface} z-50 flex h-14 items-center justify-between px-6 transition-colors duration-200 md:hidden`}>
         <Link href="/" className="flex items-center">
           <Image
@@ -50,12 +50,6 @@ export function Header() {
             priority
           />
         </Link>
-        <a
-          href={APP_URL}
-          className="rounded-full bg-foreground px-5 py-2 text-sm text-background transition-opacity hover:opacity-90"
-        >
-          Get started
-        </a>
         <button
           onClick={() => setMobileMenuOpen(true)}
           aria-label="Open menu"
