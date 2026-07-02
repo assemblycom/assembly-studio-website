@@ -12,46 +12,8 @@ import { PromptComposer } from "./prompt-composer";
 // ghost-text autocomplete and file attachments) is shared with the CTA.
 // ─────────────────────────────────────────────────────────────────────────
 
-// Small line glyphs for the featured template rows.
-function GlyphUser() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <circle cx="12" cy="8" r="3.4" />
-      <path d="M5.5 20a6.5 6.5 0 0 1 13 0" />
-    </svg>
-  );
-}
-function GlyphChart() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
-    </svg>
-  );
-}
-function GlyphList() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M8 6h12M8 12h12M8 18h12M3.5 6h.01M3.5 12h.01M3.5 18h.01" />
-    </svg>
-  );
-}
-function GlyphCheck() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M9 11l3 3L22 4" />
-      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-    </svg>
-  );
-}
-
 // Featured templates shown in the hero as a compact text list (v60 style).
 const FEATURED = getFeaturedTemplates(4);
-const GLYPHS = [
-  <GlyphUser key="u" />,
-  <GlyphChart key="c" />,
-  <GlyphList key="l" />,
-  <GlyphCheck key="k" />,
-];
 
 // Demo video — paste the YouTube video ID here (the part after `?v=` or
 // `youtu.be/`, e.g. "dQw4w9WgXcQ"). Leave empty to keep the grey placeholder.
@@ -76,71 +38,73 @@ export function Hero() {
   };
 
   return (
-    <section className="pb-24 pt-24 md:pt-28">
-      <div className="mx-auto max-w-7xl px-6">
-        {/* Watch-how-it-works pill — eyebrow above the title */}
-        <div className="flex justify-center">
-          <button
-            type="button"
-            onClick={() => setVideoOpen(true)}
-            className="group inline-flex items-center gap-3 rounded-full border border-border bg-muted/50 py-1.5 pl-1.5 pr-4 text-left transition-colors hover:bg-muted"
-          >
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground transition-transform group-hover:scale-105">
-              <IconPlay className="size-3.5" />
-            </span>
-            <span className="leading-tight">
-              <span className="block whitespace-nowrap text-sm font-medium">
-                Watch how it works
-              </span>
-              <span className="block whitespace-nowrap text-xs text-muted-foreground">
-                2-minute demo
-              </span>
-            </span>
-          </button>
-        </div>
-
-        <h1 className="mx-auto mt-6 max-w-3xl text-center text-4xl font-medium tracking-tight md:text-6xl">
-          The AI app builder for client-facing experiences
-        </h1>
-
-        {/* One panel groups the composer with the template quick-starts */}
-        <div className="mx-auto mt-9 max-w-2xl rounded-3xl border border-border bg-gradient-to-b from-muted/60 to-muted/20 p-2.5">
-          <PromptComposer />
-
-          {/* Start from a template — a compact text list; hovering a row
-              floats a preview that follows the cursor (v60 treatment) */}
-          <div className="px-2 pb-1 pt-3">
-            <p className="mb-1 text-sm text-muted-foreground">
-              Start from a template
-            </p>
-            <ul
-              onPointerMove={movePreview}
-              onPointerLeave={() => setHovered(null)}
+    <section className="-mt-14 px-3 pb-24 md:-mt-16 md:px-4">
+      {/* Pulled up under the sticky header (56px mobile / 64px desktop) so the
+          transparent nav overlaps its top and reads as "inside the box". */}
+      <div className="relative overflow-hidden rounded-[28px] bg-muted pb-16 pt-20 md:rounded-[32px] md:pb-24 md:pt-28">
+        <div className="mx-auto max-w-7xl px-6">
+          {/* Watch-how-it-works pill — eyebrow above the title */}
+          <div className="flex justify-center">
+            <button
+              type="button"
+              onClick={() => setVideoOpen(true)}
+              className="group inline-flex items-center gap-3 rounded-full border border-border bg-background py-1.5 pl-1.5 pr-4 text-left transition-colors hover:bg-background/70"
             >
-              {FEATURED.map((t, i) => (
-                <li key={t.slug}>
-                  <Link
-                    href={`/templates/${t.slug}`}
-                    onPointerEnter={() => setHovered(i)}
-                    className="group flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-muted/60"
-                  >
-                    <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-colors group-hover:text-foreground">
-                      {GLYPHS[i % GLYPHS.length]}
-                    </span>
-                    <span className="text-[15px] font-medium text-foreground">
-                      {t.title}
-                    </span>
-                    <IconArrow className="ml-auto size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground transition-transform group-hover:scale-105">
+                <IconPlay className="size-3.5" />
+              </span>
+              <span className="leading-tight">
+                <span className="block whitespace-nowrap text-sm font-medium">
+                  Watch how it works
+                </span>
+                <span className="block whitespace-nowrap text-xs text-muted-foreground">
+                  2-minute demo
+                </span>
+              </span>
+            </button>
+          </div>
+
+          <h1 className="mx-auto mt-6 max-w-3xl text-center text-4xl font-medium tracking-tight md:text-6xl">
+            The AI app builder for client-facing experiences
+          </h1>
+
+          {/* One panel groups the composer with the template quick-starts */}
+          <div className="mx-auto mt-9 max-w-2xl rounded-3xl border border-border bg-background p-2.5 shadow-[0_20px_60px_-40px_rgba(20,20,40,0.35)]">
+            <PromptComposer />
+
+            {/* Start from a template — a compact text list; hovering a row
+                floats a preview that follows the cursor (v60 treatment) */}
+            <div className="px-2 pb-1 pt-3">
+              <p className="mb-1 text-sm text-muted-foreground">
+                Start from a template
+              </p>
+              <ul
+                onPointerMove={movePreview}
+                onPointerLeave={() => setHovered(null)}
+              >
+                {FEATURED.map((t, i) => (
+                  <li key={t.slug}>
+                    <Link
+                      href={`/templates/${t.slug}`}
+                      onPointerEnter={() => setHovered(i)}
+                      className="group flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-muted/60"
+                    >
+                      <span className="size-8 shrink-0 rounded-lg bg-muted" />
+                      <span className="text-[15px] font-medium text-foreground">
+                        {t.title}
+                      </span>
+                      <IconArrow className="ml-auto size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Logos carousel — centered, set apart from the hero */}
-      <div className="mx-auto mt-28 max-w-7xl px-6 md:mt-32">
+      <div className="mx-auto mt-24 max-w-7xl px-6 md:mt-28">
         <div className="mx-auto max-w-2xl overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]">
           <div className="flex w-max animate-marquee items-center gap-12">
             {["Capital One", "Collective", "Ditto", "Heritage Law", "Waymaker", "Aura", "CoverPanda", "Northwind"]

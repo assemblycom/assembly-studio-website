@@ -5,9 +5,26 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { NAV_LINKS, APP_URL } from "@/lib/constants";
 
-export function Header({ offsetTop = false }: { offsetTop?: boolean }) {
+// The announcement bar's height — once we've scrolled past it the header is
+// pinned to the top, so it swaps from transparent to a frosted surface.
+const SCROLL_THRESHOLD = 40;
+
+export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const topClass = offsetTop ? "top-10" : "top-0";
+  const [scrolled, setScrolled] = useState(false);
+
+  // Sticky so the nav follows you down the page; the announcement bar above it
+  // is in normal flow and scrolls away. Transparent while it overlaps the top
+  // of the hero box, then a frosted white bar once pinned (Superpower-style).
+  const position = "sticky top-0";
+  const surface = scrolled ? "bg-background/80 backdrop-blur-md" : "";
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > SCROLL_THRESHOLD);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // Lock background scroll while the mobile menu overlay is open.
   useEffect(() => {
@@ -22,7 +39,7 @@ export function Header({ offsetTop = false }: { offsetTop?: boolean }) {
   return (
     <>
       {/* Mobile header — full-width bar */}
-      <header className={`fixed left-0 right-0 ${topClass} z-50 flex h-14 items-center justify-between bg-background/80 px-6 backdrop-blur-md md:hidden`}>
+      <header className={`${position} ${surface} z-50 flex h-14 items-center justify-between px-6 transition-colors duration-200 md:hidden`}>
         <Link href="/" className="flex items-center">
           <Image
             src="/images/logo-mark.svg"
@@ -50,7 +67,7 @@ export function Header({ offsetTop = false }: { offsetTop?: boolean }) {
       </header>
 
       {/* Desktop header — full-width bar */}
-      <header className={`fixed left-0 right-0 ${topClass} z-50 hidden bg-background/80 backdrop-blur-md md:block`}>
+      <header className={`${position} ${surface} z-50 hidden transition-colors duration-200 md:block`}>
         <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Link href="/" className="flex items-center">
             <Image
