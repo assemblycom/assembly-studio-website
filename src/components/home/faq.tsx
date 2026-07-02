@@ -3,7 +3,12 @@
 import { useState } from "react";
 import { Section } from "@/components/ui/section";
 
-const FAQS = [
+export interface FAQEntry {
+  question: string;
+  answer: string;
+}
+
+const FAQS: FAQEntry[] = [
   {
     question: "How do I get access to Assembly Studio?",
     answer:
@@ -86,16 +91,22 @@ function FAQItem({
   );
 }
 
-export function FAQ() {
+export function FAQ({
+  heading = "Frequently asked questions",
+  items = FAQS,
+}: {
+  heading?: string;
+  items?: FAQEntry[];
+} = {}) {
   return (
     <Section id="faq">
       <div className="mx-auto max-w-2xl">
         <h2 className="text-center text-3xl font-medium tracking-tight md:text-4xl">
-          Frequently asked questions
+          {heading}
         </h2>
 
         <div className="mt-12 space-y-3">
-          {FAQS.map((faq) => (
+          {items.map((faq) => (
             <FAQItem key={faq.question} {...faq} />
           ))}
         </div>
