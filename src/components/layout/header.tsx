@@ -54,6 +54,14 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
 
   return (
     <>
+      {/* Scrim — a soft, full-width frosted band behind the floating pill that
+          fades in on scroll, so page content (and sticky page headers) dissolve
+          under the nav instead of peeking around the capsule. Desktop only. */}
+      <div
+        aria-hidden
+        className={`pointer-events-none fixed inset-x-0 top-0 z-40 hidden h-20 bg-background/85 backdrop-blur-md transition-opacity duration-300 [mask-image:linear-gradient(to_bottom,black_80%,transparent)] [-webkit-mask-image:linear-gradient(to_bottom,black_80%,transparent)] md:block ${scrolled ? "opacity-100" : "opacity-0"}`}
+      />
+
       {/* Mobile header — full-bleed bar: just the logo and a grid menu button.
           The CTA lives inside the menu, not the bar. */}
       <header className={`${position} z-50 flex h-14 items-center justify-between px-6 transition-colors duration-200 md:hidden ${scrolled ? "bg-background/80 backdrop-blur-md" : ""}`}>
