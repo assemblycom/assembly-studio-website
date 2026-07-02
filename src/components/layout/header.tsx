@@ -38,8 +38,9 @@ export function Header() {
 
   return (
     <>
-      {/* Mobile header — full-width bar */}
-      <header className={`${position} ${surface} z-50 flex h-14 items-center justify-between px-6 transition-colors duration-200 md:hidden`}>
+      {/* Mobile header — logo, a prominent CTA, and a grid menu button, the way
+          Superpower lays out its mobile hero nav. */}
+      <header className={`${position} ${surface} z-50 flex h-14 items-center justify-between px-5 transition-colors duration-200 md:hidden`}>
         <Link href="/" className="flex items-center">
           <Image
             src="/images/logo-mark.svg"
@@ -49,19 +50,27 @@ export function Header() {
             priority
           />
         </Link>
+        <a
+          href={APP_URL}
+          className="rounded-full bg-foreground px-5 py-2 text-sm text-background transition-opacity hover:opacity-90"
+        >
+          Get started
+        </a>
         <button
           onClick={() => setMobileMenuOpen(true)}
           aria-label="Open menu"
+          className="flex size-9 items-center justify-center"
         >
-          <svg
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-          >
-            <path d="M4 8h16M4 16h16" />
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <circle cx="5" cy="5" r="1.6" />
+            <circle cx="12" cy="5" r="1.6" />
+            <circle cx="19" cy="5" r="1.6" />
+            <circle cx="5" cy="12" r="1.6" />
+            <circle cx="12" cy="12" r="1.6" />
+            <circle cx="19" cy="12" r="1.6" />
+            <circle cx="5" cy="19" r="1.6" />
+            <circle cx="12" cy="19" r="1.6" />
+            <circle cx="19" cy="19" r="1.6" />
           </svg>
         </button>
       </header>
