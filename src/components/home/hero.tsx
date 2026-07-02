@@ -101,32 +101,75 @@ const demoEmbedUrl = (autoplay: boolean) =>
   `https://www.youtube-nocookie.com/embed/${DEMO_VIDEO_ID}?rel=0&modestbranding=1&playsinline=1${autoplay ? "&autoplay=1" : ""}`;
 const demoThumbUrl = `https://img.youtube.com/vi/${DEMO_VIDEO_ID}/hqdefault.jpg`;
 
-// Pool the typeahead draws from — matched by substring against what you type.
-const SUGGESTIONS = [
-  "A client onboarding portal with progress tracking",
-  "An onboarding checklist for new clients",
-  "A client engagement dashboard",
-  "A dashboard that flags clients who go quiet",
-  "A project tracker clients can view",
-  "A document approval workflow with reminders",
-  "A branded proposal with e-sign",
-  "A client intake form that creates a project",
-  "A billing and invoices page",
-  "A support request inbox for my clients",
-  "A weekly status update clients can view",
-  "A CRM for my client relationships",
-  "A scheduling and booking app",
-  "A white-labeled client portal",
+// Best-practice starter prompts the typeahead completes toward. Each idea is
+// specific and outcome-oriented — what it does, the key fields, and the result —
+// because that's what makes a strong app-builder prompt. Completing toward these
+// nudges people to write good ones. `head` is the natural "a …" phrasing; `topic`
+// is the bare noun used for "an app for …" openings; `tail` is the shared detail.
+const PROMPT_IDEAS = [
+  { head: "a client intake form", topic: "client intake", tail: " that collects scope, goals, budget, and timeline, then auto-creates their folders" },
+  { head: "a client onboarding wizard", topic: "client onboarding", tail: " with saved progress and a document checklist" },
+  { head: "a document collection checklist", topic: "document collection", tail: " with upload reminders and completion tracking" },
+  { head: "a client engagement dashboard", topic: "client engagement", tail: " that flags clients who go quiet" },
+  { head: "a per-client metrics dashboard", topic: "client reporting", tail: " that refreshes automatically from live data" },
+  { head: "a retainer usage overview", topic: "retainer tracking", tail: " showing hours used vs. remaining, with low-balance alerts" },
+  { head: "a monthly client report", topic: "client reporting", tail: " that's branded, read-only, and publishes on a schedule" },
+  { head: "a client project tracker", topic: "project tracking", tail: " with milestones and live progress per engagement" },
+  { head: "a case status page", topic: "case status", tail: " showing the current stage, the last update, and what's next" },
+  { head: "a content approval flow", topic: "content approvals", tail: " for posts and campaigns, with full status history" },
+  { head: "a proposal builder", topic: "proposals", tail: " clients can e-sign, with view tracking and pay-on-accept" },
+  { head: "a client support inbox", topic: "support requests", tail: " with a shared, categorized triage queue" },
+  { head: "a client AI assistant", topic: "a client AI assistant", tail: " trained on your docs that escalates to your team when needed" },
+  { head: "a client resource library", topic: "a resource library", tail: " of branded guides your clients can search" },
+  // Generic artifact openings — so a request that names the thing ("a form",
+  // "a dashboard") completes even when it isn't one of the specific ideas above.
+  // `topic` starts with an article on purpose so the "an app for …" phrasing is
+  // skipped for these (it would read awkwardly).
+  { head: "a form", topic: "a form", tail: " that collects the details you need, then creates a project automatically" },
+  { head: "a dashboard", topic: "a dashboard", tail: " that shows each client the metrics that matter, refreshed from live data" },
+  { head: "a tracker", topic: "a tracker", tail: " for milestones and progress on every engagement" },
+  { head: "a portal", topic: "a portal", tail: " where clients can see updates, files, and what's next" },
+  { head: "a workflow", topic: "a workflow", tail: " that routes approvals and keeps a full status history" },
+  { head: "a report", topic: "a report", tail: " that's branded, read-only, and publishes on a schedule" },
+  { head: "a page", topic: "a page", tail: " that shows clients their current status and what to expect next" },
+  { head: "a checklist", topic: "a checklist", tail: " clients complete step by step, with reminders" },
+  { head: "a tool", topic: "a tool", tail: " that automates a repetitive client task end to end" },
+  { head: "an app", topic: "an app", tail: " that gives clients a branded place to work with you" },
 ];
+
+// Openings people actually type, expanded into full completions. Order matters —
+// the first pool entry that continues what's typed wins, so verb-led phrasings
+// come before the bare "A …" fallback.
+const upperFirst = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
+
+const LEAD_INS = ["Build ", "Create ", "Make ", "I want ", "I need ", ""];
+const PROMPT_POOL = PROMPT_IDEAS.flatMap(({ head, topic, tail }) => {
+  const full = head + tail;
+  const bare = full.charAt(0).toUpperCase() + full.slice(1);
+  // Skip the "an app for …" phrasing when the topic already carries an article,
+  // which would read as "an app for a …".
+  const appVariants = /^an? /i.test(topic)
+    ? []
+    : [`Build an app for ${topic}${tail}`, `An app for ${topic}${tail}`];
+  return [...LEAD_INS.map((lead) => (lead ? lead + full : bare)), ...appVariants];
+});
 
 export function Hero() {
   const [userInput, setUserInput] = useState("");
+  // AI-generated continuation, when the /api/complete route returns one. Falls
+  // back to the curated pool below whenever this is empty (no key, no match, or
+  // still loading).
+  const [aiGhost, setAiGhost] = useState("");
   const [boxFocused, setBoxFocused] = useState(false);
   const [hovered, setHovered] = useState<number | null>(null);
   const [videoOpen, setVideoOpen] = useState(false);
   const [videoExpanded, setVideoExpanded] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  // Tracks the latest typed value so a slow AI response can be discarded if the
+  // user has since typed more (avoids a stale ghost that no longer continues).
+  const latestInputRef = useRef(userInput);
+  latestInputRef.current = userInput;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -159,17 +202,53 @@ export function Hero() {
   );
   const allImages = files.length > 0 && previews.every(Boolean);
 
-  // Inline contextual completion — the first suggestion that continues what the
-  // user has typed, surfaced as ghost text they can accept with Tab or →. No
-  // dropdown; the hint lives right in the field.
-  const ghost =
+  // Curated fallback — the first pool entry that continues what the user typed.
+  // Instant and offline; used whenever the AI completion isn't available.
+  const curatedGhost =
     userInput.trim().length > 0
-      ? SUGGESTIONS.find(
+      ? PROMPT_POOL.find(
           (s) =>
             s.toLowerCase().startsWith(userInput.toLowerCase()) &&
             s.length > userInput.length,
         )?.slice(userInput.length) ?? ""
       : "";
+
+  // Ask the AI route to continue what's typed. Debounced so it fires on a pause,
+  // not every keystroke; the previous request is aborted when the user types on.
+  // A response is only applied if the field still holds exactly what we sent.
+  useEffect(() => {
+    const text = userInput;
+    setAiGhost(""); // drop any stale AI ghost while the curated one covers the gap
+    if (text.trim().length < 3) return;
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch("/api/complete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+          signal: controller.signal,
+        });
+        if (!res.ok) return;
+        const { completion } = await res.json();
+        if (typeof completion !== "string" || !completion) return;
+        if (latestInputRef.current !== text) return; // user typed on; discard
+        // The overlay renders userInput + ghost, so the completion must read as a
+        // continuation — add a leading space unless it opens with punctuation.
+        const needsSpace = !/^[\s.,;:!?)]/.test(completion) && !/\s$/.test(text);
+        setAiGhost(needsSpace ? ` ${completion}` : completion);
+      } catch {
+        // Aborted or network error — the curated ghost stays as the fallback.
+      }
+    }, 350);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [userInput]);
+
+  // Prefer the AI completion; fall back to the curated one. Accept with Tab or →.
+  const ghost = aiGhost || curatedGhost;
   const acceptGhost = () => {
     if (ghost) setUserInput(userInput + ghost);
   };
@@ -237,7 +316,9 @@ export function Hero() {
                 <textarea
                   ref={inputRef}
                   value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
+                  // Auto-capitalize the first letter so the prompt reads as a
+                  // proper sentence no matter how the user starts typing.
+                  onChange={(e) => setUserInput(upperFirst(e.target.value))}
                   onFocus={() => setBoxFocused(true)}
                   onBlur={() => setBoxFocused(false)}
                   onKeyDown={(e) => {
@@ -348,18 +429,30 @@ export function Hero() {
                   <IconPaperclip className="size-4" />
                   {files.length > 0 ? `${files.length} attached` : "Attach files"}
                 </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    submit();
-                  }}
-                  disabled={!userInput.trim()}
-                  aria-label="Build it"
-                  className="flex size-9 items-center justify-center rounded-full bg-foreground text-background transition-all hover:opacity-90 active:scale-95 disabled:opacity-30 disabled:active:scale-100"
-                >
-                  <IconArrow />
-                </button>
+                {/* Keyboard affordance grouped with the send control — only
+                    while a completion is available (hidden on narrow mobile). */}
+                <div className="flex items-center gap-3">
+                  {ghost && (
+                    <span className="hidden items-center gap-1.5 text-xs text-muted-foreground sm:flex">
+                      <kbd className="rounded border border-border bg-muted px-1.5 py-0.5 font-sans text-[11px] font-normal">
+                        Tab
+                      </kbd>
+                      to complete
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      submit();
+                    }}
+                    disabled={!userInput.trim()}
+                    aria-label="Build it"
+                    className="flex size-9 items-center justify-center rounded-full bg-foreground text-background transition-all hover:opacity-90 active:scale-95 disabled:opacity-30 disabled:active:scale-100"
+                  >
+                    <IconArrow />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
