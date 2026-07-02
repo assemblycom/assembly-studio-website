@@ -92,7 +92,9 @@ function MetaCard({ study }: { study: CaseStudy }) {
           <div className="px-6 py-4">
             <dt className="text-sm text-foreground">Apps in use</dt>
             <dd className="mt-0.5 text-sm text-muted-foreground">
-              {g.apps.join(", ")}
+              {/* Drop the redundant "App" suffix on Assembly apps; leave
+                  third-party integration names (OneDrive, Monday…) intact. */}
+              {g.apps.map((a) => a.replace(/ App$/, "")).join(", ")}
             </dd>
           </div>
         </dl>
