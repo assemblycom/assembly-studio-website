@@ -23,9 +23,8 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
     "rounded-full bg-foreground/70 text-background shadow-[0_10px_30px_-20px_rgba(0,0,0,0.3)] ring-1 ring-white/10 backdrop-blur-md";
 
   // Keep the same rail width at rest and when scrolled so the capsule doesn't
-  // visibly shrink. The scrolled outer gutter (px-4) matches the hero box gutter
-  // so the pill never exceeds the box width; outer px-4 + inner px-4 = 32px,
-  // matching the resting inset (px-8), so the logo/CTA don't shift horizontally.
+  // visibly shrink. The scrolled outer gutter (px-6) sits just inside the hero
+  // box gutter (px-4) so the pill doesn't touch the box edges.
   const maxWidth = fullWidth ? "max-w-none" : "max-w-7xl";
   const restInner = `h-16 ${maxWidth} ${fullWidth ? "px-8" : "px-6"}`;
   const scrolledInner = `h-14 ${maxWidth} px-4 ${pill}`;
@@ -87,7 +86,7 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
       </header>
 
       {/* Desktop header — full-width bar at the top, floating dark pill on scroll */}
-      <header className={`${position} z-50 hidden transition-all duration-300 md:block ${scrolled ? "px-4 pt-3" : ""}`}>
+      <header className={`${position} z-50 hidden transition-all duration-300 md:block ${scrolled ? "px-6 pt-3" : ""}`}>
         <div className={`relative mx-auto flex items-center justify-between transition-all duration-300 ${scrolled ? scrolledInner : restInner}`}>
           <Link href="/" className="flex items-center">
             <Image
