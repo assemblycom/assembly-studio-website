@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { APP_URL } from "@/lib/constants";
 
 // ─────────────────────────────────────────────────────────────────────────
-// HERO — ported from hero exploration v27.
-// A clean entry box with the "Start from a template" row pinned below. As you
-// type, a typeahead surfaces up to 5 contextual prompt suggestions matching
-// what you've written.
+// HERO — a "watch how it works" pill, the title, then one panel grouping the
+// entry box with three template quick-starts. As you type, an inline ghost
+// suggestion completes your prompt (accept with Tab or →).
 // ─────────────────────────────────────────────────────────────────────────
 
 type IconProps = { className?: string };
@@ -19,10 +18,10 @@ function IconArrow({ className }: IconProps) {
     </svg>
   );
 }
-function IconChevron({ className }: IconProps) {
+function IconPlay({ className }: IconProps) {
   return (
-    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M9 6l6 6-6 6" />
+    <svg className={className} width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M9 7.5v9a.75.75 0 0 0 1.14.64l7.2-4.5a.75.75 0 0 0 0-1.28l-7.2-4.5A.75.75 0 0 0 9 7.5Z" />
     </svg>
   );
 }
@@ -34,7 +33,7 @@ function IconPaperclip({ className }: IconProps) {
   );
 }
 
-// Template cards pinned below — three + a See more tile.
+// Template quick-starts shown inside the hero panel.
 const TEMPLATES = [
   { label: "Onboarding", prompt: "a client onboarding app" },
   { label: "Dashboards", prompt: "a client dashboard" },
@@ -62,11 +61,8 @@ const SUGGESTIONS = [
 export function Hero() {
   const [userInput, setUserInput] = useState("");
   const [boxFocused, setBoxFocused] = useState(false);
-  const [canLeft, setCanLeft] = useState(false);
-  const [canRight, setCanRight] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
-  const rowRef = useRef<HTMLDivElement>(null);
 
   // Inline contextual completion — the first suggestion that continues what the
   // user has typed, surfaced as ghost text they can accept with Tab or →. No
@@ -83,19 +79,6 @@ export function Hero() {
     if (ghost) setUserInput(userInput + ghost);
   };
 
-  const updateArrows = () => {
-    const el = rowRef.current;
-    if (!el) return;
-    setCanLeft(el.scrollLeft > 4);
-    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-  };
-  useEffect(() => {
-    updateArrows();
-    window.addEventListener("resize", updateArrows);
-    return () => window.removeEventListener("resize", updateArrows);
-  }, []);
-  const scrollRow = (dir: 1 | -1) => rowRef.current?.scrollBy({ left: dir * 240, behavior: "smooth" });
-
   const submit = () => {
     if (userInput.trim()) window.open(APP_URL);
   };
@@ -107,13 +90,34 @@ export function Hero() {
   return (
     <section className="pb-24 pt-24 md:pt-28">
       <div className="mx-auto max-w-7xl px-6">
-        <h1 className="mx-auto max-w-3xl text-center text-4xl font-medium tracking-tight md:text-6xl">
+        {/* Watch-how-it-works pill — eyebrow above the title */}
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={() => window.open(APP_URL)}
+            className="group inline-flex items-center gap-3 rounded-full border border-border bg-muted/50 py-1.5 pl-1.5 pr-4 text-left transition-colors hover:bg-muted"
+          >
+            <span className="flex size-9 items-center justify-center rounded-full border border-border bg-background text-foreground transition-transform group-hover:scale-105">
+              <IconPlay className="size-3.5" />
+            </span>
+            <span className="leading-tight">
+              <span className="block text-sm font-medium">Watch how it works</span>
+              <span className="block text-xs text-muted-foreground">
+                2-minute demo
+              </span>
+            </span>
+          </button>
+        </div>
+
+        <h1 className="mx-auto mt-6 max-w-3xl text-center text-4xl font-medium tracking-tight md:text-6xl">
           The AI app builder for client-facing experiences
         </h1>
 
-        {/* Entry box + typeahead anchor */}
-        <div ref={wrapRef} className="relative mx-auto mt-9 max-w-2xl">
-          <div className="shimmer-border relative rounded-2xl" data-focused={boxFocused}>
+        {/* One panel groups the entry box with the template quick-starts */}
+        <div className="mx-auto mt-9 max-w-2xl rounded-3xl border border-border bg-gradient-to-b from-muted/60 to-muted/20 p-2.5">
+          {/* Entry box + typeahead anchor */}
+          <div ref={wrapRef} className="relative">
+            <div className="shimmer-border relative rounded-2xl" data-focused={boxFocused}>
             <div
               onClick={() => inputRef.current?.focus()}
               className={`flex min-h-[152px] cursor-text flex-col rounded-2xl border bg-background p-4 shadow-sm transition-all duration-200 ${
@@ -187,50 +191,26 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Start from a template — left-aligned to the box, which stays centered */}
-        <div className="mx-auto mt-8 max-w-2xl">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Start from a template</p>
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => scrollRow(-1)}
-                  disabled={!canLeft}
-                  aria-label="Previous"
-                  className="flex size-6 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-25"
-                >
-                  <IconChevron className="size-3.5 rotate-180" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scrollRow(1)}
-                  disabled={!canRight}
-                  aria-label="Next"
-                  className="flex size-6 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-25"
-                >
-                  <IconChevron className="size-3.5" />
-                </button>
-              </div>
-            </div>
-            <div
-              ref={rowRef}
-              onScroll={updateArrows}
-              className="mt-3 flex gap-3 overflow-x-auto pb-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            >
+          {/* Start from a template — three quick-starts inside the panel */}
+          <div className="px-2 pb-1 pt-4">
+            <p className="text-sm text-muted-foreground">Start from a template</p>
+            <div className="mt-3 grid grid-cols-3 gap-3">
               {TEMPLATES.map((t) => (
-                <button key={t.label} type="button" onClick={() => pick(t.prompt)} className="group w-40 shrink-0 text-left">
+                <button
+                  key={t.label}
+                  type="button"
+                  onClick={() => pick(t.prompt)}
+                  className="group text-left"
+                >
                   <div className="aspect-[5/3] w-full rounded-lg border border-border bg-muted-foreground/10 transition-colors group-hover:border-foreground/20" />
-                  <p className="mt-2 truncate text-sm text-foreground/80">{t.label}</p>
+                  <p className="mt-2 truncate text-sm text-foreground/80">
+                    {t.label}
+                  </p>
                 </button>
               ))}
-              <a href={APP_URL} className="group w-40 shrink-0 text-left">
-                <div className="flex aspect-[5/3] w-full items-center justify-center rounded-lg border border-dashed border-border text-sm text-muted-foreground transition-colors group-hover:border-foreground/20 group-hover:text-foreground">
-                  See more
-                </div>
-                <p className="mt-2 truncate text-sm text-muted-foreground">All templates</p>
-              </a>
             </div>
           </div>
+        </div>
       </div>
 
       {/* Logos carousel — centered, set apart from the hero */}
