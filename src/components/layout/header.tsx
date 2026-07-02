@@ -21,8 +21,10 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
   // light bar; once scrolled it collapses into a floating dark capsule ("pill")
   // with light contents, à la Superpower.
   const position = "sticky top-0";
+  // Softer, slimmer smoked-glass capsule — translucent charcoal with a faint
+  // ring rather than a solid near-black slab with a heavy shadow.
   const pill =
-    "rounded-full bg-foreground/90 text-background shadow-[0_16px_40px_-18px_rgba(0,0,0,0.55)] backdrop-blur-md";
+    "rounded-full bg-foreground/80 text-background shadow-[0_10px_30px_-18px_rgba(0,0,0,0.35)] ring-1 ring-white/10 backdrop-blur-md";
 
   // Content colors flip when the bar goes dark.
   const linkCls = `rounded-full px-3 py-1.5 text-sm transition-colors ${scrolled ? "text-background/70 hover:text-background" : "text-muted-foreground hover:text-foreground"}`;
@@ -51,7 +53,7 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
     <>
       {/* Mobile header — full-bleed bar: just the logo and a grid menu button.
           The CTA lives inside the menu, not the bar. */}
-      <header className={`${position} z-50 flex items-center justify-between transition-all duration-300 md:hidden ${scrolled ? `mx-4 mt-3 h-12 px-5 ${pill}` : "h-14 px-6"}`}>
+      <header className={`${position} z-50 flex h-14 items-center justify-between px-6 transition-colors duration-200 md:hidden ${scrolled ? "bg-background/80 backdrop-blur-md" : ""}`}>
         <Link href="/" className="flex items-center">
           <Image
             src="/images/logo-mark.svg"
@@ -59,7 +61,6 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
             width={22}
             height={22}
             priority
-            className={logoInvert}
           />
         </Link>
         <button
@@ -83,7 +84,7 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
 
       {/* Desktop header — full-width bar at the top, floating dark pill on scroll */}
       <header className={`${position} z-50 hidden transition-all duration-300 md:block ${scrolled ? "px-4 pt-3" : ""}`}>
-        <div className={`relative mx-auto flex h-16 items-center justify-between transition-all duration-300 ${scrolled ? `max-w-6xl px-6 ${pill}` : innerWidth}`}>
+        <div className={`relative mx-auto flex items-center justify-between transition-all duration-300 ${scrolled ? `h-12 max-w-5xl px-5 ${pill}` : `h-16 ${innerWidth}`}`}>
           <Link href="/" className="flex items-center">
             <Image
               src="/images/logo-mark.svg"
