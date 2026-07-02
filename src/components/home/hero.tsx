@@ -82,7 +82,6 @@ const GLYPHS = [
   <GlyphList key="l" />,
   <GlyphCheck key="k" />,
 ];
-const BADGES: (string | null)[] = ["New", "New", null, null];
 
 // Pool the typeahead draws from — matched by substring against what you type.
 const SUGGESTIONS = [
@@ -266,11 +265,6 @@ export function Hero() {
                     <span className="text-[15px] font-medium text-foreground">
                       {t.title}
                     </span>
-                    {BADGES[i] && (
-                      <span className="rounded-full border border-border px-1.5 py-0.5 text-[11px] leading-none text-muted-foreground">
-                        {BADGES[i]}
-                      </span>
-                    )}
                     <IconArrow className="ml-auto size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
                   </Link>
                 </li>
