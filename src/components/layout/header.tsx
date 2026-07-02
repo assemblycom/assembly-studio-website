@@ -13,18 +13,22 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  // On the home hero the nav spans the full box width with a small margin so
-  // the logo/CTA sit near the box edges; elsewhere it aligns to page content.
-  const innerWidth = fullWidth ? "max-w-none px-8" : "max-w-7xl px-6";
-
   // Sticky so the nav follows you down. At the top it's a transparent, dark-on-
-  // light bar; once scrolled it collapses into a floating dark capsule ("pill")
-  // with light contents, à la Superpower.
+  // light bar; once scrolled it settles into a floating capsule ("pill") with
+  // light contents, à la Superpower.
   const position = "sticky top-0";
-  // Softer, slimmer smoked-glass capsule — translucent charcoal with a faint
-  // ring rather than a solid near-black slab with a heavy shadow.
+  // Soft smoked-glass capsule — a muted, translucent charcoal (not near-black)
+  // with a faint ring and a light shadow.
   const pill =
-    "rounded-full bg-foreground/80 text-background shadow-[0_10px_30px_-18px_rgba(0,0,0,0.35)] ring-1 ring-white/10 backdrop-blur-md";
+    "rounded-full bg-foreground/70 text-background shadow-[0_10px_30px_-20px_rgba(0,0,0,0.3)] ring-1 ring-white/10 backdrop-blur-md";
+
+  // Keep the same rail width at rest and when scrolled so the capsule doesn't
+  // visibly shrink. The scrolled outer gutter (px-4) matches the hero box gutter
+  // so the pill never exceeds the box width; outer px-4 + inner px-4 = 32px,
+  // matching the resting inset (px-8), so the logo/CTA don't shift horizontally.
+  const maxWidth = fullWidth ? "max-w-none" : "max-w-7xl";
+  const restInner = `h-16 ${maxWidth} ${fullWidth ? "px-8" : "px-6"}`;
+  const scrolledInner = `h-14 ${maxWidth} px-4 ${pill}`;
 
   // Content colors flip when the bar goes dark.
   const linkCls = `rounded-full px-3 py-1.5 text-sm transition-colors ${scrolled ? "text-background/70 hover:text-background" : "text-muted-foreground hover:text-foreground"}`;
@@ -84,7 +88,7 @@ export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
 
       {/* Desktop header — full-width bar at the top, floating dark pill on scroll */}
       <header className={`${position} z-50 hidden transition-all duration-300 md:block ${scrolled ? "px-4 pt-3" : ""}`}>
-        <div className={`relative mx-auto flex items-center justify-between transition-all duration-300 ${scrolled ? `h-12 max-w-5xl px-5 ${pill}` : `h-16 ${innerWidth}`}`}>
+        <div className={`relative mx-auto flex items-center justify-between transition-all duration-300 ${scrolled ? scrolledInner : restInner}`}>
           <Link href="/" className="flex items-center">
             <Image
               src="/images/logo-mark.svg"
