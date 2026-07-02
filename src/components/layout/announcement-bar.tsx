@@ -16,7 +16,7 @@ export function AnnouncementBar() {
           className="group inline-flex min-w-0 max-w-full items-center gap-2 text-sm"
         >
           <span className="truncate">
-            Assembly Studio is now generally available
+            Assembly Studio is now available
           </span>
           <span className="inline-flex items-center gap-1 whitespace-nowrap text-muted-foreground transition-colors group-hover:text-foreground">
             Learn more
