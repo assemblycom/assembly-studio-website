@@ -47,7 +47,7 @@ function IndustryDropdown({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label="Filter by industry"
-        className={`flex w-full items-center justify-center gap-2 rounded-lg border bg-background px-3 py-2.5 text-sm transition-colors hover:border-foreground/30 sm:justify-between sm:pl-4 sm:pr-3 ${
+        className={`flex h-full w-full items-center justify-center gap-2 rounded-lg border bg-background px-3 py-2.5 text-sm transition-colors hover:border-foreground/30 sm:justify-between sm:pl-4 sm:pr-3 ${
           value !== ALL_INDUSTRIES ? "border-foreground/30" : "border-border"
         }`}
       >
