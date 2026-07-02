@@ -40,7 +40,7 @@ export function Header() {
     <>
       {/* Mobile header — logo, a prominent CTA, and a grid menu button, the way
           Superpower lays out its mobile hero nav. */}
-      <header className={`${position} ${surface} z-50 flex h-14 items-center justify-between px-5 transition-colors duration-200 md:hidden`}>
+      <header className={`${position} ${surface} z-50 flex h-14 items-center justify-between px-6 transition-colors duration-200 md:hidden`}>
         <Link href="/" className="flex items-center">
           <Image
             src="/images/logo-mark.svg"
@@ -77,7 +77,7 @@ export function Header() {
 
       {/* Desktop header — full-width bar */}
       <header className={`${position} ${surface} z-50 hidden transition-colors duration-200 md:block`}>
-        <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+        <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-8 lg:px-12">
           <Link href="/" className="flex items-center">
             <Image
               src="/images/logo-mark.svg"

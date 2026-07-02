@@ -19,12 +19,12 @@ export function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
 
+  // The announcement bar only runs on the landing page.
   const bar = <AnnouncementBar />;
 
   if (!isHome) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
-        {bar}
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
