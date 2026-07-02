@@ -42,7 +42,7 @@ export function RootShell({ children }: { children: React.ReactNode }) {
           away; the sticky header pins to the top as you scroll the hero box. */}
       <div className="relative z-10 flex min-h-screen flex-col bg-background">
         {bar}
-        <Header />
+        <Header fullWidth />
         <main className="flex-1">{children}</main>
       </div>
       {/* Footer as a sibling — rounded bottom corners reveal the dark panel. */}

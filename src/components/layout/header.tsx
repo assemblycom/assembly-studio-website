@@ -9,9 +9,13 @@ import { NAV_LINKS, APP_URL } from "@/lib/constants";
 // pinned to the top, so it swaps from transparent to a frosted surface.
 const SCROLL_THRESHOLD = 40;
 
-export function Header() {
+export function Header({ fullWidth = false }: { fullWidth?: boolean }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  // On the home hero the nav spans the full box width with a small margin so
+  // the logo/CTA sit near the box edges; elsewhere it aligns to page content.
+  const innerWidth = fullWidth ? "max-w-none px-8" : "max-w-7xl px-6";
 
   // Sticky so the nav follows you down the page; the announcement bar above it
   // is in normal flow and scrolls away. Transparent while it overlaps the top
@@ -71,7 +75,7 @@ export function Header() {
 
       {/* Desktop header — full-width bar */}
       <header className={`${position} ${surface} z-50 hidden transition-colors duration-200 md:block`}>
-        <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-8 lg:px-12">
+        <div className={`relative mx-auto flex h-16 items-center justify-between ${innerWidth}`}>
           <Link href="/" className="flex items-center">
             <Image
               src="/images/logo-mark.svg"
