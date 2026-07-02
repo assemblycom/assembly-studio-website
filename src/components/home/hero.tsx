@@ -107,6 +107,7 @@ export function Hero() {
   const [boxFocused, setBoxFocused] = useState(false);
   const [hovered, setHovered] = useState<number | null>(null);
   const [videoOpen, setVideoOpen] = useState(false);
+  const [videoExpanded, setVideoExpanded] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -307,20 +308,53 @@ export function Hero() {
         </div>
       </div>
 
-      {/* Floating demo video — opens bottom-right and stays put on scroll */}
-      {videoOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-[360px] max-w-[calc(100vw-2rem)] animate-fade-in overflow-hidden rounded-2xl border border-border bg-background shadow-[0_30px_70px_-20px_rgba(20,20,40,0.45)]">
+      {/* Floating demo video — small in the corner, click to enlarge. Stays
+          put on scroll (fixed). Placeholder — drop in a real <iframe>/<video>. */}
+      {videoOpen && !videoExpanded && (
+        <div className="fixed bottom-6 right-6 z-50 w-[340px] max-w-[calc(100vw-2rem)] animate-fade-in overflow-hidden rounded-2xl border border-border bg-background shadow-[0_16px_44px_-26px_rgba(20,20,40,0.3)]">
           <button
             type="button"
             onClick={() => setVideoOpen(false)}
             aria-label="Close video"
-            className="absolute right-2 top-2 z-10 flex size-7 items-center justify-center rounded-full bg-background/80 text-foreground shadow-sm ring-1 ring-border backdrop-blur transition-colors hover:bg-background"
+            className="absolute right-2 top-2 z-10 flex size-7 items-center justify-center rounded-full bg-background/80 text-foreground ring-1 ring-border backdrop-blur transition-colors hover:bg-background"
           >
             <IconX className="size-4" />
           </button>
-          {/* Placeholder — drop in a real <iframe>/<video> when the demo exists */}
-          <div className="flex aspect-video w-full items-center justify-center bg-muted text-sm text-muted-foreground">
+          <button
+            type="button"
+            onClick={() => setVideoExpanded(true)}
+            aria-label="Enlarge video"
+            className="flex aspect-video w-full cursor-zoom-in items-center justify-center bg-muted text-sm text-muted-foreground transition-colors hover:bg-muted/80"
+          >
             2-minute demo
+          </button>
+        </div>
+      )}
+
+      {/* Enlarged view — click the backdrop to shrink back, ✕ to close */}
+      {videoOpen && videoExpanded && (
+        <div
+          className="fixed inset-0 z-[70] flex animate-fade-in items-center justify-center bg-foreground/40 p-6 backdrop-blur-sm"
+          onClick={() => setVideoExpanded(false)}
+        >
+          <div
+            className="relative w-full max-w-4xl overflow-hidden rounded-2xl border border-border bg-background shadow-[0_40px_90px_-45px_rgba(20,20,40,0.4)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setVideoExpanded(false);
+                setVideoOpen(false);
+              }}
+              aria-label="Close video"
+              className="absolute right-3 top-3 z-10 flex size-8 items-center justify-center rounded-full bg-background/80 text-foreground ring-1 ring-border backdrop-blur transition-colors hover:bg-background"
+            >
+              <IconX className="size-4" />
+            </button>
+            <div className="flex aspect-video w-full items-center justify-center bg-muted text-base text-muted-foreground">
+              2-minute demo
+            </div>
           </div>
         </div>
       )}
