@@ -51,7 +51,7 @@ export function Header({ offsetTop = false }: { offsetTop?: boolean }) {
 
       {/* Desktop header — full-width bar */}
       <header className={`fixed left-0 right-0 ${topClass} z-50 hidden bg-background/80 backdrop-blur-md md:block`}>
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+        <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Link href="/" className="flex items-center">
             <Image
               src="/images/logo-mark.svg"
@@ -62,7 +62,8 @@ export function Header({ offsetTop = false }: { offsetTop?: boolean }) {
             />
           </Link>
 
-          <nav className="flex items-center gap-1">
+          {/* Primary nav — centered on the bar */}
+          <nav className="absolute left-1/2 -translate-x-1/2">
             <ul className="flex items-center">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
@@ -93,8 +94,10 @@ export function Header({ offsetTop = false }: { offsetTop?: boolean }) {
                 </li>
               ))}
             </ul>
+          </nav>
 
-            <div className="mx-2 h-5 w-px bg-border" />
+          {/* Account actions — right */}
+          <div className="flex items-center gap-1">
             <a
               href={APP_URL}
               className="rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -107,7 +110,7 @@ export function Header({ offsetTop = false }: { offsetTop?: boolean }) {
             >
               Get started
             </a>
-          </nav>
+          </div>
         </div>
       </header>
 

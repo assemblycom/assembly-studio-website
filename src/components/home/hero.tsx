@@ -27,6 +27,13 @@ function IconPlay({ className }: IconProps) {
     </svg>
   );
 }
+function IconX({ className }: IconProps) {
+  return (
+    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M6 6l12 12M18 6L6 18" />
+    </svg>
+  );
+}
 function IconPaperclip({ className }: IconProps) {
   return (
     <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -99,6 +106,7 @@ export function Hero() {
   const [userInput, setUserInput] = useState("");
   const [boxFocused, setBoxFocused] = useState(false);
   const [hovered, setHovered] = useState<number | null>(null);
+  const [videoOpen, setVideoOpen] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -135,7 +143,7 @@ export function Hero() {
         <div className="flex justify-center">
           <button
             type="button"
-            onClick={() => window.open(APP_URL)}
+            onClick={() => setVideoOpen(true)}
             className="group inline-flex items-center gap-3 rounded-full border border-border bg-muted/50 py-1.5 pl-1.5 pr-4 text-left transition-colors hover:bg-muted"
           >
             <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground transition-transform group-hover:scale-105">
@@ -290,7 +298,7 @@ export function Hero() {
       <div
         ref={previewRef}
         aria-hidden
-        className={`pointer-events-none fixed left-0 top-0 z-40 hidden h-[200px] w-[300px] overflow-hidden rounded-2xl border border-border bg-muted shadow-[0_30px_70px_-40px_rgba(20,20,40,0.5)] transition-[opacity,scale] duration-300 ease-out md:block ${
+        className={`pointer-events-none fixed left-0 top-0 z-40 hidden h-[150px] w-[224px] overflow-hidden rounded-2xl border border-border bg-muted shadow-[0_30px_70px_-40px_rgba(20,20,40,0.5)] transition-[opacity,scale] duration-300 ease-out md:block ${
           hovered !== null ? "scale-100 opacity-100" : "scale-95 opacity-0"
         }`}
       >
@@ -298,6 +306,24 @@ export function Hero() {
           {hovered !== null ? FEATURED[hovered].title : ""}
         </div>
       </div>
+
+      {/* Floating demo video — opens bottom-right and stays put on scroll */}
+      {videoOpen && (
+        <div className="fixed bottom-6 right-6 z-50 w-[360px] max-w-[calc(100vw-2rem)] animate-fade-in overflow-hidden rounded-2xl border border-border bg-background shadow-[0_30px_70px_-20px_rgba(20,20,40,0.45)]">
+          <button
+            type="button"
+            onClick={() => setVideoOpen(false)}
+            aria-label="Close video"
+            className="absolute right-2 top-2 z-10 flex size-7 items-center justify-center rounded-full bg-background/80 text-foreground shadow-sm ring-1 ring-border backdrop-blur transition-colors hover:bg-background"
+          >
+            <IconX className="size-4" />
+          </button>
+          {/* Placeholder — drop in a real <iframe>/<video> when the demo exists */}
+          <div className="flex aspect-video w-full items-center justify-center bg-muted text-sm text-muted-foreground">
+            2-minute demo
+          </div>
+        </div>
+      )}
     </section>
   );
 }
