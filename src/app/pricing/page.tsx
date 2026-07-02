@@ -29,8 +29,9 @@ export default function PricingPage() {
         <PricingPlans />
       </Section>
 
-      {/* Feature comparison */}
-      <Section className="pt-0">
+      {/* Feature comparison — hidden on mobile (like Notion); the wide table
+          isn't usable on small screens, where the plan cards cover the need. */}
+      <Section className="hidden pt-0 md:block">
         <FeatureComparison />
       </Section>
     </>

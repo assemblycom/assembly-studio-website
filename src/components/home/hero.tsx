@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { APP_URL } from "@/lib/constants";
 import { getFeaturedTemplates } from "@/lib/templates";
@@ -38,6 +38,15 @@ function IconPaperclip({ className }: IconProps) {
   return (
     <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+    </svg>
+  );
+}
+
+function IconFile({ className }: IconProps) {
+  return (
+    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M14 3v5h5" />
+      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" />
     </svg>
   );
 }
@@ -83,6 +92,15 @@ const GLYPHS = [
   <GlyphCheck key="k" />,
 ];
 
+// Demo video — paste the YouTube video ID here (the part after `?v=` or
+// `youtu.be/`, e.g. "dQw4w9WgXcQ"). Leave empty to keep the grey placeholder.
+const DEMO_VIDEO_ID = "";
+// youtube-nocookie keeps the embed privacy-friendly; rel=0 hides unrelated
+// videos at the end, modestbranding trims the YouTube chrome.
+const demoEmbedUrl = (autoplay: boolean) =>
+  `https://www.youtube-nocookie.com/embed/${DEMO_VIDEO_ID}?rel=0&modestbranding=1&playsinline=1${autoplay ? "&autoplay=1" : ""}`;
+const demoThumbUrl = `https://img.youtube.com/vi/${DEMO_VIDEO_ID}/hqdefault.jpg`;
+
 // Pool the typeahead draws from — matched by substring against what you type.
 const SUGGESTIONS = [
   "A client onboarding portal with progress tracking",
@@ -107,9 +125,39 @@ export function Hero() {
   const [hovered, setHovered] = useState<number | null>(null);
   const [videoOpen, setVideoOpen] = useState(false);
   const [videoExpanded, setVideoExpanded] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+
+  // Merge new picks with what's already attached, de-duped by name+size so the
+  // same file picked twice doesn't stack. Snapshot the FileList into an array
+  // up front — the input is reset right after this call, which would otherwise
+  // empty the live FileList before the state updater reads it.
+  const addFiles = (picked: FileList | null) => {
+    const incoming = picked ? Array.from(picked) : [];
+    if (!incoming.length) return;
+    setFiles((prev) => {
+      const key = (f: File) => `${f.name}:${f.size}`;
+      const seen = new Set(prev.map(key));
+      return [...prev, ...incoming.filter((f) => !seen.has(key(f)))];
+    });
+  };
+  const removeFile = (i: number) =>
+    setFiles((prev) => prev.filter((_, idx) => idx !== i));
+
+  // Object URLs for image previews; non-images get null (rendered as a card).
+  // Revoke on change/unmount so we don't leak blobs.
+  const previews = useMemo(
+    () => files.map((f) => (f.type.startsWith("image/") ? URL.createObjectURL(f) : null)),
+    [files],
+  );
+  useEffect(
+    () => () => previews.forEach((url) => url && URL.revokeObjectURL(url)),
+    [previews],
+  );
+  const allImages = files.length > 0 && previews.every(Boolean);
 
   // Inline contextual completion — the first suggestion that continues what the
   // user has typed, surfaced as ghost text they can accept with Tab or →. No
@@ -213,17 +261,92 @@ export function Hero() {
                   className="relative h-full w-full resize-none bg-transparent px-1 text-base leading-relaxed text-foreground/80 caret-foreground/70 outline-none placeholder:text-muted-foreground"
                 />
               </div>
+
+              {/* Attached files — compact preview cards. Images show a
+                  thumbnail; everything else shows a file card with its type.
+                  Each has a hover ✕ to remove. The picker is the hidden input
+                  below, triggered by the Attach files button. */}
+              {files.length > 0 && (
+                // Single horizontal row that scrolls sideways (scrollbar
+                // hidden) rather than wrapping — mirrors the app-builder chat's
+                // AttachmentChipRow so the box height stays fixed with many files.
+                <div className="mt-3 flex gap-2 overflow-x-auto py-1 [&::-webkit-scrollbar]:hidden">
+                  {files.map((f, i) => {
+                    const ext = f.name.includes(".")
+                      ? f.name.split(".").pop()!.toUpperCase()
+                      : "FILE";
+                    const preview = previews[i];
+                    // 64px thumbnails when everything is an image, shrinking to
+                    // 48px once file cards are mixed in so heights stay tidy.
+                    const imgSize = allImages ? "size-16" : "size-12";
+                    return (
+                      <div
+                        key={`${f.name}:${f.size}`}
+                        className="group/att relative shrink-0"
+                        title={f.name}
+                      >
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeFile(i);
+                          }}
+                          aria-label={`Remove ${f.name}`}
+                          className="absolute right-1 top-1 z-10 flex size-5 items-center justify-center rounded-full bg-background text-foreground opacity-0 shadow-sm ring-1 ring-border transition-opacity group-hover/att:opacity-100"
+                        >
+                          <IconX className="size-3" />
+                        </button>
+                        {preview ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={preview}
+                            alt={f.name}
+                            className={`${imgSize} rounded-lg border border-border object-cover`}
+                          />
+                        ) : (
+                          <div className="flex h-12 items-center gap-2 rounded-lg border border-border bg-muted/40 pl-1.5 pr-3">
+                            <span className="flex size-9 shrink-0 items-center justify-center rounded-md bg-background text-muted-foreground ring-1 ring-border">
+                              <IconFile className="size-4" />
+                            </span>
+                            <span className="flex min-w-0 flex-col">
+                              <span className="max-w-[120px] truncate text-xs text-foreground">
+                                {f.name}
+                              </span>
+                              <span className="text-[11px] text-muted-foreground">
+                                {ext}
+                              </span>
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  addFiles(e.target.files);
+                  // Reset so picking the same file again still fires onChange.
+                  e.target.value = "";
+                }}
+              />
+
               <div className="mt-4 flex items-center justify-between">
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    window.open(APP_URL);
+                    fileInputRef.current?.click();
                   }}
                   className="flex items-center gap-2 rounded-full bg-muted px-3.5 py-2 text-sm text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground active:scale-[0.98]"
                 >
                   <IconPaperclip className="size-4" />
-                  Attach files
+                  {files.length > 0 ? `${files.length} attached` : "Attach files"}
                 </button>
                 <button
                   type="button"
@@ -318,9 +441,23 @@ export function Hero() {
             type="button"
             onClick={() => setVideoExpanded(true)}
             aria-label="Enlarge video"
-            className="flex aspect-video w-full cursor-zoom-in items-center justify-center bg-muted text-sm text-muted-foreground transition-colors hover:bg-muted/80"
+            className="group/thumb relative flex aspect-video w-full cursor-zoom-in items-center justify-center overflow-hidden bg-muted text-sm text-muted-foreground transition-colors hover:bg-muted/80"
           >
-            2-minute demo
+            {DEMO_VIDEO_ID ? (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={demoThumbUrl}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <span className="relative flex size-11 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm ring-1 ring-border transition-transform group-hover/thumb:scale-105">
+                  <IconPlay className="size-4" />
+                </span>
+              </>
+            ) : (
+              "2-minute demo"
+            )}
           </button>
         </div>
       )}
@@ -346,9 +483,19 @@ export function Hero() {
             >
               <IconX className="size-4" />
             </button>
-            <div className="flex aspect-video w-full items-center justify-center bg-muted text-base text-muted-foreground">
-              2-minute demo
-            </div>
+            {DEMO_VIDEO_ID ? (
+              <iframe
+                src={demoEmbedUrl(true)}
+                title="2-minute demo"
+                className="aspect-video w-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            ) : (
+              <div className="flex aspect-video w-full items-center justify-center bg-muted text-base text-muted-foreground">
+                2-minute demo
+              </div>
+            )}
           </div>
         </div>
       )}
