@@ -241,15 +241,17 @@ export function PromptComposer({
     if (userInput.trim()) window.open(APP_URL);
   };
 
-  // The hero starts as a compact arrow-only circle and grows into a labeled
-  // "Start building" pill the moment there's a prompt to send. The CTA passes
-  // submitLabel explicitly, so it stays a pill throughout.
+  // Every composer starts as a compact arrow-only circle and grows into a
+  // labeled pill the moment there's a prompt to send — including the CTA, which
+  // provides the label to use once typing begins.
   const hasInput = userInput.trim().length > 0;
   const pillLabel = submitLabel ?? "Start building";
-  const showPill = submitLabel != null || hasInput;
+  const showPill = hasInput;
 
   return (
-    <div className="relative text-left">
+    // scroll-mt keeps the box clear of the sticky header when the mobile
+    // keyboard scrolls the focused field into view.
+    <div className="relative scroll-mt-24 text-left">
       <div className="gradient-border relative rounded-2xl" data-focused={boxFocused}>
         <div
           onClick={() => inputRef.current?.focus()}

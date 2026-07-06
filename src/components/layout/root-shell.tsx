@@ -20,8 +20,15 @@ export function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const isSecurity = pathname === "/security";
-  const isCustomers =
-    pathname === "/customers" || pathname.startsWith("/customers/");
+  // Content pages that share the landing page's kinetic-wordmark reveal footer
+  // (but keep the standard, non-dark header). Security is intentionally excluded
+  // — it has its own distinct reveal panel (FooterBars).
+  const usesWordmarkFooter =
+    pathname === "/customers" ||
+    pathname.startsWith("/customers/") ||
+    pathname === "/pricing" ||
+    pathname === "/templates" ||
+    pathname.startsWith("/templates/");
 
   // The announcement bar only runs on the landing page.
   const bar = <AnnouncementBar />;
@@ -46,9 +53,9 @@ export function RootShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Customers reuses the landing page's reveal footer — the rounded footer over
-  // the kinetic wordmark panel — but keeps the standard (non-dark) header.
-  if (isCustomers) {
+  // Customers, pricing, and templates reuse the landing page's reveal footer —
+  // the rounded footer over the kinetic wordmark panel — with a standard header.
+  if (usesWordmarkFooter) {
     return (
       <>
         <div className="fixed inset-x-0 bottom-0 z-0 h-[60vh] overflow-hidden bg-[#7da4ff]">

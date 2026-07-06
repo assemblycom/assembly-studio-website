@@ -55,7 +55,9 @@ export function Testimonials() {
               onFocus={() => setActive(i)}
               aria-expanded={isActive}
               className={`group relative flex overflow-hidden rounded-2xl border border-border bg-muted text-left transition-[flex-grow,background-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                isActive ? "flex-[6]" : "flex-[1] hover:bg-muted/70 md:min-w-[170px]"
+                isActive
+                  ? "md:flex-[6]"
+                  : "hover:bg-muted/70 md:flex-[1] md:min-w-[170px]"
               }`}
             >
               {/* Collapsed label — photo above the company name; hidden active */}
@@ -79,7 +81,7 @@ export function Testimonials() {
               {/* Expanded content */}
               <div
                 className={`flex min-w-0 flex-col justify-between p-8 transition-opacity duration-300 ${
-                  isActive ? "opacity-100 delay-100" : "opacity-0"
+                  isActive ? "opacity-100 md:delay-100" : "opacity-100 md:opacity-0"
                 }`}
               >
                 <p className="text-lg leading-relaxed md:text-xl">
