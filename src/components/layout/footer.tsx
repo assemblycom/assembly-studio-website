@@ -26,35 +26,44 @@ const FOOTER_SECTIONS: { title: string; links: NavLink[] }[] = [
 ];
 
 export function Footer({ rounded = false }: { rounded?: boolean }) {
+  // The landing page (rounded variant) is a dark sheet with a rounded bottom
+  // that lifts to reveal the green wordmark panel below; light contents. Every
+  // other page keeps the neutral muted footer with dark contents.
+  const heading = rounded ? "text-white" : "";
+  const muted = rounded ? "text-white/50" : "text-muted-foreground";
+  const linkHover = rounded ? "hover:text-white" : "hover:text-foreground";
   return (
     <footer
-      className={`bg-muted ${rounded ? "rounded-b-[2.5rem]" : ""}`}
+      className={
+        rounded
+          ? "rounded-b-[2.5rem] bg-[#101010] text-white"
+          : "bg-muted"
+      }
     >
       {/* Footer links */}
       <div className="mx-auto max-w-7xl px-6 py-16">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           <div className="col-span-2 md:col-span-1">
+            {/* Just the logo icon — no square, wordmark, or copy. */}
             <Image
-              src="/images/logo-full.svg"
+              src="/images/logo-mark.svg"
               alt="Assembly Studio"
-              width={160}
-              height={20}
+              width={28}
+              height={28}
+              className={rounded ? "invert" : ""}
             />
-            <p className="mt-3 text-sm text-muted-foreground">
-              Build powerful AI workflows for your business.
-            </p>
           </div>
 
           {FOOTER_SECTIONS.map((section) => (
             <div key={section.title}>
-              <p className="text-sm font-medium">{section.title}</p>
+              <p className={`text-sm font-medium ${heading}`}>{section.title}</p>
               <ul className="mt-3 flex flex-col gap-2">
                 {section.links.map((link) => (
                   <li key={link.label}>
                     {link.disabled ? (
                       <span
                         aria-disabled="true"
-                        className="cursor-default text-sm text-muted-foreground"
+                        className={`cursor-default text-sm ${muted}`}
                       >
                         {link.label}
                       </span>
@@ -63,14 +72,14 @@ export function Footer({ rounded = false }: { rounded?: boolean }) {
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                        className={`text-sm ${muted} transition-colors ${linkHover}`}
                       >
                         {link.label}
                       </a>
                     ) : (
                       <Link
                         href={link.href}
-                        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                        className={`text-sm ${muted} transition-colors ${linkHover}`}
                       >
                         {link.label}
                       </Link>
@@ -88,7 +97,7 @@ export function Footer({ rounded = false }: { rounded?: boolean }) {
         <div className="mx-auto flex max-w-7xl flex-col gap-8 px-6 pb-8">
           {/* Ask AI */}
           <div>
-            <p className="text-sm text-muted-foreground">
+            <p className={`text-sm ${muted}`}>
               Ask AI about Assembly Studio
             </p>
             <div className="mt-3 flex items-center gap-2">

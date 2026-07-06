@@ -10,8 +10,8 @@ const FINAL_HOLD = 1200; // ms to hold the full word before resetting
  * Kinetic footer wordmark (Batata Letters style): the word reveals one letter
  * at a time, and on every step the whole thing is stretched horizontally to fill
  * the full width — so a single letter spans everything, then each new letter
- * compresses them all thinner until "STUDIO" fits, holds, and restarts. White
- * PP Mori, all caps, on the dark panel below the footer. Decorative only.
+ * compresses them all thinner until "STUDIO" fits, holds, and restarts. Dark
+ * PP Mori, all caps, on the green panel below the footer. Decorative only.
  */
 export function StudioWordmark() {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -53,7 +53,7 @@ export function StudioWordmark() {
     >
       <div
         ref={wordRef}
-        className="whitespace-nowrap pl-[2vw] font-medium uppercase leading-none text-white"
+        className="whitespace-nowrap pl-[2vw] font-medium uppercase leading-none text-[#101010]"
         style={{
           fontSize: "34vh",
           transformOrigin: "left center",

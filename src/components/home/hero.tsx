@@ -43,11 +43,11 @@ export function Hero() {
   };
 
   return (
-    <section className="px-4 pb-24 md:-mt-16">
+    <section className="-mt-14 pb-24 md:-mt-16 md:px-4">
       {/* A rounded dark panel on every breakpoint. On desktop the transparent
           nav overlaps its top; on mobile it sits just below the header so the
           rounded corners stay visible. */}
-      <div className="relative overflow-hidden rounded-[32px] bg-[#101010] pb-16 pt-20 md:pb-24 md:pt-28">
+      <div className="relative overflow-hidden bg-[#101010] pb-28 pt-20 md:rounded-[32px] md:pb-24 md:pt-28">
         <div className="mx-auto max-w-7xl px-6">
           {/* Watch-how-it-works pill — eyebrow above the title */}
           <div className="flex justify-center">
@@ -59,12 +59,14 @@ export function Hero() {
               className="group inline-flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 py-1.5 pl-1.5 pr-4 text-left backdrop-blur-md transition-colors hover:bg-white/15"
             >
               <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl transition-transform group-hover:scale-105">
-                {/* Video thumbnail preview behind a small glass play badge. */}
+                {/* Video thumbnail preview behind a small glass play badge.
+                    Scaled up to crop the frame's letterbox bars so the footage
+                    fills the square. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={demoThumbUrl}
                   alt=""
-                  className="absolute inset-0 h-full w-full object-cover"
+                  className="absolute inset-0 h-full w-full scale-[1.5] object-cover"
                 />
                 <span className="relative flex size-5 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm">
                   <IconPlay className="size-2.5" />

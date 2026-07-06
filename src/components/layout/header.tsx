@@ -74,35 +74,39 @@ export function Header({
 
   return (
     <>
-      {/* Mobile header — full-bleed bar: just the logo and a grid menu button.
-          The CTA lives inside the menu, not the bar. */}
-      <header className={`${position} z-50 flex h-14 items-center justify-between px-6 backdrop-blur-md transition-colors duration-200 md:hidden ${scrolled ? "bg-background/80" : "bg-muted/60"}`}>
-        <Link href="/" className="flex items-center">
-          <Image
-            src="/images/logo-mark.svg"
-            alt="Assembly Studio"
-            width={22}
-            height={22}
-            priority
-          />
-        </Link>
-        <button
-          onClick={() => setMobileMenuOpen(true)}
-          aria-label="Open menu"
-          className="flex size-9 items-center justify-center"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-            <circle cx="5" cy="5" r="1.6" />
-            <circle cx="12" cy="5" r="1.6" />
-            <circle cx="19" cy="5" r="1.6" />
-            <circle cx="5" cy="12" r="1.6" />
-            <circle cx="12" cy="12" r="1.6" />
-            <circle cx="19" cy="12" r="1.6" />
-            <circle cx="5" cy="19" r="1.6" />
-            <circle cx="12" cy="19" r="1.6" />
-            <circle cx="19" cy="19" r="1.6" />
-          </svg>
-        </button>
+      {/* Mobile header — mirrors the desktop nav: transparent with light
+          contents over the dark hero, settling into the same dark glass pill on
+          scroll. Logo on the left, grid menu button on the right. */}
+      <header className={`${position} z-50 transition-[padding] ${ease} md:hidden ${scrolled ? "px-3 pt-2" : ""}`}>
+        <div className={`flex items-center justify-between transition-[height,padding,background-color,box-shadow,border-radius,backdrop-filter] ${ease} ${scrolled ? `h-12 px-4 ${pill}` : "h-14 px-5"}`}>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/images/logo-mark.svg"
+              alt="Assembly Studio"
+              width={22}
+              height={22}
+              priority
+              className={`transition-[filter] ${ease} ${logoInvert}`}
+            />
+          </Link>
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            aria-label="Open menu"
+            className={`flex size-9 items-center justify-center transition-colors ${ease} ${lightContent ? "text-background" : "text-foreground"}`}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <circle cx="5" cy="5" r="1.6" />
+              <circle cx="12" cy="5" r="1.6" />
+              <circle cx="19" cy="5" r="1.6" />
+              <circle cx="5" cy="12" r="1.6" />
+              <circle cx="12" cy="12" r="1.6" />
+              <circle cx="19" cy="12" r="1.6" />
+              <circle cx="5" cy="19" r="1.6" />
+              <circle cx="12" cy="19" r="1.6" />
+              <circle cx="19" cy="19" r="1.6" />
+            </svg>
+          </button>
+        </div>
       </header>
 
       {/* Desktop header — full-width bar at the top, floating dark pill on scroll */}

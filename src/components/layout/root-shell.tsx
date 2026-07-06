@@ -35,7 +35,7 @@ export function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       {/* Dark panel revealed below the footer — home for the kinetic wordmark. */}
-      <div className="fixed inset-x-0 bottom-0 z-0 h-[60vh] overflow-hidden bg-[#101010]">
+      <div className="fixed inset-x-0 bottom-0 z-0 h-[60vh] overflow-hidden bg-[#7da4ff]">
         <StudioWordmark />
       </div>
       {/* White content wrapper (square bottom). The announcement bar scrolls
