@@ -36,7 +36,7 @@ function CheckIcon() {
 
 export default function DemoPage() {
   return (
-    <section className="px-6 pb-24 pt-28 md:pt-36">
+    <section className="px-6 pb-24 pt-20 md:pt-36">
       <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-2 md:gap-16 lg:gap-24">
         {/* Left — value proposition */}
         <div>
