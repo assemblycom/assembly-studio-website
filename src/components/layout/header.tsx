@@ -11,38 +11,49 @@ const SCROLL_THRESHOLD = 40;
 
 export function Header({
   fullWidth = false,
-  scrim = true,
+  darkTop = false,
 }: {
   fullWidth?: boolean;
-  // The scroll scrim masks content dissolving under the floating pill. Pages
-  // that lead with full-bleed imagery (the customers photo tunnel) look worse
-  // with a white band veiling the art, so they opt out.
-  scrim?: boolean;
+  // When the page leads with a dark hero, the bar sits over it at rest — so its
+  // contents (logo, links, CTA) need to be light even before the pill appears.
+  darkTop?: boolean;
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  // Light contents whenever the bar is on a dark surface: the scrolled pill, or
+  // a dark-hero page at rest.
+  const lightContent = scrolled || darkTop;
 
   // Sticky so the nav follows you down. At the top it's a transparent, dark-on-
   // light bar; once scrolled it settles into a floating capsule ("pill") with
   // light contents, à la Superpower.
   const position = "sticky top-0";
-  // Soft smoked-glass capsule — a muted, translucent charcoal (not near-black)
-  // with a faint ring and a light shadow.
+  // Soft smoked-glass capsule — a translucent charcoal with a faint ring, light
+  // shadow, and a backdrop blur that frosts whatever scrolls behind it.
   const pill =
-    "rounded-full bg-foreground/70 text-background shadow-[0_6px_20px_-16px_rgba(0,0,0,0.15)] ring-1 ring-white/10 backdrop-blur-md";
+    "rounded-full bg-foreground/70 text-background shadow-[0_6px_20px_-16px_rgba(0,0,0,0.15)] ring-1 ring-white/10 backdrop-blur-xl";
+
+  // One shared easing/duration for the rest→pill transition so every animated
+  // property (chrome, geometry, logo tint) settles together on the same soft
+  // ease-out curve — no property snapping ahead of the others.
+  const ease =
+    "duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none";
 
   // Keep the same rail width at rest and when scrolled so the capsule doesn't
   // visibly shrink. The scrolled outer gutter (px-6) sits just inside the hero
   // box gutter (px-4) so the pill doesn't touch the box edges.
   const maxWidth = fullWidth ? "max-w-none" : "max-w-7xl";
   const restInner = `h-16 ${maxWidth} ${fullWidth ? "px-8" : "px-6"}`;
-  const scrolledInner = `h-14 ${maxWidth} px-4 ${pill}`;
+  // Left keeps a small inset for the logo mark; the right is tightened so the
+  // rounded end of the "Get started" capsule nests concentrically inside the
+  // pill's rounded end (gap ≈ pill radius − button radius) instead of floating.
+  const scrolledInner = `h-12 ${maxWidth} pl-4 pr-1.5 ${pill}`;
 
-  // Content colors flip when the bar goes dark.
-  const linkCls = `rounded-full px-3 py-1.5 text-sm transition-colors ${scrolled ? "text-background/70 hover:text-background" : "text-muted-foreground hover:text-foreground"}`;
-  const disabledCls = `cursor-default rounded-full px-3 py-1.5 text-sm ${scrolled ? "text-background/50" : "text-muted-foreground"}`;
-  const ctaCls = `rounded-full px-4 py-1.5 text-sm transition-[background-color,color,opacity] hover:opacity-90 ${scrolled ? "bg-background text-foreground" : "bg-foreground text-background"}`;
-  const logoInvert = scrolled ? "brightness-0 invert" : "";
+  // Content colors flip when the bar is on a dark surface.
+  const linkCls = `rounded-full px-2 py-1.5 text-sm transition-colors lg:px-3 ${lightContent ? "text-background/70 hover:text-background" : "text-muted-foreground hover:text-foreground"}`;
+  const disabledCls = `cursor-default rounded-full px-2 py-1.5 text-sm lg:px-3 ${lightContent ? "text-background/50" : "text-muted-foreground"}`;
+  const ctaCls = `rounded-full px-4 py-1.5 text-sm transition-[background-color,color,opacity] hover:opacity-90 ${lightContent ? "bg-background text-foreground" : "bg-foreground text-background"}`;
+  const logoInvert = lightContent ? "brightness-0 invert" : "";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > SCROLL_THRESHOLD);
@@ -63,16 +74,6 @@ export function Header({
 
   return (
     <>
-      {/* Scrim — a soft, full-width frosted band behind the floating pill that
-          fades in on scroll, so page content (and sticky page headers) dissolve
-          under the nav instead of peeking around the capsule. Desktop only. */}
-      {scrim && (
-        <div
-          aria-hidden
-          className={`pointer-events-none fixed inset-x-0 top-0 z-40 hidden h-20 bg-background backdrop-blur-md transition-opacity duration-300 [mask-image:linear-gradient(to_bottom,black_90%,transparent)] [-webkit-mask-image:linear-gradient(to_bottom,black_90%,transparent)] md:block ${scrolled ? "opacity-100" : "opacity-0"}`}
-        />
-      )}
-
       {/* Mobile header — full-bleed bar: just the logo and a grid menu button.
           The CTA lives inside the menu, not the bar. */}
       <header className={`${position} z-50 flex h-14 items-center justify-between px-6 backdrop-blur-md transition-colors duration-200 md:hidden ${scrolled ? "bg-background/80" : "bg-muted/60"}`}>
@@ -105,8 +106,11 @@ export function Header({
       </header>
 
       {/* Desktop header — full-width bar at the top, floating dark pill on scroll */}
-      <header className={`${position} z-50 hidden transition-all duration-300 md:block ${scrolled ? "px-6 pt-3" : ""}`}>
-        <div className={`relative mx-auto flex items-center justify-between transition-all duration-300 ${scrolled ? scrolledInner : restInner}`}>
+      <header className={`${position} z-50 hidden transition-[padding] ${ease} md:block ${scrolled ? "px-6 pt-2" : ""}`}>
+        <div className={`relative mx-auto flex items-center transition-[height,padding,background-color,box-shadow,border-radius,backdrop-filter] ${ease} ${scrolled ? scrolledInner : restInner}`}>
+          {/* Three balanced columns keep the nav truly centred while the equal
+              side columns guarantee it never crowds the logo or the actions. */}
+          <div className="flex flex-1 items-center">
           <Link href="/" className="flex items-center">
             <Image
               src="/images/logo-mark.svg"
@@ -114,12 +118,13 @@ export function Header({
               width={22}
               height={22}
               priority
-              className={logoInvert}
+              className={`transition-[filter] ${ease} ${logoInvert}`}
             />
           </Link>
+          </div>
 
-          {/* Primary nav — centered on the bar */}
-          <nav className="absolute left-1/2 -translate-x-1/2">
+          {/* Primary nav — centered between the two equal side columns */}
+          <nav className="flex shrink-0 justify-center">
             <ul className="flex items-center">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
@@ -153,7 +158,7 @@ export function Header({
           </nav>
 
           {/* Account actions — right */}
-          <div className="flex items-center gap-1">
+          <div className="flex flex-1 items-center justify-end gap-1">
             <a
               href={APP_URL}
               className={linkCls}

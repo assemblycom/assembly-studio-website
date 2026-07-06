@@ -1,7 +1,25 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Section } from "@/components/ui/section";
 import { FAQ, type FAQEntry } from "@/components/home/faq";
 import { DEMO_URL, TRUST_CENTER_URL } from "@/lib/constants";
+
+// Curated customer spotlight for the social-proof band — teaser for the full
+// Capital One Luxury Travel case study (see src/lib/case-studies.ts).
+const SPOTLIGHT = {
+  company: "Capital One Luxury Travel",
+  href: "/customers/capital-one-luxury-travel",
+  image: "/images/customers/capital-one-luxury-travel.jpg",
+  stat: { value: "1,100+", label: "Hotel partners onboarded" },
+  title:
+    "How Capital One Luxury Travel balanced 'build vs. buy' with Assembly",
+  quote:
+    "Before Assembly, we managed hotel partners through spreadsheets and email chains — it just didn't scale.",
+  person: {
+    name: "Phillip LaRue",
+    role: "Sr. Director of Luxury Travel at Capital One",
+  },
+};
 
 export const metadata: Metadata = {
   title: "Security",
@@ -173,14 +191,67 @@ export default function SecurityPage() {
         </div>
       </Section>
 
-      {/* Social proof — placeholder until logos / quotes are ready */}
+      {/* Social proof — customer spotlight */}
       <Section className="pt-0">
-        <div className="mx-auto flex max-w-4xl flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border bg-muted/30 px-6 py-16 text-center">
-          <p className="text-sm text-muted-foreground">Social proof</p>
-          <p className="max-w-md text-sm text-muted-foreground/70">
-            Placeholder for customer logos, security quotes, or compliance
-            badges.
-          </p>
+        <div className="mx-auto max-w-6xl">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="size-1.5 rounded-full bg-foreground" />
+            Customer spotlight
+          </div>
+          <h2 className="mt-4 max-w-2xl text-3xl font-medium tracking-tight md:text-4xl">
+            See how enterprises trust Assembly at scale
+          </h2>
+
+          <div className="mt-10 grid gap-4 overflow-hidden rounded-3xl border border-border p-3 md:grid-cols-2 md:p-4">
+            {/* Left — photo with a stat overlay */}
+            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl md:aspect-auto">
+              <Image
+                src={SPOTLIGHT.image}
+                alt={SPOTLIGHT.company}
+                fill
+                sizes="(min-width: 768px) 45vw, 100vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
+              <div className="absolute bottom-6 left-6 text-background">
+                <p className="text-sm text-background/80">
+                  {SPOTLIGHT.stat.label}
+                </p>
+                <p className="text-4xl font-medium tracking-tight">
+                  {SPOTLIGHT.stat.value}
+                </p>
+              </div>
+            </div>
+
+            {/* Right — headline, quote, attribution, CTA */}
+            <div className="flex flex-col justify-center px-2 py-4 md:px-8">
+              <h3 className="text-2xl font-medium tracking-tight">
+                {SPOTLIGHT.title}
+              </h3>
+              <p className="mt-6 leading-relaxed text-muted-foreground">
+                &ldquo;{SPOTLIGHT.quote}&rdquo;
+              </p>
+              <div className="mt-6 flex items-center gap-3">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground">
+                  {SPOTLIGHT.person.name.charAt(0)}
+                </span>
+                <span className="flex flex-col">
+                  <span className="text-sm text-foreground">
+                    {SPOTLIGHT.person.name}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {SPOTLIGHT.person.role}
+                  </span>
+                </span>
+              </div>
+              <a
+                href={SPOTLIGHT.href}
+                className="mt-8 inline-block w-fit rounded-full bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
+              >
+                Learn more
+              </a>
+            </div>
+          </div>
         </div>
       </Section>
 

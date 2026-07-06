@@ -49,6 +49,20 @@ const PROMPT_IDEAS = [
 
 const upperFirst = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
+// Animated placeholder — a static verb prefix plus a rotating example of what
+// you can build. Rotation stops the moment the user types (the placeholder is
+// gone by then). Examples mirror the prompt ideas above.
+const PLACEHOLDER_PREFIX = "Assembly Studio build ";
+const PLACEHOLDER_EXAMPLES = [
+  "a client intake form",
+  "a client engagement dashboard",
+  "a client project tracker",
+  "a content approval flow",
+  "a document collection checklist",
+  "a proposal clients can e-sign",
+];
+const PLACEHOLDER_ROTATE_MS = 2600;
+
 // Openings people actually type, expanded into full completions. Order matters —
 // the first pool entry that continues what's typed wins, so verb-led phrasings
 // come before the bare "A …" fallback.
@@ -65,17 +79,17 @@ const PROMPT_POOL = PROMPT_IDEAS.flatMap(({ head, topic, tail }) => {
 });
 
 export function PromptComposer({
-  placeholder = "Describe the app you want to build…",
   ariaLabel = "Describe what to build",
   // When set, the submit control is a labeled pill (e.g. "Start building");
   // otherwise it's the compact arrow-only circle used in the hero.
   submitLabel,
 }: {
-  placeholder?: string;
   ariaLabel?: string;
   submitLabel?: string;
 }) {
   const [userInput, setUserInput] = useState("");
+  // Index of the rotating placeholder example (only advances while empty).
+  const [exampleIndex, setExampleIndex] = useState(0);
   // AI-generated continuation, when the /api/complete route returns one. Falls
   // back to the curated pool below whenever this is empty (no key, no match, or
   // still loading).
@@ -104,6 +118,17 @@ export function PromptComposer({
   };
   const removeFile = (i: number) =>
     setFiles((prev) => prev.filter((_, idx) => idx !== i));
+
+  // Cycle the placeholder example while the box is empty; stop once the user
+  // starts typing so nothing animates behind their text.
+  useEffect(() => {
+    if (userInput) return;
+    const id = setInterval(
+      () => setExampleIndex((i) => (i + 1) % PLACEHOLDER_EXAMPLES.length),
+      PLACEHOLDER_ROTATE_MS,
+    );
+    return () => clearInterval(id);
+  }, [userInput]);
 
   // Object URLs for image previews; non-images get null (rendered as a card).
   // Revoke on change/unmount so we don't leak blobs.
@@ -174,14 +199,28 @@ export function PromptComposer({
 
   return (
     <div className="relative text-left">
-      <div className="shimmer-border relative rounded-2xl" data-focused={boxFocused}>
+      <div className="gradient-border relative rounded-2xl" data-focused={boxFocused}>
         <div
           onClick={() => inputRef.current?.focus()}
-          className={`flex min-h-[152px] cursor-text flex-col rounded-2xl border bg-background p-4 shadow-sm transition-all duration-200 ${
-            boxFocused ? "border-foreground/20 shadow-md" : "border-border"
+          className={`flex min-h-[152px] cursor-text flex-col rounded-2xl bg-background p-4 shadow-sm transition-all duration-200 ${
+            boxFocused ? "shadow-md" : ""
           }`}
         >
           <div className="relative flex-1">
+            {/* Animated placeholder — static verb + a rotating example. Only
+                while empty; the keyed span re-mounts each rotation so the new
+                example fades in. */}
+            {!userInput && (
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 px-1 text-base leading-relaxed text-muted-foreground"
+              >
+                {PLACEHOLDER_PREFIX}
+                <span key={exampleIndex} className="animate-prompt inline-block">
+                  {PLACEHOLDER_EXAMPLES[exampleIndex]}
+                </span>
+              </div>
+            )}
             {/* Ghost completion sits behind the textarea, aligned to the typed
                 text; the typed portion is transparent so only the suggested
                 remainder shows through. */}
@@ -215,7 +254,6 @@ export function PromptComposer({
                 }
               }}
               rows={3}
-              placeholder={placeholder}
               aria-label={ariaLabel}
               spellCheck={false}
               className="relative h-full w-full resize-none bg-transparent px-1 text-base leading-relaxed text-foreground/80 caret-foreground/70 outline-none placeholder:text-muted-foreground"

@@ -177,10 +177,18 @@ export function FeatureComparison() {
 
       <div className="mt-10 overflow-x-auto md:overflow-visible">
         <div className="min-w-[760px] md:min-w-0">
-          {/* Sticky plan header */}
+          {/* Sticky plan header. The floating nav pill isn't full-width, so
+              rows would otherwise scroll up into the transparent area around it.
+              The masking band rides with this sticky header and covers that zone
+              (0 → nav bottom) with the page background — page-specific, no nav
+              changes. */}
           <div
-            className={`${GRID} sticky top-[72px] z-20 items-end border-b border-border bg-background py-4`}
+            className={`${GRID} sticky top-14 z-20 items-end border-b border-border bg-background py-4`}
           >
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 bottom-full h-16 bg-background"
+            />
             <div className="text-lg font-medium">Features</div>
             {PLAN_NAMES.map((name) => (
               <div key={name} className="text-lg font-medium">

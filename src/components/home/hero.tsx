@@ -17,11 +17,13 @@ const FEATURED = getFeaturedTemplates(4);
 
 // Demo video — paste the YouTube video ID here (the part after `?v=` or
 // `youtu.be/`, e.g. "dQw4w9WgXcQ"). Leave empty to keep the grey placeholder.
-const DEMO_VIDEO_ID = "";
+const DEMO_VIDEO_ID = "6ezvUi6UacA";
+// Start a couple seconds in (skips the cold open).
+const DEMO_VIDEO_START = 2;
 // youtube-nocookie keeps the embed privacy-friendly; rel=0 hides unrelated
 // videos at the end, modestbranding trims the YouTube chrome.
 const demoEmbedUrl = (autoplay: boolean) =>
-  `https://www.youtube-nocookie.com/embed/${DEMO_VIDEO_ID}?rel=0&modestbranding=1&playsinline=1${autoplay ? "&autoplay=1" : ""}`;
+  `https://www.youtube-nocookie.com/embed/${DEMO_VIDEO_ID}?rel=0&modestbranding=1&playsinline=1&start=${DEMO_VIDEO_START}${autoplay ? "&autoplay=1" : ""}`;
 const demoThumbUrl = `https://img.youtube.com/vi/${DEMO_VIDEO_ID}/hqdefault.jpg`;
 
 export function Hero() {
@@ -30,41 +32,45 @@ export function Hero() {
   const [videoExpanded, setVideoExpanded] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
-  // Float the preview near the cursor while hovering the template list.
+  // Float the preview beside the cursor (right of it, vertically centred on it)
+  // while hovering the template list. The preview is 150px tall, so -75 centres.
   const movePreview = (e: React.PointerEvent) => {
     const el = previewRef.current;
     if (!el) return;
-    el.style.transform = `translate(${e.clientX + 28}px, ${e.clientY - 110}px)`;
+    el.style.transform = `translate(${e.clientX + 28}px, ${e.clientY - 75}px)`;
   };
 
   return (
-    <section className="-mt-14 pb-24 md:-mt-16 md:px-4">
-      {/* Mobile: full-bleed, no gray card. Desktop (md+): a rounded gray box
-          that the transparent nav overlaps at its top. */}
-      <div className="relative pb-16 pt-20 md:overflow-hidden md:rounded-[32px] md:bg-muted md:pb-24 md:pt-28">
+    <section className="px-4 pb-24 md:-mt-16">
+      {/* A rounded dark panel on every breakpoint. On desktop the transparent
+          nav overlaps its top; on mobile it sits just below the header so the
+          rounded corners stay visible. */}
+      <div className="relative overflow-hidden rounded-[32px] bg-[#101010] pb-16 pt-20 md:pb-24 md:pt-28">
         <div className="mx-auto max-w-7xl px-6">
           {/* Watch-how-it-works pill — eyebrow above the title */}
           <div className="flex justify-center">
+            {/* Frosted dark chip on the dark hero, with a white play disc as
+                the focal accent. */}
             <button
               type="button"
               onClick={() => setVideoOpen(true)}
-              className="group inline-flex items-center gap-3 rounded-full border border-border bg-background py-1.5 pl-1.5 pr-4 text-left transition-colors hover:bg-background/70"
+              className="group inline-flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 py-1.5 pl-1.5 pr-4 text-left backdrop-blur-md transition-colors hover:bg-white/15"
             >
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground transition-transform group-hover:scale-105">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-background text-foreground transition-transform group-hover:scale-105">
                 <IconPlay className="size-3.5" />
               </span>
               <span className="leading-tight">
-                <span className="block whitespace-nowrap text-sm font-medium">
+                <span className="block whitespace-nowrap text-sm font-medium text-white">
                   Watch how it works
                 </span>
-                <span className="block whitespace-nowrap text-xs text-muted-foreground">
+                <span className="block whitespace-nowrap text-xs text-white/60">
                   2-minute demo
                 </span>
               </span>
             </button>
           </div>
 
-          <h1 className="mx-auto mt-6 max-w-3xl text-center text-4xl font-medium tracking-tight md:text-6xl">
+          <h1 className="mx-auto mt-6 max-w-3xl text-center text-4xl font-medium tracking-tight text-white md:text-6xl">
             The AI app builder for client-facing experiences
           </h1>
 
@@ -86,11 +92,16 @@ export function Hero() {
                   <li key={t.slug}>
                     <Link
                       href={`/templates/${t.slug}`}
-                      onPointerEnter={() => setHovered(i)}
+                      onPointerEnter={(e) => {
+                        setHovered(i);
+                        // Position immediately so it doesn't flash at the
+                        // previous hover's (stale) spot before the first move.
+                        movePreview(e);
+                      }}
                       className="group flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-muted/60"
                     >
                       <span className="size-8 shrink-0 rounded-lg bg-muted" />
-                      <span className="text-[15px] font-medium text-foreground">
+                      <span className="text-[15px] font-normal text-foreground">
                         {t.title}
                       </span>
                       <IconArrow className="ml-auto size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
@@ -105,6 +116,15 @@ export function Hero() {
 
       {/* Logos carousel — centered, set apart from the hero */}
       <div className="mx-auto mt-24 max-w-7xl px-6 md:mt-28">
+        <p
+          className="mb-8 text-center text-xs uppercase tracking-wider text-muted-foreground"
+          style={{
+            fontFamily:
+              '"ABC Diatype Mono", ui-monospace, SFMono-Regular, Menlo, monospace',
+          }}
+        >
+          Trusted by teams at
+        </p>
         <div className="mx-auto max-w-2xl overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]">
           <div className="flex w-max animate-marquee items-center gap-12">
             {["Capital One", "Collective", "Ditto", "Heritage Law", "Waymaker", "Aura", "CoverPanda", "Northwind"]

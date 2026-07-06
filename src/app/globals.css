@@ -156,6 +156,60 @@ body {
   }
 }
 
+/* Animated gradient border for the hero composer panel. A conic blue→green
+   gradient rotates continuously; a masked ::before paints only the 2px edge
+   ring so the interior stays clean. --gb-angle is registered so the browser
+   can interpolate the sweep (a plain custom prop wouldn't animate). */
+@property --gb-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes gb-spin {
+  to {
+    --gb-angle: 360deg;
+  }
+}
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(
+    from var(--gb-angle),
+    #8ea2f4,
+    #b7c39d,
+    #d3e27e,
+    #b7c39d,
+    #8ea2f4
+  );
+  -webkit-mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+  -webkit-mask-clip: content-box, border-box;
+  -webkit-mask-composite: xor;
+  mask-image: linear-gradient(#000 0 0), linear-gradient(#000 0 0);
+  mask-clip: content-box, border-box;
+  mask-composite: exclude;
+  animation: gb-spin 6s linear infinite;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .gradient-border::before {
+    animation: none;
+  }
+}
+/* Focus reaction — when the composer is clicked/focused it lifts and gains a
+   soft brand-tinted halo so the box clearly responds. `data-focused` is set by
+   the composer on textarea focus/blur. */
+.gradient-border {
+  transition: box-shadow 0.3s ease;
+}
+.gradient-border[data-focused="true"] {
+  box-shadow:
+    0 0 0 4px rgba(157, 176, 240, 0.35),
+    0 16px 44px -26px rgba(20, 20, 40, 0.35);
+}
+
 /* On-brand focus ring (replaces the browser's default blue outline). */
 @layer base {
   a:focus-visible,

@@ -28,9 +28,7 @@ const FOOTER_SECTIONS: { title: string; links: NavLink[] }[] = [
 export function Footer({ rounded = false }: { rounded?: boolean }) {
   return (
     <footer
-      className={`border-t border-border bg-muted ${
-        rounded ? "rounded-b-[2.5rem]" : ""
-      }`}
+      className={`bg-muted ${rounded ? "rounded-b-[2.5rem]" : ""}`}
     >
       {/* Footer links */}
       <div className="mx-auto max-w-7xl px-6 py-16">
