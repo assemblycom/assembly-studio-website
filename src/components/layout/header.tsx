@@ -53,10 +53,11 @@ export function Header({
   // pill's rounded end (gap ≈ pill radius − button radius) instead of floating.
   const scrolledInner = `h-12 ${maxWidth} pl-4 pr-1.5 ${pill}`;
 
-  // Content colors flip when the bar is on a dark surface.
-  const linkCls = `rounded-full px-2 py-1.5 text-sm transition-colors lg:px-3 ${lightContent ? "text-background/70 hover:text-background" : "text-muted-foreground hover:text-foreground"}`;
-  const disabledCls = `cursor-default rounded-full px-2 py-1.5 text-sm lg:px-3 ${lightContent ? "text-background/50" : "text-muted-foreground"}`;
-  const ctaCls = `rounded-full px-4 py-1.5 text-sm transition-[background-color,color,opacity] hover:opacity-90 ${lightContent ? "bg-background text-foreground" : "bg-foreground text-background"}`;
+  // Content colors flip when the bar is on a dark surface. whitespace-nowrap
+  // keeps every label on one line so the scrolled pill never wraps its actions.
+  const linkCls = `whitespace-nowrap rounded-full px-2 py-1.5 text-sm transition-colors lg:px-3 ${lightContent ? "text-background/70 hover:text-background" : "text-muted-foreground hover:text-foreground"}`;
+  const disabledCls = `cursor-default whitespace-nowrap rounded-full px-2 py-1.5 text-sm lg:px-3 ${lightContent ? "text-background/50" : "text-muted-foreground"}`;
+  const ctaCls = `whitespace-nowrap rounded-full px-4 py-1.5 text-sm transition-[background-color,color,opacity] hover:opacity-90 ${lightContent ? "bg-background text-foreground" : "bg-foreground text-background"}`;
   const logoInvert = lightContent ? "brightness-0 invert" : "";
 
   useEffect(() => {
