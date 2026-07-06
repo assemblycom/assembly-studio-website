@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Section } from "@/components/ui/section";
 
@@ -57,12 +58,19 @@ export function Testimonials() {
                 isActive ? "flex-[6]" : "flex-[1] hover:bg-muted/70 md:min-w-[170px]"
               }`}
             >
-              {/* Collapsed label — horizontal, bottom-left; hidden once active */}
+              {/* Collapsed label — photo above the company name; hidden active */}
               <span
-                className={`pointer-events-none absolute inset-x-0 bottom-0 hidden p-6 transition-opacity duration-300 md:block ${
+                className={`pointer-events-none absolute inset-x-0 bottom-0 hidden flex-col gap-3 p-6 transition-opacity duration-300 md:flex ${
                   isActive ? "opacity-0" : "opacity-100"
                 }`}
               >
+                <Image
+                  src={`/images/customers/${t.slug}.jpg`}
+                  alt={t.company}
+                  width={44}
+                  height={44}
+                  className="size-11 rounded-xl object-cover"
+                />
                 <span className="whitespace-nowrap text-base font-medium text-muted-foreground">
                   {t.company}
                 </span>
@@ -77,10 +85,19 @@ export function Testimonials() {
                 <p className="text-lg leading-relaxed md:text-xl">
                   &ldquo;{t.quote}&rdquo;
                 </p>
-                <div className="mt-6">
-                  <span className="block text-base font-medium">{t.author}</span>
-                  <span className="block text-sm text-muted-foreground">
-                    {t.company}
+                <div className="mt-6 flex items-center gap-3">
+                  <Image
+                    src={`/images/customers/${t.slug}.jpg`}
+                    alt={t.author}
+                    width={44}
+                    height={44}
+                    className="size-11 shrink-0 rounded-full object-cover"
+                  />
+                  <span className="flex flex-col">
+                    <span className="text-base font-medium">{t.author}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {t.company}
+                    </span>
                   </span>
                 </div>
               </div>

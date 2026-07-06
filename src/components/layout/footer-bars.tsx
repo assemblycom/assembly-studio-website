@@ -12,17 +12,28 @@ import { useEffect, useRef } from "react";
  */
 const WORD = "STUDIO";
 const SAMPLE_FONT_PX = 300; // offscreen render size — bigger = finer slicing
-const COLUMN_STEP = 5; // center-to-center column pitch (offscreen px)
-const PILL_RATIO = 1.08; // pill width vs. column pitch (>1 closes the gaps)
-const MIN_SEGMENT = 4; // drop specks shorter than this (offscreen px)
-const GAP_BRIDGE = 2; // stitch across gaps this short so AA doesn't fragment runs
+const COLUMN_STEP = 7; // center-to-center column pitch (offscreen px)
+const PILL_RATIO = 1.12; // pill width vs. column pitch (>1 closes the gaps)
+const MIN_SEGMENT = 5; // drop specks shorter than this (offscreen px)
+const GAP_BRIDGE = 3; // stitch across gaps this short so AA doesn't fragment runs
 // Adjacent columns whose run tops AND bottoms stay within this many px are
 // merged into one wide pill — collapsing straight stems (I, T, D) and long
 // horizontal strokes into few heavy pills. Curves drift more than this per
-// column, so they break apart and keep their dense per-column sampling.
-const EXTENT_TOL = 3;
+// column, so they break apart and keep their dense per-column sampling. Keep
+// this modest: too high and the curves (S, O) merge into blobs.
+const EXTENT_TOL = 9;
+// Cap on how many columns fold into one pill, so a wide stroke can't balloon
+// into a single giant blob — it just becomes a couple of touching pills.
+const MAX_MERGED_COLUMNS = 8;
 const INFLUENCE_RADIUS = 240;
 const MAX_STRETCH = 90;
+// Below this viewport width the word is stretched taller (letters get more
+// height without getting wider) so it doesn't read as tiny on phones.
+const MOBILE_BREAKPOINT = 640;
+const MOBILE_FILL = 0.94; // width fraction on mobile (vs. 0.92 on desktop)
+const MOBILE_Y_STRETCH = 2.3; // vertical scale multiplier on mobile (taller glyphs)
+// After a tap lifts, how long the reaction lingers before easing back.
+const TAP_HOLD_MS = 700;
 
 // A pill spans columns x0..x1 (equal when it's a single dense slice on a curve)
 // and covers the vertical band top..bottom, all in offscreen coords.
@@ -38,7 +49,12 @@ export function FooterBars() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // pointer is the eased position the render reads; target is where the
+    // cursor/last tap actually is. Easing lets a tap ripple in and settle back.
     const pointer = { x: -9999, y: -9999 };
+    const target = { x: -9999, y: -9999 };
+    const EASE = 0.18;
+    let releaseTimer = 0;
     let segments: Segment[] = [];
     let srcW = 1;
     let srcH = 1;
@@ -116,6 +132,7 @@ export function FooterBars() {
           const tops = [run.top];
           const bottoms = [run.bottom];
           for (let cj = ci + 1; cj < cols.length; cj++) {
+            if (tops.length >= MAX_MERGED_COLUMNS) break;
             if (xs[cj] - x1 > COLUMN_STEP + 1) break;
             let best: Run | null = null;
             let bestOverlap = 0;
@@ -163,18 +180,24 @@ export function FooterBars() {
       ctx.clearRect(0, 0, cssW, cssH);
       // Black pills on the blue reveal panel (matches the landing wordmark).
       ctx.fillStyle = "#101010";
-      // Fit the word to ~92% width, anchored low so it lands in the reveal.
-      const scale = (cssW * 0.92) / srcW;
-      const offsetX = (cssW - srcW * scale) / 2;
-      const offsetY = cssH * 0.62 - (srcH * scale) / 2;
-      const thickness = pillW * scale;
+      // Ease the reaction point toward the cursor / last tap.
+      pointer.x += (target.x - pointer.x) * EASE;
+      pointer.y += (target.y - pointer.y) * EASE;
+      // Fit the word to the width; on mobile stretch it taller (scaleY > scaleX)
+      // so it reads big. Anchored low so it lands in the reveal.
+      const mobile = cssW < MOBILE_BREAKPOINT;
+      const scaleX = (cssW * (mobile ? MOBILE_FILL : 0.92)) / srcW;
+      const scaleY = scaleX * (mobile ? MOBILE_Y_STRETCH : 1);
+      const offsetX = (cssW - srcW * scaleX) / 2;
+      const offsetY = cssH * 0.62 - (srcH * scaleY) / 2;
+      const thickness = pillW * scaleX;
       for (const s of segments) {
-        const xL = offsetX + s.x0 * scale;
-        const xR = offsetX + s.x1 * scale;
+        const xL = offsetX + s.x0 * scaleX;
+        const xR = offsetX + s.x1 * scaleX;
         const cx = (xL + xR) / 2;
         const w = xR - xL + thickness; // column span plus the pill thickness
-        const baseTop = offsetY + s.top * scale;
-        const baseBottom = offsetY + s.bottom * scale;
+        const baseTop = offsetY + s.top * scaleY;
+        const baseBottom = offsetY + s.bottom * scaleY;
         const cy = (baseTop + baseBottom) / 2;
         const baseH = baseBottom - baseTop;
         // Distance from cursor drives a vertical-only reaction (x stays put).
@@ -194,10 +217,20 @@ export function FooterBars() {
       raf = requestAnimationFrame(render);
     };
 
-    const onMove = (e: PointerEvent) => {
+    // Cursor move / press aims the reaction at that point; touch works because
+    // pointerdown fires on tap. On release we let it linger, then ease back.
+    const aim = (e: PointerEvent) => {
+      clearTimeout(releaseTimer);
       const rect = canvas.getBoundingClientRect();
-      pointer.x = e.clientX - rect.left;
-      pointer.y = e.clientY - rect.top;
+      target.x = e.clientX - rect.left;
+      target.y = e.clientY - rect.top;
+    };
+    const release = () => {
+      clearTimeout(releaseTimer);
+      releaseTimer = window.setTimeout(() => {
+        target.x = -9999;
+        target.y = -9999;
+      }, TAP_HOLD_MS);
     };
 
     const start = async () => {
@@ -215,12 +248,19 @@ export function FooterBars() {
 
     start();
     window.addEventListener("resize", layout);
-    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointermove", aim, { passive: true });
+    window.addEventListener("pointerdown", aim, { passive: true });
+    window.addEventListener("pointerup", release, { passive: true });
+    window.addEventListener("pointercancel", release, { passive: true });
     return () => {
       cancelled = true;
       cancelAnimationFrame(raf);
+      clearTimeout(releaseTimer);
       window.removeEventListener("resize", layout);
-      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointermove", aim);
+      window.removeEventListener("pointerdown", aim);
+      window.removeEventListener("pointerup", release);
+      window.removeEventListener("pointercancel", release);
     };
   }, []);
 

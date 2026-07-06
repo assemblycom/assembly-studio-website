@@ -15,6 +15,14 @@ import { PromptComposer } from "./prompt-composer";
 // Featured templates shown in the hero as a compact text list (v60 style).
 const FEATURED = getFeaturedTemplates(4);
 
+// Per-template tile icons (self-contained gray glyphs in public/), keyed by slug.
+const TEMPLATE_ICONS: Record<string, string> = {
+  "new-client-intake": "/images/template-icons/contact.svg",
+  "client-engagement-dashboard": "/images/template-icons/chat.svg",
+  "client-project-tracker": "/images/template-icons/folder.svg",
+  "content-approval-flow": "/images/template-icons/check.svg",
+};
+
 // Demo video — paste the YouTube video ID here (the part after `?v=` or
 // `youtu.be/`, e.g. "dQw4w9WgXcQ"). Leave empty to keep the grey placeholder.
 const DEMO_VIDEO_ID = "6ezvUi6UacA";
@@ -113,7 +121,12 @@ export function Hero() {
                       }}
                       className="group flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-muted/60"
                     >
-                      <span className="size-8 shrink-0 rounded-lg bg-muted" />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={TEMPLATE_ICONS[t.slug]}
+                        alt=""
+                        className="size-9 shrink-0 object-contain"
+                      />
                       <span className="text-[15px] font-normal text-foreground">
                         {t.title}
                       </span>

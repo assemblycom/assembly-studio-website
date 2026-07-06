@@ -38,7 +38,7 @@ export function Header({
   // a brighter ring there for a more contrasty edge.
   const pill = onDark
     ? "rounded-full bg-white/10 text-background ring-1 ring-white/25 backdrop-blur-xl"
-    : "rounded-full bg-foreground/70 text-background shadow-[0_6px_20px_-16px_rgba(0,0,0,0.15)] ring-1 ring-white/10 backdrop-blur-xl";
+    : "rounded-full bg-foreground/90 text-background shadow-[0_6px_20px_-16px_rgba(0,0,0,0.15)] ring-1 ring-white/10 backdrop-blur-xl";
 
   // One shared easing/duration for the rest→pill transition so every animated
   // property (chrome, geometry, logo tint) settles together on the same soft
@@ -110,7 +110,7 @@ export function Header({
           <button
             onClick={() => setMobileMenuOpen(true)}
             aria-label="Open menu"
-            className={`flex size-9 items-center justify-center rounded-full transition-[color,background-color,transform] ${ease} active:scale-90 ${lightContent ? "text-background hover:bg-white/10" : "text-foreground hover:bg-foreground/10"}`}
+            className={`flex size-9 items-center justify-center transition-[color,opacity] ${ease} active:opacity-60 ${lightContent ? "text-background" : "text-foreground"}`}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <circle cx="5" cy="5" r="1.6" />
