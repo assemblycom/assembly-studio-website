@@ -10,7 +10,14 @@ import {
   type ContentBlock,
 } from "@/lib/case-studies";
 import { VideoPlayer } from "@/components/customers/video-player";
+import { IconArrow } from "@/components/home/icons";
 import { APP_URL } from "@/lib/constants";
+
+// Matches the mono eyebrow treatment used across the site (e.g. the hero's
+// "Trusted by teams at"). ABC Diatype Mono isn't bundled, so the system mono
+// stack is the intended fallback.
+const MONO_EYEBROW =
+  '"ABC Diatype Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -156,28 +163,32 @@ function BodyBlock({ block }: { block: ContentBlock }) {
   }
 }
 
+// Compact, text-only "keep reading" card (ReadMe-style): a mono category
+// eyebrow, the company name, and a one-line summary — no photo, so two fit
+// side by side without dominating the page.
 function RelatedCard({ study }: { study: CaseStudy }) {
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className="group flex flex-col overflow-hidden rounded-xl border border-border transition-colors duration-200 hover:border-foreground/30"
+      className="group flex flex-col bg-background p-6 transition-colors duration-200 hover:bg-muted/40 md:p-8"
     >
-      <div className="aspect-[16/9] overflow-hidden bg-muted">
-        {caseStudyImage(study) && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={caseStudyImage(study)}
-            alt=""
-            className="h-full w-full object-cover object-[50%_20%]"
-          />
-        )}
+      <div className="flex items-start justify-between gap-4">
+        <p
+          className="text-xs uppercase tracking-wider text-muted-foreground"
+          style={{ fontFamily: MONO_EYEBROW }}
+        >
+          Customer story
+          <span className="mx-1.5 text-muted-foreground/50">·</span>
+          {study.industry}
+        </p>
+        <IconArrow className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-[transform,color] duration-200 group-hover:translate-x-0.5 group-hover:text-foreground" />
       </div>
-      <div className="p-6">
-        <p className="text-xs text-muted-foreground">{study.company}</p>
-        <h3 className="mt-1.5 text-base font-medium leading-snug">
-          {study.headline}
-        </h3>
-      </div>
+      <h3 className="mt-8 text-2xl font-medium tracking-tight md:text-3xl">
+        {study.company}
+      </h3>
+      <p className="mt-3 text-[0.9375rem] leading-relaxed text-muted-foreground">
+        {study.summary}
+      </p>
     </Link>
   );
 }
@@ -329,14 +340,34 @@ export default async function CaseStudyPage({ params }: Props) {
         </>
       )}
 
-      {/* More customer stories */}
+      {/* Read next — compact, text-only story pair */}
       {related.length > 0 && (
         <Section>
           <div className="mx-auto max-w-5xl">
-            <p className="text-sm text-muted-foreground">
-              More customer stories
-            </p>
-            <div className="mt-6 grid gap-6 sm:grid-cols-2">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p
+                  className="text-xs uppercase tracking-wider text-muted-foreground"
+                  style={{ fontFamily: MONO_EYEBROW }}
+                >
+                  Read next
+                </p>
+                <h2 className="mt-2 text-3xl font-medium tracking-tight md:text-4xl">
+                  More customer stories
+                </h2>
+              </div>
+              <Link
+                href="/customers"
+                className="group hidden shrink-0 items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground sm:inline-flex"
+              >
+                View all stories
+                <IconArrow className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
+              </Link>
+            </div>
+            {/* gap-px over a border-colored background paints the crisp 1px
+                dividers between cells (vertical on desktop, horizontal when
+                stacked) inside the rounded, clipped container. */}
+            <div className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2">
               {related.map((s) => (
                 <RelatedCard key={s.slug} study={s} />
               ))}
