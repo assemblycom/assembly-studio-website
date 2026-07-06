@@ -15,9 +15,8 @@ export default function HomePage() {
       <HowItWorks />
       {/* Scrolling out of "How it works" the page hands off to its dark lower
           half at a clean edge (no gradient) — the sections below sit on #101010
-          (tokens flipped via .dark-section) and flow into the dark CTA + footer.
-          data-nav-dark marks the zone so the sticky nav can boost its contrast. */}
-      <div data-nav-dark>
+          (tokens flipped via .dark-section) and flow into the dark CTA + footer. */}
+      <div>
         <div className="dark-section bg-[#101010]">
           <Templates />
           <Testimonials />

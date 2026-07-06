@@ -32,9 +32,14 @@ const DEMO_VIDEO_START = 2;
 // videos at the end, modestbranding trims the YouTube chrome.
 const demoEmbedUrl = (autoplay: boolean) =>
   `https://www.youtube-nocookie.com/embed/${DEMO_VIDEO_ID}?rel=0&modestbranding=1&playsinline=1&start=${DEMO_VIDEO_START}${autoplay ? "&autoplay=1" : ""}`;
-// Use an auto-generated frame (1.jpg ≈ 25% in) rather than the branded default
-// thumbnail, so the preview shows a person's face.
-const demoThumbUrl = `https://img.youtube.com/vi/${DEMO_VIDEO_ID}/1.jpg`;
+// Full-res poster frame (1280×720) so the preview stays crisp; if a video has
+// no maxres frame we fall back to the always-present hqdefault via onError.
+const demoThumbUrl = `https://img.youtube.com/vi/${DEMO_VIDEO_ID}/maxresdefault.jpg`;
+const demoThumbFallbackUrl = `https://img.youtube.com/vi/${DEMO_VIDEO_ID}/hqdefault.jpg`;
+const onThumbError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  if (e.currentTarget.src !== demoThumbFallbackUrl)
+    e.currentTarget.src = demoThumbFallbackUrl;
+};
 
 export function Hero() {
   const [hovered, setHovered] = useState<number | null>(null);
@@ -67,14 +72,13 @@ export function Hero() {
               className="group inline-flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 py-1.5 pl-1.5 pr-4 text-left backdrop-blur-md transition-colors hover:bg-white/15"
             >
               <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl transition-transform group-hover:scale-105">
-                {/* Video thumbnail preview behind a small glass play badge.
-                    Scaled up to crop the frame's letterbox bars so the footage
-                    fills the square. */}
+                {/* Video thumbnail preview behind a small glass play badge. */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={demoThumbUrl}
                   alt=""
-                  className="absolute inset-0 h-full w-full scale-[1.5] object-cover"
+                  onError={onThumbError}
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
                 <span className="relative flex size-5 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm">
                   <IconPlay className="size-2.5" />
@@ -201,6 +205,7 @@ export function Hero() {
                 <img
                   src={demoThumbUrl}
                   alt=""
+                  onError={onThumbError}
                   className="absolute inset-0 h-full w-full object-cover"
                 />
                 <span className="relative flex size-9 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-md transition-transform group-hover/thumb:scale-105">

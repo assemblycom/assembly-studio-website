@@ -20,26 +20,22 @@ export function Header({
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  // True when the sticky bar currently sits over a dark page region (marked
-  // with [data-nav-dark]). The default dark pill blends into #101010, so we
-  // swap it for a frosted light pill there to keep it legible.
-  const [onDark, setOnDark] = useState(false);
-  // Light contents only when the bar actually sits on a dark surface: a dark-hero
-  // page at rest, or a scrolled pill still floating over a dark region. Over white
-  // the scrolled pill is light frosted glass, so its contents stay dark.
-  const lightContent = (darkTop && !scrolled) || (scrolled && onDark);
+  // The scrolled pill is a single dark capsule on every surface, so its contents
+  // are light whenever the pill is showing. At rest, contents are light only on a
+  // dark-hero page (darkTop); over a white page they stay dark.
+  const lightContent = scrolled || darkTop;
 
   // Sticky so the nav follows you down. At the top it's a transparent, dark-on-
   // light bar; once scrolled it settles into a floating capsule ("pill") with
   // light contents, à la Superpower.
   const position = "sticky top-0";
-  // Soft smoked-glass capsule — a translucent charcoal with a faint ring, light
-  // shadow, and a backdrop blur that frosts whatever scrolls behind it. Over a
-  // dark region the charcoal disappears, so we use a frosted light capsule with
-  // a brighter ring there for a more contrasty edge.
-  const pill = onDark
-    ? "rounded-full bg-white/10 ring-1 ring-white/25 backdrop-blur-xl"
-    : "rounded-full bg-white/80 ring-1 ring-black/[0.08] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.28)] backdrop-blur-xl";
+  // One consistent floating capsule on every surface: a near-opaque dark pill.
+  // A translucent fill takes on whatever is behind it and visibly smears as the
+  // bar crosses a light/dark boundary (e.g. the white composer over the dark
+  // hero), so we keep it dark and near-solid — legible on the hero via its ring,
+  // clean over white content below.
+  const pill =
+    "rounded-full bg-[#141414]/90 ring-1 ring-white/12 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.45)] backdrop-blur-xl";
 
   // One shared easing/duration for the rest→pill transition so every animated
   // property (chrome, geometry, logo tint) settles together on the same soft
@@ -64,18 +60,7 @@ export function Header({
   const logoInvert = lightContent ? "brightness-0 invert" : "";
 
   useEffect(() => {
-    // Sample point near the bar's vertical center so we flip exactly as the
-    // dark zone reaches the nav.
-    const NAV_MID_Y = 28;
-    const onScroll = () => {
-      setScrolled(window.scrollY > SCROLL_THRESHOLD);
-      let dark = false;
-      document.querySelectorAll("[data-nav-dark]").forEach((el) => {
-        const r = el.getBoundingClientRect();
-        if (r.top <= NAV_MID_Y && r.bottom >= NAV_MID_Y) dark = true;
-      });
-      setOnDark(dark);
-    };
+    const onScroll = () => setScrolled(window.scrollY > SCROLL_THRESHOLD);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);

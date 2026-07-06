@@ -48,8 +48,15 @@ function FAQItem({
   // Each question is its own card — spacing between them separates the rows, so
   // no divider lines are needed. A hairline border + soft shadow gives the white
   // cards definition against the white page.
+  //
+  // Hover reveals the answer; the click toggle stays as a fallback for touch and
+  // keyboard, where there is no hover.
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-muted transition-colors hover:border-foreground/15">
+    <div
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      className="overflow-hidden rounded-2xl border border-border bg-muted transition-colors hover:border-foreground/15"
+    >
       <button
         onClick={() => setOpen(!open)}
         aria-expanded={open}
