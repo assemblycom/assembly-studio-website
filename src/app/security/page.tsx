@@ -170,7 +170,7 @@ export default function SecurityPage() {
             See how enterprises trust Assembly at scale
           </h2>
 
-          <div className="mt-10 grid gap-4 overflow-hidden rounded-3xl border border-border p-3 md:min-h-[480px] md:grid-cols-2 md:p-4">
+          <div className="mt-10 grid gap-4 overflow-hidden rounded-3xl border border-border p-3 md:grid-cols-2 md:p-4">
             {/* Left — photo with a stat overlay */}
             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl md:aspect-auto">
               <Image
