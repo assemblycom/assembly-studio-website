@@ -20,6 +20,8 @@ export function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const isSecurity = pathname === "/security";
+  const isCustomers =
+    pathname === "/customers" || pathname.startsWith("/customers/");
 
   // The announcement bar only runs on the landing page.
   const bar = <AnnouncementBar />;
@@ -31,6 +33,26 @@ export function RootShell({ children }: { children: React.ReactNode }) {
       <>
         <div className="fixed inset-x-0 bottom-0 z-0 h-[60vh] overflow-hidden bg-[#7da4ff]">
           <FooterBars />
+        </div>
+        <div className="relative z-10 flex min-h-screen flex-col bg-background">
+          <Header />
+          <main className="flex-1">{children}</main>
+        </div>
+        <div className="relative z-10">
+          <Footer rounded />
+        </div>
+        <div aria-hidden className="pointer-events-none h-[42vh]" />
+      </>
+    );
+  }
+
+  // Customers reuses the landing page's reveal footer — the rounded footer over
+  // the kinetic wordmark panel — but keeps the standard (non-dark) header.
+  if (isCustomers) {
+    return (
+      <>
+        <div className="fixed inset-x-0 bottom-0 z-0 h-[60vh] overflow-hidden bg-[#7da4ff]">
+          <StudioWordmark />
         </div>
         <div className="relative z-10 flex min-h-screen flex-col bg-background">
           <Header />
