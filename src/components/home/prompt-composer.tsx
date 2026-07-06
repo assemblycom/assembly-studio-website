@@ -50,8 +50,9 @@ const PROMPT_IDEAS = [
 const upperFirst = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
 // Animated placeholder — a static verb prefix plus a rotating example of what
-// you can build. Rotation stops the moment the user types (the placeholder is
-// gone by then). Examples mirror the prompt ideas above.
+// you can build, typed out character by character (typewriter). Typing stops
+// the moment the user types (the placeholder is gone by then). Examples mirror
+// the prompt ideas above.
 const PLACEHOLDER_PREFIX = "Assembly Studio build ";
 const PLACEHOLDER_EXAMPLES = [
   "a client intake form",
@@ -61,7 +62,12 @@ const PLACEHOLDER_EXAMPLES = [
   "a document collection checklist",
   "a proposal clients can e-sign",
 ];
-const PLACEHOLDER_ROTATE_MS = 2600;
+// Typewriter cadence: per-character type/delete speed, plus the pause once an
+// example is fully typed before it starts erasing.
+const TYPE_MS = 45;
+const DELETE_MS = 22;
+const HOLD_FULL_MS = 1800;
+const HOLD_EMPTY_MS = 350;
 
 // Openings people actually type, expanded into full completions. Order matters —
 // the first pool entry that continues what's typed wins, so verb-led phrasings
@@ -88,8 +94,9 @@ export function PromptComposer({
   submitLabel?: string;
 }) {
   const [userInput, setUserInput] = useState("");
-  // Index of the rotating placeholder example (only advances while empty).
-  const [exampleIndex, setExampleIndex] = useState(0);
+  // The portion of the current placeholder example currently typed out (only
+  // advances while empty).
+  const [typedExample, setTypedExample] = useState("");
   // AI-generated continuation, when the /api/complete route returns one. Falls
   // back to the curated pool below whenever this is empty (no key, no match, or
   // still loading).
@@ -119,15 +126,52 @@ export function PromptComposer({
   const removeFile = (i: number) =>
     setFiles((prev) => prev.filter((_, idx) => idx !== i));
 
-  // Cycle the placeholder example while the box is empty; stop once the user
-  // starts typing so nothing animates behind their text.
+  // Type the placeholder example out one character at a time, hold, erase, then
+  // move to the next — a typewriter loop. Stops once the user starts typing so
+  // nothing animates behind their text. Respects prefers-reduced-motion by
+  // showing the first example in full without animating.
   useEffect(() => {
     if (userInput) return;
-    const id = setInterval(
-      () => setExampleIndex((i) => (i + 1) % PLACEHOLDER_EXAMPLES.length),
-      PLACEHOLDER_ROTATE_MS,
-    );
-    return () => clearInterval(id);
+
+    const reduce =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      setTypedExample(PLACEHOLDER_EXAMPLES[0]);
+      return;
+    }
+
+    let exampleIdx = 0;
+    let charIdx = 0;
+    let deleting = false;
+    let timer: ReturnType<typeof setTimeout>;
+
+    const tick = () => {
+      const full = PLACEHOLDER_EXAMPLES[exampleIdx];
+      if (!deleting) {
+        charIdx += 1;
+        setTypedExample(full.slice(0, charIdx));
+        if (charIdx === full.length) {
+          deleting = true;
+          timer = setTimeout(tick, HOLD_FULL_MS);
+          return;
+        }
+        timer = setTimeout(tick, TYPE_MS);
+      } else {
+        charIdx -= 1;
+        setTypedExample(full.slice(0, charIdx));
+        if (charIdx === 0) {
+          deleting = false;
+          exampleIdx = (exampleIdx + 1) % PLACEHOLDER_EXAMPLES.length;
+          timer = setTimeout(tick, HOLD_EMPTY_MS);
+          return;
+        }
+        timer = setTimeout(tick, DELETE_MS);
+      }
+    };
+
+    timer = setTimeout(tick, TYPE_MS);
+    return () => clearTimeout(timer);
   }, [userInput]);
 
   // Object URLs for image previews; non-images get null (rendered as a card).
@@ -207,18 +251,22 @@ export function PromptComposer({
           }`}
         >
           <div className="relative flex-1">
-            {/* Animated placeholder — static verb + a rotating example. Only
-                while empty; the keyed span re-mounts each rotation so the new
-                example fades in. */}
+            {/* Animated placeholder — static verb + a typewritten example that
+                types, holds, erases, and cycles. Only while empty. The blinking
+                caret is hidden once the box is focused so it doesn't sit beside
+                the real text cursor. */}
             {!userInput && (
               <div
                 aria-hidden
                 className="pointer-events-none absolute inset-0 px-1 text-base leading-relaxed text-muted-foreground"
               >
                 {PLACEHOLDER_PREFIX}
-                <span key={exampleIndex} className="animate-prompt inline-block">
-                  {PLACEHOLDER_EXAMPLES[exampleIndex]}
-                </span>
+                {typedExample}
+                {!boxFocused && (
+                  <span className="animate-caret ml-px inline-block w-px self-stretch align-[-0.1em] text-muted-foreground">
+                    |
+                  </span>
+                )}
               </div>
             )}
             {/* Ghost completion sits behind the textarea, aligned to the typed

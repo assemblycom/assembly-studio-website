@@ -13,12 +13,21 @@ import { useEffect, useRef } from "react";
 const WORD = "STUDIO";
 const SAMPLE_FONT_PX = 300; // offscreen render size — bigger = finer slicing
 const COLUMN_STEP = 5; // center-to-center column pitch (offscreen px)
-const PILL_RATIO = 0.72; // pill width as a fraction of the column pitch
+const PILL_RATIO = 1.08; // pill width vs. column pitch (>1 closes the gaps)
 const MIN_SEGMENT = 4; // drop specks shorter than this (offscreen px)
+const GAP_BRIDGE = 2; // stitch across gaps this short so AA doesn't fragment runs
+// Adjacent columns whose run tops AND bottoms stay within this many px are
+// merged into one wide pill — collapsing straight stems (I, T, D) and long
+// horizontal strokes into few heavy pills. Curves drift more than this per
+// column, so they break apart and keep their dense per-column sampling.
+const EXTENT_TOL = 3;
 const INFLUENCE_RADIUS = 240;
 const MAX_STRETCH = 90;
 
-type Segment = { cx: number; top: number; bottom: number };
+// A pill spans columns x0..x1 (equal when it's a single dense slice on a curve)
+// and covers the vertical band top..bottom, all in offscreen coords.
+type Segment = { x0: number; x1: number; top: number; bottom: number };
+type Run = { top: number; bottom: number; used: boolean };
 
 export function FooterBars() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -64,19 +73,77 @@ export function FooterBars() {
 
       const data = octx.getImageData(0, 0, srcW, srcH).data;
       pillW = COLUMN_STEP * PILL_RATIO;
-      const next: Segment[] = [];
+
+      // Pass 1 — per column, collect vertical filled runs, bridging gaps up to
+      // GAP_BRIDGE so anti-aliasing doesn't shatter a stroke into specks.
+      const xs: number[] = [];
+      const cols: Run[][] = [];
       for (let x = Math.floor(COLUMN_STEP / 2); x < srcW; x += COLUMN_STEP) {
+        const runs: Run[] = [];
         let runStart = -1;
+        let lastFilled = -1;
+        let gap = 0;
         for (let y = 0; y < srcH; y++) {
           const filled = data[(y * srcW + x) * 4 + 3] > 128;
-          if (filled && runStart < 0) runStart = y;
-          const atEnd = y === srcH - 1;
-          if ((!filled || atEnd) && runStart >= 0) {
-            const end = filled ? y : y - 1;
-            if (end - runStart >= MIN_SEGMENT)
-              next.push({ cx: x, top: runStart, bottom: end });
+          if (filled) {
+            if (runStart < 0) runStart = y;
+            lastFilled = y;
+            gap = 0;
+          } else if (runStart >= 0 && ++gap > GAP_BRIDGE) {
+            if (lastFilled - runStart >= MIN_SEGMENT)
+              runs.push({ top: runStart, bottom: lastFilled, used: false });
             runStart = -1;
           }
+        }
+        if (runStart >= 0 && lastFilled - runStart >= MIN_SEGMENT)
+          runs.push({ top: runStart, bottom: lastFilled, used: false });
+        xs.push(x);
+        cols.push(runs);
+      }
+
+      // Pass 2 — walk columns left→right and chain each run to the best
+      // overlapping run in the next column whose top AND bottom stay within
+      // EXTENT_TOL. Uniform stems/bars chain into one wide pill; curves (which
+      // drift more than the tolerance per column) stay one pill per column.
+      const next: Segment[] = [];
+      for (let ci = 0; ci < cols.length; ci++) {
+        for (const run of cols[ci]) {
+          if (run.used) continue;
+          run.used = true;
+          let x1 = xs[ci];
+          let curTop = run.top;
+          let curBottom = run.bottom;
+          const tops = [run.top];
+          const bottoms = [run.bottom];
+          for (let cj = ci + 1; cj < cols.length; cj++) {
+            if (xs[cj] - x1 > COLUMN_STEP + 1) break;
+            let best: Run | null = null;
+            let bestOverlap = 0;
+            for (const r2 of cols[cj]) {
+              if (r2.used) continue;
+              const overlap =
+                Math.min(curBottom, r2.bottom) - Math.max(curTop, r2.top);
+              if (
+                overlap > 0 &&
+                Math.abs(r2.top - curTop) <= EXTENT_TOL &&
+                Math.abs(r2.bottom - curBottom) <= EXTENT_TOL &&
+                overlap > bestOverlap
+              ) {
+                best = r2;
+                bestOverlap = overlap;
+              }
+            }
+            if (!best) break;
+            best.used = true;
+            x1 = xs[cj];
+            curTop = best.top;
+            curBottom = best.bottom;
+            tops.push(best.top);
+            bottoms.push(best.bottom);
+          }
+          const top = tops.reduce((a, b) => a + b, 0) / tops.length;
+          const bottom = bottoms.reduce((a, b) => a + b, 0) / bottoms.length;
+          next.push({ x0: xs[ci], x1, top, bottom });
         }
       }
       segments = next;
@@ -100,15 +167,18 @@ export function FooterBars() {
       const scale = (cssW * 0.92) / srcW;
       const offsetX = (cssW - srcW * scale) / 2;
       const offsetY = cssH * 0.62 - (srcH * scale) / 2;
-      const w = pillW * scale;
+      const thickness = pillW * scale;
       for (const s of segments) {
-        const x = offsetX + s.cx * scale;
+        const xL = offsetX + s.x0 * scale;
+        const xR = offsetX + s.x1 * scale;
+        const cx = (xL + xR) / 2;
+        const w = xR - xL + thickness; // column span plus the pill thickness
         const baseTop = offsetY + s.top * scale;
         const baseBottom = offsetY + s.bottom * scale;
         const cy = (baseTop + baseBottom) / 2;
         const baseH = baseBottom - baseTop;
         // Distance from cursor drives a vertical-only reaction (x stays put).
-        const dx = pointer.x - x;
+        const dx = pointer.x - cx;
         const dy = pointer.y - cy;
         const influence = Math.max(
           0,
@@ -118,7 +188,7 @@ export function FooterBars() {
         const y = cy - h / 2 + dy * influence * 0.12;
         const r = Math.min(w, h) / 2;
         ctx.beginPath();
-        ctx.roundRect(x - w / 2, y, w, h, r);
+        ctx.roundRect(cx - w / 2, y, w, h, r);
         ctx.fill();
       }
       raf = requestAnimationFrame(render);

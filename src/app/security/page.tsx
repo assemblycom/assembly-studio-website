@@ -102,36 +102,33 @@ const SECURITY_FAQS: FAQEntry[] = [
 export default function SecurityPage() {
   return (
     <>
-      {/* Hero — a tall dark rounded card, inset with a thin white frame. Pulled
-          up under the nav so the (light) nav sits inside the card; see RootShell
-          darkTop. Fills the viewport so the next section stays below the fold. */}
-      <section className="-mt-16 px-4 pb-4">
-        <div className="relative flex min-h-[calc(100vh-1rem)] items-center justify-center overflow-hidden bg-[#101010] px-6 py-16 text-center md:rounded-[32px]">
-          <div className="mx-auto max-w-3xl">
-            <h1 className="text-4xl font-medium tracking-tight text-white md:text-5xl">
-              Don&apos;t let AI generate your software security
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-white/60">
-              Build as fast as you want. The encryption, access controls, and
-              certifications underneath are engineered, audited, and on by
-              default — never left to chance.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <a
-                href={DEMO_URL}
-                className="rounded-full bg-background px-6 py-3 text-sm text-foreground transition-opacity hover:opacity-90"
-              >
-                Book demo
-              </a>
-              <a
-                href={TRUST_CENTER_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="rounded-full border border-white/15 bg-white/10 px-6 py-3 text-sm text-white backdrop-blur-md transition-colors hover:bg-white/15"
-              >
-                View Trust Center
-              </a>
-            </div>
+      {/* Hero — a light, centered lede matching the Templates page (no dark
+          card); the plain light nav sits above it on the white page. */}
+      <section className="px-6 pb-10 pt-24 text-center md:pt-32">
+        <div className="mx-auto max-w-3xl">
+          <h1 className="text-4xl font-medium tracking-tight md:text-5xl">
+            Don&apos;t let AI generate your software security
+          </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
+            Build as fast as you want. The encryption, access controls, and
+            certifications underneath are engineered, audited, and on by
+            default — never left to chance.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <a
+              href={DEMO_URL}
+              className="rounded-full bg-foreground px-6 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
+            >
+              Book demo
+            </a>
+            <a
+              href={TRUST_CENTER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-border bg-background px-6 py-2.5 text-sm text-foreground transition-colors hover:bg-muted"
+            >
+              View Trust Center
+            </a>
           </div>
         </div>
       </section>
@@ -229,7 +226,7 @@ export default function SecurityPage() {
             See how enterprises trust Assembly at scale
           </h2>
 
-          <div className="mt-10 grid gap-4 overflow-hidden rounded-3xl border border-border p-3 md:grid-cols-2 md:p-4">
+          <div className="mt-10 grid gap-4 overflow-hidden rounded-3xl border border-border p-3 md:min-h-[480px] md:grid-cols-2 md:p-4">
             {/* Left — photo with a stat overlay */}
             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl md:aspect-auto">
               <Image
@@ -250,27 +247,14 @@ export default function SecurityPage() {
               </div>
             </div>
 
-            {/* Right — headline, quote, attribution, CTA */}
-            <div className="flex flex-col justify-center px-2 py-4 md:px-8">
+            {/* Right — headline, body copy, CTA */}
+            <div className="flex flex-col justify-start px-2 py-4 md:px-8 md:py-10">
               <h3 className="text-2xl font-medium tracking-tight">
                 {SPOTLIGHT.title}
               </h3>
               <p className="mt-6 leading-relaxed text-muted-foreground">
-                &ldquo;{SPOTLIGHT.quote}&rdquo;
+                {SPOTLIGHT.quote}
               </p>
-              <div className="mt-6 flex items-center gap-3">
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground">
-                  {SPOTLIGHT.person.name.charAt(0)}
-                </span>
-                <span className="flex flex-col">
-                  <span className="text-sm text-foreground">
-                    {SPOTLIGHT.person.name}
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    {SPOTLIGHT.person.role}
-                  </span>
-                </span>
-              </div>
               <a
                 href={SPOTLIGHT.href}
                 className="mt-8 inline-block w-fit rounded-full bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"

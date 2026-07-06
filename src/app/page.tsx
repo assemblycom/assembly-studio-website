@@ -13,11 +13,19 @@ export default function HomePage() {
       <Hero />
       <WhyAssembly />
       <HowItWorks />
-      <Templates />
-      <Testimonials />
-      <Comparison />
-      <FAQ />
-      <CTA />
+      {/* Scrolling out of "How it works" the page hands off to its dark lower
+          half at a clean edge (no gradient) — the sections below sit on #101010
+          (tokens flipped via .dark-section) and flow into the dark CTA + footer.
+          data-nav-dark marks the zone so the sticky nav can boost its contrast. */}
+      <div data-nav-dark>
+        <div className="dark-section bg-[#101010]">
+          <Templates />
+          <Testimonials />
+          <Comparison />
+          <FAQ />
+        </div>
+        <CTA />
+      </div>
     </>
   );
 }

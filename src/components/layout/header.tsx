@@ -20,6 +20,10 @@ export function Header({
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  // True when the sticky bar currently sits over a dark page region (marked
+  // with [data-nav-dark]). The default dark pill blends into #101010, so we
+  // swap it for a frosted light pill there to keep it legible.
+  const [onDark, setOnDark] = useState(false);
   // Light contents whenever the bar is on a dark surface: the scrolled pill, or
   // a dark-hero page at rest.
   const lightContent = scrolled || darkTop;
@@ -29,9 +33,12 @@ export function Header({
   // light contents, à la Superpower.
   const position = "sticky top-0";
   // Soft smoked-glass capsule — a translucent charcoal with a faint ring, light
-  // shadow, and a backdrop blur that frosts whatever scrolls behind it.
-  const pill =
-    "rounded-full bg-foreground/70 text-background shadow-[0_6px_20px_-16px_rgba(0,0,0,0.15)] ring-1 ring-white/10 backdrop-blur-xl";
+  // shadow, and a backdrop blur that frosts whatever scrolls behind it. Over a
+  // dark region the charcoal disappears, so we use a frosted light capsule with
+  // a brighter ring there for a more contrasty edge.
+  const pill = onDark
+    ? "rounded-full bg-white/10 text-background ring-1 ring-white/25 backdrop-blur-xl"
+    : "rounded-full bg-foreground/70 text-background shadow-[0_6px_20px_-16px_rgba(0,0,0,0.15)] ring-1 ring-white/10 backdrop-blur-xl";
 
   // One shared easing/duration for the rest→pill transition so every animated
   // property (chrome, geometry, logo tint) settles together on the same soft
@@ -56,7 +63,18 @@ export function Header({
   const logoInvert = lightContent ? "brightness-0 invert" : "";
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > SCROLL_THRESHOLD);
+    // Sample point near the bar's vertical center so we flip exactly as the
+    // dark zone reaches the nav.
+    const NAV_MID_Y = 28;
+    const onScroll = () => {
+      setScrolled(window.scrollY > SCROLL_THRESHOLD);
+      let dark = false;
+      document.querySelectorAll("[data-nav-dark]").forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.top <= NAV_MID_Y && r.bottom >= NAV_MID_Y) dark = true;
+      });
+      setOnDark(dark);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -92,7 +110,7 @@ export function Header({
           <button
             onClick={() => setMobileMenuOpen(true)}
             aria-label="Open menu"
-            className={`flex size-9 items-center justify-center transition-colors ${ease} ${lightContent ? "text-background" : "text-foreground"}`}
+            className={`flex size-9 items-center justify-center rounded-full transition-[color,background-color,transform] ${ease} active:scale-90 ${lightContent ? "text-background hover:bg-white/10" : "text-foreground hover:bg-foreground/10"}`}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <circle cx="5" cy="5" r="1.6" />
