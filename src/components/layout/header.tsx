@@ -24,9 +24,10 @@ export function Header({
   // with [data-nav-dark]). The default dark pill blends into #101010, so we
   // swap it for a frosted light pill there to keep it legible.
   const [onDark, setOnDark] = useState(false);
-  // Light contents whenever the bar is on a dark surface: the scrolled pill, or
-  // a dark-hero page at rest.
-  const lightContent = scrolled || darkTop;
+  // Light contents only when the bar actually sits on a dark surface: a dark-hero
+  // page at rest, or a scrolled pill still floating over a dark region. Over white
+  // the scrolled pill is light frosted glass, so its contents stay dark.
+  const lightContent = (darkTop && !scrolled) || (scrolled && onDark);
 
   // Sticky so the nav follows you down. At the top it's a transparent, dark-on-
   // light bar; once scrolled it settles into a floating capsule ("pill") with
@@ -37,8 +38,8 @@ export function Header({
   // dark region the charcoal disappears, so we use a frosted light capsule with
   // a brighter ring there for a more contrasty edge.
   const pill = onDark
-    ? "rounded-full bg-white/10 text-background ring-1 ring-white/25 backdrop-blur-xl"
-    : "rounded-full bg-foreground/90 text-background shadow-[0_6px_20px_-16px_rgba(0,0,0,0.15)] ring-1 ring-white/10 backdrop-blur-xl";
+    ? "rounded-full bg-white/10 ring-1 ring-white/25 backdrop-blur-xl"
+    : "rounded-full bg-white/80 ring-1 ring-black/[0.08] shadow-[0_8px_30px_-12px_rgba(0,0,0,0.28)] backdrop-blur-xl";
 
   // One shared easing/duration for the rest→pill transition so every animated
   // property (chrome, geometry, logo tint) settles together on the same soft

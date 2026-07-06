@@ -67,9 +67,9 @@ export function Testimonials() {
                 <Image
                   src={`/images/customers/${t.slug}.jpg`}
                   alt={t.company}
-                  width={44}
-                  height={44}
-                  className="size-11 rounded-xl object-cover"
+                  width={56}
+                  height={56}
+                  className="size-14 rounded-xl object-cover"
                 />
                 <span className="whitespace-nowrap text-base font-medium text-muted-foreground">
                   {t.company}
@@ -89,9 +89,9 @@ export function Testimonials() {
                   <Image
                     src={`/images/customers/${t.slug}.jpg`}
                     alt={t.author}
-                    width={44}
-                    height={44}
-                    className="size-11 shrink-0 rounded-full object-cover"
+                    width={56}
+                    height={56}
+                    className="size-14 shrink-0 rounded-xl object-cover"
                   />
                   <span className="flex flex-col">
                     <span className="text-base font-medium">{t.author}</span>
