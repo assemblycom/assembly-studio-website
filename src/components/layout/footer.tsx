@@ -56,7 +56,7 @@ export function Footer({ rounded = false }: { rounded?: boolean }) {
 
           {FOOTER_SECTIONS.map((section) => (
             <div key={section.title}>
-              <p className={`text-sm font-medium ${heading}`}>{section.title}</p>
+              <p className={`text-sm font-normal ${heading}`}>{section.title}</p>
               <ul className="mt-3 flex flex-col gap-2">
                 {section.links.map((link) => (
                   <li key={link.label}>
@@ -113,7 +113,7 @@ export function Footer({ rounded = false }: { rounded?: boolean }) {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={`Ask ${ai.label} about Assembly Studio`}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background transition-colors hover:border-foreground/20"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background transition-all hover:-translate-y-0.5 hover:border-foreground/30 hover:shadow-md"
                 >
                   <Image
                     src={ai.src}

@@ -102,59 +102,73 @@ const SECURITY_FAQS: FAQEntry[] = [
 export default function SecurityPage() {
   return (
     <>
-      {/* Hero */}
-      <section className="px-6 pb-10 pt-24 text-center md:pt-32">
-        <div className="mx-auto max-w-3xl">
-          <h1 className="text-4xl font-medium tracking-tight md:text-5xl">
-            Don&apos;t let AI generate your software security
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Build as fast as you want. The encryption, access controls, and
-            certifications underneath are engineered, audited, and on by default
-            — never left to chance.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <a
-              href={DEMO_URL}
-              className="rounded-full bg-foreground px-6 py-3 text-sm text-background transition-opacity hover:opacity-90"
-            >
-              Book demo
-            </a>
-            <a
-              href={TRUST_CENTER_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-full border border-border bg-background px-6 py-3 text-sm text-foreground transition-colors hover:bg-muted"
-            >
-              View Trust Center
-            </a>
+      {/* Hero — a tall dark rounded card, inset with a thin white frame. Pulled
+          up under the nav so the (light) nav sits inside the card; see RootShell
+          darkTop. Fills the viewport so the next section stays below the fold. */}
+      <section className="-mt-16 px-4 pb-4">
+        <div className="relative flex min-h-[calc(100vh-1rem)] items-center justify-center overflow-hidden bg-[#101010] px-6 py-16 text-center md:rounded-[32px]">
+          <div className="mx-auto max-w-3xl">
+            <h1 className="text-4xl font-medium tracking-tight text-white md:text-5xl">
+              Don&apos;t let AI generate your software security
+            </h1>
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-white/60">
+              Build as fast as you want. The encryption, access controls, and
+              certifications underneath are engineered, audited, and on by
+              default — never left to chance.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <a
+                href={DEMO_URL}
+                className="rounded-full bg-background px-6 py-3 text-sm text-foreground transition-opacity hover:opacity-90"
+              >
+                Book demo
+              </a>
+              <a
+                href={TRUST_CENTER_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-full border border-white/15 bg-white/10 px-6 py-3 text-sm text-white backdrop-blur-md transition-colors hover:bg-white/15"
+              >
+                View Trust Center
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
       {/* What makes Assembly Studio different */}
       <Section className="pt-16 md:pt-24">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-2xl font-medium tracking-tight md:text-3xl">
-            What makes Assembly Studio different
-          </h2>
-          <p className="mt-3 text-muted-foreground">
-            Apps you build inherit the platform&apos;s security model — you
-            don&apos;t wire it up yourself.
-          </p>
-        </div>
-        <div className="mx-auto mt-10 grid max-w-4xl gap-4 sm:grid-cols-2">
-          {DIFFERENTIATORS.map((card) => (
-            <div
-              key={card.title}
-              className="rounded-2xl border border-border p-6"
-            >
-              <h3 className="text-base font-medium">{card.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                {card.description}
-              </p>
-            </div>
-          ))}
+        <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-2 md:gap-16">
+          {/* Left — heading stays in view while the list scrolls */}
+          <div className="md:sticky md:top-28 md:self-start">
+            <h2 className="text-3xl font-medium tracking-tight md:text-4xl">
+              What makes Assembly Studio different
+            </h2>
+            <p className="mt-6 max-w-md text-muted-foreground">
+              Apps you build inherit the platform&apos;s security model — you
+              don&apos;t wire it up yourself.
+            </p>
+          </div>
+
+          {/* Right — numbered primitives, divided rows */}
+          <ul>
+            {DIFFERENTIATORS.map((card, i) => (
+              <li
+                key={card.title}
+                className="grid grid-cols-[auto_1fr] gap-x-6 border-t border-border py-8 first:border-t-0 first:pt-0"
+              >
+                <span className="pt-0.5 font-mono text-sm tabular-nums tracking-widest text-muted-foreground">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div>
+                  <h3 className="text-base font-medium">{card.title}</h3>
+                  <p className="mt-2 leading-relaxed text-muted-foreground">
+                    {card.description}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </Section>
 
@@ -165,40 +179,53 @@ export default function SecurityPage() {
             Assembly vs. other AI app builders
           </h2>
         </div>
-        <div className="mx-auto mt-10 max-w-4xl overflow-hidden rounded-2xl border border-border">
-          <table className="w-full border-collapse text-left text-sm">
-            <thead>
-              <tr className="bg-muted">
-                <th className="w-1/3 px-5 py-4 font-medium" />
-                <th className="w-1/3 px-5 py-4 font-medium text-muted-foreground">
-                  Generic AI builders
-                </th>
-                <th className="w-1/3 px-5 py-4 font-medium">Assembly Studio</th>
-              </tr>
-            </thead>
-            <tbody>
-              {COMPARISON.map((row) => (
-                <tr key={row.aspect} className="border-t border-border">
-                  <td className="px-5 py-4 font-medium">{row.aspect}</td>
-                  <td className="px-5 py-4 text-muted-foreground">
-                    {row.generic}
-                  </td>
-                  <td className="px-5 py-4">{row.assembly}</td>
+        <div className="relative mx-auto mt-10 max-w-4xl pt-8">
+          {/* Full-width banner tab sits on top of the Assembly column */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 flex">
+            <div className="w-1/3" />
+            <div className="w-1/3" />
+            <div className="flex h-8 w-1/3 items-center justify-center rounded-t-2xl bg-foreground text-xs font-medium text-background">
+              Top choice
+            </div>
+          </div>
+          <div className="overflow-hidden rounded-2xl rounded-tr-none border border-border">
+            <table className="w-full border-collapse text-left text-sm">
+              <thead>
+                <tr className="bg-muted">
+                  <th className="w-1/3 px-5 py-4 font-medium text-muted-foreground">
+                    How it&apos;s handled
+                  </th>
+                  <th className="w-1/3 border-l border-border px-5 py-4 font-medium text-muted-foreground">
+                    Generic AI builders
+                  </th>
+                  <th className="w-1/3 border-l border-border px-5 py-4 font-medium">
+                    Assembly Studio
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {COMPARISON.map((row) => (
+                  <tr key={row.aspect} className="border-t border-border">
+                    <td className="px-5 py-4 font-medium">{row.aspect}</td>
+                    <td className="border-l border-border px-5 py-4 text-muted-foreground">
+                      {row.generic}
+                    </td>
+                    {/* Subtle light tint highlights the Assembly column */}
+                    <td className="border-l border-border bg-muted/60 px-5 py-4">
+                      {row.assembly}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </Section>
 
       {/* Social proof — customer spotlight */}
       <Section className="pt-0">
         <div className="mx-auto max-w-6xl">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span className="size-1.5 rounded-full bg-foreground" />
-            Customer spotlight
-          </div>
-          <h2 className="mt-4 max-w-2xl text-3xl font-medium tracking-tight md:text-4xl">
+          <h2 className="max-w-2xl text-3xl font-medium tracking-tight md:text-4xl">
             See how enterprises trust Assembly at scale
           </h2>
 
