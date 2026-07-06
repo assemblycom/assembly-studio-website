@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Section } from "@/components/ui/section";
 import { FAQ, type FAQEntry } from "@/components/home/faq";
+import { SecurityBenchmark } from "@/components/security/security-benchmark";
 import { DEMO_URL, TRUST_CENTER_URL } from "@/lib/constants";
 
 // Curated customer spotlight for the social-proof band — teaser for the full
@@ -50,29 +51,6 @@ const DIFFERENTIATORS: { title: string; description: string }[] = [
   },
 ];
 
-const COMPARISON: { aspect: string; generic: string; assembly: string }[] = [
-  {
-    aspect: "Where security lives",
-    generic: "Generated fresh in each app",
-    assembly: "Inherited from the platform",
-  },
-  {
-    aspect: "How failures are caught",
-    generic: "Scanned or checklisted after the fact",
-    assembly: "Removed at the architectural level",
-  },
-  {
-    aspect: "Internal team vs. client boundary",
-    generic: "Must be requested and generated",
-    assembly: "Native and structural",
-  },
-  {
-    aspect: "Where the app lives",
-    generic: "Standalone app at its own URL",
-    assembly: "Inside your access-controlled client experience",
-  },
-];
-
 const SECURITY_FAQS: FAQEntry[] = [
   {
     question: "Where do my app's login and permissions come from?",
@@ -104,10 +82,12 @@ export default function SecurityPage() {
     <>
       {/* Hero — a light, centered lede matching the Templates page (no dark
           card); the plain light nav sits above it on the white page. */}
-      <section className="px-6 pb-10 pt-24 text-center md:pt-32">
+      <section className="px-6 pb-24 pt-24 text-center md:pb-36 md:pt-32">
         <div className="mx-auto max-w-3xl">
           <h1 className="text-4xl font-medium tracking-tight md:text-5xl">
-            Don&apos;t let AI generate your software security
+            Don&apos;t let AI generate your
+            <br />
+            software security
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
             Build as fast as you want. The encryption, access controls, and
@@ -169,54 +149,18 @@ export default function SecurityPage() {
         </div>
       </Section>
 
-      {/* Comparison strip */}
+      {/* Comparison — capability benchmark across AI app builders */}
       <Section className="pt-16 md:pt-24">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-2xl font-medium tracking-tight md:text-3xl">
             Assembly vs. other AI app builders
           </h2>
+          <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
+            Standalone-app generators can scaffold security — you own and
+            maintain it. Assembly apps inherit the platform&apos;s controls.
+          </p>
         </div>
-        <div className="relative mx-auto mt-10 max-w-4xl pt-8">
-          {/* Full-width banner tab sits on top of the Assembly column */}
-          <div className="pointer-events-none absolute inset-x-0 top-0 flex">
-            <div className="w-1/3" />
-            <div className="w-1/3" />
-            <div className="flex h-8 w-1/3 items-center justify-center rounded-t-2xl bg-foreground text-xs font-medium text-background">
-              Top choice
-            </div>
-          </div>
-          <div className="overflow-hidden rounded-2xl rounded-tr-none border border-border">
-            <table className="w-full border-collapse text-left text-sm">
-              <thead>
-                <tr className="bg-muted">
-                  <th className="w-1/3 px-5 py-4 font-medium text-muted-foreground">
-                    How it&apos;s handled
-                  </th>
-                  <th className="w-1/3 border-l border-border px-5 py-4 font-medium text-muted-foreground">
-                    Generic AI builders
-                  </th>
-                  <th className="w-1/3 border-l border-border px-5 py-4 font-medium">
-                    Assembly Studio
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {COMPARISON.map((row) => (
-                  <tr key={row.aspect} className="border-t border-border">
-                    <td className="px-5 py-4 font-medium">{row.aspect}</td>
-                    <td className="border-l border-border px-5 py-4 text-muted-foreground">
-                      {row.generic}
-                    </td>
-                    {/* Subtle light tint highlights the Assembly column */}
-                    <td className="border-l border-border bg-muted/60 px-5 py-4">
-                      {row.assembly}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <SecurityBenchmark />
       </Section>
 
       {/* Social proof — customer spotlight */}
@@ -247,19 +191,44 @@ export default function SecurityPage() {
               </div>
             </div>
 
-            {/* Right — headline, body copy, CTA */}
-            <div className="flex flex-col justify-start px-2 py-4 md:px-8 md:py-10">
+            {/* Right — headline, pull quote, attribution, CTA (centered so the
+                card doesn't leave a big empty band at the bottom) */}
+            <div className="flex flex-col justify-center gap-5 px-2 py-6 md:px-10 md:py-12">
+              <p className="text-sm text-muted-foreground">Customer story</p>
               <h3 className="text-2xl font-medium tracking-tight">
                 {SPOTLIGHT.title}
               </h3>
-              <p className="mt-6 leading-relaxed text-muted-foreground">
-                {SPOTLIGHT.quote}
-              </p>
+              <blockquote className="border-l-2 border-border pl-4 leading-relaxed text-muted-foreground">
+                &ldquo;{SPOTLIGHT.quote}&rdquo;
+              </blockquote>
+              <div className="flex items-center gap-3">
+                <Image
+                  src={SPOTLIGHT.image}
+                  alt={SPOTLIGHT.person.name}
+                  width={96}
+                  height={96}
+                  className="size-10 rounded-full object-cover"
+                />
+                <div>
+                  <div className="text-sm font-medium">
+                    {SPOTLIGHT.person.name}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {SPOTLIGHT.person.role}
+                  </div>
+                </div>
+              </div>
               <a
                 href={SPOTLIGHT.href}
-                className="mt-8 inline-block w-fit rounded-full bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
+                className="group mt-1 inline-flex w-fit items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
               >
-                Learn more
+                Read the story
+                <span
+                  aria-hidden
+                  className="transition-transform group-hover:translate-x-0.5"
+                >
+                  →
+                </span>
               </a>
             </div>
           </div>
