@@ -7,16 +7,6 @@ export const metadata: Metadata = {
     "See Assembly Studio in action. Book a live walkthrough tailored to your use case — and see how fast you can ship a branded, secure client app.",
 };
 
-// Reuses the hero's logo strip so the social proof reads consistently.
-const LOGOS = [
-  "Capital One",
-  "Collective",
-  "Ditto",
-  "Heritage Law",
-  "Waymaker",
-  "Aura",
-];
-
 const EXPECTATIONS = [
   "A walkthrough built around your use case",
   "See an app go from prompt to portal",
@@ -48,10 +38,9 @@ export default function DemoPage() {
   return (
     <section className="px-6 pb-24 pt-28 md:pt-36">
       <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-2 md:gap-16 lg:gap-24">
-        {/* Left — value proposition and social proof */}
+        {/* Left — value proposition */}
         <div>
-          <p className="text-sm text-muted-foreground">Book a demo</p>
-          <h1 className="mt-3 max-w-md text-4xl font-medium tracking-tight md:text-5xl">
+          <h1 className="max-w-md text-4xl font-medium tracking-tight md:text-5xl">
             See Assembly Studio in action
           </h1>
           <p className="mt-6 max-w-md text-lg text-muted-foreground">
@@ -67,33 +56,6 @@ export default function DemoPage() {
               </li>
             ))}
           </ul>
-
-          {/* Social proof — a customer quote over a compact logo strip */}
-          <figure className="mt-12 border-l-2 border-border pl-5">
-            <blockquote className="text-lg leading-relaxed tracking-tight">
-              &ldquo;Assembly isn&rsquo;t just a portal — it&rsquo;s our
-              infrastructure.&rdquo;
-            </blockquote>
-            <figcaption className="mt-3 text-sm text-muted-foreground">
-              Carlos Williams · Ditto
-            </figcaption>
-          </figure>
-
-          <div className="mt-10">
-            <p className="text-sm text-muted-foreground">
-              Trusted by teams at
-            </p>
-            <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3">
-              {LOGOS.map((name) => (
-                <span
-                  key={name}
-                  className="text-base font-medium text-muted-foreground"
-                >
-                  {name}
-                </span>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Right — the form */}
