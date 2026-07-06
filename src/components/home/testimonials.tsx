@@ -89,9 +89,9 @@ export function Testimonials() {
                   <Image
                     src={`/images/customers/${t.slug}.jpg`}
                     alt={t.author}
-                    width={56}
-                    height={56}
-                    className="size-14 shrink-0 rounded-xl object-cover"
+                    width={80}
+                    height={80}
+                    className="size-16 shrink-0 rounded-xl object-cover"
                   />
                   <span className="flex flex-col">
                     <span className="text-base font-medium">{t.author}</span>

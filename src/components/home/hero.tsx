@@ -226,7 +226,7 @@ export function Hero() {
           onClick={() => setVideoExpanded(false)}
         >
           <div
-            className="relative w-full max-w-4xl overflow-hidden rounded-2xl border border-border bg-background shadow-[0_40px_90px_-45px_rgba(20,20,40,0.4)]"
+            className="relative w-full max-w-4xl overflow-hidden rounded-2xl border border-white/12 bg-background shadow-[0_40px_90px_-45px_rgba(20,20,40,0.4)]"
             onClick={(e) => e.stopPropagation()}
           >
             <button

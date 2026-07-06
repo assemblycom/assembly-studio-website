@@ -241,6 +241,13 @@ export function PromptComposer({
     if (userInput.trim()) window.open(APP_URL);
   };
 
+  // The hero starts as a compact arrow-only circle and grows into a labeled
+  // "Start building" pill the moment there's a prompt to send. The CTA passes
+  // submitLabel explicitly, so it stays a pill throughout.
+  const hasInput = userInput.trim().length > 0;
+  const pillLabel = submitLabel ?? "Start building";
+  const showPill = submitLabel != null || hasInput;
+
   return (
     <div className="relative text-left">
       <div className="gradient-border relative rounded-2xl" data-focused={boxFocused}>
@@ -403,17 +410,17 @@ export function PromptComposer({
                   to complete
                 </span>
               )}
-              {submitLabel ? (
+              {showPill ? (
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     submit();
                   }}
-                  disabled={!userInput.trim()}
+                  disabled={!hasInput}
                   className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2 text-sm text-background transition-all hover:opacity-90 active:scale-95 disabled:opacity-30 disabled:active:scale-100"
                 >
-                  {submitLabel}
+                  {pillLabel}
                   <IconArrow className="size-4" />
                 </button>
               ) : (
@@ -423,7 +430,7 @@ export function PromptComposer({
                     e.stopPropagation();
                     submit();
                   }}
-                  disabled={!userInput.trim()}
+                  disabled={!hasInput}
                   aria-label="Build it"
                   className="flex size-9 items-center justify-center rounded-full bg-foreground text-background transition-all hover:opacity-90 active:scale-95 disabled:opacity-30 disabled:active:scale-100"
                 >
