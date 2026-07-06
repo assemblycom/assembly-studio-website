@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { NAV_LINKS, APP_URL } from "@/lib/constants";
+import { NAV_LINKS, APP_URL, DEMO_URL } from "@/lib/constants";
 
 // The announcement bar's height — once we've scrolled past it the header is
 // pinned to the top, so it swaps from transparent to a frosted surface.
@@ -167,6 +167,9 @@ export function Header({
 
           {/* Account actions — right */}
           <div className="flex flex-1 items-center justify-end gap-1">
+            <Link href={DEMO_URL} className={linkCls}>
+              Book a demo
+            </Link>
             <a
               href={APP_URL}
               className={linkCls}
@@ -258,6 +261,16 @@ export function Header({
               </li>
             ))}
           </ul>
+
+          <div className="border-t border-border px-6 py-6">
+            <Link
+              href={DEMO_URL}
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex w-full items-center justify-center rounded-full border border-foreground/20 px-4 py-3 text-sm text-foreground"
+            >
+              Book a demo
+            </Link>
+          </div>
         </div>
       )}
     </>

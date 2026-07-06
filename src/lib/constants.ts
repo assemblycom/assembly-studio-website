@@ -19,5 +19,5 @@ export const NAV_LINKS: NavLink[] = [
 export const DOCS_URL = "/docs";
 export const APP_URL = "https://app.assembly.com";
 export const SIGNUP_URL = "https://app.assembly.com/signup";
-export const DEMO_URL = "https://app.assembly.com/demo";
+export const DEMO_URL = "/demo";
 export const TRUST_CENTER_URL = "https://trust.assembly.com";
