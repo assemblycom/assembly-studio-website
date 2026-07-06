@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/footer";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { StudioWordmark } from "@/components/layout/studio-wordmark";
 import { FooterBars } from "@/components/layout/footer-bars";
+import { TemplatesFooter } from "@/components/layout/templates-footer";
 
 /**
  * Home gets the Zoox-style treatment: the footer is a rounded sheet that lifts
@@ -20,15 +21,17 @@ export function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isHome = pathname === "/";
   const isSecurity = pathname === "/security";
+  // Templates gets its own reveal panel — the gooey "path relax" wordmark that
+  // deforms around the cursor — instead of the shared kinetic wordmark.
+  const isTemplates =
+    pathname === "/templates" || pathname.startsWith("/templates/");
   // Content pages that share the landing page's kinetic-wordmark reveal footer
-  // (but keep the standard, non-dark header). Security is intentionally excluded
-  // — it has its own distinct reveal panel (FooterBars).
+  // (but keep the standard, non-dark header). Security and templates are
+  // excluded — each has its own distinct reveal panel.
   const usesWordmarkFooter =
     pathname === "/customers" ||
     pathname.startsWith("/customers/") ||
-    pathname === "/pricing" ||
-    pathname === "/templates" ||
-    pathname.startsWith("/templates/");
+    pathname === "/pricing";
 
   // The announcement bar only runs on the landing page.
   const bar = <AnnouncementBar />;
@@ -53,8 +56,28 @@ export function RootShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Customers, pricing, and templates reuse the landing page's reveal footer —
-  // the rounded footer over the kinetic wordmark panel — with a standard header.
+  // Templates: same rounded reveal footer, but the panel below runs the gooey
+  // path-relax wordmark that softens and springs around the cursor.
+  if (isTemplates) {
+    return (
+      <>
+        <div className="fixed inset-x-0 bottom-0 z-0 h-[60vh] overflow-hidden bg-[#7da4ff]">
+          <TemplatesFooter />
+        </div>
+        <div className="relative z-10 flex min-h-screen flex-col bg-background">
+          <Header />
+          <main className="flex-1">{children}</main>
+        </div>
+        <div className="relative z-10">
+          <Footer rounded />
+        </div>
+        <div aria-hidden className="pointer-events-none h-[42vh]" />
+      </>
+    );
+  }
+
+  // Customers and pricing reuse the landing page's reveal footer — the rounded
+  // footer over the kinetic wordmark panel — with a standard header.
   if (usesWordmarkFooter) {
     return (
       <>
