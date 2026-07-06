@@ -56,8 +56,17 @@ export function Hero() {
               onClick={() => setVideoOpen(true)}
               className="group inline-flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 py-1.5 pl-1.5 pr-4 text-left backdrop-blur-md transition-colors hover:bg-white/15"
             >
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-background text-foreground transition-transform group-hover:scale-105">
-                <IconPlay className="size-3.5" />
+              <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl ring-1 ring-white/15 transition-transform group-hover:scale-105">
+                {/* Video thumbnail preview behind a small glass play badge. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={demoThumbUrl}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <span className="relative flex size-5 items-center justify-center rounded-full bg-white/20 text-white ring-1 ring-white/30 backdrop-blur-sm">
+                  <IconPlay className="size-2.5" />
+                </span>
               </span>
               <span className="leading-tight">
                 <span className="block whitespace-nowrap text-sm font-medium text-white">
@@ -159,9 +168,9 @@ export function Hero() {
             type="button"
             onClick={() => setVideoOpen(false)}
             aria-label="Close video"
-            className="absolute right-2 top-2 z-10 flex size-7 items-center justify-center rounded-full bg-background/80 text-foreground ring-1 ring-border backdrop-blur transition-colors hover:bg-background"
+            className="absolute right-2 top-2 z-10 flex size-6 items-center justify-center rounded-full bg-black/25 text-white ring-1 ring-white/20 backdrop-blur-md transition-colors hover:bg-black/40"
           >
-            <IconX className="size-4" />
+            <IconX className="size-3.5" />
           </button>
           <button
             type="button"
@@ -177,8 +186,8 @@ export function Hero() {
                   alt=""
                   className="absolute inset-0 h-full w-full object-cover"
                 />
-                <span className="relative flex size-11 items-center justify-center rounded-full bg-background/90 text-foreground shadow-sm ring-1 ring-border transition-transform group-hover/thumb:scale-105">
-                  <IconPlay className="size-4" />
+                <span className="relative flex size-9 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/30 backdrop-blur-md transition-transform group-hover/thumb:scale-105">
+                  <IconPlay className="size-3.5" />
                 </span>
               </>
             ) : (
@@ -205,9 +214,9 @@ export function Hero() {
                 setVideoOpen(false);
               }}
               aria-label="Close video"
-              className="absolute right-3 top-3 z-10 flex size-8 items-center justify-center rounded-full bg-background/80 text-foreground ring-1 ring-border backdrop-blur transition-colors hover:bg-background"
+              className="absolute right-3 top-3 z-10 flex size-7 items-center justify-center rounded-full bg-black/25 text-white ring-1 ring-white/20 backdrop-blur-md transition-colors hover:bg-black/40"
             >
-              <IconX className="size-4" />
+              <IconX className="size-3.5" />
             </button>
             {DEMO_VIDEO_ID ? (
               <iframe
