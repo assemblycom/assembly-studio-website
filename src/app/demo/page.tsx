@@ -18,18 +18,9 @@ const LOGOS = [
 ];
 
 const EXPECTATIONS = [
-  {
-    title: "A walkthrough built around your use case",
-    body: "No generic pitch — we tailor the session to the clients and workflows you serve.",
-  },
-  {
-    title: "See an app go from prompt to portal",
-    body: "Watch how fast you can generate a branded, secure client app and publish it live.",
-  },
-  {
-    title: "Straight answers on security, pricing, and rollout",
-    body: "Bring your questions on SOC 2, HIPAA, SSO, and what a rollout looks like for your team.",
-  },
+  "A walkthrough built around your use case",
+  "See an app go from prompt to portal",
+  "Straight answers on security, pricing, and rollout",
 ];
 
 function CheckIcon() {
@@ -39,7 +30,7 @@ function CheckIcon() {
       height="20"
       viewBox="0 0 20 20"
       fill="none"
-      className="mt-0.5 shrink-0 text-foreground"
+      className="shrink-0 text-foreground"
       aria-hidden
     >
       <path
@@ -68,16 +59,11 @@ export default function DemoPage() {
             can ship a branded, secure client app on Assembly.
           </p>
 
-          <ul className="mt-10 flex flex-col gap-5">
+          <ul className="mt-10 flex flex-col gap-4">
             {EXPECTATIONS.map((item) => (
-              <li key={item.title} className="flex gap-3">
+              <li key={item} className="flex items-center gap-3">
                 <CheckIcon />
-                <div>
-                  <p className="font-medium leading-snug">{item.title}</p>
-                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                    {item.body}
-                  </p>
-                </div>
+                <span className="leading-snug">{item}</span>
               </li>
             ))}
           </ul>

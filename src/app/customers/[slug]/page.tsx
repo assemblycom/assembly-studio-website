@@ -170,7 +170,7 @@ function RelatedCard({ study }: { study: CaseStudy }) {
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className="group flex flex-col bg-background p-6 transition-colors duration-200 hover:bg-muted/40 md:p-8"
+      className="group flex flex-col bg-background p-6 transition-colors duration-200 hover:bg-muted md:p-8"
     >
       <div className="flex items-start justify-between gap-4">
         <p
