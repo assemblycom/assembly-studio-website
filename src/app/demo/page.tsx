@@ -58,7 +58,7 @@ export default function DemoPage() {
     <section className="px-6 pb-24 pt-28 md:pt-36">
       <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-2 md:gap-16 lg:gap-24">
         {/* Left — value proposition and social proof */}
-        <div className="md:pt-6">
+        <div>
           <p className="text-sm text-muted-foreground">Book a demo</p>
           <h1 className="mt-3 max-w-md text-4xl font-medium tracking-tight md:text-5xl">
             See Assembly Studio in action
