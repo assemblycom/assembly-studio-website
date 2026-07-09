@@ -1,0 +1,814 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { APP_URL } from "@/lib/constants";
+import { getFeaturedTemplates, TEMPLATES, type Template } from "@/lib/templates";
+import { IconArrow } from "./icons";
+import { V66Composer } from "./hero-v66";
+import { TemplateMock } from "./template-preview";
+
+// ─────────────────────────────────────────────────────────────────────────
+// HERO V69 — V64's composition (left headline, tall composer, poster template
+// row) on a vertical blue→green→white gradient, with a ToDesktop-style nav:
+// wide and transparent at the top, collapsing into a compact centered frosted
+// pill on scroll. Text + UI stay dark so they read over the light gradient.
+// ─────────────────────────────────────────────────────────────────────────
+
+const MONO = '"ABC Diatype Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
+const NAV_LINKS = ["Solutions", "Resources", "Pricing", "Products"];
+
+// Type scale — modeled on Linear / Devin Desktop / Bird: large display at
+// MEDIUM weight (never bold), tight negative tracking that grows with size,
+// tight leading on the display, and muted supporting text. Tailwind classes:
+//   display  text-[34px] md:text-[50px]  font-medium  tracking-[-0.03em]  leading-[1.03]
+//   lead     text-[18px]                 font-normal  tracking-[-0.01em]  leading-[1.5]  (muted)
+//   label    text-[15px]                 font-normal  tracking-[-0.01em]                 (nav / CTA)
+//   title    text-[15px]                 font-medium  tracking-[-0.01em]  leading-[1.25] (card title)
+//   meta     text-[13px]                 font-normal  tracking-[-0.005em]                (muted)
+//   eyebrow  text-[12px]                 font-normal  tracking-[0.01em]   (mono, normal case)
+const T = {
+  display: "text-[34px] font-medium leading-[1.03] tracking-[-0.03em] md:text-[50px]",
+  label: "text-[15px] tracking-[-0.01em]",
+  title: "text-[13px] font-normal leading-[1.3] tracking-[-0.01em]",
+  meta: "text-[11px] tracking-[-0.005em]",
+  eyebrow: "text-[12px] tracking-[0.01em]",
+};
+
+function IconChevron({ className }: { className?: string }) {
+  return (
+    <svg className={className} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M9 6l6 6-6 6" />
+    </svg>
+  );
+}
+// Polished, animated mocks for the first two card templates. Animations are
+// triggered by the card's group-hover (cards stay mounted in the row), so the
+// form fills in / the chart builds each time you hover.
+function CardIntake() {
+  // A minimal glimpse — two filled fields and the primary action. No in-card
+  // title/badge: the template name lives in the caption beneath the card, so
+  // repeating it here would only crowd the widget.
+  const fields: [string, string][] = [
+    ["Company", "Northwind Co."],
+    ["Contact", "jane@northwind.com"],
+  ];
+  return (
+    <div className="flex h-full flex-col justify-center gap-3 bg-[var(--v69-card)] p-4">
+      {fields.map(([l, v], i) => (
+        <div
+          key={l}
+          className="flex flex-col gap-1 [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.45s_ease-out_both]"
+          style={{ animationDelay: `${i * 0.08}s` }}
+        >
+          <span className="text-[9px] leading-none text-neutral-400">{l}</span>
+          <div className="flex h-[26px] items-center rounded-[6px] bg-[var(--v69-well)] px-2.5 text-[11px] text-neutral-800 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.05)]">
+            <span className="truncate">{v}</span>
+          </div>
+        </div>
+      ))}
+      {/* Muted secondary action — a quiet chip, not a stark white CTA. */}
+      <button
+        type="button"
+        tabIndex={-1}
+        className="mt-3 flex h-[26px] items-center justify-center rounded-[6px] bg-[var(--v69-chip)] text-[11px] font-medium text-neutral-700 ring-1 ring-[color:var(--v69-chip-border)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.55s_ease-out_0.28s_both]"
+      >
+        Create client
+      </button>
+    </div>
+  );
+}
+
+function CardDashboard() {
+  // A dense column histogram (à la a trading/analytics readout): a shallow early
+  // dip that climbs steadily to the "now". All bars share one neutral tone.
+  const bars = [
+    44, 40, 33, 27, 22, 18, 16, 19, 17, 23, 27, 25, 31, 35, 33, 39, 43, 41, 47,
+    51, 49, 57, 61, 59, 67, 73, 79, 87, 94, 100,
+  ];
+  return (
+    <div className="flex h-full flex-col gap-2 bg-[var(--v69-card)] px-3.5 pt-3.5">
+      <div>
+        <div className="text-[9px] text-neutral-400">Engagement score</div>
+        <div className="mt-1 flex items-center gap-2">
+          <span aria-label="82" className="v69-score-num text-[30px] font-medium leading-none tracking-tight text-neutral-900 group-hover:[animation:v69Count_0.9s_ease-out_both]" />
+          <span className="rounded-full bg-[var(--v69-well)] px-2.5 py-1 text-[9px] font-medium leading-none text-neutral-400 group-hover:[animation:v69Pop_0.35s_ease-out_0.9s_both]">+5%</span>
+        </div>
+      </div>
+      <div className="flex min-h-0 flex-1 items-end gap-[2px] pt-1">
+        {bars.map((h, i) => (
+          <div
+            key={i}
+            className="w-full origin-bottom rounded-[1px] bg-neutral-500/70 group-hover:[animation:v69GrowY_0.6s_ease-out_both]"
+            style={{ height: `${h}%`, animationDelay: `${i * 0.02}s` }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Static (non-animated) filling mocks for the remaining featured cards — rows
+// centered with even gaps so the card reads composed, not top-clustered.
+function CardList({
+  header,
+  icon,
+  badge,
+  rows,
+}: {
+  header?: string;
+  icon?: React.ReactNode;
+  badge?: string;
+  rows: [string, string, string][];
+}) {
+  return (
+    <div className="flex h-full flex-col gap-2 bg-[var(--v69-card)] p-3.5">
+      {header && (
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            {icon}
+            <span className="text-[11px] font-medium text-neutral-800">{header}</span>
+          </div>
+          {badge && <span className="rounded-full bg-[var(--v69-well-2)] px-2 py-0.5 text-[9px] text-neutral-500">{badge}</span>}
+        </div>
+      )}
+      <div className="flex flex-1 flex-col justify-center gap-2">
+        {rows.map(([label, status, color], i) => (
+          <div
+            key={label + i}
+            className="flex items-center justify-between rounded-md bg-[var(--v69-well)] px-2.5 py-2 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.04)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both]"
+            style={{ animationDelay: `${i * 0.09}s` }}
+          >
+            <span className="text-[10px] text-neutral-800">{label}</span>
+            <span
+              className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] text-neutral-700 shadow-[0_1px_2px_rgba(16,24,40,0.05)] ring-1 ring-[var(--v69-chip-border)]"
+              style={{ backgroundColor: `color-mix(in srgb, ${color} 15%, var(--v69-chip))` }}
+            >
+              <span className="size-1.5 rounded-full" style={{ backgroundColor: color }} />
+              {status}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CardProposal() {
+  const items: [string, string][] = [
+    ["Brand strategy", "$4,000"],
+    ["Visual identity", "$6,500"],
+    ["Website design", "$8,000"],
+  ];
+  return (
+    <div className="flex h-full flex-col bg-[var(--v69-card)] p-4">
+      <div className="flex flex-1 flex-col justify-center gap-3 rounded-lg bg-[var(--v69-well)] px-3.5 py-4 text-[11px] shadow-[inset_0_0_0_1px_rgba(16,24,40,0.04)]">
+        {items.map(([l, p], i) => (
+          <div
+            key={l}
+            className="flex items-center justify-between [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both]"
+            style={{ animationDelay: `${i * 0.09}s` }}
+          >
+            <span className="text-neutral-600">{l}</span>
+            <span className="tabular-nums text-neutral-500">{p}</span>
+          </div>
+        ))}
+        <div
+          className="mt-1 flex items-baseline justify-between border-t border-black/[0.07] pt-2.5 [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both]"
+          style={{ animationDelay: `${items.length * 0.09}s` }}
+        >
+          <span className="text-neutral-500">Total</span>
+          <span className="text-[17px] font-medium leading-none tracking-tight tabular-nums text-neutral-900">$18,500</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CardChat() {
+  return (
+    <div className="flex h-full flex-col justify-center gap-2 bg-[var(--v69-card)] p-4 text-[11px]">
+      <div className="max-w-[85%] rounded-xl rounded-tl-sm bg-[var(--v69-well-2)] px-3 py-2 text-neutral-700 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.03)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both]">When does my project kick off?</div>
+      <div className="ml-auto max-w-[85%] rounded-xl rounded-tr-sm bg-neutral-900 px-3 py-2 leading-relaxed text-white shadow-[0_2px_6px_-2px_rgba(16,24,40,0.3)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_0.35s_both]">Kickoff is Mon, Apr 8.</div>
+      <div className="mt-auto flex h-7 items-center rounded-full bg-[var(--v69-well)] px-3 text-[10px] text-neutral-400 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.04)]">
+        <span>Ask a question…</span>
+        <span className="ml-px h-3 w-px bg-neutral-500 opacity-0 group-hover:[animation:v69Blink_0.9s_steps(1)_0.7s_infinite]" />
+      </div>
+    </div>
+  );
+}
+
+// Onboarding wizard — a numbered stepper whose completed steps check in and
+// whose progress bar fills on hover.
+function CardOnboarding() {
+  const steps: [string, "done" | "active" | "todo"][] = [
+    ["Account created", "done"],
+    ["Company details", "done"],
+    ["Goals & scope", "active"],
+    ["Review & submit", "todo"],
+  ];
+  return (
+    <div className="flex h-full flex-col justify-center gap-3.5 bg-[var(--v69-card)] p-4">
+      {/* Progress first (the status), then the steps — done ✓, current row
+          highlighted, upcoming muted. Monotone: neutral tones only. */}
+      <div className="flex items-center gap-2.5">
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--v69-well-2)]">
+          <div className="h-full w-1/2 origin-left rounded-full bg-neutral-500 group-hover:[animation:v69GrowX_0.9s_ease-out_both]" />
+        </div>
+        <span className="text-[10px] tabular-nums text-neutral-400">50%</span>
+      </div>
+      <div className="flex flex-col gap-0.5">
+        {steps.map(([label, state], i) => (
+          <div
+            key={label}
+            className={`flex items-center gap-2.5 rounded-md px-2 py-1.5 [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] ${state === "active" ? "bg-[var(--v69-well)]" : ""}`}
+            style={{ animationDelay: `${i * 0.08}s` }}
+          >
+            <span
+              className={`flex size-4 shrink-0 items-center justify-center rounded-full ${
+                state === "done"
+                  ? "bg-neutral-700 text-white"
+                  : "border border-neutral-400/40"
+              }`}
+            >
+              {state === "done" ? (
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+              ) : null}
+            </span>
+            <span className={`text-[11px] ${state === "todo" ? "text-neutral-400" : "text-neutral-800"}`}>{label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Document collection — an upload checklist where each requested doc checks off
+// with a staggered pop on hover.
+function CardChecklist() {
+  const docs: [string, boolean][] = [
+    ["Signed contract", true],
+    ["W-9 form", true],
+    ["Brand assets", true],
+    ["Logo files", false],
+  ];
+  return (
+    <div className="flex h-full flex-col justify-center gap-2 bg-[var(--v69-card)] p-4">
+      <div className="flex flex-col gap-2">
+        {docs.map(([label, done], i) => (
+          <div key={label} className="flex items-center gap-2 rounded-md bg-[var(--v69-well)] px-2.5 py-1.5 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.04)]">
+            <span
+              className={`flex size-3.5 shrink-0 items-center justify-center rounded-[4px] ${
+                done ? "bg-neutral-700 text-white group-hover:[animation:v69Pop_0.8s_cubic-bezier(0.22,1,0.36,1)_both]" : "border border-black/10 bg-[var(--v69-chip)]"
+              }`}
+              style={done ? { animationDelay: `${0.28 + i * 0.26}s` } : undefined}
+            >
+              {done && (
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+              )}
+            </span>
+            <span className={`text-[10px] ${done ? "text-neutral-800" : "text-neutral-400"}`}>{label}</span>
+            {!done && <span className="ml-auto text-[9px] text-neutral-400">Pending</span>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// PDF to digital intake — a source PDF chip that flows into a guided web form;
+// the fields type in and a signature line draws itself on hover.
+function CardPdf() {
+  return (
+    <div className="flex h-full flex-col justify-center gap-2 bg-[var(--v69-card)] p-4">
+      <div className="flex flex-col gap-2">
+        {([["Full name", "Jane Rivera"], ["Company", "Northwind Co."]] as [string, string][]).map(([l, v], i) => (
+          <div key={l} className="flex flex-col gap-1">
+            <span className="text-[9px] text-neutral-400">{l}</span>
+            <div className="flex h-[22px] items-center overflow-hidden rounded-[6px] bg-[var(--v69-well)] px-2 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.05)]">
+              <span className="inline-block min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[9px] text-neutral-800 group-hover:[animation:v68Type_1.5s_steps(24)_both]" style={{ animationDelay: `${0.3 + i * 1.9}s` }}>
+                {v}
+              </span>
+              <span className="ml-px h-3 w-px shrink-0 bg-neutral-700 opacity-0 group-hover:[animation:v68Caret_1.5s_ease-out_both]" style={{ animationDelay: `${0.3 + i * 1.9}s` }} />
+            </div>
+          </div>
+        ))}
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[9px] text-neutral-400">Signature</span>
+          <div className="flex h-6 items-center rounded-md bg-[var(--v69-well)] px-2 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.05)]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Client performance dashboard — a radial goal gauge: an ~80% arc sweeps in on
+// hover with the value + target read centred inside the ring. Monotone.
+function CardMetrics() {
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-3 bg-[var(--v69-card)] p-4">
+      <div className="relative flex items-center justify-center">
+        <svg viewBox="0 0 84 84" className="size-[128px] -rotate-90">
+          <circle cx="42" cy="42" r="37" fill="none" strokeWidth="6" className="stroke-neutral-500/15" />
+          <circle
+            cx="42"
+            cy="42"
+            r="37"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="6"
+            strokeLinecap="round"
+            pathLength={100}
+            strokeDasharray="100"
+            style={{ strokeDashoffset: 20 }}
+            className="text-neutral-500 group-hover:[animation:v69Ring_1s_ease-out_both]"
+          />
+        </svg>
+        <div className="absolute flex flex-col items-center leading-none">
+          <span className="text-[26px] font-medium tracking-tight text-neutral-900">2.4k</span>
+          <span className="mt-1.5 text-[10px] tabular-nums text-neutral-400">/ 3,000</span>
+        </div>
+      </div>
+      <span className="text-[10px] font-medium text-neutral-600">May target</span>
+    </div>
+  );
+}
+
+// Retainer usage overview — a hours-used-vs-remaining bar that fills on hover.
+function CardRetainer() {
+  return (
+    <div className="flex h-full flex-col justify-center bg-[var(--v69-card)] p-4">
+      <div className="flex flex-col gap-3 rounded-lg bg-[var(--v69-well)] px-3.5 py-3.5 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.04)]">
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-[22px] font-medium leading-none tracking-tight text-neutral-900">33.5</span>
+          <span className="text-[10px] text-neutral-400">/ 40 hrs used</span>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <div className="h-2 overflow-hidden rounded-full bg-black/[0.06]">
+            <div className="h-full w-[84%] origin-left rounded-full bg-neutral-500 group-hover:[animation:v69GrowX_1s_ease-out_both]" />
+          </div>
+          <div className="flex justify-between text-[9px] text-neutral-400">
+            <span>84% used</span>
+            <span className="tabular-nums">6.5 hrs remaining</span>
+          </div>
+        </div>
+        <div className="flex flex-col gap-1 border-t border-black/[0.06] pt-2 text-[9px]">
+          {([["Design & build", "20.0h"], ["Client meetings", "13.5h"]] as [string, string][]).map(([l, v]) => (
+            <div key={l} className="flex items-center justify-between">
+              <span className="text-neutral-500">{l}</span>
+              <span className="tabular-nums text-neutral-600">{v}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Monthly client report — a branded, read-only report: a "Published" badge pops
+// in, a sparkline draws, and the summary lines rise in on hover.
+function CardReport() {
+  const stats: [string, string][] = [
+    ["Revenue", "$42.0k"],
+    ["Hours", "33.5"],
+  ];
+  const line = "M2,44 C22,40 34,26 54,28 C74,30 84,12 104,16 C124,20 136,30 156,22 C176,15 188,9 198,7";
+  return (
+    <div className="flex h-full flex-col justify-center gap-2 bg-[var(--v69-card)] p-4">
+      <div className="flex gap-1.5">
+        {stats.map(([l, v]) => (
+          <div key={l} className="flex-1 rounded-md bg-[var(--v69-well)] px-2 py-1 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.04)]">
+            <div className="text-[9px] text-neutral-400">{l}</div>
+            <div className="text-[13px] font-medium leading-tight text-neutral-900">{v}</div>
+          </div>
+        ))}
+      </div>
+      <div className="flex min-h-0 flex-1 flex-col gap-1">
+        <div className="flex items-center justify-between">
+          <span className="text-[9px] text-neutral-400">Revenue trend</span>
+          <span className="text-[9px] font-medium text-neutral-500">+12%</span>
+        </div>
+        <div className="relative min-h-0 flex-1">
+          <svg viewBox="0 0 200 52" preserveAspectRatio="none" className="h-full w-full text-neutral-500">
+            <defs>
+              <linearGradient id="v69report" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="currentColor" stopOpacity="0.22" />
+                <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <path d={`${line} L200,52 L0,52 Z`} fill="url(#v69report)" />
+            <path
+              d={line}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
+              pathLength={1}
+              style={{ strokeDasharray: 1 }}
+              className="group-hover:[animation:v69Draw_1s_ease-out_both]"
+            />
+          </svg>
+        </div>
+        <div className="flex justify-between text-[9px] text-neutral-400">
+          <span>Wk 1</span>
+          <span>Wk 2</span>
+          <span>Wk 3</span>
+          <span>Wk 4</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Tail card — matches the sibling poster structure (a 188px preview tile + a
+// title/meta caption beneath) so it reads as one of the row rather than a
+// heavier standalone box. The preview is a small stack of template thumbnails
+// that fans out on hover.
+function CardInfo() {
+  // Fan offsets are kept small (≤24px shift, ≤7° rotate) relative to the
+  // 146×116 thumbnails so the whole stack stays inside the 236×188 tile at rest
+  // and on hover — nothing clips at the edges. Each thumbnail is a real card mock
+  // rendered at its native 236×188 and scaled down (0.618) so it reads as a true
+  // mini-screenshot rather than an overflowing, clipped fragment.
+  const stack = [
+    { slug: "content-approval-flow", z: "z-[1]", rest: "[transform:translate(-50%,-50%)_translateY(8px)_scale(0.9)]", hover: "group-hover:[transform:translate(-50%,-50%)_translateX(-24px)_translateY(-2px)_rotate(-7deg)]" },
+    { slug: "client-project-tracker", z: "z-[2]", rest: "[transform:translate(-50%,-50%)_translateY(4px)_scale(0.95)]", hover: "group-hover:[transform:translate(-50%,-50%)_translateY(-8px)]" },
+    { slug: "client-engagement-dashboard", z: "z-[3]", rest: "[transform:translate(-50%,-50%)]", hover: "group-hover:[transform:translate(-50%,-50%)_translateX(24px)_translateY(-2px)_rotate(7deg)]" },
+  ];
+  return (
+    <a
+      href={APP_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="See all templates"
+      className="group flex w-[236px] shrink-0 flex-col"
+    >
+      <div className="relative h-[188px] overflow-hidden rounded-xl border border-dashed border-black/15 bg-white/40 transition-transform duration-300 group-hover:-translate-y-1">
+        {stack.map((t) => (
+          <div
+            key={t.slug}
+            className={`absolute left-1/2 top-1/2 h-[116px] w-[146px] origin-center overflow-hidden rounded-md border border-black/[0.06] bg-white shadow-[0_6px_16px_-8px_rgba(16,24,40,0.35)] transition-transform duration-300 ease-out ${t.z} ${t.rest} ${t.hover}`}
+          >
+            <div className="h-[188px] w-[236px] origin-top-left scale-[0.6186]">
+              <V69CardMock slug={t.slug} />
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className={`mt-3 inline-flex items-center gap-1.5 text-[#181d24] ${T.title}`}>
+        See all templates
+        <IconArrow className="size-4 text-neutral-900/50 transition-transform group-hover:translate-x-0.5" />
+      </p>
+      <p className={`mt-1 text-neutral-900/55 ${T.meta}`}>+{TEMPLATES.length - CAROUSEL.length} more</p>
+    </a>
+  );
+}
+
+// Client project tracker — a phase-progress (Gantt-ish) read, deliberately
+// distinct from the status-pill approval list so the two don't look alike: each
+// phase is a labeled bar that fills to its completion on hover.
+function CardTracker() {
+  // Monotone neutral tracks — the phase names and fill lengths carry the state,
+  // so no status colour is needed.
+  const phases: [string, number][] = [
+    ["Discovery & scope", 1],
+    ["Design phase", 0.55],
+    ["Build & QA", 0],
+  ];
+  return (
+    <div className="flex h-full flex-col justify-center gap-3.5 bg-[var(--v69-card)] p-4">
+      {phases.map(([label, pct], i) => (
+        <div key={label} className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-neutral-700">{label}</span>
+            <span className="text-[10px] tabular-nums text-neutral-400">{Math.round(pct * 100)}%</span>
+          </div>
+          <div className="h-1.5 overflow-hidden rounded-full bg-[var(--v69-well)]">
+            <div
+              className="h-full origin-left rounded-full bg-neutral-500 group-hover:[animation:v69GrowX_0.9s_ease-out_both]"
+              style={{ width: `${pct * 100}%`, animationDelay: `${i * 0.12}s` }}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function V69CardMock({ slug }: { slug: string }) {
+  if (slug === "new-client-intake") return <CardIntake />;
+  if (slug === "client-engagement-dashboard") return <CardDashboard />;
+  if (slug === "client-project-tracker") return <CardTracker />;
+  if (slug === "content-approval-flow")
+    return (
+      <CardList
+        rows={[
+          ["March newsletter", "Approved", "color-mix(in srgb, var(--v69-ink) 90%, transparent)"],
+          ["Launch announcement", "In review", "color-mix(in srgb, var(--v69-ink) 55%, transparent)"],
+          ["Case study", "Draft", "color-mix(in srgb, var(--v69-ink) 35%, transparent)"],
+        ]}
+      />
+    );
+  if (slug === "proposal-builder") return <CardProposal />;
+  if (slug === "client-ai-assistant") return <CardChat />;
+  if (slug === "onboarding-wizard") return <CardOnboarding />;
+  if (slug === "document-collection") return <CardChecklist />;
+  if (slug === "pdf-to-digital-intake") return <CardPdf />;
+  if (slug === "client-performance-dashboard") return <CardMetrics />;
+  if (slug === "retainer-usage-overview") return <CardRetainer />;
+  if (slug === "monthly-client-report") return <CardReport />;
+  return <TemplateMock slug={slug} />;
+}
+
+const FEATURED = getFeaturedTemplates(6);
+const CAROUSEL: Template[] = [
+  ...FEATURED,
+  ...TEMPLATES.filter((t) => !FEATURED.some((f) => f.slug === t.slug)),
+].slice(0, 12);
+
+// V70 nav — a slightly squarish frosted pill that shortens into a compact
+// centered pill on scroll, so it stops spanning awkwardly across the blue hero
+// gradient once you move down the page.
+function V71Nav() {
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Lock background scroll while the full-screen menu is open.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, [menuOpen]);
+
+  return (
+    <div className="fixed inset-x-0 top-0 z-50">
+      {/* Full-width off-white announcement bar. */}
+      <div className="flex h-9 w-full items-center justify-center gap-2 bg-[#f2f1e8] px-4 text-[13px] text-neutral-600">
+        <span className="rounded-full bg-neutral-900 px-2 py-0.5 text-[10px] font-normal text-white">New</span>
+        <span className="truncate">Assembly Studio builds client-facing apps in minutes.</span>
+      </div>
+      <div className="flex justify-center px-4 pt-4">
+        <nav
+        className={`relative flex w-full items-center justify-between gap-6 rounded-[20px] border transition-all duration-300 ease-out backdrop-blur-xl ${
+          scrolled
+            ? "max-w-3xl border-black/[0.06] bg-[#f4f4ec]/78 py-1.5 pl-4 pr-1.5 shadow-[0_12px_34px_-14px_rgba(40,50,90,0.22)]"
+            : "max-w-[1600px] border-black/[0.05] bg-[#f4f4ec]/62 py-2 pl-4 pr-2 shadow-[0_8px_24px_-16px_rgba(40,50,90,0.16)]"
+        }`}
+      >
+        <Link href="/" aria-label="Assembly" className="flex shrink-0 items-center transition-opacity hover:opacity-80">
+          <Image src="/images/logo-mark.svg" alt="Assembly" width={24} height={24} priority />
+        </Link>
+
+        {/* Links — absolutely centered in the bar, independent of side widths. */}
+        <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-7 md:flex">
+          {NAV_LINKS.map((l) => (
+            <a key={l} href={APP_URL} target="_blank" rel="noopener noreferrer" className={`whitespace-nowrap text-neutral-900/65 transition-colors hover:text-neutral-900 ${T.label}`}>
+              {l}
+            </a>
+          ))}
+        </div>
+
+        <div className="flex shrink-0 items-center gap-1.5">
+          <a href={APP_URL} target="_blank" rel="noopener noreferrer" className={`hidden rounded-full px-3 py-2 text-neutral-900/70 transition-colors hover:text-neutral-900 sm:inline ${T.label}`}>
+            Log in
+          </a>
+          <a
+            href={APP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`rounded-full bg-neutral-900 px-4 py-1.5 font-normal text-white transition-[opacity,transform] hover:opacity-90 active:scale-[0.98] ${T.label}`}
+          >
+            Start trial
+          </a>
+          {/* Mobile menu button — v62's 3×3 grid-dots glyph. */}
+          <button
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Open menu"
+            className="flex size-9 items-center justify-center rounded-full text-neutral-900/70 transition-colors hover:bg-black/[0.05] hover:text-neutral-900 md:hidden"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <circle cx="5" cy="5" r="1.6" />
+              <circle cx="12" cy="5" r="1.6" />
+              <circle cx="19" cy="5" r="1.6" />
+              <circle cx="5" cy="12" r="1.6" />
+              <circle cx="12" cy="12" r="1.6" />
+              <circle cx="19" cy="12" r="1.6" />
+              <circle cx="5" cy="19" r="1.6" />
+              <circle cx="12" cy="19" r="1.6" />
+              <circle cx="19" cy="19" r="1.6" />
+            </svg>
+          </button>
+        </div>
+        </nav>
+      </div>
+
+      {/* Mobile full-screen menu — full-bleed frosted panel in the same tone as
+          the nav, with the links, Log in, and a Start trial CTA. */}
+      {menuOpen && (
+        <div className="fixed inset-0 z-[60] flex flex-col bg-[#f4f4ec]/95 backdrop-blur-2xl md:hidden">
+          <div className="flex items-center justify-between px-5 pt-6">
+            <Link href="/" aria-label="Assembly" onClick={() => setMenuOpen(false)} className="flex items-center">
+              <Image src="/images/logo-mark.svg" alt="Assembly" width={24} height={24} />
+            </Link>
+            <button
+              type="button"
+              onClick={() => setMenuOpen(false)}
+              aria-label="Close menu"
+              className="flex size-9 items-center justify-center rounded-full text-neutral-900/70 transition-colors hover:bg-black/[0.05] hover:text-neutral-900"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden>
+                <path d="M6 6l12 12M6 18L18 6" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="flex flex-1 flex-col gap-1 px-5 pt-10">
+            {NAV_LINKS.map((l) => (
+              <a
+                key={l}
+                href={APP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMenuOpen(false)}
+                className="rounded-2xl px-2 py-3 text-[28px] font-normal tracking-[-0.02em] text-neutral-900 transition-colors hover:bg-black/[0.03]"
+              >
+                {l}
+              </a>
+            ))}
+            <a
+              href={APP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMenuOpen(false)}
+              className="rounded-2xl px-2 py-3 text-[28px] font-normal tracking-[-0.02em] text-neutral-900/60 transition-colors hover:bg-black/[0.03]"
+            >
+              Log in
+            </a>
+          </div>
+
+          <div className="px-5 pb-8">
+            <a
+              href={APP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMenuOpen(false)}
+              className="flex h-12 items-center justify-center rounded-2xl bg-neutral-900 text-[15px] font-normal text-white transition-opacity active:opacity-90"
+            >
+              Start trial
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function HeroV71() {
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(true);
+  const rowRef = useRef<HTMLDivElement>(null);
+
+  const updateArrows = () => {
+    const el = rowRef.current;
+    if (!el) return;
+    setCanLeft(el.scrollLeft > 4);
+    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  };
+  useEffect(() => {
+    updateArrows();
+    window.addEventListener("resize", updateArrows);
+    return () => window.removeEventListener("resize", updateArrows);
+  }, []);
+  const scrollRow = (dir: 1 | -1) => rowRef.current?.scrollBy({ left: dir * 320, behavior: "smooth" });
+
+  return (
+    <>
+      <V71Nav />
+      <section className="overflow-x-clip pb-24">
+        <div className="relative px-6 pb-28 pt-40 md:px-10 md:pt-48">
+          <div className="relative mx-auto max-w-[1600px]">
+            {/* V71 — full-bleed brand-blue gradient with NO shape restriction:
+                spans the full viewport width and runs from behind the nav down
+                into the template row, fading out (unlike V70's rounded panel). */}
+            <div
+              aria-hidden
+              className="pointer-events-none absolute left-1/2 top-[-11rem] z-0 h-[900px] w-screen -translate-x-1/2 md:top-[-12rem]"
+              style={{
+                background:
+                  "linear-gradient(180deg, #8ea2f4 0%, #a9bbf3 28%, #cfd9f6 54%, rgba(207,217,246,0) 90%)",
+              }}
+            />
+            <h1 className={`relative z-10 mx-auto max-w-3xl text-center text-[#181d24] ${T.display}`}>
+              The AI app builder
+              {/* Mobile breaks after "builder" (so "for" starts line 2); desktop
+                  keeps the break after "for". */}
+              <br className="md:hidden" />{" "}
+              for
+              <br className="hidden md:block" />{" "}
+              client-facing experiences
+            </h1>
+
+            {/* Composer — sits on the blue panel; its light surface reads against it. */}
+            <div className="relative z-10 mx-auto mt-8 max-w-xl">
+              <V66Composer glow={false} typewriter mutedControls submitLabel="Start Building" submitDark surfaceClassName="v69-composer bg-[var(--v69-box)] ring-1 ring-black/[0.10]" minHeightClass="min-h-[148px]" />
+            </div>
+
+            {/* Template row — poster-style cards. Extra top margin gives the
+                composer room to breathe before the templates begin. */}
+            <div className="relative z-10 mt-10">
+              <div className="flex items-center justify-end">
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => scrollRow(-1)}
+                    disabled={!canLeft}
+                    aria-label="Previous templates"
+                    className="flex size-7 items-center justify-center rounded-full text-neutral-900/40 transition-colors hover:bg-black/[0.06] hover:text-neutral-900 disabled:pointer-events-none disabled:opacity-25"
+                  >
+                    <IconChevron className="size-4 rotate-180" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scrollRow(1)}
+                    disabled={!canRight}
+                    aria-label="More templates"
+                    className="flex size-7 items-center justify-center rounded-full text-neutral-900/40 transition-colors hover:bg-black/[0.06] hover:text-neutral-900 disabled:pointer-events-none disabled:opacity-25"
+                  >
+                    <IconChevron className="size-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Full-bleed: the row breaks out of the content column to span the
+                  whole viewport, so cards peek off both edges instead of being
+                  hard-cut mid-page. Inset padding keeps the first card aligned. */}
+              <div className="relative left-1/2 mt-1 w-screen -translate-x-1/2">
+              <div
+                ref={rowRef}
+                onScroll={updateArrows}
+                className="flex gap-4 overflow-x-auto pb-2 pl-6 pr-6 pt-3 md:pl-10 md:pr-10 lg:pl-[max(2.5rem,calc((100vw-1600px)/2))] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [&:has(a:hover)>a:not(:hover)]:opacity-45"
+              >
+                {CAROUSEL.map((t) => (
+                  <a
+                    key={t.slug}
+                    href={APP_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex w-[236px] shrink-0 origin-center flex-col transition-[transform,opacity] duration-300 ease-out"
+                  >
+                    <div className="relative h-[188px] overflow-hidden rounded-xl border border-black/[0.06] bg-[var(--v69-card)] shadow-[0_6px_20px_-14px_rgba(40,50,90,0.16)] transition-[transform,border-color,box-shadow] duration-300 [will-change:transform] group-hover:-translate-y-1 group-hover:border-black/[0.12] group-hover:shadow-[0_14px_32px_-18px_rgba(40,50,90,0.26)]">
+                      <div className="h-full w-full transition-transform duration-[600ms] ease-out [will-change:transform] group-hover:scale-[1.04]">
+                        <V69CardMock slug={t.slug} />
+                      </div>
+                    </div>
+                    <p className={`mt-3 line-clamp-2 text-[#181d24] ${T.title}`}>{t.title}</p>
+                    <p className={`mt-1 text-neutral-900/55 ${T.meta}`}>{t.category}</p>
+                  </a>
+                ))}
+
+                {/* Tail — info card: stacked previews that fan out on hover. */}
+                <CardInfo />
+              </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Logos carousel — on the white base below the gradient. */}
+        <div className="mx-auto mt-20 max-w-7xl px-6 md:mt-24">
+          <p className={`mb-8 text-center text-muted-foreground ${T.eyebrow}`} style={{ fontFamily: MONO }}>
+            Trusted by teams at
+          </p>
+          <div className="mx-auto max-w-2xl overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]">
+            <div className="flex w-max animate-marquee items-center gap-12">
+              {["Capital One", "Collective", "Ditto", "Heritage Law", "Waymaker", "Aura", "CoverPanda", "Northwind"]
+                .concat(["Capital One", "Collective", "Ditto", "Heritage Law", "Waymaker", "Aura", "CoverPanda", "Northwind"])
+                .map((name, i) => (
+                  <span key={i} className="shrink-0 text-base font-medium text-muted-foreground">
+                    {name}
+                  </span>
+                ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}

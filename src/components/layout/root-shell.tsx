@@ -113,10 +113,10 @@ export function RootShell({ children }: { children: React.ReactNode }) {
         <StudioWordmark />
       </div>
       {/* White content wrapper (square bottom). The announcement bar scrolls
-          away; the sticky header pins to the top as you scroll the hero box. */}
+          away; the hero renders its own sticky nav (with the theme toggle), so
+          the global header is omitted here to avoid a duplicate bar. */}
       <div className="relative z-10 flex min-h-screen flex-col bg-background">
         {bar}
-        <Header fullWidth darkTop />
         <main className="flex-1">{children}</main>
       </div>
       {/* Footer as a sibling — rounded bottom corners reveal the dark panel. */}

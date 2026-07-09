@@ -24,7 +24,22 @@
   --border: #e5e5e5;
   --accent: #0a0a0a;
   --accent-foreground: #ffffff;
+  /* Design-system Card tokens (light defaults); the hero's template row
+     overrides --card/--card-foreground inline per theme. */
+  --card: #ffffff;
+  --card-foreground: #0a0a0a;
   --font-pp-mori: "PP Mori", system-ui, sans-serif;
+
+  /* Default surface hierarchy for the reused template-card mocks (light). The
+     hero re-declares these inline for its light row; kept here so no token is
+     ever unset. */
+  --v69-card: #ffffff;
+  --v69-well: #f1f2f4;
+  --v69-well-2: #e9eaee;
+  --v69-chip: #ffffff;
+  --v69-chip-border: rgba(16, 24, 40, 0.1);
+  --v69-ink: #101828;
+  --v69-box: #ffffff;
 }
 
 @theme inline {
@@ -35,6 +50,8 @@
   --color-border: var(--border);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
   --font-sans: var(--font-pp-mori);
   --font-mono: var(--font-geist-mono);
 }
@@ -44,6 +61,18 @@
   --animate-fade-in: fade-in 0.4s ease both;
   /* Blinking caret for the typewriter placeholder in the hero prompt box. */
   --animate-caret: caret 1.1s step-end infinite;
+  /* Prompt-picker dropdown — a quick top-anchored rise+fade. */
+  --animate-menu-in: menu-in 0.16s cubic-bezier(0.22, 1, 0.36, 1) both;
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
   @keyframes marquee {
     from {
       transform: translateX(0);
@@ -236,5 +265,193 @@ body {
   [tabindex]:focus-visible {
     outline: 2px solid var(--foreground);
     outline-offset: 2px;
+  }
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Hero (v76) — the composer's animated conic-gradient ring, the reused
+   template-card mocks' dark skin, and their staggered content animations.
+   Ported from the hero-iterations prototype.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/* Animated conic-gradient border around the composer. The masked ::before
+   paints only the 1.5px ring so the glass surface shows through. */
+@property --v63-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes v63BorderSpin {
+  to {
+    --v63-angle: 360deg;
+  }
+}
+.v63-gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--v63-angle),
+    transparent 0deg,
+    #b4bfe4 130deg,
+    #d9ed92 230deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: v63BorderSpin 5s linear infinite;
+  pointer-events: none;
+  z-index: 2;
+  /* The hero keeps the ring visible at rest so the box always reads as the live
+     entry point. */
+  opacity: 1;
+  transition: opacity 0.3s ease,
+    padding 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+    filter 0.45s ease;
+}
+.v63-gradient-border {
+  transition: box-shadow 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+/* Hover — the ring thickens, brightens, spins a touch faster, and a soft brand
+   glow blooms behind the box. */
+.v63-gradient-border:hover {
+  box-shadow: 0 12px 44px -12px rgba(150, 170, 240, 0.28),
+    0 0 26px -6px rgba(217, 237, 146, 0.16);
+}
+.v63-gradient-border:hover::before {
+  padding: 2.5px;
+  filter: brightness(1.28) saturate(1.15);
+  animation-duration: 2.6s;
+}
+/* Focus — while typing, the ring calms down: slow spin, dimmed, thin. */
+.v63-gradient-border:focus-within::before {
+  padding: 1.5px;
+  filter: none;
+  opacity: 0.5;
+  animation-duration: 20s;
+}
+.v63-gradient-border:focus-within {
+  box-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .v63-gradient-border::before {
+    animation: none;
+  }
+}
+
+/* Dark-mode skin for the reused template-card mocks. Tailwind v4 utilities read
+   their color from --color-* theme vars, so scoping these on the mock wrapper
+   reskins the light mocks to dark WITHOUT editing the shared component. */
+.v72-mock-dark {
+  --v69-card: transparent;
+  --v69-well: #262626;
+  --v69-well-2: #2e2e2e;
+  --v69-chip: #2a2a2a;
+  --v69-chip-border: rgba(255, 255, 255, 0.1);
+  --v69-ink: #ffffff;
+
+  --color-white: #191b22;
+  --color-black: #ffffff;
+
+  --color-neutral-300: #666a72;
+  --color-neutral-400: #80848c;
+  --color-neutral-500: #9a9ea6;
+  --color-neutral-600: #b2b6bd;
+  --color-neutral-700: #cbced4;
+  --color-neutral-800: #e5e7ea;
+  --color-neutral-900: #f3f4f6;
+
+  --color-emerald-50: #12281f;
+  --color-emerald-100: #16382a;
+  --color-emerald-500: #10b981;
+  --color-emerald-600: #6ee7b7;
+  --color-emerald-700: #a7f3d0;
+
+  --color-amber-50: #2c2210;
+  --color-amber-600: #fbbf24;
+
+  --color-red-50: #2c1414;
+  --color-red-500: #f87171;
+}
+
+/* Typewriter reveal — grows the text's layout width left-to-right in steps. */
+@keyframes v68Type {
+  from { max-width: 0; }
+  to { max-width: 100%; }
+}
+/* Windowed blink so only the field being filled shows a caret. */
+@keyframes v68Caret {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  24% { opacity: 0; }
+  36% { opacity: 1; }
+  48% { opacity: 0; }
+  60% { opacity: 1; }
+  72% { opacity: 0; }
+  100% { opacity: 0; }
+}
+/* Line-draw for the dashboard sparkline (path uses pathLength=1). */
+@keyframes v69Draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+/* Radial goal gauge — the arc sweeps from empty to its ~80% target on hover. */
+@keyframes v69Ring {
+  from { stroke-dashoffset: 100; }
+  to { stroke-dashoffset: 20; }
+}
+/* Horizontal fill for progress / usage bars — scaleX from the left. */
+@keyframes v69GrowX {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+/* Vertical grow for bar-chart columns — scaleY from the bottom. */
+@keyframes v69GrowY {
+  from { transform: scaleY(0.04); }
+  to { transform: scaleY(1); }
+}
+/* Count-up for the engagement score. Driven by an animatable integer property
+   surfaced through a counter, so it steps cleanly with no fractional flicker. */
+@property --v69-score {
+  syntax: "<integer>";
+  initial-value: 82;
+  inherits: false;
+}
+@keyframes v69Count {
+  from { --v69-score: 0; }
+  to { --v69-score: 82; }
+}
+.v69-score-num {
+  counter-reset: v69-score var(--v69-score);
+}
+.v69-score-num::after {
+  content: counter(v69-score);
+}
+/* Pop-in for checkmarks, badges, and status chips. */
+@keyframes v69Pop {
+  0% { opacity: 0; transform: scale(0.7); }
+  55% { opacity: 1; }
+  100% { opacity: 1; transform: scale(1); }
+}
+/* Steady caret blink for the chat input (loops while the card is hovered). */
+@keyframes v69Blink {
+  0%, 45% { opacity: 1; }
+  50%, 95% { opacity: 0; }
+  100% { opacity: 1; }
+}
+/* Staggered entrance for template-card mock content — replays on each hover. */
+@keyframes cardRowIn {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }

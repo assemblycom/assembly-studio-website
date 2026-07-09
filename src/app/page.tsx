@@ -1,4 +1,4 @@
-import { Hero } from "@/components/home/hero";
+import { HeroV76 } from "@/components/home/hero-v76";
 import { WhyAssembly } from "@/components/home/why-assembly";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { Templates } from "@/components/home/templates";
@@ -10,7 +10,7 @@ import { CTA } from "@/components/home/cta";
 export default function HomePage() {
   return (
     <>
-      <Hero />
+      <HeroV76 />
       <WhyAssembly />
       <HowItWorks />
       {/* Scrolling out of "How it works" the page hands off to its dark lower
