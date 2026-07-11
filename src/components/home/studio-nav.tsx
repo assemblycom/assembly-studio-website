@@ -57,10 +57,16 @@ export function StudioNav({
   // no side gutters, no drop shadow. Tracks the surface: a light near-opaque
   // glass in light contexts and a dark one over a dark hero/theme. Kept
   // near-opaque so it doesn't smear as the bar crosses a section boundary.
-  const barChrome =
+  // The border is split out from the surface (see the header border-b below):
+  // it lives at rest as a transparent hairline so scrolling only transitions its
+  // COLOR (transparent → hairline) — never its width, and never from the
+  // inherited currentColor, which flashed a bright line for a frame.
+  const scrolledSurface =
     softGlass || !darkTop
-      ? "bg-white/80 backdrop-blur-xl border-b border-black/[0.07]"
-      : "bg-[#0e0e10]/85 backdrop-blur-xl border-b border-white/10";
+      ? "bg-white/80 backdrop-blur-xl"
+      : "bg-[#0e0e10]/85 backdrop-blur-xl";
+  const scrolledBorder =
+    softGlass || !darkTop ? "border-black/[0.07]" : "border-white/10";
 
   // One shared easing/duration for the rest→pill transition so every animated
   // property (chrome, geometry, logo tint) settles together on the same soft
@@ -138,7 +144,7 @@ export function StudioNav({
       {/* Mobile header — mirrors the desktop nav: transparent with light
           contents over the dark hero, settling into the same dark glass pill on
           scroll. Logo on the left, grid menu button on the right. */}
-      <header className={`${position} z-50 transition-colors ${ease} md:hidden ${scrolled ? barChrome : ""}`}>
+      <header className={`${position} z-50 border-b transition-colors ${ease} md:hidden ${scrolled ? `${scrolledSurface} ${scrolledBorder}` : "border-transparent"}`}>
         <div className={`flex items-center justify-between px-5 transition-[height] ${ease} ${scrolled ? "h-12" : "h-14"}`}>
           <Link href="/" className="flex items-center">
             {logoMark}
@@ -165,7 +171,7 @@ export function StudioNav({
 
       {/* Desktop header — full-bleed bar: transparent at the top, frosted
           full-width surface with a hairline bottom border on scroll */}
-      <header className={`${position} z-50 hidden transition-colors ${ease} md:block ${scrolled ? barChrome : ""}`}>
+      <header className={`${position} z-50 hidden border-b transition-colors ${ease} md:block ${scrolled ? `${scrolledSurface} ${scrolledBorder}` : "border-transparent"}`}>
         <div className={`relative mx-auto flex items-center ${contentRail} transition-[height] ${ease} ${scrolled ? "h-14" : "h-16"}`}>
           {/* Three balanced columns keep the nav truly centred while the equal
               side columns guarantee it never crowds the logo or the actions. */}

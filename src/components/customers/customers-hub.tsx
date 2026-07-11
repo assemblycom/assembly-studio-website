@@ -67,7 +67,7 @@ function StoryCard({ study }: { study: CaseStudy }) {
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className="group flex flex-col rounded-xl border border-border bg-background p-3 transition-colors duration-200 hover:border-foreground/15"
+      className="group flex flex-col rounded-xl border border-border bg-card p-3 transition-colors duration-200 hover:border-foreground/15"
     >
       <div className="relative aspect-[16/10] overflow-hidden rounded-lg">
         <Image
@@ -155,7 +155,7 @@ export function CustomersHub() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search…"
               aria-label="Search customer stories"
-              className="w-full rounded-lg border border-border bg-background py-3 pl-11 pr-4 text-sm outline-none transition-colors focus:border-foreground/40"
+              className="w-full rounded-lg border border-border bg-muted py-3 pl-11 pr-4 text-sm outline-none transition-colors focus:border-foreground/40"
             />
           </div>
 
@@ -178,13 +178,11 @@ export function CustomersHub() {
                   type="button"
                   aria-pressed={isActive}
                   onClick={() => toggleSector(label)}
-                  style={{
-                    backgroundColor: isActive
-                      ? "rgba(17,17,20,0.07)"
-                      : "rgba(17,17,20,0.04)",
-                    color: isActive ? "#5b616b" : "#9095a0",
-                  }}
-                  className="rounded-md px-2.5 py-1 font-[family-name:var(--font-diatype-mono)] text-xs uppercase transition-opacity hover:opacity-70"
+                  className={`rounded-md px-2.5 py-1 font-[family-name:var(--font-diatype-mono)] text-xs uppercase transition-colors ${
+                    isActive
+                      ? "bg-foreground/10 text-foreground"
+                      : "bg-muted text-muted-foreground hover:text-foreground"
+                  }`}
                 >
                   {label}
                 </button>

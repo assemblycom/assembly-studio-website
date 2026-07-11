@@ -222,13 +222,13 @@ export function PricingPlans() {
         <div
           role="radiogroup"
           aria-label="Billing period"
-          className="inline-flex items-center gap-1 rounded-full border border-border p-1.5 text-base md:p-1 md:text-sm"
+          className="flex w-full items-center gap-1 rounded-full border border-border bg-muted p-1.5 text-base md:inline-flex md:w-auto md:p-1 md:text-sm"
         >
           <button
             role="radio"
             aria-checked={billing === "monthly"}
             onClick={() => setBilling("monthly")}
-            className={`rounded-full px-5 py-2.5 transition-colors md:px-4 md:py-1.5 ${
+            className={`flex-1 rounded-full px-5 py-2.5 text-center transition-colors md:flex-none md:px-4 md:py-1.5 ${
               billing === "monthly"
                 ? "bg-foreground text-background"
                 : "text-muted-foreground hover:text-foreground"
@@ -240,7 +240,7 @@ export function PricingPlans() {
             role="radio"
             aria-checked={billing === "yearly"}
             onClick={() => setBilling("yearly")}
-            className={`flex items-center gap-2 rounded-full px-5 py-2.5 transition-colors md:px-4 md:py-1.5 ${
+            className={`flex flex-1 items-center justify-center gap-2 rounded-full px-5 py-2.5 transition-colors md:flex-none md:px-4 md:py-1.5 ${
               billing === "yearly"
                 ? "bg-foreground text-background"
                 : "text-muted-foreground hover:text-foreground"
@@ -267,8 +267,8 @@ export function PricingPlans() {
           return (
             <div
               key={plan.name}
-              className={`flex flex-col rounded-xl border p-8 ${
-                plan.highlighted ? "border-foreground" : "border-border"
+              className={`flex flex-col rounded-xl border bg-muted p-8 ${
+                plan.highlighted ? "border-foreground/40" : "border-border"
               }`}
             >
               <h3 className="text-lg font-medium">{plan.name}</h3>
@@ -288,10 +288,10 @@ export function PricingPlans() {
 
               <a
                 href={APP_URL}
-                className={`mt-6 rounded-lg px-6 py-3 text-center text-sm transition-opacity hover:opacity-90 ${
+                className={`mt-6 rounded-lg px-6 py-3 text-center text-sm transition-[background-color,opacity] ${
                   plan.highlighted
-                    ? "bg-foreground text-background"
-                    : "border border-border text-foreground hover:bg-muted"
+                    ? "bg-foreground text-background hover:opacity-90"
+                    : "border border-border bg-foreground/[0.06] text-foreground hover:bg-foreground/10"
                 }`}
               >
                 {plan.cta}

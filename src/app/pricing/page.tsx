@@ -13,12 +13,12 @@ export default function PricingPage() {
   return (
     <>
       {/* Hero */}
-      <section className="px-6 pb-10 pt-24 text-left md:pt-32 md:text-center">
+      <section className="px-6 pb-10 pt-24 text-center md:pt-32">
         <div className="mx-auto max-w-3xl">
           <h1 className="text-balance text-4xl font-medium tracking-tight md:text-5xl">
             Simple, transparent pricing
           </h1>
-          <p className="mt-6 max-w-2xl text-pretty text-lg text-muted-foreground md:mx-auto">
+          <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg text-muted-foreground">
             Start free, scale as you grow. Save ~17% when billed annually.
           </p>
           {/* CTAs now live on each plan block below (Get started + Book a demo),

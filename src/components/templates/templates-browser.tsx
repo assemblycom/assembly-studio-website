@@ -87,7 +87,7 @@ export function TemplatesBrowser({ templates }: Props) {
           placeholder="Search…"
           aria-label="Search templates"
           autoComplete="off"
-          className="w-full rounded-lg border border-border bg-background py-3 pl-11 pr-4 text-sm outline-none transition-colors focus:border-foreground/40"
+          className="w-full rounded-lg border border-border bg-muted py-3 pl-11 pr-4 text-sm outline-none transition-colors focus:border-foreground/40"
         />
       </div>
 
@@ -111,8 +111,8 @@ export function TemplatesBrowser({ templates }: Props) {
                 onClick={() => toggleCategory(cat)}
                 className={`rounded-md px-2.5 py-1 font-[family-name:var(--font-diatype-mono)] text-xs uppercase transition-colors ${
                   active
-                    ? "bg-foreground/[0.08] text-foreground"
-                    : "bg-foreground/[0.04] text-muted-foreground hover:text-foreground"
+                    ? "bg-foreground/[0.16] text-foreground"
+                    : "bg-foreground/[0.08] text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {cat}

@@ -35,7 +35,7 @@ export function Footer({ reveal = false }: { reveal?: boolean }) {
   const linkHover = reveal ? "hover:text-white" : "hover:text-foreground";
   return (
     <footer
-      className={reveal ? "bg-[#101010] text-white" : "bg-background"}
+      className={reveal ? "footer-reveal bg-[#101010] text-white" : "bg-background"}
     >
       {/* Footer links */}
       <div className="mx-auto max-w-7xl px-6 py-16">
@@ -117,7 +117,7 @@ export function Footer({ reveal = false }: { reveal?: boolean }) {
                     alt={ai.label}
                     width={18}
                     height={18}
-                    className="h-[18px] w-[18px] object-contain"
+                    className="ai-glyph h-[18px] w-[18px] object-contain"
                   />
                 </a>
               ))}

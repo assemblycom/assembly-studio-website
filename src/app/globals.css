@@ -368,6 +368,21 @@ body {
   outline-color: rgba(255, 255, 255, 0.1);
 }
 
+/* Third-party AI brand glyphs (ChatGPT, Claude, …) ship as near-black artwork
+   for the light footer; on the dark footer that's black-on-black, so flip them
+   to solid white silhouettes. brightness(0) flattens any multi-fill art to
+   black first so invert yields a uniform white mark. */
+[data-theme="dark"] .ai-glyph {
+  filter: brightness(0) invert(1);
+}
+
+/* The reveal footer is a #101010 dark sheet on light pages (it lifts over the
+   wordmark panel). In dark mode the page is already near-black, so #101010 reads
+   as a lighter seam — match it to the page background instead. */
+[data-theme="dark"] .footer-reveal {
+  background-color: var(--background);
+}
+
 /* On-brand focus ring (replaces the browser's default blue outline). */
 @layer base {
   a:focus-visible,

@@ -71,9 +71,10 @@ function MetaCard({ study }: { study: CaseStudy }) {
 
   return (
     <aside className="hidden h-fit flex-col gap-4 md:flex md:sticky md:top-28">
-      {/* Facts panel — logo, name, and the at-a-glance rows. Outlined (not a
-          full-bleed gray fill) so it reads lighter against the page. */}
-      <div className="overflow-hidden rounded-lg border border-border">
+      {/* Facts panel — logo, name, and the at-a-glance rows. A subtle card tint
+          (--card) lifts it off the page: white in light, a soft near-black in
+          dark so the panel reads as its own surface, not a bordered void. */}
+      <div className="overflow-hidden rounded-lg border border-border bg-card">
         <div className="flex flex-col items-center px-6 pb-6 pt-8">
           <div className="flex size-24 items-center justify-center rounded-full bg-background ring-1 ring-border">
             <span className="text-2xl font-medium tracking-tight">
