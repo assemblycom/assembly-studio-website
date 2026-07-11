@@ -188,7 +188,10 @@
   color: #0a0a0a;
 }
 [data-theme="dark"] .announcement-bar {
-  background-color: #1c1c20;
+  /* Match the page ground (not a lighter strip) so the bar reads as one
+     continuous surface with the hero below — same intent as light mode, where
+     it matches #fcfcfd. A lighter strip left a visible seam under the bar. */
+  background-color: var(--background);
   color: #ededed;
 }
 [data-theme="dark"] .announcement-bar .ab-muted {

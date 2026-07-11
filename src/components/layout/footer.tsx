@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { APP_URL, type NavLink } from "@/lib/constants";
+import { APP_URL, DOCS_URL, type NavLink } from "@/lib/constants";
 
 const FOOTER_SECTIONS: { title: string; links: NavLink[] }[] = [
   {
@@ -8,7 +8,7 @@ const FOOTER_SECTIONS: { title: string; links: NavLink[] }[] = [
     links: [
       { label: "Pricing", href: "/pricing" },
       { label: "Security", href: "/security" },
-      { label: "Docs", href: "#", disabled: true },
+      { label: "Docs", href: DOCS_URL, external: true },
     ],
   },
   {

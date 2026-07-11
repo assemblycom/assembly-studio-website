@@ -219,7 +219,7 @@ export function FeatureComparison() {
               type="button"
               aria-pressed={plan === i}
               onClick={() => setPlan(i)}
-              className={`shrink-0 border-b pb-3 pt-6 text-base font-medium transition-colors ${
+              className={`-mb-px shrink-0 border-b pb-3 pt-6 text-base font-medium transition-colors ${
                 plan === i
                   ? "border-foreground text-foreground"
                   : "border-transparent text-muted-foreground"

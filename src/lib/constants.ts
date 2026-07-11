@@ -8,15 +8,15 @@ export interface NavLink {
   disabled?: boolean;
 }
 
+export const DOCS_URL = "https://studio.assembly.com/docs";
+
 export const NAV_LINKS: NavLink[] = [
   { label: "Customers", href: "/customers" },
   { label: "Templates", href: "/templates" },
   { label: "Security", href: "/security" },
-  { label: "Docs", href: "#", disabled: true },
+  { label: "Docs", href: DOCS_URL, external: true },
   { label: "Pricing", href: "/pricing" },
 ];
-
-export const DOCS_URL = "/docs";
 export const APP_URL = "https://app.assembly.com";
 export const SIGNUP_URL = "https://app.assembly.com/signup";
 export const DEMO_URL = "/demo";

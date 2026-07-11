@@ -288,7 +288,7 @@ export function PricingPlans() {
 
               <a
                 href={APP_URL}
-                className={`mt-6 rounded-lg px-6 py-3 text-center text-sm transition-[background-color,opacity] ${
+                className={`mt-6 rounded-lg px-6 py-2.5 text-center text-sm transition-[background-color,opacity] ${
                   plan.highlighted
                     ? "bg-foreground text-background hover:opacity-90"
                     : "border border-border bg-foreground/[0.06] text-foreground hover:bg-foreground/10"
@@ -300,7 +300,7 @@ export function PricingPlans() {
                   doesn't compete with the primary Get started action. */}
               <Link
                 href={DEMO_URL}
-                className="mt-2 rounded-lg px-6 py-3 text-center text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                className="mt-2 rounded-lg px-6 py-2.5 text-center text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               >
                 Book a demo
               </Link>
