@@ -29,7 +29,7 @@ export function CustomersHero() {
           {/* Keep the hyphenated compound intact so it never wraps mid-word to a
               lonely "-enabled" line on narrow screens. */}
           Made for <span className="whitespace-nowrap">tech-enabled</span>{" "}
-          professional service firms
+          service firms
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
           Trusted by professional service firms with 1M+ clients and counting.

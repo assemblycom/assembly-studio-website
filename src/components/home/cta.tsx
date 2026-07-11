@@ -77,7 +77,7 @@ export function CTA() {
   const { theme } = useTheme();
   const dark = theme === "dark";
   return (
-    <section className={`px-6 py-20 md:py-28 ${dark ? "bg-[#101010]" : "bg-[#fcfcfd]"}`}>
+    <section className={`px-6 py-20 md:py-28 ${dark ? "bg-background" : "bg-[#fcfcfd]"}`}>
       <div className="mx-auto max-w-3xl text-center">
         <p className={`type-eyebrow ${dark ? "text-white/60" : "text-neutral-500"}`}>AI App Builder</p>
         <h2 className={`type-h2 mt-3 ${dark ? "text-white" : "text-neutral-900"}`}>

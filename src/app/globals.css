@@ -246,6 +246,11 @@ html {
   /* Overscroll color — the footer carries the DIA gradient glow; here we just
      tint the rubber-band bounce area to match so it feels continuous. */
   background-color: var(--muted);
+  /* The site is vertical-only. Clip any stray horizontal overflow (a full-bleed
+     child, a sub-pixel rounding) so the page can never scroll sideways and
+     reveal the fixed wordmark panel behind it. `clip` (not `hidden`) avoids
+     creating a scroll container, so sticky headers keep working. */
+  overflow-x: clip;
 }
 
 body {

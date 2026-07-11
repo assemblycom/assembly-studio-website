@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import {
@@ -52,9 +52,21 @@ class BarrelEffectImpl extends Effect {
 }
 const BarrelEffect = wrapEffect(BarrelEffectImpl);
 
-function CylinderWall({ images }: { images: string[] }) {
+function CylinderWall({
+  images,
+  onReady,
+}: {
+  images: string[];
+  onReady?: () => void;
+}) {
+  // useTexture suspends until every image is decoded, so this component only
+  // mounts once the textures are ready — the right moment to reveal the tunnel.
   const textures = useTexture(images);
   const meshRef = useRef<THREE.Mesh>(null);
+
+  useEffect(() => {
+    onReady?.();
+  }, [onReady]);
 
   // Paint every image into one wide strip, cover-fitting each into its slot so
   // nothing is distorted, then wrap it around the cylinder.
@@ -123,7 +135,13 @@ function CylinderWall({ images }: { images: string[] }) {
   );
 }
 
-export function ImageTunnel({ images }: { images: string[] }) {
+export function ImageTunnel({
+  images,
+  onReady,
+}: {
+  images: string[];
+  onReady?: () => void;
+}) {
   return (
     <Canvas
       dpr={[1, 2]}
@@ -132,7 +150,7 @@ export function ImageTunnel({ images }: { images: string[] }) {
       style={{ width: "100%", height: "100%" }}
     >
       <Suspense fallback={null}>
-        <CylinderWall images={images} />
+        <CylinderWall images={images} onReady={onReady} />
       </Suspense>
       <EffectComposer>
         <BarrelEffect barrel={SETTINGS.barrel} />

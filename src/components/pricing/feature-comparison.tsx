@@ -1,4 +1,6 @@
-import { Fragment } from "react";
+"use client";
+
+import { Fragment, useState } from "react";
 
 const PLAN_NAMES = ["Free", "Starter", "Professional", "Advanced"] as const;
 
@@ -154,6 +156,33 @@ function InfoIcon() {
   );
 }
 
+// Feature name with an optional tap/hover tooltip — shared by both layouts.
+function RowLabel({ label, tooltip }: { label: string; tooltip?: string }) {
+  return (
+    <div className="group relative flex items-center gap-1.5 pr-4 text-sm text-muted-foreground">
+      {label}
+      {tooltip && (
+        <>
+          <button
+            type="button"
+            tabIndex={0}
+            aria-label={`About ${label}`}
+            className="text-muted-foreground/60 transition-colors hover:text-foreground"
+          >
+            <InfoIcon />
+          </button>
+          <span
+            role="tooltip"
+            className="pointer-events-none absolute left-0 top-full z-30 mt-2 hidden w-60 rounded-lg border border-border bg-background p-3 text-xs leading-relaxed text-muted-foreground shadow-md group-hover:block group-focus-within:block"
+          >
+            {tooltip}
+          </span>
+        </>
+      )}
+    </div>
+  );
+}
+
 function CellContent({ value }: { value: Cell }) {
   if (value === false) {
     return <span className="text-muted-foreground/40">—</span>;
@@ -169,14 +198,61 @@ function CellContent({ value }: { value: Cell }) {
 }
 
 export function FeatureComparison() {
+  // Mobile can't fit five columns, so it shows one plan at a time (Shopify-style
+  // tabs); desktop keeps the full side-by-side table.
+  const [plan, setPlan] = useState(0);
+
   return (
     <div>
       <h2 className="text-2xl font-medium tracking-tight md:text-3xl">
         Compare plans
       </h2>
 
-      <div className="mt-10 overflow-x-auto md:overflow-visible">
-        <div className="min-w-[760px] md:min-w-0">
+      {/* Mobile: plan tabs + a single-column feature list for the chosen plan. */}
+      <div className="md:hidden">
+        {/* Scrollable plan tabs, pinned under the nav so they stay reachable as
+            you read down the list. */}
+        <div className="sticky top-12 z-20 -mx-6 flex gap-6 overflow-x-auto border-b border-border bg-background px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {PLAN_NAMES.map((name, i) => (
+            <button
+              key={name}
+              type="button"
+              aria-pressed={plan === i}
+              onClick={() => setPlan(i)}
+              className={`shrink-0 border-b pb-3 pt-6 text-base font-medium transition-colors ${
+                plan === i
+                  ? "border-foreground text-foreground"
+                  : "border-transparent text-muted-foreground"
+              }`}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+
+        {GROUPS.map((group) => (
+          <div key={group.label}>
+            <div className="pb-2 pt-8 text-sm font-medium text-foreground">
+              {group.label}
+            </div>
+            {group.rows.map((row) => (
+              <div
+                key={row.label}
+                className="flex items-center justify-between gap-4 border-t border-border py-3.5"
+              >
+                <RowLabel label={row.label} tooltip={row.tooltip} />
+                <div className="shrink-0">
+                  <CellContent value={row.values[plan]} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop: full side-by-side table. */}
+      <div className="mt-10 hidden md:block">
+        <div className="min-w-0">
           {/* Sticky plan header — sits flush under the nav pill. */}
           <div
             className={`${GRID} sticky top-14 z-20 items-end border-b border-border bg-background py-4`}
@@ -200,27 +276,7 @@ export function FeatureComparison() {
                   key={row.label}
                   className={`${GRID} items-center border-t border-border py-3.5`}
                 >
-                  <div className="group relative flex items-center gap-1.5 pr-4 text-sm text-muted-foreground">
-                    {row.label}
-                    {row.tooltip && (
-                      <>
-                        <button
-                          type="button"
-                          tabIndex={0}
-                          aria-label={`About ${row.label}`}
-                          className="text-muted-foreground/60 transition-colors hover:text-foreground"
-                        >
-                          <InfoIcon />
-                        </button>
-                        <span
-                          role="tooltip"
-                          className="pointer-events-none absolute left-0 top-full z-30 mt-2 hidden w-60 rounded-lg border border-border bg-background p-3 text-xs leading-relaxed text-muted-foreground shadow-md group-hover:block group-focus-within:block"
-                        >
-                          {row.tooltip}
-                        </span>
-                      </>
-                    )}
-                  </div>
+                  <RowLabel label={row.label} tooltip={row.tooltip} />
                   {row.values.map((value, i) => (
                     <div key={i}>
                       <CellContent value={value} />

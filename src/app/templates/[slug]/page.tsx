@@ -73,7 +73,7 @@ function TemplateHeader({
           {template.industries.map((industry) => (
             <span
               key={industry}
-              className="rounded-md bg-muted px-2.5 py-1 font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-muted-foreground"
+              className="rounded-md bg-foreground/10 px-2.5 py-1 font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-foreground/80"
             >
               {industry}
             </span>
@@ -101,7 +101,7 @@ export default async function TemplateDetailPage({ params }: Props) {
   return (
     <>
       {/* Bottom padding keeps the last content ("Perfect for") off the footer. */}
-      <section className="px-6 pb-24 pt-24 md:pb-28 md:pt-28">
+      <section className="px-6 pb-24 pt-10 md:pb-28 md:pt-28">
         <div className="mx-auto max-w-6xl">
           {/* Mobile: title/CTA lead the page, above the gallery */}
           <TemplateHeader template={template} className="lg:hidden" />
