@@ -35,7 +35,7 @@ export function Testimonials() {
   return (
     <Section id="testimonials">
       <div className="text-center">
-        <h2 className="text-3xl font-medium tracking-tight md:text-4xl">
+        <h2 className="type-h2">
           What our customers say
         </h2>
       </div>

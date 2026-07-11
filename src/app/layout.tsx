@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { RootShell } from "@/components/layout/root-shell";
+import { ThemeProvider, THEME_INIT_SCRIPT } from "@/components/theme/theme-provider";
 import "./globals.css";
 
 // Inter is used for the app-like UI rendered inside the template preview cards
@@ -30,9 +31,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`h-full antialiased ${inter.variable}`}>
+    <html
+      lang="en"
+      className={`h-full antialiased ${inter.variable}`}
+      // The pre-paint script sets data-theme on <html> before hydration, so the
+      // server markup (no attribute) and client differ by design.
+      suppressHydrationWarning
+    >
+      <head>
+        {/* Applies the persisted theme to <html> before paint to avoid a flash
+            of the wrong theme; defaults to light. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className="min-h-full font-sans">
-        <RootShell>{children}</RootShell>
+        <ThemeProvider>
+          <RootShell>{children}</RootShell>
+        </ThemeProvider>
       </body>
     </html>
   );

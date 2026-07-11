@@ -84,20 +84,19 @@ export default function SecurityPage() {
           card); the plain light nav sits above it on the white page. */}
       <section className="px-6 pb-24 pt-24 text-center md:pb-36 md:pt-32">
         <div className="mx-auto max-w-3xl">
-          <h1 className="text-4xl font-medium tracking-tight md:text-5xl">
-            Don&apos;t let AI generate your
-            <br />
+          <h1 className="text-balance text-4xl font-medium tracking-tight md:text-5xl">
+            Don&apos;t let AI generate your{" "}
+            <br className="hidden md:block" />
             software security
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Build as fast as you want. The encryption, access controls, and
-            certifications underneath are engineered, audited, and on by
-            default — never left to chance.
+          <p className="mx-auto mt-6 max-w-2xl text-pretty text-base text-muted-foreground md:text-lg">
+            Build as fast as you want. Encryption, access controls, and
+            certifications are engineered, audited, and on by default.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <a
               href={DEMO_URL}
-              className="rounded-full bg-foreground px-6 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
+              className="rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
             >
               Book demo
             </a>
@@ -105,7 +104,7 @@ export default function SecurityPage() {
               href={TRUST_CENTER_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full border border-border bg-background px-6 py-2.5 text-sm text-foreground transition-colors hover:bg-muted"
+              className="rounded-lg border border-border bg-background px-5 py-2.5 text-sm text-foreground transition-colors hover:bg-muted"
             >
               View Trust Center
             </a>
@@ -181,8 +180,10 @@ export default function SecurityPage() {
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
-              <div className="absolute bottom-6 left-6 text-background">
-                <p className="text-sm text-background/80">
+              {/* Always white — this sits on the photo's dark gradient, not the
+                  page surface, so it must not follow the (dark) page theme. */}
+              <div className="absolute bottom-6 left-6 text-white">
+                <p className="text-sm text-white/80">
                   {SPOTLIGHT.stat.label}
                 </p>
                 <p className="text-4xl font-medium tracking-tight">
@@ -220,7 +221,7 @@ export default function SecurityPage() {
               </div>
               <a
                 href={SPOTLIGHT.href}
-                className="group mt-1 inline-flex w-fit items-center gap-2 rounded-full bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
+                className="group mt-1 inline-flex w-fit items-center gap-2 rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
               >
                 Read the story
                 <span
@@ -247,7 +248,7 @@ export default function SecurityPage() {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <a
               href={DEMO_URL}
-              className="rounded-full bg-foreground px-6 py-3 text-sm text-background transition-opacity hover:opacity-90"
+              className="rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
             >
               Book demo
             </a>
@@ -255,7 +256,7 @@ export default function SecurityPage() {
               href={TRUST_CENTER_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full border border-border bg-background px-6 py-3 text-sm text-foreground transition-colors hover:bg-muted"
+              className="rounded-lg border border-border bg-background px-5 py-2.5 text-sm text-foreground transition-colors hover:bg-muted"
             >
               Explore Trust Center
             </a>

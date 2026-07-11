@@ -59,7 +59,7 @@ function CardIntake() {
       {fields.map(([l, v], i) => (
         <div
           key={l}
-          className="flex flex-col gap-1 [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.45s_ease-out_both]"
+          className="flex flex-col gap-1 [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.45s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.45s_ease-out_both]"
           style={{ animationDelay: `${i * 0.08}s` }}
         >
           <span className="text-[9px] leading-none text-neutral-400">{l}</span>
@@ -72,7 +72,7 @@ function CardIntake() {
       <button
         type="button"
         tabIndex={-1}
-        className="mt-3 flex h-[26px] items-center justify-center rounded-[6px] bg-[var(--v69-chip)] text-[11px] font-medium text-neutral-700 ring-1 ring-[color:var(--v69-chip-border)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.55s_ease-out_0.28s_both]"
+        className="mt-3 flex h-[26px] items-center justify-center rounded-[6px] bg-[var(--v69-chip)] text-[11px] font-medium text-neutral-700 ring-1 ring-[color:var(--v69-chip-border)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.55s_ease-out_0.28s_both] group-[.is-inview]:[animation:cardRowIn_0.55s_ease-out_0.28s_both]"
       >
         Create client
       </button>
@@ -92,18 +92,126 @@ function CardDashboard() {
       <div>
         <div className="text-[9px] text-neutral-400">Engagement score</div>
         <div className="mt-1 flex items-center gap-2">
-          <span aria-label="82" className="v69-score-num text-[30px] font-medium leading-none tracking-tight text-neutral-900 group-hover:[animation:v69Count_0.9s_ease-out_both]" />
-          <span className="rounded-full bg-[var(--v69-well)] px-2.5 py-1 text-[9px] font-medium leading-none text-neutral-400 group-hover:[animation:v69Pop_0.35s_ease-out_0.9s_both]">+5%</span>
+          <span aria-label="82" className="v69-score-num text-[30px] font-medium leading-none tracking-tight text-neutral-900 group-hover:[animation:v69Count_0.9s_ease-out_both] group-[.is-inview]:[animation:v69Count_0.9s_ease-out_both]" />
+          <span className="rounded-full bg-[var(--v69-well)] px-2.5 py-1 text-[9px] font-medium leading-none text-neutral-400 group-hover:[animation:v69Pop_0.35s_ease-out_0.9s_both] group-[.is-inview]:[animation:v69Pop_0.35s_ease-out_0.9s_both]">+5%</span>
         </div>
       </div>
       <div className="flex min-h-0 flex-1 items-end gap-[2px] pt-1">
         {bars.map((h, i) => (
           <div
             key={i}
-            className="w-full origin-bottom rounded-[1px] bg-neutral-500/70 group-hover:[animation:v69GrowY_0.6s_ease-out_both]"
+            className="w-full origin-bottom rounded-[1px] bg-neutral-500/70 group-hover:[animation:v69GrowY_0.6s_ease-out_both] group-[.is-inview]:[animation:v69GrowY_0.6s_ease-out_both]"
             style={{ height: `${h}%`, animationDelay: `${i * 0.02}s` }}
           />
         ))}
+      </div>
+    </div>
+  );
+}
+
+function CardDataViz() {
+  // Distinct from the engagement dashboard's dense histogram: a few thick
+  // capsule bars, each a full-height track with a filled lower portion — reads
+  // as an analytics readout. A headline metric anchors it as a revenue chart.
+  const bars = [48, 30, 64, 42, 70, 92, 58];
+  return (
+    <div className="flex h-full flex-col gap-2 bg-[var(--v69-card)] px-3.5 pt-3.5">
+      <div>
+        <div className="text-[9px] text-neutral-400">Monthly revenue</div>
+        <div className="mt-1 flex items-center gap-2">
+          <span className="text-[26px] font-medium leading-none tracking-tight text-neutral-900">$48.2K</span>
+          <span className="rounded-full bg-[var(--v69-well)] px-2.5 py-1 text-[9px] font-medium leading-none text-neutral-400 group-hover:[animation:v69Pop_0.35s_ease-out_0.9s_both] group-[.is-inview]:[animation:v69Pop_0.35s_ease-out_0.9s_both]">+12%</span>
+        </div>
+      </div>
+      <div className="flex min-h-0 flex-1 items-end gap-1.5 pb-3.5 pt-1.5">
+        {bars.map((h, i) => (
+          <div key={i} className="relative flex h-full w-full items-end overflow-hidden rounded-full bg-[var(--v69-well)]">
+            <div
+              className="w-full origin-bottom rounded-full bg-neutral-500/70 group-hover:[animation:v69GrowY_0.6s_ease-out_both] group-[.is-inview]:[animation:v69GrowY_0.6s_ease-out_both]"
+              style={{ height: `${h}%`, animationDelay: `${i * 0.05}s` }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Time tracker — a day's logged time: a headline total over per-entry duration
+// bars, so it actually reads as time tracking (not a billable-rate roster).
+function CardTimeTracker() {
+  // pct is each entry's duration relative to the longest, so the bars stay
+  // proportional to the times shown.
+  const rows = [
+    { label: "Client work", time: "3h 10m", pct: 100 },
+    { label: "Design review", time: "2h 05m", pct: 66 },
+    { label: "Admin", time: "1h 05m", pct: 34 },
+  ];
+  return (
+    <div className="flex h-full flex-col gap-2 bg-[var(--v69-card)] px-3.5 pt-3.5">
+      <div>
+        <div className="text-[9px] text-neutral-400">Tracked today</div>
+        <div className="mt-1 text-[26px] font-medium leading-none tracking-tight text-neutral-900">6h 20m</div>
+      </div>
+      <div className="flex min-h-0 flex-1 flex-col justify-center gap-3 pb-3.5">
+        {rows.map((r, i) => (
+          <div
+            key={r.label}
+            className="flex flex-col gap-1.5 [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]"
+            style={{ animationDelay: `${i * 0.09}s` }}
+          >
+            <div className="flex items-center justify-between text-[10px] leading-none">
+              <span className="text-neutral-700">{r.label}</span>
+              <span className="tabular-nums text-neutral-400">{r.time}</span>
+            </div>
+            <div className="h-1.5 overflow-hidden rounded-full bg-[var(--v69-well)]">
+              <div
+                className="h-full origin-left rounded-full bg-neutral-500/70 group-hover:[animation:v69GrowX_0.7s_ease-out_both] group-[.is-inview]:[animation:v69GrowX_0.7s_ease-out_both]"
+                style={{ width: `${r.pct}%`, animationDelay: `${i * 0.09}s` }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Goal tracker — a monotone segmented donut (a "pie chart" read) with a legend,
+// distinct from the single progress ring used by the metrics card. Slice size
+// tracks each goal's progress; brightness encodes magnitude, not hue.
+function CardGoalTracker() {
+  // len/start are path lengths on a pathLength=100 circle: slices sized by pct
+  // with a small gap between each.
+  const segs = [
+    { label: "Revenue target", pct: 72, len: 31.7, start: 0, stroke: "stroke-neutral-500", dot: "bg-neutral-500" },
+    { label: "New clients", pct: 45, len: 19.8, start: 34.7, stroke: "stroke-neutral-400", dot: "bg-neutral-400" },
+    { label: "Retention", pct: 90, len: 39.6, start: 57.5, stroke: "stroke-neutral-600", dot: "bg-neutral-600" },
+  ];
+  return (
+    <div className="flex h-full items-center justify-center bg-[var(--v69-card)] p-4">
+      <div className="relative flex size-[150px] items-center justify-center">
+        <svg viewBox="0 0 84 84" className="size-[150px] -rotate-90">
+          <circle cx="42" cy="42" r="35" fill="none" strokeWidth="8" className="stroke-neutral-500/12" />
+          {segs.map((s) => (
+            <circle
+              key={s.label}
+              cx="42"
+              cy="42"
+              r="35"
+              fill="none"
+              strokeWidth="8"
+              pathLength={100}
+              strokeDasharray={`${s.len} ${100 - s.len}`}
+              style={{ strokeDashoffset: -s.start }}
+              className={s.stroke}
+            />
+          ))}
+        </svg>
+        <div className="absolute flex flex-col items-center leading-none">
+          <span className="text-[32px] font-medium tracking-tight text-neutral-900">69%</span>
+          <span className="mt-1.5 text-[10px] text-neutral-400">avg progress</span>
+        </div>
       </div>
     </div>
   );
@@ -137,7 +245,7 @@ function CardList({
         {rows.map(([label, status, color], i) => (
           <div
             key={label + i}
-            className="flex items-center justify-between rounded-md bg-[var(--v69-well)] px-2.5 py-2 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.04)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both]"
+            className="flex items-center justify-between rounded-md bg-[var(--v69-well)] px-2.5 py-2 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.04)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]"
             style={{ animationDelay: `${i * 0.09}s` }}
           >
             <span className="text-[10px] text-neutral-800">{label}</span>
@@ -167,7 +275,7 @@ function CardProposal() {
         {items.map(([l, p], i) => (
           <div
             key={l}
-            className="flex items-center justify-between [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both]"
+            className="flex items-center justify-between [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]"
             style={{ animationDelay: `${i * 0.09}s` }}
           >
             <span className="text-neutral-600">{l}</span>
@@ -175,7 +283,7 @@ function CardProposal() {
           </div>
         ))}
         <div
-          className="mt-1 flex items-baseline justify-between border-t border-black/[0.07] pt-2.5 [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both]"
+          className="mt-1 flex items-baseline justify-between border-t border-black/[0.07] pt-2.5 [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]"
           style={{ animationDelay: `${items.length * 0.09}s` }}
         >
           <span className="text-neutral-500">Total</span>
@@ -189,11 +297,11 @@ function CardProposal() {
 function CardChat() {
   return (
     <div className="flex h-full flex-col justify-center gap-2 bg-[var(--v69-card)] p-4 text-[11px]">
-      <div className="max-w-[85%] rounded-xl rounded-tl-sm bg-[var(--v69-well-2)] px-3 py-2 text-neutral-700 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.03)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both]">When does my project kick off?</div>
-      <div className="ml-auto max-w-[85%] rounded-xl rounded-tr-sm bg-neutral-900 px-3 py-2 leading-relaxed text-white shadow-[0_2px_6px_-2px_rgba(16,24,40,0.3)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_0.35s_both]">Kickoff is Mon, Apr 8.</div>
+      <div className="max-w-[85%] rounded-xl rounded-tl-sm bg-[var(--v69-well-2)] px-3 py-2 text-neutral-700 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.03)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]">When does my project kick off?</div>
+      <div className="ml-auto max-w-[85%] rounded-xl rounded-tr-sm bg-neutral-900 px-3 py-2 leading-relaxed text-white shadow-[0_2px_6px_-2px_rgba(16,24,40,0.3)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_0.35s_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_0.35s_both]">Kickoff is Mon, Apr 8.</div>
       <div className="mt-auto flex h-7 items-center rounded-full bg-[var(--v69-well)] px-3 text-[10px] text-neutral-400 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.04)]">
         <span>Ask a question…</span>
-        <span className="ml-px h-3 w-px bg-neutral-500 opacity-0 group-hover:[animation:v69Blink_0.9s_steps(1)_0.7s_infinite]" />
+        <span className="ml-px h-3 w-px bg-neutral-500 opacity-0 group-hover:[animation:v69Blink_0.9s_steps(1)_0.7s_infinite] group-[.is-inview]:[animation:v69Blink_0.9s_steps(1)_0.7s_infinite]" />
       </div>
     </div>
   );
@@ -214,7 +322,7 @@ function CardOnboarding() {
           highlighted, upcoming muted. Monotone: neutral tones only. */}
       <div className="flex items-center gap-2.5">
         <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--v69-well-2)]">
-          <div className="h-full w-1/2 origin-left rounded-full bg-neutral-500 group-hover:[animation:v69GrowX_0.9s_ease-out_both]" />
+          <div className="h-full w-1/2 origin-left rounded-full bg-neutral-500 group-hover:[animation:v69GrowX_0.9s_ease-out_both] group-[.is-inview]:[animation:v69GrowX_0.9s_ease-out_both]" />
         </div>
         <span className="text-[10px] tabular-nums text-neutral-400">50%</span>
       </div>
@@ -222,7 +330,7 @@ function CardOnboarding() {
         {steps.map(([label, state], i) => (
           <div
             key={label}
-            className={`flex items-center gap-2.5 rounded-md px-2 py-1.5 [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] ${state === "active" ? "bg-[var(--v69-well)]" : ""}`}
+            className={`flex items-center gap-2.5 rounded-md px-2 py-1.5 [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both] ${state === "active" ? "bg-[var(--v69-well)]" : ""}`}
             style={{ animationDelay: `${i * 0.08}s` }}
           >
             <span
@@ -262,7 +370,7 @@ function CardChecklist() {
           <div key={label} className="flex items-center gap-2 rounded-md bg-[var(--v69-well)] px-2.5 py-1.5 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.04)]">
             <span
               className={`flex size-3.5 shrink-0 items-center justify-center rounded-[4px] ${
-                done ? "bg-neutral-700 text-white group-hover:[animation:v69Pop_0.8s_cubic-bezier(0.22,1,0.36,1)_both]" : "border border-black/10 bg-[var(--v69-chip)]"
+                done ? "bg-neutral-700 text-white group-hover:[animation:v69Pop_0.8s_cubic-bezier(0.22,1,0.36,1)_both] group-[.is-inview]:[animation:v69Pop_0.8s_cubic-bezier(0.22,1,0.36,1)_both]" : "border border-black/10 bg-[var(--v69-chip)]"
               }`}
               style={done ? { animationDelay: `${0.28 + i * 0.26}s` } : undefined}
             >
@@ -291,10 +399,10 @@ function CardPdf() {
           <div key={l} className="flex flex-col gap-1">
             <span className="text-[9px] text-neutral-400">{l}</span>
             <div className="flex h-[22px] items-center overflow-hidden rounded-[6px] bg-[var(--v69-well)] px-2 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.05)]">
-              <span className="inline-block min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[9px] text-neutral-800 group-hover:[animation:v68Type_1.5s_steps(24)_both]" style={{ animationDelay: `${0.3 + i * 1.9}s` }}>
+              <span className="inline-block min-w-0 max-w-0 overflow-hidden whitespace-nowrap text-[9px] text-neutral-800 group-hover:[animation:v68Type_1.5s_steps(24)_both] group-[.is-inview]:[animation:v68Type_1.5s_steps(24)_both]" style={{ animationDelay: `${0.3 + i * 1.9}s` }}>
                 {v}
               </span>
-              <span className="ml-px h-3 w-px shrink-0 bg-neutral-700 opacity-0 group-hover:[animation:v68Caret_1.5s_ease-out_both]" style={{ animationDelay: `${0.3 + i * 1.9}s` }} />
+              <span className="ml-px h-3 w-px shrink-0 bg-neutral-700 opacity-0 group-hover:[animation:v68Caret_1.5s_ease-out_both] group-[.is-inview]:[animation:v68Caret_1.5s_ease-out_both]" style={{ animationDelay: `${0.3 + i * 1.9}s` }} />
             </div>
           </div>
         ))}
@@ -326,7 +434,7 @@ function CardMetrics() {
             pathLength={100}
             strokeDasharray="100"
             style={{ strokeDashoffset: 20 }}
-            className="text-neutral-500 group-hover:[animation:v69Ring_1s_ease-out_both]"
+            className="text-neutral-500 group-hover:[animation:v69Ring_1s_ease-out_both] group-[.is-inview]:[animation:v69Ring_1s_ease-out_both]"
           />
         </svg>
         <div className="absolute flex flex-col items-center leading-none">
@@ -350,7 +458,7 @@ function CardRetainer() {
         </div>
         <div className="flex flex-col gap-1.5">
           <div className="h-2 overflow-hidden rounded-full bg-black/[0.06]">
-            <div className="h-full w-[84%] origin-left rounded-full bg-neutral-500 group-hover:[animation:v69GrowX_1s_ease-out_both]" />
+            <div className="h-full w-[84%] origin-left rounded-full bg-neutral-500 group-hover:[animation:v69GrowX_1s_ease-out_both] group-[.is-inview]:[animation:v69GrowX_1s_ease-out_both]" />
           </div>
           <div className="flex justify-between text-[9px] text-neutral-400">
             <span>84% used</span>
@@ -412,7 +520,7 @@ function CardReport() {
               vectorEffect="non-scaling-stroke"
               pathLength={1}
               style={{ strokeDasharray: 1 }}
-              className="group-hover:[animation:v69Draw_1s_ease-out_both]"
+              className="group-hover:[animation:v69Draw_1s_ease-out_both] group-[.is-inview]:[animation:v69Draw_1s_ease-out_both]"
             />
           </svg>
         </div>
@@ -492,7 +600,7 @@ function CardTracker() {
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-[var(--v69-well)]">
             <div
-              className="h-full origin-left rounded-full bg-neutral-500 group-hover:[animation:v69GrowX_0.9s_ease-out_both]"
+              className="h-full origin-left rounded-full bg-neutral-500 group-hover:[animation:v69GrowX_0.9s_ease-out_both] group-[.is-inview]:[animation:v69GrowX_0.9s_ease-out_both]"
               style={{ width: `${pct * 100}%`, animationDelay: `${i * 0.12}s` }}
             />
           </div>
@@ -505,6 +613,19 @@ function CardTracker() {
 export function V69CardMock({ slug }: { slug: string }) {
   if (slug === "new-client-intake") return <CardIntake />;
   if (slug === "client-engagement-dashboard") return <CardDashboard />;
+  if (slug === "data-visualization") return <CardDataViz />;
+  if (slug === "time-tracker") return <CardTimeTracker />;
+  if (slug === "goal-tracker") return <CardGoalTracker />;
+  if (slug === "client-support-requests")
+    return (
+      <CardList
+        rows={[
+          ["Login issue", "Open", "color-mix(in srgb, var(--v69-ink) 90%, transparent)"],
+          ["Billing question", "In progress", "color-mix(in srgb, var(--v69-ink) 55%, transparent)"],
+          ["Feature request", "Resolved", "color-mix(in srgb, var(--v69-ink) 30%, transparent)"],
+        ]}
+      />
+    );
   if (slug === "client-project-tracker") return <CardTracker />;
   if (slug === "content-approval-flow")
     return (

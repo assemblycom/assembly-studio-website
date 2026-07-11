@@ -10,11 +10,6 @@ export interface FAQEntry {
 
 const FAQS: FAQEntry[] = [
   {
-    question: "How do I get access to Assembly Studio?",
-    answer:
-      "Access rolls out in waves, with waitlist members receiving priority access. Founding members receive additional benefits including an exclusive plan and personalized onboarding.",
-  },
-  {
     question: "What can I actually build?",
     answer:
       "Assembly Studio works well for client-facing workflows. Examples include year-end checklists (accounting), deliverable reviews (consulting), case trackers (law), approval flows (marketing), and mood board approvals (design). Any describable client workflow is buildable.",
@@ -27,12 +22,17 @@ const FAQS: FAQEntry[] = [
   {
     question: "What if I already have an Assembly.com workspace?",
     answer:
-      "Currently, Assembly Studio operates independently from existing Assembly.com workspaces and cannot be combined. Future integration is planned.",
+      "Currently, Assembly Studio operates on its own pricing. Changing to Assembly Studio pricing will enable the AI app builder in your Assembly.com workspace.",
   },
   {
     question: "How do I get in touch with the team?",
     answer:
       "Contact the team at studio@assembly.com for Assembly Studio inquiries.",
+  },
+  {
+    question: "What is Assembly Studio not good for?",
+    answer:
+      "Assembly is best for authenticated customer experiences. Pure publicly accessible projects like marketing websites, or streaming video platforms, or public web apps are not ideal.",
   },
 ];
 
@@ -108,7 +108,7 @@ export function FAQ({
   return (
     <Section id="faq">
       <div className="mx-auto max-w-2xl">
-        <h2 className="text-center text-3xl font-medium tracking-tight md:text-4xl">
+        <h2 className="type-h2 text-center">
           {heading}
         </h2>
 

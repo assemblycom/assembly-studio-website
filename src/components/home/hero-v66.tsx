@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { APP_URL } from "@/lib/constants";
 import { TEMPLATES } from "@/lib/templates";
-import { IconArrow, IconPaperclip, IconPlay } from "./icons";
+import { IconArrow, IconFile, IconPaperclip, IconPlay, IconX } from "./icons";
 import { TemplateMock } from "./template-preview";
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -157,7 +157,7 @@ function V66Nav() {
 // The prompt box. Kept top-level so its menu state doesn't remount. `tone`
 // flips the text + control colors so the same box can sit on a light panel or
 // on a dark/glass hero.
-export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 ring-black/[0.06]", surfaceRadiusClass = "rounded-[22px]", minHeightClass = "min-h-[188px]", tone = "light", typewriter = false, mutedControls = false, submitLabel, submitDark = false, accent = LIME, hidePlus = false, hideHowTo = false, howToLabel = "How it works", howToSide = "left", promptPicker = false, promptPickerLabel = "Select a prompt", promptPickerSide = "left", promptItems, plusItems, compact = false, minimalControls = false, plusAsAttach = false, footerLeading, value: valueProp, onValueChange, textareaRef }: { glow?: boolean; surfaceClassName?: string; surfaceRadiusClass?: string; minHeightClass?: string; tone?: "light" | "dark"; typewriter?: boolean; mutedControls?: boolean; submitLabel?: string; submitDark?: boolean; accent?: string; hidePlus?: boolean; hideHowTo?: boolean; howToLabel?: string; howToSide?: "left" | "right"; promptPicker?: boolean; promptPickerLabel?: string; promptPickerSide?: "left" | "right"; promptItems?: string[]; plusItems?: { label: string; icon: "attach" | "transfer" }[]; compact?: boolean; minimalControls?: boolean; plusAsAttach?: boolean; footerLeading?: React.ReactNode; value?: string; onValueChange?: (v: string) => void; textareaRef?: React.Ref<HTMLTextAreaElement> } = {}) {
+export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 ring-black/[0.06]", surfaceRadiusClass = "rounded-[22px]", minHeightClass = "min-h-[188px]", tone = "light", typewriter = false, mutedControls = false, submitLabel, submitDark = false, accent = LIME, hidePlus = false, hideHowTo = false, howToLabel = "How it works", howToSide = "left", promptPicker = false, promptPickerLabel = "Select a prompt", promptPickerSide = "left", promptItems, plusItems, compact = false, minimalControls = false, plusAsAttach = false, footerLeading, showSubmit = true, textDimmed = false, value: valueProp, onValueChange, textareaRef }: { glow?: boolean; surfaceClassName?: string; surfaceRadiusClass?: string; minHeightClass?: string; tone?: "light" | "dark"; typewriter?: boolean; mutedControls?: boolean; submitLabel?: string; submitDark?: boolean; accent?: string; hidePlus?: boolean; hideHowTo?: boolean; howToLabel?: string; howToSide?: "left" | "right"; promptPicker?: boolean; promptPickerLabel?: string; promptPickerSide?: "left" | "right"; promptItems?: string[]; plusItems?: { label: string; icon: "attach" | "transfer" }[]; compact?: boolean; minimalControls?: boolean; plusAsAttach?: boolean; footerLeading?: React.ReactNode; showSubmit?: boolean; textDimmed?: boolean; value?: string; onValueChange?: (v: string) => void; textareaRef?: React.Ref<HTMLTextAreaElement> } = {}) {
   // Prompt-picker entries. Default: the shared "Build a …" examples. A hero can
   // pass `promptItems` to show its own list inserted verbatim (e.g. bare app
   // names, no "Build" prefix).
@@ -182,6 +182,50 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
   const menuRef = useRef<HTMLDivElement>(null);
   const promptRef = useRef<HTMLDivElement>(null);
 
+  // File attachments. Capped so the box can't overflow; images preview as
+  // thumbnails, everything else as a compact file card. De-duped by name+size.
+  const MAX_FILES = 5;
+  const [files, setFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const atLimit = files.length >= MAX_FILES;
+  // A brief, in-composer hint shown when a pick would exceed the cap — instead
+  // of a jarring native tooltip or a silently-dead button.
+  const [showLimit, setShowLimit] = useState(false);
+  const limitTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const flashLimit = () => {
+    setShowLimit(true);
+    clearTimeout(limitTimer.current);
+    limitTimer.current = setTimeout(() => setShowLimit(false), 2600);
+  };
+  const addFiles = (picked: FileList | null) => {
+    const incoming = picked ? Array.from(picked) : [];
+    if (!incoming.length) return;
+    const keyOf = (f: File) => `${f.name}:${f.size}`;
+    const existing = new Set(files.map(keyOf));
+    const fresh = incoming.filter((f) => !existing.has(keyOf(f)));
+    const room = MAX_FILES - files.length;
+    if (fresh.length > room) flashLimit(); // more picked than we can take
+    if (room <= 0) return;
+    setFiles((prev) => {
+      const seen = new Set(prev.map(keyOf));
+      const merged = [...prev];
+      for (const f of fresh) {
+        if (merged.length >= MAX_FILES) break;
+        if (!seen.has(keyOf(f))) {
+          merged.push(f);
+          seen.add(keyOf(f));
+        }
+      }
+      return merged;
+    });
+  };
+  const removeFile = (i: number) => setFiles((prev) => prev.filter((_, idx) => idx !== i));
+  const previews = useMemo(
+    () => files.map((f) => (f.type.startsWith("image/") ? URL.createObjectURL(f) : null)),
+    [files],
+  );
+  useEffect(() => () => previews.forEach((u) => u && URL.revokeObjectURL(u)), [previews]);
+
   const dark = tone === "dark";
   // mutedControls: softer off-white surface (no hard shadow) so the pills sit
   // naturally in a tinted composer instead of popping as bright white.
@@ -199,6 +243,9 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
       ? "bg-white/10 hover:bg-white/[0.2]"
       : lightPill;
   const pillTextCls = dark ? "text-white/65" : "text-neutral-700";
+  // The "+" carries a persistent gray fill (not hover-only) so it always reads
+  // as an actionable control.
+  const plusBgCls = dark ? "bg-white/10 hover:bg-white/[0.16]" : "bg-black/[0.05] hover:bg-black/[0.08]";
   // Compact scales the footer controls down (v73/v74) without touching the
   // default composer other heroes use. All controls (+, pills, submit) share
   // the same subtle pill styling so nothing pops.
@@ -325,9 +372,53 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
             rows={3}
             aria-label="Describe what to build"
             placeholder={typewriter ? "" : "Describe the workflow you want to turn into an app…"}
-            className={`w-full flex-1 resize-none bg-transparent px-1 text-base leading-relaxed outline-none ${textCls}`}
+            // While the demo animation is playing (textDimmed), the text reads
+            // as secondary/placeholder ink; it flips to full-strength once the
+            // visitor takes over.
+            className={`w-full flex-1 resize-none bg-transparent px-1 text-base leading-relaxed outline-none ${textDimmed ? (dark ? "text-white/45" : "text-neutral-500") : textCls}`}
           />
         </div>
+
+        {/* Attached files — image thumbnails or compact file cards, each with a
+            hover ✕ to remove. Scrolls sideways so the box height stays fixed. */}
+        {files.length > 0 && (
+          <div className="mt-3 flex gap-2 overflow-x-auto py-1 [&::-webkit-scrollbar]:hidden">
+            {files.map((f, i) => {
+              const ext = f.name.includes(".") ? f.name.split(".").pop()!.toUpperCase() : "FILE";
+              const preview = previews[i];
+              return (
+                <div key={`${f.name}:${f.size}`} className="group/att relative shrink-0" title={f.name}>
+                  <button
+                    type="button"
+                    onClick={() => removeFile(i)}
+                    aria-label={`Remove ${f.name}`}
+                    className={`absolute right-1 top-1 z-10 flex size-5 items-center justify-center rounded-full opacity-0 shadow-sm transition-opacity group-hover/att:opacity-100 ${dark ? "bg-[#1b1b1b] text-white ring-1 ring-white/15" : "bg-white text-neutral-900 ring-1 ring-black/10"}`}
+                  >
+                    <IconX className="size-3" />
+                  </button>
+                  {preview ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={preview}
+                      alt={f.name}
+                      className={`size-14 rounded-lg object-cover ${dark ? "ring-1 ring-white/10" : "border border-black/10"}`}
+                    />
+                  ) : (
+                    <div className={`flex h-12 items-center gap-2 rounded-lg pl-1.5 pr-3 ${dark ? "bg-white/[0.06] ring-1 ring-white/10" : "border border-black/10 bg-black/[0.03]"}`}>
+                      <span className={`flex size-9 shrink-0 items-center justify-center rounded-md ${dark ? "bg-white/10 text-white/70" : "bg-white text-neutral-500 ring-1 ring-black/10"}`}>
+                        <IconFile className="size-4" />
+                      </span>
+                      <span className="flex min-w-0 flex-col">
+                        <span className={`max-w-[120px] truncate text-xs ${dark ? "text-white/90" : "text-neutral-800"}`}>{f.name}</span>
+                        <span className={`text-[11px] ${dark ? "text-white/45" : "text-neutral-500"}`}>{ext}</span>
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         <div className="mt-3 flex items-center justify-between gap-2">
           {/* Left — creation controls: "+", the prompt picker, and/or video. */}
@@ -339,10 +430,37 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
               <button
                 type="button"
                 aria-label="Attach files"
-                className={`flex ${plusSize} items-center justify-center rounded-full transition-colors ${pillCls} ${pillTextCls}`}
+                onClick={() => {
+                  if (atLimit) {
+                    flashLimit();
+                    return;
+                  }
+                  fileInputRef.current?.click();
+                }}
+                className={`flex ${plusSize} items-center justify-center rounded-full transition-colors ${plusBgCls} ${pillTextCls}`}
               >
                 <IconPlus />
               </button>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*,application/pdf,.doc,.docx,.csv,.xlsx,.txt"
+              className="hidden"
+              onChange={(e) => {
+                addFiles(e.target.files);
+                e.target.value = "";
+              }}
+            />
+            {/* Organic, self-dismissing hint when a pick would exceed the cap. */}
+            {showLimit && (
+              <span
+                role="status"
+                className={`animate-fade-in whitespace-nowrap ${pillText} ${dark ? "text-white/55" : "text-neutral-500"}`}
+              >
+                Up to {MAX_FILES} files
+              </span>
             )}
             {!hidePlus && !plusAsAttach && (
             <div ref={menuRef} className="relative">
@@ -351,7 +469,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
                 onClick={() => setMenuOpen((o) => !o)}
                 aria-label="Add"
                 aria-expanded={menuOpen}
-                className={`flex ${plusSize} items-center justify-center rounded-full transition-colors ${pillCls} ${pillTextCls}`}
+                className={`flex ${plusSize} items-center justify-center rounded-full transition-colors ${plusBgCls} ${pillTextCls}`}
               >
                 <IconPlus />
               </button>
@@ -386,7 +504,10 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
             {howToSide === "right" && howToNode}
             {promptPickerSide === "right" && promptPickerNode}
             {/* Submit — grey circle while empty (Notion-style); once there's text
-                it turns the accent, and (with submitLabel) expands into a pill. */}
+                it turns the accent, and (with submitLabel) expands into a pill.
+                Hidden entirely when showSubmit is false (e.g. during the hero's
+                demo animation) so the CTA only appears once the visitor types. */}
+            {showSubmit && (
             <button
               type="button"
               disabled={!value.trim()}
@@ -405,6 +526,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
               {submitLabel && value.trim() && <span className="hidden whitespace-nowrap sm:inline">{submitLabel}</span>}
               <IconArrow className="size-4" />
             </button>
+            )}
           </div>
         </div>
       </div>

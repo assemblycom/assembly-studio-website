@@ -9,16 +9,19 @@ import { APP_URL } from "@/lib/constants";
  */
 export function AnnouncementBar() {
   return (
-    <div className="h-10 w-full bg-background text-foreground">
-      <div className="flex h-full items-center justify-center px-10 sm:px-12">
+    <div className="announcement-bar h-10 w-full">
+      <div className="flex h-full items-center justify-center px-4 sm:px-12">
         <a
           href={APP_URL}
           className="group inline-flex min-w-0 max-w-full items-center gap-2 text-sm"
         >
+          {/* Shorter headline on mobile so it never truncates in the narrow bar;
+              the full phrasing returns at sm and up. */}
           <span className="truncate">
-            Assembly Studio is now available
+            <span className="sm:hidden">Assembly Studio available</span>
+            <span className="hidden sm:inline">Assembly Studio is now available</span>
           </span>
-          <span className="inline-flex items-center gap-1 whitespace-nowrap text-muted-foreground transition-colors group-hover:text-foreground">
+          <span className="ab-muted inline-flex items-center gap-1 whitespace-nowrap transition-colors">
             Learn more
             <span
               aria-hidden

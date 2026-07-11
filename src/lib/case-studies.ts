@@ -298,6 +298,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "metta-health",
     company: "Metta Health",
     industry: "Healthcare",
+    featured: true,
     image: "/images/customers/metta-health.jpg",
     headline:
       "How Metta Health Scales HIPAA-Compliant Patient Authorizations with Assembly",

@@ -36,7 +36,7 @@ export function TemplateGallery({
             onClick={() => setActive(i)}
             aria-label={`View preview ${i + 1}`}
             aria-current={active === i}
-            className={`aspect-[4/3] flex-1 rounded-lg border bg-muted transition-all sm:flex-none sm:w-24 ${
+            className={`aspect-[4/3] flex-1 rounded-lg border bg-muted transition-[opacity,border-color,box-shadow,transform] duration-200 active:scale-[0.96] sm:flex-none sm:w-24 ${
               active === i
                 ? "border-foreground/25 ring-2 ring-foreground/10"
                 : "border-border opacity-60 hover:opacity-100"

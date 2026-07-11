@@ -14,7 +14,6 @@ export function StudioNav({
   fullWidth = false,
   darkTop = false,
   softGlass = false,
-  logoVideo,
   maxWidthClass,
   restPaddingClass,
   hideDemo = false,
@@ -27,9 +26,6 @@ export function StudioNav({
   // For soft, light heroes (V64): the scrolled pill is a light frosted capsule
   // rather than the dark slab, so its contents stay dark throughout.
   softGlass?: boolean;
-  // Optional animated logo (e.g. a .webm). When set, replaces the static mark
-  // with a looping video and skips the invert tint (the video carries color).
-  logoVideo?: string;
   // Override the nav's rail width so it can line up with a wider hero (V63).
   maxWidthClass?: string;
   // Override the at-rest horizontal padding so the nav clears a rounded hero
@@ -46,25 +42,25 @@ export function StudioNav({
   // The menu is portaled to <body>, so it needs the client to have mounted.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
-  // The scrolled pill is a single dark capsule on every surface, so its contents
-  // are light whenever the pill is showing. At rest, contents are light only on a
-  // dark-hero page (darkTop); over a white page they stay dark. The soft-glass
-  // pill is light, so contents stay dark even when scrolled.
-  const lightContent = softGlass ? false : scrolled || darkTop;
+  // The scrolled pill now matches the surface theme: a light capsule in light
+  // contexts, a dark one over a dark hero/theme (darkTop). So contents are light
+  // only in a dark context — dark otherwise, whether at rest or scrolled.
+  const lightContent = softGlass ? false : darkTop;
 
   // Sticky so the nav follows you down. At the top it's a transparent, dark-on-
   // light bar; once scrolled it settles into a floating capsule ("pill") with
   // light contents, à la Superpower.
   // Sticks to the top; the announcement bar above it scrolls away in flow.
   const position = "sticky top-0";
-  // One consistent floating capsule on every surface: a near-opaque dark pill.
-  // A translucent fill takes on whatever is behind it and visibly smears as the
-  // bar crosses a light/dark boundary (e.g. the white composer over the dark
-  // hero), so we keep it dark and near-solid — legible on the hero via its ring,
-  // clean over white content below.
-  const pill = softGlass
-    ? "rounded-full bg-white/65 ring-1 ring-black/[0.06] shadow-[0_10px_30px_-16px_rgba(70,80,140,0.4)] backdrop-blur-xl"
-    : "rounded-full bg-[#141414]/90 ring-1 ring-white/12 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.45)] backdrop-blur-xl";
+  // Full-bleed bar (Linear-style): transparent at the top, then a full-width
+  // frosted surface with a hairline bottom border on scroll — no floating pill,
+  // no side gutters, no drop shadow. Tracks the surface: a light near-opaque
+  // glass in light contexts and a dark one over a dark hero/theme. Kept
+  // near-opaque so it doesn't smear as the bar crosses a section boundary.
+  const barChrome =
+    softGlass || !darkTop
+      ? "bg-white/80 backdrop-blur-xl border-b border-black/[0.07]"
+      : "bg-[#0e0e10]/85 backdrop-blur-xl border-b border-white/10";
 
   // One shared easing/duration for the rest→pill transition so every animated
   // property (chrome, geometry, logo tint) settles together on the same soft
@@ -76,26 +72,27 @@ export function StudioNav({
   // visibly shrink. The scrolled outer gutter (px-6) sits just inside the hero
   // box gutter (px-4) so the pill doesn't touch the box edges.
   const maxWidth = fullWidth ? "max-w-none" : (maxWidthClass ?? "max-w-7xl");
-  const restInner = `h-16 ${maxWidth} ${fullWidth ? "px-8" : (restPaddingClass ?? "px-6")}`;
-  // Left keeps a small inset for the logo mark; the right is tightened so the
-  // rounded end of the "Get started" capsule nests concentrically inside the
-  // pill's rounded end (gap ≈ pill radius − button radius) instead of floating.
-  const scrolledInner = `h-12 ${maxWidth} pl-4 pr-1.5 ${pill}`;
+  // Inner content rail — same width/padding at rest and scrolled so nothing
+  // shifts horizontally; only the bar height eases down a touch on scroll.
+  const contentRail = `${maxWidth} ${fullWidth ? "px-8" : (restPaddingClass ?? "px-6")}`;
 
-  // Content colors flip when the bar is on a dark surface. whitespace-nowrap
-  // keeps every label on one line so the scrolled pill never wraps its actions.
-  // The soft-glass nav sits on a light tinted gradient where muted grey reads
-  // too faint, so its dark-content links use a stronger ink tone.
+  // Content colors flip when the bar is on a dark surface. Light content always
+  // sits over a dark surface (the scrolled dark pill or a dark hero/theme), so
+  // it uses EXPLICIT white/ink rather than the background token — the token now
+  // flips to dark in dark mode, which would make the light-content nav vanish.
+  // The dark-content branch keeps the tokens so it tracks the theme correctly.
+  // whitespace-nowrap keeps every label on one line so the pill never wraps.
   const darkLink = softGlass ? "text-foreground/90 hover:text-foreground" : "text-muted-foreground hover:text-foreground";
   const darkDisabled = softGlass ? "text-foreground/90" : "text-muted-foreground";
-  const linkCls = `whitespace-nowrap rounded-full px-2 py-1.5 text-sm transition-colors lg:px-3 ${lightContent ? "text-background/70 hover:text-background" : darkLink}`;
-  const disabledCls = `cursor-default whitespace-nowrap rounded-full px-2 py-1.5 text-sm lg:px-3 ${lightContent ? "text-background/50" : darkDisabled}`;
-  const ctaCls = `whitespace-nowrap rounded-full px-4 py-1.5 text-sm transition-[background-color,color,opacity] hover:opacity-90 ${lightContent ? "bg-background text-foreground" : "bg-foreground text-background"}`;
+  const linkCls = `whitespace-nowrap rounded-full px-2 py-1.5 text-sm transition-colors lg:px-3 ${lightContent ? "text-white/70 hover:text-white" : darkLink}`;
+  const disabledCls = `cursor-default whitespace-nowrap rounded-full px-2 py-1.5 text-sm lg:px-3 ${lightContent ? "text-white/50" : darkDisabled}`;
+  const ctaCls = `whitespace-nowrap rounded-lg px-4 py-1.5 text-sm transition-[background-color,color,opacity] hover:opacity-90 ${lightContent ? "bg-white text-neutral-900" : "bg-foreground text-background"}`;
   const logoInvert = lightContent ? "brightness-0 invert" : "";
 
-  // On a dark-hero page (e.g. V72) the full-screen mobile menu stays dark to
-  // match the hero ground, rather than flashing a white overlay. Mirrors V72's
-  // ground (#0a0a0b), white ink, and white/10 hairlines.
+  // Over a dark surface the full-screen mobile menu stays dark rather than
+  // flashing a white overlay. Use the site's canonical dark background (#0a0a0b,
+  // the dark --background token) so the menu reads as the exact same black as the
+  // page behind it, not a lighter charcoal.
   const menuSurface = darkTop ? "bg-[#0a0a0b] text-white" : "bg-background";
   const menuBorder = darkTop ? "border-white/10" : "border-border";
   const menuMuted = darkTop ? "text-white/50" : "text-muted-foreground";
@@ -103,21 +100,12 @@ export function StudioNav({
   const menuCta = darkTop ? "bg-white text-neutral-900" : "bg-foreground text-background";
   const menuDemo = darkTop ? "border-white/20 text-white" : "border-foreground/20 text-foreground";
   const menuLogoInvert = darkTop ? "brightness-0 invert" : "";
+  // The selected segment of the in-menu Appearance switch — a soft fill that
+  // reads on either menu ground, mirroring the desktop toggle's knob.
+  const menuSegActive = darkTop ? "bg-white/10 text-white" : "bg-foreground/[0.06] text-foreground";
 
-  // The nav logo — a clean white mark at rest, swapping to the animated metal
-  // video once the bar condenses into its pill on scroll.
-  const logoMark = logoVideo && scrolled ? (
-    // eslint-disable-next-line jsx-a11y/media-has-caption
-    <video
-      src={logoVideo}
-      autoPlay
-      loop
-      muted
-      playsInline
-      aria-label="Assembly Studio"
-      className="size-9 rounded-md object-cover"
-    />
-  ) : (
+  // The nav logo — a clean white SVG mark.
+  const logoMark = (
     <Image
       src="/images/logo-mark.svg"
       alt="Assembly Studio"
@@ -150,15 +138,15 @@ export function StudioNav({
       {/* Mobile header — mirrors the desktop nav: transparent with light
           contents over the dark hero, settling into the same dark glass pill on
           scroll. Logo on the left, grid menu button on the right. */}
-      <header className={`${position} z-50 transition-[padding] ${ease} md:hidden ${scrolled ? "px-3 pt-2" : ""}`}>
-        <div className={`flex items-center justify-between transition-[height,padding,background-color,box-shadow,border-radius,backdrop-filter] ${ease} ${scrolled ? `h-12 px-4 ${pill}` : "h-14 px-5"}`}>
+      <header className={`${position} z-50 transition-colors ${ease} md:hidden ${scrolled ? barChrome : ""}`}>
+        <div className={`flex items-center justify-between px-5 transition-[height] ${ease} ${scrolled ? "h-12" : "h-14"}`}>
           <Link href="/" className="flex items-center">
             {logoMark}
           </Link>
           <button
             onClick={() => setMobileMenuOpen(true)}
             aria-label="Open menu"
-            className={`flex size-9 items-center justify-center transition-[color,opacity] ${ease} active:opacity-60 ${lightContent ? "text-background" : "text-foreground"}`}
+            className={`flex size-9 items-center justify-center transition-[color,opacity] ${ease} active:opacity-60 ${lightContent ? "text-white" : "text-foreground"}`}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <circle cx="5" cy="5" r="1.6" />
@@ -175,9 +163,10 @@ export function StudioNav({
         </div>
       </header>
 
-      {/* Desktop header — full-width bar at the top, floating dark pill on scroll */}
-      <header className={`${position} z-50 hidden transition-[padding] ${ease} md:block ${scrolled ? "px-6 pt-2" : ""}`}>
-        <div className={`relative mx-auto flex items-center transition-[height,padding,background-color,box-shadow,border-radius,backdrop-filter] ${ease} ${scrolled ? scrolledInner : restInner}`}>
+      {/* Desktop header — full-bleed bar: transparent at the top, frosted
+          full-width surface with a hairline bottom border on scroll */}
+      <header className={`${position} z-50 hidden transition-colors ${ease} md:block ${scrolled ? barChrome : ""}`}>
+        <div className={`relative mx-auto flex items-center ${contentRail} transition-[height] ${ease} ${scrolled ? "h-14" : "h-16"}`}>
           {/* Three balanced columns keep the nav truly centred while the equal
               side columns guarantee it never crowds the logo or the actions. */}
           <div className="flex flex-1 items-center">
@@ -220,34 +209,35 @@ export function StudioNav({
             </ul>
           </nav>
 
-          {/* Account actions — right */}
-          <div className="flex flex-1 items-center justify-end gap-1">
+          {/* Account actions — right. */}
+          <div className="flex flex-1 items-center justify-end gap-1.5">
             {themeToggle && (() => {
               const light = themeToggle.theme === "light";
-              const track = lightContent ? "ring-background/25" : "ring-foreground/15";
-              const knob = lightContent ? "bg-background/15" : "bg-foreground/10";
-              const activeInk = lightContent ? "text-background" : "text-foreground";
-              const idleInk = lightContent ? "text-background/45" : "text-foreground/40";
+              // A single round icon button (not a two-segment toggle — that ate
+              // too much nav width). It shows the mode you'd switch TO: a moon in
+              // light, a sun in dark. Hidden below xl where the nav gets crammed;
+              // the mobile menu still carries an Appearance switch.
+              const ring = lightContent ? "ring-white/25" : "ring-foreground/15";
+              const ink = lightContent
+                ? "text-white/70 hover:text-white hover:bg-white/10"
+                : "text-foreground/60 hover:text-foreground hover:bg-foreground/[0.06]";
               return (
                 <button
                   type="button"
-                  role="switch"
-                  aria-checked={!light}
                   onClick={themeToggle.onToggle}
                   aria-label={light ? "Switch to dark theme" : "Switch to light theme"}
-                  className={`mr-1.5 flex items-center gap-0.5 rounded-full p-0.5 ring-1 transition-colors ${track}`}
+                  className={`mr-1.5 hidden size-8 items-center justify-center rounded-full ring-1 transition-colors xl:flex ${ring} ${ink}`}
                 >
-                  <span className={`flex size-6 items-center justify-center rounded-full transition-colors ${light ? `${knob} ${activeInk}` : idleInk}`}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  {light ? (
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                       <circle cx="12" cy="12" r="4" />
                       <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
                     </svg>
-                  </span>
-                  <span className={`flex size-6 items-center justify-center rounded-full transition-colors ${!light ? `${knob} ${activeInk}` : idleInk}`}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                    </svg>
-                  </span>
+                  )}
                 </button>
               );
             })()}
@@ -274,7 +264,9 @@ export function StudioNav({
           announcement bar (z-40); otherwise the bar covers the overlay top. */}
       {mounted && mobileMenuOpen && createPortal(
         <div className={`fixed inset-0 z-[60] flex flex-col md:hidden ${menuSurface}`}>
-          <div className={`flex h-14 items-center justify-between border-b px-6 ${menuBorder}`}>
+          {/* Match the mobile header's padding (px-5) and height exactly so the
+              logo stays put when the menu opens — it must not shift. */}
+          <div className={`flex items-center justify-between border-b px-5 ${scrolled ? "h-12" : "h-14"} ${menuBorder}`}>
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
@@ -297,7 +289,7 @@ export function StudioNav({
               </a>
               <a
                 href={APP_URL}
-                className={`rounded-full px-4 py-2 text-sm ${menuCta}`}
+                className={`rounded-lg px-4 py-2 text-sm ${menuCta}`}
               >
                 Get started
               </a>
@@ -352,12 +344,49 @@ export function StudioNav({
             ))}
           </ul>
 
+          {themeToggle && (() => {
+            const light = themeToggle.theme === "light";
+            // Compact icon-only segments (sun / moon) — no labels; each targets an
+            // explicit theme so only the inactive one acts on tap.
+            const segCls = (active: boolean) =>
+              `flex size-8 items-center justify-center rounded-full transition-colors ${active ? menuSegActive : menuMuted}`;
+            return (
+              <div className={`mt-auto flex justify-end border-t px-6 py-5 ${menuBorder}`}>
+                <div className={`flex items-center gap-1 rounded-full border p-1 ${menuBorder}`} role="group" aria-label="Appearance">
+                  <button
+                    type="button"
+                    onClick={() => { if (!light) themeToggle.onToggle(); }}
+                    aria-pressed={light}
+                    aria-label="Light theme"
+                    className={segCls(light)}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <circle cx="12" cy="12" r="4" />
+                      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { if (light) themeToggle.onToggle(); }}
+                    aria-pressed={!light}
+                    aria-label="Dark theme"
+                    className={segCls(!light)}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+
           {!hideDemo && (
             <div className={`border-t px-6 py-6 ${menuBorder}`}>
               <Link
                 href={DEMO_URL}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex w-full items-center justify-center rounded-full border px-4 py-3 text-sm ${menuDemo}`}
+                className={`flex w-full items-center justify-center rounded-lg border px-4 py-3 text-sm ${menuDemo}`}
               >
                 Book a demo
               </Link>

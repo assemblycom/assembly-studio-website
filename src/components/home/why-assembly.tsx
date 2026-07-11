@@ -190,7 +190,7 @@ const BLOCKS: Block[] = [
 export function WhyAssembly() {
   return (
     <Section>
-      <h2 className="max-w-3xl text-3xl font-medium tracking-tight md:text-4xl">
+      <h2 className="type-h2 max-w-3xl">
         <span className="text-muted-foreground">
           A hundred tools can generate a web app.
         </span>{" "}
@@ -210,7 +210,7 @@ export function WhyAssembly() {
               {block.visual}
             </div>
             <div className="border-t border-border p-6">
-              <h3 className="text-lg font-medium">{block.title}</h3>
+              <h3 className="type-h4">{block.title}</h3>
               <p className="mt-2 max-w-xl leading-relaxed text-muted-foreground">
                 {block.body}
               </p>

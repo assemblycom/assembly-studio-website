@@ -16,16 +16,16 @@ export default function TemplatesPage() {
     <>
       <section className="px-6 pb-10 pt-24 text-center md:pt-32">
         <div className="mx-auto max-w-3xl">
-          <h1 className="text-4xl font-medium tracking-tight md:text-5xl">
+          <h1 className="text-balance text-4xl font-medium tracking-tight md:text-5xl">
             Start from a template
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Prebuilt workflows you can deploy and customize — so you can launch
-            in days, not months.
+          <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg text-muted-foreground">
+            Prebuilt workflows you can deploy and customize to launch in days,
+            not months.
           </p>
           <a
             href={SIGNUP_URL}
-            className="mt-8 inline-block rounded-full bg-foreground px-6 py-3 text-sm text-background transition-opacity hover:opacity-90"
+            className="mt-8 inline-block rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-[opacity,transform] hover:opacity-90 active:scale-[0.96]"
           >
             Start free trial
           </a>

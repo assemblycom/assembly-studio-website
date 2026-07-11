@@ -16,19 +16,39 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: "ABC Diatype Mono";
+  src: url("/fonts/ABCDiatypeMono-Regular-Trial.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "ABC Diatype Mono";
+  src: url("/fonts/ABCDiatypeMono-Medium-Trial.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
+  /* Light palette tuned toward Linear's calm, slightly-cool neutral scale:
+     a soft near-black (not pure #000), cooler mid-grays for secondary text,
+     and faint hairline borders so surfaces read as layered rather than boxed. */
   --background: #ffffff;
-  --foreground: #0a0a0a;
-  --muted: #f5f5f5;
-  --muted-foreground: #737373;
-  --border: #e5e5e5;
-  --accent: #0a0a0a;
+  --foreground: #101114;
+  --muted: #f6f7f9;
+  --muted-foreground: #6b7079;
+  --border: #e8e9ec;
+  --accent: #101114;
   --accent-foreground: #ffffff;
   /* Design-system Card tokens (light defaults); the hero's template row
      overrides --card/--card-foreground inline per theme. */
   --card: #ffffff;
   --card-foreground: #0a0a0a;
   --font-pp-mori: "PP Mori", system-ui, sans-serif;
+  --font-diatype-mono: "ABC Diatype Mono", ui-monospace, monospace;
 
   /* Default surface hierarchy for the reused template-card mocks (light). The
      hero re-declares these inline for its light row; kept here so no token is
@@ -40,6 +60,21 @@
   --v69-chip-border: rgba(16, 24, 40, 0.1);
   --v69-ink: #101828;
   --v69-box: #ffffff;
+}
+
+/* Site-wide dark theme. The theme toggle writes data-theme="dark" on <html>,
+   which redefines the design tokens so every token-based surface across all
+   pages flips with no per-component restyling. Light is the default (:root). */
+[data-theme="dark"] {
+  --background: #0a0a0b;
+  --foreground: #ededed;
+  --muted: #1a1a1c;
+  --muted-foreground: #a3a3a3;
+  --border: #262629;
+  --accent: #ededed;
+  --accent-foreground: #ffffff;
+  --card: #141416;
+  --card-foreground: #ededed;
 }
 
 @theme inline {
@@ -103,30 +138,96 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    --muted: #1a1a1a;
-    --muted-foreground: #a3a3a3;
-    --border: #262626;
-    --accent: #ededed;
-    --accent-foreground: #ffffff;
-  }
+/* ── Landing surfaces that track the site theme ────────────────────────────
+   Two home section groups react to the theme (data-theme on <html>) by
+   redefining the design tokens, so every token-based component inside flips
+   with no per-component restyling:
+   • .section-follow  — matches the hero (its differentiators + walkthrough read
+     as one continuous surface with the hero).
+   • .section-contrast — the OPPOSITE of the hero, so the page keeps alternating.
+   Follow simply inherits the current theme's tokens; contrast redefines them to
+   the other theme's values. */
+.section-follow,
+.section-contrast {
+  background-color: var(--background);
+  color: var(--foreground);
 }
+/* .section-follow inherits the current theme tokens — no override needed. */
 
-/* Dark canvas for the lower half of the landing page. Redefines the design
-   tokens to their dark equivalents so every token-based component inside
-   (Templates, Testimonials, Comparison, FAQ) flips to the dark #101010 surface
-   with no per-component restyling. */
-.dark-section {
+/* Contrast = opposite of the current theme. In light it's a dark sheet; in
+   dark it flips to a light sheet. */
+.section-contrast {
   --background: #101010;
   --foreground: #ededed;
   --muted: #1c1c1c;
   --muted-foreground: #a3a3a3;
   --border: #2a2a2a;
+}
+[data-theme="dark"] .section-contrast {
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
+  --border: #e5e5e5;
+}
+
+/* Announcement bar follows the theme. Light is a clean white bar; dark is a
+   lighter-black strip (a full white bar reads too loud over the near-black
+   hero). Light is the default. */
+/* Match the hero's top ground color (#fcfcfd) so the bar reads as one
+   continuous surface with the hero below it rather than a brighter strip. */
+.announcement-bar {
+  background-color: #fcfcfd;
+  color: #0a0a0a;
+}
+/* (announcement bar matches hero ground) */
+.announcement-bar .ab-muted {
+  color: #737373;
+}
+.announcement-bar .group:hover .ab-muted {
+  color: #0a0a0a;
+}
+[data-theme="dark"] .announcement-bar {
+  background-color: #1c1c20;
+  color: #ededed;
+}
+[data-theme="dark"] .announcement-bar .ab-muted {
+  color: #8a8a90;
+}
+[data-theme="dark"] .announcement-bar .group:hover .ab-muted {
+  color: #ededed;
+}
+
+/* Theme toggle crossfades the whole page in one GPU-composited pass via the
+   View Transitions API (see theme-provider). Tuning just the root snapshots
+   keeps the fade gentle and premium; honor reduced-motion by snapping instead. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.32s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+/* A full page that defaults to the dark surface (e.g. Security). Redefines the
+   design tokens so every token-based component inside flips with no per-
+   component restyling. Uses the same token set as the hero's dark row. */
+.page-dark {
+  --background: #0a0a0b;
+  --foreground: #ededed;
+  --muted: #1a1a1c;
+  --muted-foreground: #a3a3a3;
+  --border: #262629;
   --accent: #ededed;
-  --accent-foreground: #101010;
+  --accent-foreground: #ffffff;
+  /* Set color too (not just the token) so untinted text that inherits `color`
+     — e.g. headings with no text-* utility — reads light on the dark ground. */
+  background-color: var(--background);
   color: var(--foreground);
 }
 
@@ -255,6 +356,18 @@ body {
     0 16px 44px -26px rgba(20, 20, 40, 0.35);
 }
 
+/* Subtle 1px outline on photographic images for consistent edge definition.
+   Pure black at low opacity in light mode, pure white in dark — a tinted
+   neutral would pick up the surface color and read as dirt on the edge. Uses an
+   inset offset so it sits inside the image's own clip (rounded parents). */
+.img-outline {
+  outline: 1px solid rgba(0, 0, 0, 0.1);
+  outline-offset: -1px;
+}
+[data-theme="dark"] .img-outline {
+  outline-color: rgba(255, 255, 255, 0.1);
+}
+
 /* On-brand focus ring (replaces the browser's default blue outline). */
 @layer base {
   a:focus-visible,
@@ -265,6 +378,64 @@ body {
   [tabindex]:focus-visible {
     outline: 2px solid var(--foreground);
     outline-offset: 2px;
+  }
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Typographic scale — the single source of truth for headings and lead copy.
+   Every landing section pulls from these classes so the hierarchy always holds
+   at every breakpoint: the hero display outranks a section H2, which outranks a
+   step H3, and so on. Change a size here, never per-component. Sizes are
+   mobile-first with a md bump; weight stays 400/500 (never bold).
+   ─────────────────────────────────────────────────────────────────────────── */
+@layer components {
+  .type-display {
+    font-size: 2.25rem; /* 36px */
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    font-weight: 500;
+  }
+  .type-h2 {
+    font-size: 1.875rem; /* 30px */
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    font-weight: 500;
+  }
+  .type-h3 {
+    font-size: 1.5rem; /* 24px */
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    font-weight: 500;
+  }
+  .type-h4 {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.4;
+    letter-spacing: -0.006em;
+    font-weight: 500;
+  }
+  .type-lead {
+    font-size: 1.0625rem; /* 17px */
+    line-height: 1.6;
+    font-weight: 400;
+  }
+  .type-eyebrow {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.4;
+    font-weight: 400;
+  }
+  @media (min-width: 768px) {
+    .type-display {
+      font-size: 3rem; /* 48px */
+    }
+    .type-h2 {
+      font-size: 2.25rem; /* 36px */
+    }
+    .type-h3 {
+      font-size: 1.875rem; /* 30px */
+    }
+    .type-lead {
+      font-size: 1.125rem; /* 18px */
+    }
   }
 }
 
@@ -317,16 +488,17 @@ body {
 .v63-gradient-border {
   transition: box-shadow 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
-/* Hover — the ring thickens, brightens, spins a touch faster, and a soft brand
-   glow blooms behind the box. */
+/* Hover — the ring thickens just slightly and a soft, single-tone brand-blue
+   bloom settles behind the box. Kept restrained on purpose: no brightness/
+   saturation pump (that read garish on white) and a calmer spin, so it feels
+   premium rather than lit-up. */
 .v63-gradient-border:hover {
-  box-shadow: 0 12px 44px -12px rgba(150, 170, 240, 0.28),
-    0 0 26px -6px rgba(217, 237, 146, 0.16);
+  box-shadow: 0 12px 40px -16px rgba(111, 150, 240, 0.20);
 }
 .v63-gradient-border:hover::before {
-  padding: 2.5px;
-  filter: brightness(1.28) saturate(1.15);
-  animation-duration: 2.6s;
+  padding: 2px;
+  filter: brightness(1.06);
+  animation-duration: 3.6s;
 }
 /* Focus — while typing, the ring calms down: slow spin, dimmed, thin. */
 .v63-gradient-border:focus-within::before {
@@ -342,6 +514,22 @@ body {
   .v63-gradient-border::before {
     animation: none;
   }
+}
+/* Light mode: the pale pastel ring washes out on white — and worse while
+   typing, when it dims to 50%. Deepen to punchier on-brand blue→green so the
+   live gradient edge stays visible, and keep it readable at focus. Only the
+   color/opacity are overridden so the rest/hover/focus thickness still apply. */
+html:not([data-theme="dark"]) .v63-gradient-border::before {
+  background: conic-gradient(
+    from var(--v63-angle),
+    transparent 0deg,
+    #6f96f0 120deg,
+    #93c53a 240deg,
+    transparent 360deg
+  );
+}
+html:not([data-theme="dark"]) .v63-gradient-border:focus-within::before {
+  opacity: 0.8;
 }
 
 /* Dark-mode skin for the reused template-card mocks. Tailwind v4 utilities read

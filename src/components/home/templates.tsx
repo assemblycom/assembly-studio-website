@@ -20,7 +20,7 @@ export function Templates() {
         </div>
         <Link
           href="/templates"
-          className="hidden shrink-0 rounded-full border border-border px-4 py-1.5 text-sm text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground md:inline-block"
+          className="hidden shrink-0 rounded-lg border border-border px-4 py-1.5 text-sm text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground md:inline-block"
         >
           See all
         </Link>

@@ -26,6 +26,6 @@ export function ErrorScreen({ title, description, children }: ErrorScreenProps) 
   );
 }
 
-/** Primary pill button/link — solid foreground fill. */
+/** Primary button/link — solid foreground fill. */
 export const primaryAction =
-  "rounded-full bg-foreground px-5 py-2 text-sm text-background transition-opacity hover:opacity-90";
+  "rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90";

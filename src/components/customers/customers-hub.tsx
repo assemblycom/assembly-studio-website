@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import {
   CASE_STUDIES,
   caseStudyImage,
@@ -9,8 +10,6 @@ import {
   INDUSTRY_GROUPS,
   type CaseStudy,
 } from "@/lib/case-studies";
-import { VideoPlayer } from "@/components/customers/video-player";
-
 /**
  * Customers hub — a curated landing for customer stories.
  *
@@ -24,51 +23,6 @@ import { VideoPlayer } from "@/components/customers/video-player";
  * Every card links straight to its full case-study page. The page is capped at
  * ~10 items so the hub stays curated.
  */
-
-const HUB_LIMIT = 8; // featured (2) + hub (8) = 10 items total
-
-/* ------------------------------------------------------------------ */
-/* Featured card — wide, media on one side, story on the other         */
-/* ------------------------------------------------------------------ */
-
-function FeaturedCard({ study }: { study: CaseStudy }) {
-  const stat = study.stats[0];
-  return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-background transition-colors duration-200 hover:border-foreground/30">
-      {/* Video media — play the story inline, right on the card */}
-      <VideoPlayer
-        videoUrl={study.videoUrl}
-        poster={caseStudyImage(study)}
-        label={`Play ${study.company} story`}
-        iconOnly
-      />
-
-      {/* Story — click through to the full case study */}
-      <Link
-        href={`/customers/${study.slug}`}
-        className="flex flex-1 flex-col p-7 md:p-8"
-      >
-        <h3 className="text-xl font-medium leading-snug tracking-tight">
-          {study.headline}
-        </h3>
-        <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
-          {study.summary}
-        </p>
-
-        {stat && (
-          <div className="mt-auto pt-8">
-            <div className="text-5xl font-medium leading-none tracking-tight">
-              {stat.value}
-            </div>
-            <div className="mt-3 text-sm text-muted-foreground">
-              {stat.label}
-            </div>
-          </div>
-        )}
-      </Link>
-    </article>
-  );
-}
 
 /* ------------------------------------------------------------------ */
 /* Hub card — a uniform top "visual" zone (photo, or a big-stat tile     */
@@ -86,15 +40,17 @@ function StoryCard({ study }: { study: CaseStudy }) {
     return (
       <Link
         href={`/customers/${study.slug}`}
-        className="group flex flex-col rounded-2xl border border-border bg-background p-6 transition-colors duration-200 hover:border-foreground/30"
+        className="group flex flex-col rounded-xl border border-border bg-muted p-6 transition-colors duration-200 hover:border-foreground/15"
       >
-        <span className="text-sm text-muted-foreground">{study.company}</span>
-        <h3 className="mt-3 line-clamp-3 text-lg font-medium leading-snug tracking-tight">
+        <span className="font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-muted-foreground">
+          {study.company}
+        </span>
+        <h3 className="mt-3 line-clamp-3 text-balance text-lg font-normal leading-snug tracking-tight">
           {study.headline}
         </h3>
         {stat && (
           <div className="mt-auto pt-8">
-            <div className="text-6xl font-medium leading-none tracking-tight">
+            <div className="text-6xl font-medium leading-none tracking-tight tabular-nums">
               {stat.value}
             </div>
             <div className="mt-3 text-sm text-muted-foreground">
@@ -106,23 +62,27 @@ function StoryCard({ study }: { study: CaseStudy }) {
     );
   }
 
-  // Photo card: image on top, company + headline below.
+  // Photo card: an inset image (rounded, with a margin inside the card) over the
+  // company + headline — so the photo reads as a framed thumbnail, not full-bleed.
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-background transition-colors duration-200 hover:border-foreground/30"
+      className="group flex flex-col rounded-xl border border-border bg-background p-3 transition-colors duration-200 hover:border-foreground/15"
     >
-      <div className="aspect-[16/10] overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+      <div className="relative aspect-[16/10] overflow-hidden rounded-lg">
+        <Image
           src={image}
           alt=""
-          className="h-full w-full object-cover object-[50%_20%]"
+          fill
+          sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw"
+          className="img-outline object-cover object-[50%_20%]"
         />
       </div>
-      <div className="flex flex-col p-6">
-        <span className="text-sm text-muted-foreground">{study.company}</span>
-        <h3 className="mt-3 line-clamp-2 text-base font-medium leading-snug tracking-tight">
+      <div className="flex flex-col px-1 pb-2 pt-4">
+        <span className="font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-muted-foreground">
+          {study.company}
+        </span>
+        <h3 className="mt-3 line-clamp-2 text-balance text-base font-normal leading-snug tracking-tight">
           {study.headline}
         </h3>
       </div>
@@ -134,71 +94,128 @@ function StoryCard({ study }: { study: CaseStudy }) {
 /* Hub                                                                 */
 /* ------------------------------------------------------------------ */
 
-export function CustomersHub() {
-  const [active, setActive] = useState("All");
+function IconSearch({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.2-3.2" />
+    </svg>
+  );
+}
 
-  // Only offer pills for industry groups that actually have a story.
-  const groups = useMemo(() => {
+export function CustomersHub() {
+  const [query, setQuery] = useState("");
+  // Sectors are multi-select: pick several to widen the results (OR), or none
+  // for everything.
+  const [selectedSectors, setSelectedSectors] = useState<string[]>([]);
+  const toggleSector = (label: string) =>
+    setSelectedSectors((prev) =>
+      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label],
+    );
+
+  // Sector list — every group that has a story to browse.
+  const sectors = useMemo(() => {
     const present = new Set(
       CASE_STUDIES.map((s) => getIndustryGroup(s.industry)).filter(Boolean),
     );
-    return [
-      "All",
-      ...INDUSTRY_GROUPS.map((g) => g.label).filter((l) => present.has(l)),
-    ];
+    return INDUSTRY_GROUPS.map((g) => g.label).filter((l) => present.has(l));
   }, []);
 
-  const featured = CASE_STUDIES.filter((s) => s.featured).slice(0, 2);
-  const hub = CASE_STUDIES.filter((s) => !s.featured).slice(0, HUB_LIMIT);
-  const filtered =
-    active === "All"
-      ? null
-      : CASE_STUDIES.filter((s) => getIndustryGroup(s.industry) === active);
+  // The browsable grid: every story, flagships first, narrowed by the selected
+  // sectors and the search query.
+  const results = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return CASE_STUDIES.filter((s) => {
+        if (!selectedSectors.length) return true;
+        const group = getIndustryGroup(s.industry);
+        return group ? selectedSectors.includes(group) : false;
+      })
+      .filter((s) => {
+        if (!q) return true;
+        return [s.company, s.headline, s.industry, s.summary]
+          .filter(Boolean)
+          .some((f) => f!.toLowerCase().includes(q));
+      })
+      .sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)));
+  }, [query, selectedSectors]);
 
   return (
-    <>
-      {/* Industry filter — a single edge-to-edge scroll row on mobile, wrapping
-          normally once there's room. */}
-      <div className="-mx-6 flex gap-2 overflow-x-auto px-6 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
-        {groups.map((group) => (
-          <button
-            key={group}
-            type="button"
-            onClick={() => setActive(group)}
-            className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-1.5 text-sm transition-colors duration-200 ${
-              active === group
-                ? "border-foreground bg-foreground text-background"
-                : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
-            }`}
-          >
-            {group}
-          </button>
-        ))}
-      </div>
+    // Desktop: a sticky search rail (left) beside the results grid (right).
+    // Mobile: the search group leads so it's reachable right after the hero.
+    <div className="flex flex-col gap-12 lg:grid lg:grid-cols-[minmax(0,17rem)_1fr] lg:gap-x-16">
+      {/* Search + sector rail — first on mobile, a sticky left rail on desktop. */}
+      <aside className="order-1 lg:order-none lg:h-fit lg:sticky lg:top-28 lg:self-start">
+        <h2 className="hidden text-3xl font-medium tracking-tight lg:block">Discover all</h2>
 
-      {active === "All" ? (
-        <>
-          {/* Featured tier */}
-          <div className="mt-8 grid gap-5 lg:grid-cols-2">
-            {featured.map((study) => (
-              <FeaturedCard key={study.slug} study={study} />
-            ))}
+        <div className="relative lg:mt-7">
+            <IconSearch className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search…"
+              aria-label="Search customer stories"
+              className="w-full rounded-lg border border-border bg-background py-3 pl-11 pr-4 text-sm outline-none transition-colors focus:border-foreground/40"
+            />
           </div>
 
-          {/* Hub grid */}
-          <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {hub.map((study) => (
-              <StoryCard key={study.slug} study={study} />
-            ))}
+          {/* Sits just under the search so the two read as one control group. */}
+          <div className="mt-5 flex items-baseline justify-between">
+            <span className="text-sm text-muted-foreground">Filter by sector</span>
+            <span className="text-sm text-muted-foreground">
+              {results.length} {results.length === 1 ? "result" : "results"}
+            </span>
           </div>
-        </>
-      ) : (
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered!.map((study) => (
-            <StoryCard key={study.slug} study={study} />
-          ))}
+
+          {/* Soft, squarish chips with room to breathe — easier to scan than a
+              tight text list. */}
+          <div className="mt-4 flex flex-wrap gap-2.5">
+            {sectors.map((label) => {
+              const isActive = selectedSectors.includes(label);
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  aria-pressed={isActive}
+                  onClick={() => toggleSector(label)}
+                  style={{
+                    backgroundColor: isActive
+                      ? "rgba(17,17,20,0.07)"
+                      : "rgba(17,17,20,0.04)",
+                    color: isActive ? "#5b616b" : "#9095a0",
+                  }}
+                  className="rounded-md px-2.5 py-1 font-[family-name:var(--font-diatype-mono)] text-xs uppercase transition-opacity hover:opacity-70"
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </aside>
+
+        <div className="order-2 lg:order-none">
+          {results.length > 0 ? (
+            <div className="grid gap-5 sm:grid-cols-2">
+              {results.map((study) => (
+                <StoryCard key={study.slug} study={study} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex min-h-[40vh] flex-col items-center justify-center rounded-2xl border border-dashed border-border text-center">
+              <p className="text-base font-medium">No stories match your search.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  setSelectedSectors([]);
+                }}
+                className="mt-3 text-sm text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground"
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
         </div>
-      )}
-    </>
+    </div>
   );
 }

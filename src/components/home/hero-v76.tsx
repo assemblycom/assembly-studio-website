@@ -8,6 +8,7 @@ import { V66Composer } from "./hero-v66";
 import { V69CardMock } from "./hero-v71";
 import { StudioNav } from "./studio-nav";
 import { Card } from "@/components/ui/card";
+import { useTheme } from "@/components/theme/theme-provider";
 
 // ─────────────────────────────────────────────────────────────────────────
 // HERO V76 — V75 as the base, adding a SELECTOR FRAME around the template
@@ -28,8 +29,16 @@ const V76_PROMPTS = [
   "Proposal clients can e-sign",
 ];
 
-const DEFAULT_PROMPT =
-  "A client intake form that collects company details, the primary contact, and an e-signature, then creates a new client record";
+// The composer leads with a fixed instruction; only the "what to build" part
+// animates, cycling through examples so the box stays anchored instead of
+// typing an entire sentence from scratch.
+const PROMPT_PREFIX = "Build me ";
+const BUILD_EXAMPLES = [
+  "a client intake form with company details and an e-signature",
+  "a dashboard that tracks client engagement over time",
+  "a proposal builder with line items and a running total",
+  "a project tracker for every client milestone",
+];
 
 const LEAD_SLUG = "client-engagement-dashboard";
 const FEATURED = getFeaturedTemplates(6);
@@ -78,19 +87,17 @@ const TemplateCard = memo(function TemplateCard({
       role="button"
       tabIndex={0}
       data-card={index}
-      onClick={() => onSelect(index)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onSelect(index);
-        }
-      }}
+      // Hover (and keyboard focus) glides the selector frame to this card;
+      // the actual click is reserved for routing to the login/app (not wired
+      // here — that's product logic for later).
+      onMouseEnter={() => onSelect(index)}
+      onFocus={() => onSelect(index)}
       style={{ opacity: selectionActive && !selected ? 0.5 : 1 }}
       className="group w-[236px] shrink-0 origin-center cursor-pointer text-left outline-none transition-[transform,opacity] duration-200 ease-out [will-change:opacity]"
     >
       <Card
         size="sm"
-        className={`gap-0 py-0 pb-0! ring-1 transition-[transform,box-shadow] duration-200 ease-out [will-change:transform] ${dark ? "ring-white/8 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)]" : "ring-black/[0.06] shadow-[0_10px_30px_-20px_rgba(16,24,40,0.25)]"}`}
+        className={`gap-0 py-0 pb-0! ring-1 transition-[transform,box-shadow] duration-200 ease-out [will-change:transform] ${dark ? "ring-white/8 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)]" : "ring-black/[0.07] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_28px_-18px_rgba(16,24,40,0.20)]"}`}
       >
         <div data-slot="card-media" className={`h-[188px] w-full overflow-hidden [font-family:var(--font-inter),system-ui,sans-serif] ${dark ? "v72-mock-dark" : ""}`}>
           <div className="h-full w-full">
@@ -98,7 +105,7 @@ const TemplateCard = memo(function TemplateCard({
           </div>
         </div>
       </Card>
-      <p className={`mt-3 line-clamp-2 text-[13px] font-medium leading-[1.3] ${dark ? "text-white" : "text-neutral-900"}`}>{template.title}</p>
+      <p className={`mt-3 line-clamp-2 text-[13px] font-normal leading-[1.3] ${dark ? "text-white" : "text-neutral-900"}`}>{template.title}</p>
       <p className={`mt-1 text-[11px] ${dark ? "text-white/50" : "text-neutral-500"}`}>{template.category}</p>
     </div>
   );
@@ -106,37 +113,93 @@ const TemplateCard = memo(function TemplateCard({
 
 export function HeroV76({
   showPlus = true,
-  showVideo = true,
   showBody = false,
-}: { showPlus?: boolean; showVideo?: boolean; showBody?: boolean } = {}) {
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+}: { showPlus?: boolean; showBody?: boolean } = {}) {
+  // Theme is global now (persisted, applied to <html data-theme>), so the hero
+  // reads it from context and the nav toggle drives the whole site.
+  const { theme, toggleTheme } = useTheme();
   const dark = theme === "dark";
-  useEffect(() => {
-    document.body.dataset.v76Theme = theme;
-    return () => {
-      delete document.body.dataset.v76Theme;
-    };
-  }, [theme]);
 
-  const [prompt, setPrompt] = useState("");
+  // The prefix is always present (static); only the example after it types in,
+  // holds, deletes, and advances to the next — so the box never types a whole
+  // sentence from empty.
+  const [prompt, setPrompt] = useState(PROMPT_PREFIX);
+  // Once the visitor focuses or types in the composer, the demo typewriter must
+  // stop — otherwise its ticks keep overwriting what they type. engagedRef is
+  // the synchronous guard (blocks an in-flight tick); userEngaged tears the
+  // animation effect down.
+  const [userEngaged, setUserEngaged] = useState(false);
+  const engagedRef = useRef(false);
+  const clearedRef = useRef(false);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    const engage = () => {
+      engagedRef.current = true;
+      setUserEngaged(true);
+    };
+    // On the first focus, wipe the leftover demo text so the visitor types into
+    // a clean box — but only if it's still the animation's text (starts with
+    // the prefix), never a prompt-idea the picker inserted.
+    const onFocus = () => {
+      if (!clearedRef.current) {
+        clearedRef.current = true;
+        if (el.value.startsWith(PROMPT_PREFIX)) setPrompt("");
+      }
+      engage();
+    };
+    el.addEventListener("focus", onFocus);
+    el.addEventListener("input", engage);
+    return () => {
+      el.removeEventListener("focus", onFocus);
+      el.removeEventListener("input", engage);
+    };
+  }, []);
+  useEffect(() => {
+    if (userEngaged) return;
     const reduce =
       typeof window !== "undefined" &&
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
-      setPrompt(DEFAULT_PROMPT);
+      setPrompt(PROMPT_PREFIX + BUILD_EXAMPLES[0]);
       return;
     }
-    let i = 0;
+    let exampleIdx = 0;
+    let charIdx = 0;
+    let deleting = false;
     let timer: ReturnType<typeof setTimeout>;
     const tick = () => {
-      i += 1;
-      setPrompt(DEFAULT_PROMPT.slice(0, i));
-      if (i < DEFAULT_PROMPT.length) timer = setTimeout(tick, 26);
+      if (engagedRef.current) return;
+      // Timers are throttled/paused while the tab is hidden; wait and retry so
+      // the loop resumes cleanly on return instead of stalling mid-word.
+      if (typeof document !== "undefined" && document.hidden) {
+        timer = setTimeout(tick, 500);
+        return;
+      }
+      const full = BUILD_EXAMPLES[exampleIdx];
+      if (!deleting) {
+        charIdx += 1;
+        setPrompt(PROMPT_PREFIX + full.slice(0, charIdx));
+        if (charIdx < full.length) timer = setTimeout(tick, 34);
+        else {
+          deleting = true;
+          timer = setTimeout(tick, 2000); // hold on the full example
+        }
+      } else {
+        charIdx -= 1;
+        setPrompt(PROMPT_PREFIX + full.slice(0, charIdx));
+        if (charIdx > 0) timer = setTimeout(tick, 16);
+        else {
+          deleting = false;
+          exampleIdx = (exampleIdx + 1) % BUILD_EXAMPLES.length;
+          timer = setTimeout(tick, 350);
+        }
+      }
     };
-    timer = setTimeout(tick, 450);
+    timer = setTimeout(tick, 600);
     return () => clearTimeout(timer);
-  }, []);
+  }, [userEngaged]);
 
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
@@ -151,6 +214,14 @@ export function HeroV76({
   // The selected card — framed by the selector ring, bright while the rest dim.
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [frame, setFrame] = useState({ x: 24 - FRAME_PAD, top: 24 - FRAME_PAD, w: 236 + 2 * FRAME_PAD, h: 188 + 2 * FRAME_PAD });
+  // Gate the glide transition until after the first measure has painted, so the
+  // frame snaps to the selected card on load instead of visibly sliding in from
+  // its placeholder position.
+  const [frameReady, setFrameReady] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => requestAnimationFrame(() => setFrameReady(true)));
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   // The selector frame + video CTA are a desktop experience; on mobile the
   // templates are just a plain swipeable row.
@@ -163,6 +234,11 @@ export function HeroV76({
     return () => mq.removeEventListener("change", sync);
   }, []);
 
+  // Set by the arrows (not hover): the next measure scrolls the card fully clear
+  // of the edge fade so it never lands half-hidden under the mask. Hover keeps
+  // its gentle in-view nudge untouched.
+  const stepScrollRef = useRef(false);
+
   // Measure the selected card and glide the frame to it; keep it in view.
   // getBoundingClientRect (not offsetLeft) so it's independent of which
   // ancestor is the offsetParent; re-measured on layout via ResizeObserver.
@@ -170,10 +246,9 @@ export function HeroV76({
     const row = rowRef.current;
     if (!row) return;
     const measure = () => {
-      const media = row
-        .querySelector<HTMLElement>(`[data-card="${selectedIndex}"]`)
-        ?.querySelector<HTMLElement>('[data-slot="card-media"]');
-      if (!media) return;
+      const cardEl = row.querySelector<HTMLElement>(`[data-card="${selectedIndex}"]`);
+      const media = cardEl?.querySelector<HTMLElement>('[data-slot="card-media"]');
+      if (!cardEl || !media) return;
       const rowRect = row.getBoundingClientRect();
       const mRect = media.getBoundingClientRect();
       if (mRect.width < 40 || mRect.height < 40) return; // not laid out yet
@@ -183,9 +258,17 @@ export function HeroV76({
         w: mRect.width + 2 * FRAME_PAD,
         h: mRect.height + 2 * FRAME_PAD,
       });
-      // Keep the selected card in view (horizontal scroll only).
-      if (mRect.left < rowRect.left + 8) row.scrollBy({ left: mRect.left - rowRect.left - 24, behavior: "smooth" });
-      else if (mRect.right > rowRect.right - 8) row.scrollBy({ left: mRect.right - rowRect.right + 24, behavior: "smooth" });
+      // Keep the selected card in view (horizontal scroll only). Measure the WHOLE
+      // card — not just its media — so an arrow step lands the entire card fully
+      // past the edge fade instead of clipping its trailing edge. Arrow steps ask
+      // for a wider clearance (72px); hover keeps the gentle 24px nudge.
+      const cRect = cardEl.getBoundingClientRect();
+      const step = stepScrollRef.current;
+      stepScrollRef.current = false;
+      const edge = step ? 72 : 8;
+      const clear = step ? 72 : 24;
+      if (cRect.left < rowRect.left + edge) row.scrollBy({ left: cRect.left - rowRect.left - clear, behavior: "smooth" });
+      else if (cRect.right > rowRect.right - edge) row.scrollBy({ left: cRect.right - rowRect.right + clear, behavior: "smooth" });
     };
     measure();
     const raf = requestAnimationFrame(measure);
@@ -203,17 +286,44 @@ export function HeroV76({
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
-  const scrollRow = (dir: 1 | -1) => rowRef.current?.scrollBy({ left: dir * 320, behavior: "smooth" });
+
+  // Mobile: there's no hover, so each card's mock animation plays when the card
+  // scrolls into view and replays if you scroll back to it (the `is-inview`
+  // class drives the same animations hover does on desktop). Desktop keeps hover.
+  useEffect(() => {
+    if (isDesktop) return;
+    const row = rowRef.current;
+    if (!row) return;
+    const cards = row.querySelectorAll<HTMLElement>("[data-card]");
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          entry.target.classList.toggle("is-inview", entry.isIntersecting);
+        }
+      },
+      { threshold: 0.6 },
+    );
+    cards.forEach((c) => io.observe(c));
+    return () => io.disconnect();
+  }, [isDesktop]);
+  // The arrows step the selected card (which glides the frame + tab and keeps
+  // itself in view via the measure effect), so browsing and selecting are one
+  // and the same gesture.
+  const lastCardIndex = CAROUSEL.length - 1;
+  const stepSelection = (dir: 1 | -1) => {
+    stepScrollRef.current = true;
+    setSelectedIndex((i) => Math.min(lastCardIndex, Math.max(0, i + dir)));
+  };
 
   const FADE = 56;
   const rowMask = `linear-gradient(to right, transparent 0, #000 ${canLeft ? FADE : 0}px, #000 calc(100% - ${canRight ? FADE : 0}px), transparent 100%)`;
 
   const groundGradient = dark
     ? "linear-gradient(180deg, #141416 0%, #0d0d0e 55%, #0a0a0b 100%)"
-    : "linear-gradient(180deg, #ffffff 0%, #f7f7f8 42%, #eff0f2 70%, #ffffff 100%)";
+    : "linear-gradient(180deg, #fcfcfd 0%, #f7f8fa 52%, #ffffff 100%)";
   const chevronCls = dark
     ? "bg-white/[0.06] text-white/70 ring-white/10 hover:bg-white/15 hover:text-white"
-    : "bg-black/[0.04] text-neutral-600 ring-black/[0.08] hover:bg-black/[0.08] hover:text-neutral-900";
+    : "bg-black/[0.02] text-neutral-400 ring-black/[0.05] hover:bg-black/[0.05] hover:text-neutral-700";
   const rowTokens: Record<string, string> = dark
     ? {
         "--card": "#1b1b1b",
@@ -240,10 +350,9 @@ export function HeroV76({
       <StudioNav
         darkTop={dark}
         hideDemo
-        logoVideo={dark ? "/liquid-metal.webm" : undefined}
         maxWidthClass="max-w-[1600px]"
         restPaddingClass="px-6 md:px-10"
-        themeToggle={{ theme, onToggle: () => setTheme((t) => (t === "dark" ? "light" : "dark")) }}
+        themeToggle={{ theme, onToggle: toggleTheme }}
       />
       <section className={`relative -mt-14 pb-24 md:-mt-16 ${dark ? "bg-[#0a0a0b]" : "bg-white"}`}>
         <div className="relative overflow-hidden" style={{ background: groundGradient }}>
@@ -251,14 +360,17 @@ export function HeroV76({
 
           <div className={`relative z-10 ${RAIL} pb-16 pt-36 md:pt-36 lg:pb-20`}>
             <div className="relative z-30 max-w-2xl">
-              <h1 className={`max-w-xl text-3xl font-medium leading-[1.08] tracking-tight md:text-[46px] ${dark ? "text-white" : "text-neutral-900"}`}>
-                The AI app builder for
-                <br />
+              <h1 className={`type-display max-w-xl text-center md:text-left ${dark ? "text-white" : "text-neutral-900"}`}>
+                The AI app builder
+                {/* Mobile breaks after "builder" so "for" starts line 2; desktop keeps the break after "for". */}
+                <br className="md:hidden" />{" "}
+                for
+                <br className="hidden md:block" />{" "}
                 client-facing experiences
               </h1>
 
               {showBody && (
-                <p className={`mt-4 max-w-lg text-[17px] leading-relaxed ${dark ? "text-white/55" : "text-neutral-500"}`}>
+                <p className={`type-lead mt-4 max-w-lg text-center md:text-left ${dark ? "text-white/55" : "text-neutral-500"}`}>
                   Describe what you need in plain language and Assembly ships a polished, client-ready app — no code, no handoffs.
                 </p>
               )}
@@ -266,6 +378,11 @@ export function HeroV76({
               <div className="mt-8 max-w-xl">
                 <div className="v63-gradient-border relative rounded-[14px] md:rounded-[22px]">
                   <V66Composer
+                    textareaRef={inputRef}
+                    // The demo prompt types in secondary ink and hides the CTA;
+                    // both flip on once the visitor starts their own prompt.
+                    textDimmed={!userEngaged}
+                    showSubmit={userEngaged && prompt.trim().length > 0}
                     glow={false}
                     tone={theme}
                     compact
@@ -274,10 +391,8 @@ export function HeroV76({
                     promptPickerLabel="Prompt Ideas"
                     promptPickerSide="left"
                     promptItems={V76_PROMPTS}
-                    howToLabel="Watch video"
-                    howToSide="right"
                     hidePlus={!showPlus}
-                    hideHowTo={!showVideo || !isDesktop}
+                    hideHowTo
                     plusAsAttach
                     submitLabel="Start building"
                     value={prompt}
@@ -287,32 +402,32 @@ export function HeroV76({
                     surfaceClassName={
                       dark
                         ? "bg-[#1b1b1b] ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_24px_60px_-28px_rgba(0,0,0,0.8)]"
-                        : "bg-white ring-1 ring-black/[0.06] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_24px_60px_-30px_rgba(16,24,40,0.18)]"
+                        : "bg-transparent ring-1 ring-black/[0.05] shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
                     }
                   />
                 </div>
               </div>
             </div>
 
-            <div className="mt-1">
+            <div className="mt-8 md:mt-1">
               <div className="flex items-center justify-end gap-4">
                 <div className="hidden items-center md:flex">
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
-                      onClick={() => scrollRow(-1)}
-                      disabled={!canLeft}
+                      onClick={() => stepSelection(-1)}
+                      disabled={selectedIndex === 0}
                       aria-label="Previous templates"
-                      className={`flex size-9 items-center justify-center rounded-full ring-1 transition-colors disabled:pointer-events-none disabled:opacity-30 ${chevronCls}`}
+                      className={`flex size-9 items-center justify-center rounded-lg ring-1 transition-colors disabled:pointer-events-none disabled:opacity-30 ${chevronCls}`}
                     >
                       <IconChevron className="size-4 rotate-180" />
                     </button>
                     <button
                       type="button"
-                      onClick={() => scrollRow(1)}
-                      disabled={!canRight}
+                      onClick={() => stepSelection(1)}
+                      disabled={selectedIndex === lastCardIndex}
                       aria-label="More templates"
-                      className={`flex size-9 items-center justify-center rounded-full ring-1 transition-colors disabled:pointer-events-none disabled:opacity-30 ${chevronCls}`}
+                      className={`flex size-9 items-center justify-center rounded-lg ring-1 transition-colors disabled:pointer-events-none disabled:opacity-30 ${chevronCls}`}
                     >
                       <IconChevron className="size-4" />
                     </button>
@@ -324,41 +439,52 @@ export function HeroV76({
                 ref={rowRef}
                 onScroll={updateArrows}
                 style={{ maskImage: rowMask, WebkitMaskImage: rowMask, ...rowTokens } as React.CSSProperties}
-                className="relative -mx-6 mt-3 flex gap-4 overflow-x-auto px-6 pb-10 pt-3 md:pt-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                // pl is px-6 (24px) + FRAME_PAD (5px) so the selected card's
+                // selector frame — which hugs 5px outside the card — lines its
+                // left edge up with the hero title, prompt box, and logo.
+                className="relative -mx-6 mt-3 flex gap-4 overflow-x-auto pb-10 pl-[29px] pr-6 pt-3 md:pt-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               >
                 {/* Selector frame — glides to the selected card. */}
                 {isDesktop && (
                 <div
                   aria-hidden
-                  className="pointer-events-none absolute left-0 top-0 z-20 transition-transform duration-[380ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+                  className={`pointer-events-none absolute left-0 top-0 z-20 ${frameReady ? "transition-transform duration-[380ms] ease-[cubic-bezier(0.22,1,0.36,1)]" : ""}`}
                   style={{ transform: `translateX(${frame.x}px)`, top: frame.top, width: frame.w, height: frame.h }}
                 >
                   {(() => {
-                    // Frame + tab drawn as ONE continuous outline (tab filled),
-                    // with the tab flush to the frame's right edge — the right
-                    // border flows straight up into it.
+                    // The selector is a ring + a solid tab, same colour so they read
+                    // as one piece. The tab is FLUSH RIGHT: its right edge is the
+                    // ring's right edge, and the ring's top-right is squared so the
+                    // two right edges are one continuous line. The tab's bottom sits
+                    // exactly on the ring's top edge (same colour → seamless), so it
+                    // rests on the border line rather than floating above it.
                     const W = frame.w;
                     const H = frame.h;
                     const T = 30; // tab height above the frame
                     const R = 17; // frame corner radius = card radius (12) + gap (5) so corners run parallel
-                    const K = 10; // tab corner radius
+                    const K = 10; // tab top-corner radius
+                    const CR = 9; // concave fillet where the tab meets the frame's top edge
                     const TAB_W = 120;
-                    const tabRight = W - R; // inset from the corner so the right base can flare
+                    const selectorColor = dark ? "#9a9aa0" : "#e5e6ea";
+                    // Inset the tab from the frame's rounded top-right corner so both
+                    // of its bases land on the straight run of the top edge — the
+                    // right fillet ends exactly where the corner curve begins.
+                    const tabRight = W - R - CR;
                     const tabLeft = tabRight - TAB_W;
-                    // Softer/dimmer grey on dark (near-white read too bright);
-                    // keep the light grey on light mode.
-                    const c = dark ? "#8e8e94" : "#c4c4ca";
-                    const f = 8; // concave fillet where the tab flares off the top edge (both bases)
-                    const outline = `M ${R} ${T} H ${tabLeft - f} Q ${tabLeft} ${T} ${tabLeft} ${T - f} V ${K} Q ${tabLeft} 0 ${tabLeft + K} 0 H ${tabRight - K} Q ${tabRight} 0 ${tabRight} ${K} V ${T - f} Q ${tabRight} ${T} ${tabRight + f} ${T} H ${W - R} Q ${W} ${T} ${W} ${T + R} V ${T + H - R} Q ${W} ${T + H} ${W - R} ${T + H} H ${R} Q 0 ${T + H} 0 ${T + H - R} V ${T + R} Q 0 ${T} ${R} ${T} Z`;
-                    const tabFill = `M ${tabLeft - f} ${T + 1} L ${tabLeft - f} ${T} Q ${tabLeft} ${T} ${tabLeft} ${T - f} V ${K} Q ${tabLeft} 0 ${tabLeft + K} 0 H ${tabRight - K} Q ${tabRight} 0 ${tabRight} ${K} V ${T - f} Q ${tabRight} ${T} ${tabRight + f} ${T} L ${tabRight + f} ${T + 1} Z`;
+                    // Frame: a plain rounded rectangle — all four corners share R.
+                    const ring = `M ${R} ${T} H ${W - R} Q ${W} ${T} ${W} ${T + R} V ${T + H - R} Q ${W} ${T + H} ${W - R} ${T + H} H ${R} Q 0 ${T + H} 0 ${T + H - R} V ${T + R} Q 0 ${T} ${R} ${T} Z`;
+                    // Tab: rounded top corners (K); each bottom corner eases into the
+                    // frame's top edge with a concave fillet (CR) so the junction is
+                    // a soft curve rather than a hard notch.
+                    const tab = `M ${tabLeft - CR} ${T} Q ${tabLeft} ${T} ${tabLeft} ${T - CR} L ${tabLeft} ${K} Q ${tabLeft} 0 ${tabLeft + K} 0 H ${tabRight - K} Q ${tabRight} 0 ${tabRight} ${K} L ${tabRight} ${T - CR} Q ${tabRight} ${T} ${tabRight + CR} ${T} Z`;
                     return (
                       <>
                         <svg width={W} height={T + H} viewBox={`0 0 ${W} ${T + H}`} fill="none" className="absolute left-0 overflow-visible" style={{ top: -T }}>
-                          <path d={tabFill} fill={c} />
-                          <path d={outline} stroke={c} strokeWidth="1.5" />
+                          <path d={ring} stroke={selectorColor} strokeWidth="1.5" />
+                          <path d={tab} fill={selectorColor} />
                         </svg>
                         <span
-                          className="absolute flex items-center justify-center text-[12.5px] font-medium leading-none text-neutral-900"
+                          className="absolute flex items-center justify-center text-[12.5px] font-normal leading-none text-neutral-900"
                           style={{ left: tabLeft, top: -T, width: TAB_W, height: T }}
                         >
                           Or use a template
@@ -390,7 +516,7 @@ export function HeroV76({
                 >
                   <Card
                     size="sm"
-                    className={`gap-0 py-0 ring-1 transition-[transform,box-shadow] duration-200 ease-out group-hover:-translate-y-0.5 ${dark ? "ring-white/8 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)] group-hover:shadow-[0_14px_34px_-22px_rgba(0,0,0,0.85)]" : "ring-black/[0.06] shadow-[0_10px_30px_-20px_rgba(16,24,40,0.25)] group-hover:shadow-[0_14px_34px_-22px_rgba(16,24,40,0.26)]"}`}
+                    className={`gap-0 py-0 ring-1 transition-[transform,box-shadow] duration-200 ease-out group-hover:-translate-y-0.5 ${dark ? "ring-white/8 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)] group-hover:shadow-[0_14px_34px_-22px_rgba(0,0,0,0.85)]" : "ring-black/[0.07] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_28px_-18px_rgba(16,24,40,0.20)] group-hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_18px_36px_-20px_rgba(16,24,40,0.24)]"}`}
                   >
                     <div data-slot="card-media" className={`relative h-[188px] w-full overflow-hidden ${dark ? "" : "bg-[#eef0f2]"}`}>
                       {SEE_ALL_STACK.map((t) => (
@@ -415,7 +541,7 @@ export function HeroV76({
                       ))}
                     </div>
                   </Card>
-                  <p className={`mt-3 inline-flex items-center gap-1.5 text-[13px] font-medium ${dark ? "text-white" : "text-neutral-900"}`}>
+                  <p className={`mt-3 inline-flex items-center gap-1.5 text-[13px] font-normal ${dark ? "text-white" : "text-neutral-900"}`}>
                     See all templates
                     <IconArrow className={`size-3.5 transition-transform group-hover:translate-x-0.5 ${dark ? "text-white/50" : "text-neutral-400"}`} />
                   </p>
@@ -428,7 +554,7 @@ export function HeroV76({
 
         {/* Logos carousel. */}
         <div className="mx-auto mt-24 max-w-7xl px-6 md:mt-28">
-          <p className={`mb-8 text-center text-xs tracking-wider ${dark ? "text-white/40" : "text-neutral-400"}`} style={{ fontFamily: MONO }}>
+          <p className={`mb-8 text-center font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wider ${dark ? "text-white/40" : "text-neutral-400"}`}>
             Trusted by teams at
           </p>
           <div className="mx-auto max-w-2xl overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]">

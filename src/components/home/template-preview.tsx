@@ -217,6 +217,75 @@ export function TemplateMock({ slug }: { slug: string }) {
     );
   }
 
+  if (slug === "data-visualization") {
+    // A small line/area chart reads as "data visualization" and stays distinct
+    // from the engagement dashboard's bar chart.
+    return (
+      <div className="flex flex-col gap-3 p-3.5 text-[10px] leading-none">
+        <div className="flex items-center gap-2">
+          <span className="text-foreground">Monthly revenue</span>
+          <span className="ml-auto rounded-full bg-emerald-50 px-1.5 py-0.5 text-[9px] font-medium text-emerald-600">+12%</span>
+        </div>
+        <div className="flex flex-col gap-1.5 rounded-lg border border-border p-2.5">
+          <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="h-14 w-full text-foreground" aria-hidden>
+            <polygon points="0,40 0,27 17,29 33,18 50,22 67,10 83,14 100,5 100,40" className="fill-current text-foreground/10" />
+            <polyline points="0,27 17,29 33,18 50,22 67,10 83,14 100,5" fill="none" className="stroke-current text-foreground/70" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+          </svg>
+          <div className="flex justify-between text-[8px] text-muted-foreground/70">
+            <span>Jan</span>
+            <span>Apr</span>
+            <span>Jul</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (slug === "goal-tracker") {
+    const goals: [string, number][] = [
+      ["Revenue target", 72],
+      ["New clients", 45],
+      ["Retention", 90],
+    ];
+    return (
+      <div className="flex flex-col gap-2.5 p-3.5 text-[10px] leading-none">
+        <div className="overflow-hidden rounded-lg border border-border">
+          {goals.map(([g, pct], i) => (
+            <div key={g} className={`flex flex-col gap-1.5 px-2.5 py-2 ${i > 0 ? "border-t border-border" : ""} ${ROW_ANIM[i]}`}>
+              <div className="flex items-center justify-between">
+                <span className="truncate text-foreground/80">{g}</span>
+                <span className="tabular-nums text-muted-foreground">{pct}%</span>
+              </div>
+              <div className="h-1 overflow-hidden rounded-full bg-muted">
+                <div className="h-full rounded-full bg-foreground/70" style={{ width: `${pct}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (slug === "client-support-requests") {
+    const rows = [
+      { t: "Login issue", color: STATUS.submitted, s: "Open" },
+      { t: "Billing question", color: STATUS.submitted, s: "In progress" },
+      { t: "Feature request", color: STATUS.done, s: "Resolved" },
+    ];
+    return (
+      <div className="flex flex-col gap-2.5 p-3.5 text-[10px] leading-none">
+        <div className="overflow-hidden rounded-lg border border-border">
+          {rows.map((r, i) => (
+            <div key={i} className={`flex items-center gap-1.5 px-2.5 py-2 ${i > 0 ? "border-t border-border" : ""} ${ROW_ANIM[i]}`}>
+              <span className="truncate text-foreground/80">{r.t}</span>
+              <Pill color={r.color} label={r.s} />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   // Default — New client intake
   const fields = [
     { label: "Company name", value: "Northwind Co." },

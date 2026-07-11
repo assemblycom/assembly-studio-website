@@ -10,6 +10,8 @@ export interface Template {
   industries?: string[];
   /** Surfaced in the curated set on the homepage. */
   featured?: boolean;
+  /** Optional preview image shown on the card in place of the grey placeholder. */
+  image?: string;
 }
 
 // Category order is intentional — it drives the order of the filter tabs.
@@ -43,25 +45,15 @@ export const TEMPLATE_INDUSTRIES = [
 // Each template carries 2–4 industries it most naturally serves.
 const INDUSTRY_BY_SLUG: Record<string, string[]> = {
   "new-client-intake": ["Accounting", "Legal", "Consulting", "Marketing"],
-  "onboarding-wizard": ["Consulting", "Marketing", "Technology", "Financial services"],
   "document-collection": ["Accounting", "Legal", "Real estate", "Financial services"],
   "pdf-to-digital-intake": ["Legal", "Healthcare", "Accounting", "Real estate"],
-  "client-performance-dashboard": ["Marketing", "Consulting", "Financial services"],
-  "retainer-usage-overview": ["Marketing", "Consulting", "Legal"],
-  "monthly-client-report": ["Marketing", "Accounting", "Consulting"],
   "client-engagement-dashboard": ["Marketing", "Consulting", "Technology"],
   "data-visualization": ["Financial services", "Consulting", "Technology", "Accounting"],
   "client-project-tracker": ["Marketing", "Consulting", "Technology", "Real estate"],
-  "case-status-page": ["Legal", "Real estate", "Healthcare"],
-  "deliverable-progress": ["Marketing", "Consulting", "Technology"],
   "time-tracker": ["Legal", "Accounting", "Consulting"],
   "goal-tracker": ["Consulting", "Healthcare", "Education"],
   "content-approval-flow": ["Marketing", "Consulting"],
-  "design-approval": ["Marketing", "Technology"],
-  "markup-comments": ["Marketing", "Technology", "Consulting"],
   "client-support-requests": ["Technology", "Marketing", "Consulting"],
-  "service-request-intake": ["Consulting", "Technology", "Real estate"],
-  "internal-ticketing": ["Technology", "Consulting", "Financial services"],
   "proposal-builder": ["Marketing", "Consulting", "Accounting", "Legal"],
   "client-ai-assistant": ["Technology", "Healthcare", "Financial services", "Education"],
   "client-discussion-forum": ["Education", "Technology", "Marketing"],
@@ -70,7 +62,6 @@ const INDUSTRY_BY_SLUG: Record<string, string[]> = {
   "client-resource-library": ["Education", "Consulting", "Healthcare", "Financial services"],
   "internal-resource-library": ["Consulting", "Technology", "Healthcare"],
   "data-room": ["Financial services", "Legal", "Real estate", "Accounting"],
-  "course-player": ["Education", "Healthcare", "Consulting"],
   "certification-flow": ["Education", "Healthcare", "Financial services"],
 };
 
@@ -86,16 +77,6 @@ const BASE_TEMPLATES: Template[] = [
       "Collect everything you need from a new client in one guided flow — scope, goals, stakeholders, budget, and timeline — then auto-create their folders.",
     features: ["Scope & goals", "Stakeholders", "Budget & timeline", "E-signature"],
     featured: true,
-  },
-  {
-    slug: "onboarding-wizard",
-    title: "Onboarding wizard",
-    description: "Multi-step flow with saved progress",
-    icon: "🧭",
-    category: "Onboarding",
-    longDescription:
-      "Walk clients through onboarding one step at a time, with progress saved so they can pick up right where they left off.",
-    features: ["Multi-step flow", "Saved progress", "Conditional steps", "Auto-folder setup"],
   },
   {
     slug: "document-collection",
@@ -119,36 +100,6 @@ const BASE_TEMPLATES: Template[] = [
   },
 
   // Dashboards
-  {
-    slug: "client-performance-dashboard",
-    title: "Client performance dashboard",
-    description: "Per-client key metrics, scoped views",
-    icon: "📈",
-    category: "Dashboards",
-    longDescription:
-      "Give each client a scoped dashboard of the metrics that matter to them, refreshed automatically from live data.",
-    features: ["Per-client metrics", "Scoped views", "Live data", "Custom KPIs"],
-  },
-  {
-    slug: "retainer-usage-overview",
-    title: "Retainer usage overview",
-    description: "Hours or credits used vs. remaining",
-    icon: "⏳",
-    category: "Dashboards",
-    longDescription:
-      "Show clients exactly how much of their retainer they've used and what's left, with a clear burn-down and low-balance alerts.",
-    features: ["Hours/credits used", "Remaining balance", "Burn-down", "Alerts"],
-  },
-  {
-    slug: "monthly-client-report",
-    title: "Monthly client report",
-    description: "Branded read-only report published monthly",
-    icon: "🗓️",
-    category: "Dashboards",
-    longDescription:
-      "Publish a polished, branded, read-only report to each client on a monthly cadence — no manual assembly required.",
-    features: ["Branded layout", "Read-only", "Scheduled publish", "Auto-refresh"],
-  },
   {
     slug: "client-engagement-dashboard",
     title: "Client engagement dashboard",
@@ -184,26 +135,6 @@ const BASE_TEMPLATES: Template[] = [
     featured: true,
   },
   {
-    slug: "case-status-page",
-    title: "Case status page",
-    description: "Current stage, last update, what to expect",
-    icon: "💼",
-    category: "Trackers",
-    longDescription:
-      "Give clients a simple status page showing the current stage, the last update, and what to expect next.",
-    features: ["Current stage", "Last update", "What to expect", "Client-facing"],
-  },
-  {
-    slug: "deliverable-progress",
-    title: "Deliverable progress",
-    description: "Drafting, in review, delivered statuses",
-    icon: "🌓",
-    category: "Trackers",
-    longDescription:
-      "Track each deliverable through drafting, in-review, and delivered statuses so everyone knows where things stand.",
-    features: ["Status labels", "Per-item view", "In review / delivered", "Notifications"],
-  },
-  {
     slug: "time-tracker",
     title: "Time tracker",
     description: "Log billable hours, roll-ups, exportable",
@@ -236,26 +167,6 @@ const BASE_TEMPLATES: Template[] = [
     features: ["Posts & campaigns", "Status history", "Comments", "Audit trail"],
     featured: true,
   },
-  {
-    slug: "design-approval",
-    title: "Design approval",
-    description: "Compare options, comment, pick a direction",
-    icon: "🎨",
-    category: "Approvals",
-    longDescription:
-      "Present design options side by side, gather comments, and let clients pick a direction — with version history.",
-    features: ["Compare options", "Comments", "Pick a direction", "Version history"],
-  },
-  {
-    slug: "markup-comments",
-    title: "Markup & comments",
-    description: "Pin comments to a design or PDF, with status tracking",
-    icon: "💬",
-    category: "Approvals",
-    longDescription:
-      "Let clients pin comments directly onto a design or PDF and track each one to resolution.",
-    features: ["Pin comments", "On design or PDF", "Status tracking", "Threads"],
-  },
 
   // Requests
   {
@@ -267,26 +178,6 @@ const BASE_TEMPLATES: Template[] = [
     longDescription:
       "Centralize incoming client requests into a categorized, shared triage queue so nothing gets lost.",
     features: ["Categorized requests", "Shared triage queue", "Priority", "Real-time updates"],
-  },
-  {
-    slug: "service-request-intake",
-    title: "Service request intake",
-    description: "Pick a service, scope it, submit",
-    icon: "📋",
-    category: "Requests",
-    longDescription:
-      "Let clients pick a service, scope what they need, and submit — routed automatically to the right person.",
-    features: ["Pick a service", "Scope it", "Submit", "Routing"],
-  },
-  {
-    slug: "internal-ticketing",
-    title: "Internal ticketing",
-    description: "IT, HR, ops tickets with triage and assign",
-    icon: "🎟️",
-    category: "Requests",
-    longDescription:
-      "Run IT, HR, and ops tickets through one queue with triage, assignment, and status tracking.",
-    features: ["IT/HR/ops tickets", "Triage", "Assignment", "Status tracking"],
   },
 
   // Proposals
@@ -380,16 +271,6 @@ const BASE_TEMPLATES: Template[] = [
   },
 
   // Education
-  {
-    slug: "course-player",
-    title: "Course player",
-    description: "Self-paced lessons with progress tracking",
-    icon: "🎓",
-    category: "Education",
-    longDescription:
-      "Deliver self-paced lessons clients can work through at their own pace, with progress saved so they can resume anytime.",
-    features: ["Self-paced lessons", "Progress tracking", "Video & text", "Resume anytime"],
-  },
   {
     slug: "certification-flow",
     title: "Certification flow",

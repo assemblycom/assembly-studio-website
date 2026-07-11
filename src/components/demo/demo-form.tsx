@@ -6,7 +6,7 @@ import { IconArrow } from "@/components/home/icons";
 const TEAM_SIZES = ["Just me", "2–10", "11–50", "51–200", "200+"];
 
 const inputCls =
-  "w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/30";
+  "w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/30";
 
 function Field({
   label,
@@ -80,7 +80,7 @@ function TeamSizeSelect({ label }: { label: string }) {
         {open && (
           <ul
             role="listbox"
-            className="absolute left-0 top-full z-20 mt-2 w-full origin-top animate-fade-in overflow-hidden rounded-xl border border-border bg-background p-1 shadow-[0_16px_44px_-26px_rgba(20,20,40,0.35)]"
+            className="absolute left-0 top-full z-20 mt-2 w-full origin-top animate-fade-in overflow-hidden rounded-lg border border-border bg-background p-1 shadow-[0_16px_44px_-26px_rgba(20,20,40,0.35)]"
           >
             {TEAM_SIZES.map((size) => (
               <li key={size}>
@@ -124,20 +124,13 @@ function TeamSizeSelect({ label }: { label: string }) {
   );
 }
 
-// Boxed card on desktop; on mobile the form goes borderless (Bird-style) so it
-// doesn't read as a cramped panel on a small screen.
-const cardCls =
-  "bg-background md:rounded-2xl md:border md:border-border md:p-8 md:shadow-sm";
-
 export function DemoForm() {
   // Prototype: there's no backend, so a submit just swaps in a confirmation.
   const [submitted, setSubmitted] = useState(false);
 
   if (submitted) {
     return (
-      <div
-        className={`flex min-h-[420px] flex-col items-center justify-center py-16 text-center ${cardCls}`}
-      >
+      <div className="flex min-h-[420px] flex-col items-center justify-center py-16 text-center">
         <div className="flex size-12 items-center justify-center rounded-full bg-muted">
           <svg
             width="24"
@@ -173,7 +166,6 @@ export function DemoForm() {
         e.preventDefault();
         setSubmitted(true);
       }}
-      className={cardCls}
     >
       <div className="flex flex-col gap-4">
         <div className="grid gap-4 sm:grid-cols-2">
@@ -229,7 +221,7 @@ export function DemoForm() {
 
       <button
         type="submit"
-        className="group mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm text-background transition-opacity hover:opacity-90"
+        className="group mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-foreground px-6 py-3 text-sm text-background transition-opacity hover:opacity-90"
       >
         Book a demo
         <IconArrow className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />

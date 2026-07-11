@@ -1,12 +1,11 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Header } from "@/components/layout/header";
+import { StudioNav } from "@/components/home/studio-nav";
 import { Footer } from "@/components/layout/footer";
-import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { StudioWordmark } from "@/components/layout/studio-wordmark";
 import { FooterBars } from "@/components/layout/footer-bars";
-import { TemplatesFooter } from "@/components/layout/templates-footer";
+import { useTheme } from "@/components/theme/theme-provider";
 
 /**
  * Home gets the Zoox-style treatment: the footer is a rounded sheet that lifts
@@ -19,25 +18,34 @@ import { TemplatesFooter } from "@/components/layout/templates-footer";
  */
 export function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { theme, toggleTheme } = useTheme();
+  const dark = theme === "dark";
   const isHome = pathname === "/";
   const isSecurity = pathname === "/security";
-  // Templates gets its own reveal panel — the gooey "path relax" wordmark that
-  // deforms around the cursor — instead of the shared kinetic wordmark.
-  const isTemplates =
-    pathname === "/templates" || pathname.startsWith("/templates/");
-  // Content pages that share the landing page's kinetic-wordmark reveal footer
-  // (but keep the standard, non-dark header). Security and templates are
-  // excluded — each has its own distinct reveal panel.
+  // Content pages that share the landing page's kinetic-wordmark reveal footer.
+  // Templates is included so it gets the exact same footer as home instead of
+  // its own gooey path-relax panel.
   const usesWordmarkFooter =
     pathname === "/customers" ||
     pathname.startsWith("/customers/") ||
-    pathname === "/pricing";
+    pathname === "/pricing" ||
+    pathname === "/templates" ||
+    pathname.startsWith("/templates/");
 
-  // The announcement bar only runs on the landing page.
-  const bar = <AnnouncementBar />;
+  // The shared nav carries the site theme toggle and never shows "Book a demo"
+  // (it's a demo-page/pricing-hero CTA, not a nav item). Its contents ride
+  // light over the dark theme and dark over the light theme.
+  const nav = (
+    <StudioNav
+      hideDemo
+      darkTop={dark}
+      themeToggle={{ theme, onToggle: toggleTheme }}
+    />
+  );
 
-  // Security leads with a dark hero and reuses the home reveal footer, but the
-  // panel below shows the interactive bar field instead of the kinetic wordmark.
+  // Security leads with a hero and reuses the home reveal footer, but the panel
+  // below shows the interactive bar field instead of the kinetic wordmark. It
+  // follows the site theme like every other page.
   if (isSecurity) {
     return (
       <>
@@ -45,39 +53,19 @@ export function RootShell({ children }: { children: React.ReactNode }) {
           <FooterBars />
         </div>
         <div className="relative z-10 flex min-h-screen flex-col bg-background">
-          <Header />
+          {nav}
           <main className="flex-1">{children}</main>
         </div>
         <div className="relative z-10">
-          <Footer rounded />
+          <Footer reveal />
         </div>
         <div aria-hidden className="pointer-events-none h-[42vh]" />
       </>
     );
   }
 
-  // Templates: same rounded reveal footer, but the panel below runs the gooey
-  // path-relax wordmark that softens and springs around the cursor.
-  if (isTemplates) {
-    return (
-      <>
-        <div className="fixed inset-x-0 bottom-0 z-0 h-[60vh] overflow-hidden bg-[#7da4ff]">
-          <TemplatesFooter />
-        </div>
-        <div className="relative z-10 flex min-h-screen flex-col bg-background">
-          <Header />
-          <main className="flex-1">{children}</main>
-        </div>
-        <div className="relative z-10">
-          <Footer rounded />
-        </div>
-        <div aria-hidden className="pointer-events-none h-[42vh]" />
-      </>
-    );
-  }
-
-  // Customers and pricing reuse the landing page's reveal footer — the rounded
-  // footer over the kinetic wordmark panel — with a standard header.
+  // Customers, pricing, and templates reuse the landing page's reveal footer —
+  // the rounded footer over the kinetic wordmark panel — with a standard header.
   if (usesWordmarkFooter) {
     return (
       <>
@@ -85,11 +73,11 @@ export function RootShell({ children }: { children: React.ReactNode }) {
           <StudioWordmark />
         </div>
         <div className="relative z-10 flex min-h-screen flex-col bg-background">
-          <Header />
+          {nav}
           <main className="flex-1">{children}</main>
         </div>
         <div className="relative z-10">
-          <Footer rounded />
+          <Footer reveal />
         </div>
         <div aria-hidden className="pointer-events-none h-[42vh]" />
       </>
@@ -99,7 +87,7 @@ export function RootShell({ children }: { children: React.ReactNode }) {
   if (!isHome) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
-        <Header />
+        {nav}
         <main className="flex-1">{children}</main>
         <Footer />
       </div>
@@ -116,12 +104,11 @@ export function RootShell({ children }: { children: React.ReactNode }) {
           away; the hero renders its own sticky nav (with the theme toggle), so
           the global header is omitted here to avoid a duplicate bar. */}
       <div className="relative z-10 flex min-h-screen flex-col bg-background">
-        {bar}
         <main className="flex-1">{children}</main>
       </div>
       {/* Footer as a sibling — rounded bottom corners reveal the dark panel. */}
       <div className="relative z-10">
-        <Footer rounded />
+        <Footer reveal />
       </div>
       {/* Gap that reveals the dark panel below the footer — its height is the
           visible dark strip the wordmark sits in. */}

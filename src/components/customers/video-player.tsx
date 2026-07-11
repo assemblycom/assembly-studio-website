@@ -49,21 +49,21 @@ export function VideoPlayer({
             <img
               src={poster}
               alt=""
-              className="absolute inset-0 h-full w-full object-cover object-center"
+              className="img-outline absolute inset-0 h-full w-full object-cover object-center"
             />
           )}
           {iconOnly ? (
             <>
               {/* Play sign fades in on hover; a faint scrim keeps it legible */}
               <span className="absolute inset-0 bg-black/0 transition-colors duration-200 group-hover/vp:bg-black/25" />
-              <span className="relative flex size-10 items-center justify-center rounded-lg bg-white/15 text-white opacity-0 ring-1 ring-white/30 backdrop-blur transition-all duration-200 group-hover/vp:opacity-100 group-hover/vp:scale-105">
+              <span className="relative flex size-10 items-center justify-center rounded-lg bg-white/15 text-white opacity-0 ring-1 ring-white/30 backdrop-blur transition-[opacity,transform] duration-200 group-hover/vp:opacity-100 group-hover/vp:scale-105">
                 <svg viewBox="0 0 24 24" fill="currentColor" className="size-4" aria-hidden>
                   <path d="M9 7.5v9a.75.75 0 0 0 1.14.64l7.2-4.5a.75.75 0 0 0 0-1.28l-7.2-4.5A.75.75 0 0 0 9 7.5Z" />
                 </svg>
               </span>
             </>
           ) : (
-            <span className="relative inline-flex items-center gap-2 rounded-lg bg-white/15 px-4 py-2.5 text-sm font-medium text-white ring-1 ring-white/30 shadow-sm backdrop-blur-md transition-all duration-200 hover:bg-white/25 hover:scale-[1.03]">
+            <span className="relative inline-flex items-center gap-2 rounded-lg bg-white/15 px-4 py-2.5 text-sm font-medium text-white ring-1 ring-white/30 shadow-sm backdrop-blur-md transition-[background-color,transform] duration-200 hover:bg-white/25 hover:scale-[1.03] active:scale-[0.98]">
               <svg viewBox="0 0 24 24" fill="currentColor" className="size-4" aria-hidden>
                 <path d="M9 7.5v9a.75.75 0 0 0 1.14.64l7.2-4.5a.75.75 0 0 0 0-1.28l-7.2-4.5A.75.75 0 0 0 9 7.5Z" />
               </svg>

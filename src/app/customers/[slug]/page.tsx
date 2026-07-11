@@ -71,8 +71,9 @@ function MetaCard({ study }: { study: CaseStudy }) {
 
   return (
     <aside className="hidden h-fit flex-col gap-4 md:flex md:sticky md:top-28">
-      {/* Facts panel — logo, name, and the at-a-glance rows */}
-      <div className="overflow-hidden rounded-lg bg-muted">
+      {/* Facts panel — logo, name, and the at-a-glance rows. Outlined (not a
+          full-bleed gray fill) so it reads lighter against the page. */}
+      <div className="overflow-hidden rounded-lg border border-border">
         <div className="flex flex-col items-center px-6 pb-6 pt-8">
           <div className="flex size-24 items-center justify-center rounded-full bg-background ring-1 ring-border">
             <span className="text-2xl font-medium tracking-tight">
@@ -114,23 +115,23 @@ function BodyBlock({ block }: { block: ContentBlock }) {
   switch (block.type) {
     case "heading":
       return (
-        <h2 className="mt-16 text-2xl font-medium tracking-tight first:mt-0 md:text-3xl">
+        <h2 className="mt-14 text-2xl font-medium tracking-tight first:mt-0 md:mt-20 md:text-3xl">
           {block.text}
         </h2>
       );
     case "paragraph":
       return (
-        <p className="mt-7 text-[1.0625rem] leading-[1.8] text-foreground/80">
+        <p className="mt-5 text-base leading-[1.75] text-foreground/80 md:mt-6 md:text-[1.0625rem] md:leading-[1.85]">
           {block.text}
         </p>
       );
     case "list":
       return (
-        <ul className="mt-7 list-disc space-y-2.5 pl-5 marker:text-foreground/40">
+        <ul className="mt-5 list-disc space-y-2.5 pl-5 marker:text-foreground/40 md:mt-6">
           {block.items.map((item) => (
             <li
               key={item}
-              className="pl-1.5 text-[1.0625rem] leading-[1.7] text-foreground/80"
+              className="pl-1.5 text-base leading-[1.7] text-foreground/80 md:text-[1.0625rem]"
             >
               {item}
             </li>
@@ -139,8 +140,8 @@ function BodyBlock({ block }: { block: ContentBlock }) {
       );
     case "quote":
       return (
-        <figure className="my-16 border-l-2 border-border pl-6">
-          <blockquote className="text-2xl font-normal leading-[1.4] tracking-tight text-foreground">
+        <figure className="my-12 border-l-2 border-border pl-6 md:my-16">
+          <blockquote className="text-xl font-normal leading-[1.45] tracking-tight text-foreground md:text-2xl md:leading-[1.4]">
             &ldquo;{block.text}&rdquo;
           </blockquote>
           {block.attribution && (
@@ -172,16 +173,17 @@ function RelatedCard({ study }: { study: CaseStudy }) {
       href={`/customers/${study.slug}`}
       className="group flex flex-col bg-background p-6 transition-colors duration-200 hover:bg-muted md:p-8"
     >
-      <div className="flex items-start justify-between gap-4">
+      {/* Eyebrow is just the sector — the section header already says these are
+          customer stories, so the "Customer story ·" prefix was redundant noise
+          that wrapped to two lines on mobile. Single line now, arrow centered. */}
+      <div className="flex items-center justify-between gap-4">
         <p
           className="text-xs uppercase tracking-wider text-muted-foreground"
           style={{ fontFamily: MONO_EYEBROW }}
         >
-          Customer story
-          <span className="mx-1.5 text-muted-foreground/50">·</span>
           {study.industry}
         </p>
-        <IconArrow className="mt-0.5 size-4 shrink-0 text-muted-foreground transition-[transform,color] duration-200 group-hover:translate-x-0.5 group-hover:text-foreground" />
+        <IconArrow className="size-4 shrink-0 text-muted-foreground transition-[transform,color] duration-200 group-hover:translate-x-0.5 group-hover:text-foreground" />
       </div>
       <h3 className="mt-8 text-2xl font-medium tracking-tight md:text-3xl">
         {study.company}
@@ -212,7 +214,7 @@ export default async function CaseStudyPage({ params }: Props) {
       {/* Hero — video stories get breathing room from the media below; stories
           without a video need extra padding under the stats instead. */}
       <section
-        className={`px-6 pt-24 md:pt-44 ${study.featured ? "" : "pb-8 md:pb-12"}`}
+        className={`px-6 pt-10 md:pt-28 ${study.featured ? "" : "pb-10 md:pb-16"}`}
       >
         <div className="mx-auto max-w-5xl text-left md:text-center">
           <nav
@@ -231,26 +233,22 @@ export default async function CaseStudyPage({ params }: Props) {
             <span className="text-foreground">{study.company}</span>
           </nav>
 
-          <h1 className="mt-6 max-w-3xl text-4xl font-medium tracking-tight md:mx-auto md:text-5xl">
+          <h1 className="mt-7 max-w-3xl text-balance text-4xl font-medium leading-[1.1] tracking-tight md:mx-auto md:text-5xl">
             {study.headline}
           </h1>
-          <p className="mt-8 max-w-2xl text-lg text-muted-foreground md:mx-auto">
-            {study.summary}
-          </p>
 
-          <div className="mt-8 flex max-w-lg items-stretch justify-start divide-x divide-border sm:max-w-2xl md:mx-auto md:justify-center">
-            {study.stats.map((stat) => (
-              <div
+          {/* Stats as compact mono badges under the title. Capped at two so the
+              row never stacks into a third pill on mobile — one or two per row,
+              two rows at most. Value in solid ink, label muted. */}
+          <div className="mt-7 flex flex-wrap justify-start gap-2 md:mt-8 md:justify-center">
+            {study.stats.slice(0, 2).map((stat) => (
+              <span
                 key={stat.label}
-                className="flex-1 px-3 text-left first:pl-0 sm:px-8 sm:text-center sm:first:pl-8 md:text-center"
+                className="inline-flex items-center gap-1.5 rounded-md bg-foreground/[0.05] px-3 py-1.5 font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide"
               >
-                <span className="text-3xl font-medium sm:text-4xl">
-                  {stat.value}
-                </span>
-                <p className="mt-1 text-[0.6875rem] leading-snug text-muted-foreground sm:text-sm">
-                  {stat.label}
-                </p>
-              </div>
+                <span className="text-foreground">{stat.value}</span>
+                <span className="text-muted-foreground">{stat.label}</span>
+              </span>
             ))}
           </div>
 
@@ -266,17 +264,30 @@ export default async function CaseStudyPage({ params }: Props) {
         </div>
       </section>
 
+      {/* Mobile-only hairline: softens the otherwise-abrupt jump from the title
+          block straight into the body copy. Desktop has the sidebar + wider
+          rhythm for that separation, so it's only needed on narrow screens. */}
+      {!study.featured && (
+        <div aria-hidden className="px-6 md:hidden">
+          <div className="mx-auto max-w-5xl border-t border-border" />
+        </div>
+      )}
+
       {hasRichBody ? (
-        <Section className="pt-16 md:pt-20">
+        <Section className="pt-12 md:pt-20">
           <div className="mx-auto grid max-w-5xl gap-12 md:grid-cols-[minmax(0,1fr)_16rem] md:gap-16">
             <article>
-              {study.body!.map((block, i) => (
-                <BodyBlock key={i} block={block} />
-              ))}
+              {/* Skip image blocks — they'd render an empty "Placeholder" box,
+                  and we don't have real story imagery yet. */}
+              {study.body!
+                .filter((block) => block.type !== "image")
+                .map((block, i) => (
+                  <BodyBlock key={i} block={block} />
+                ))}
 
               <a
                 href={APP_URL}
-                className="mt-14 inline-block rounded-full bg-foreground px-6 py-3 text-sm text-background transition-opacity hover:opacity-90"
+                className="mt-14 inline-block rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
               >
                 Start building
               </a>
@@ -331,7 +342,7 @@ export default async function CaseStudyPage({ params }: Props) {
 
               <a
                 href={APP_URL}
-                className="mt-12 inline-block rounded-full bg-foreground px-6 py-3 text-sm text-background transition-opacity hover:opacity-90"
+                className="mt-12 inline-block rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
               >
                 Start building
               </a>

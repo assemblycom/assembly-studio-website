@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { APP_URL } from "@/lib/constants";
+import Link from "next/link";
+import { APP_URL, DEMO_URL } from "@/lib/constants";
 
 interface PlanFeatureGroup {
   label: string;
@@ -215,18 +216,19 @@ export function PricingPlans() {
 
   return (
     <div>
-      {/* Billing toggle */}
-      <div className="flex justify-center">
+      {/* Billing toggle — enlarged on mobile (bigger tap targets, matches the
+          left-aligned hero); settles back to the compact size on desktop. */}
+      <div className="flex justify-start md:justify-center">
         <div
           role="radiogroup"
           aria-label="Billing period"
-          className="inline-flex items-center gap-1 rounded-full border border-border p-1 text-sm"
+          className="inline-flex items-center gap-1 rounded-full border border-border p-1.5 text-base md:p-1 md:text-sm"
         >
           <button
             role="radio"
             aria-checked={billing === "monthly"}
             onClick={() => setBilling("monthly")}
-            className={`rounded-full px-4 py-1.5 transition-colors ${
+            className={`rounded-full px-5 py-2.5 transition-colors md:px-4 md:py-1.5 ${
               billing === "monthly"
                 ? "bg-foreground text-background"
                 : "text-muted-foreground hover:text-foreground"
@@ -238,7 +240,7 @@ export function PricingPlans() {
             role="radio"
             aria-checked={billing === "yearly"}
             onClick={() => setBilling("yearly")}
-            className={`flex items-center gap-2 rounded-full px-4 py-1.5 transition-colors ${
+            className={`flex items-center gap-2 rounded-full px-5 py-2.5 transition-colors md:px-4 md:py-1.5 ${
               billing === "yearly"
                 ? "bg-foreground text-background"
                 : "text-muted-foreground hover:text-foreground"
@@ -258,8 +260,8 @@ export function PricingPlans() {
         </div>
       </div>
 
-      {/* Plans */}
-      <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Plans — tucked closer under the toggle on mobile; roomier on desktop. */}
+      <div className="mt-5 grid gap-6 sm:grid-cols-2 md:mt-12 lg:grid-cols-4">
         {PLANS.map((plan) => {
           const price = billing === "yearly" ? plan.priceYearly : plan.priceMonthly;
           return (
@@ -294,6 +296,14 @@ export function PricingPlans() {
               >
                 {plan.cta}
               </a>
+              {/* Secondary CTA under each plan — a quiet "Book a demo" so it
+                  doesn't compete with the primary Get started action. */}
+              <Link
+                href={DEMO_URL}
+                className="mt-2 rounded-lg px-6 py-3 text-center text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                Book a demo
+              </Link>
 
               <div className="mt-8 flex flex-1 flex-col gap-6">
                 {plan.featureGroups.map((group) => (

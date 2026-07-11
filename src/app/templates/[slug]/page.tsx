@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Section } from "@/components/ui/section";
 import { TEMPLATES, getTemplateBySlug, type Template } from "@/lib/templates";
 import { TemplateGallery } from "@/components/templates/template-gallery";
 import { SIGNUP_URL } from "@/lib/constants";
@@ -74,7 +73,7 @@ function TemplateHeader({
           {template.industries.map((industry) => (
             <span
               key={industry}
-              className="rounded-md bg-muted px-2.5 py-1 text-xs text-muted-foreground"
+              className="rounded-md bg-muted px-2.5 py-1 font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-muted-foreground"
             >
               {industry}
             </span>
@@ -85,7 +84,7 @@ function TemplateHeader({
       <div className="mt-6">
         <a
           href={SIGNUP_URL}
-          className="inline-block rounded-full bg-foreground px-6 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
+          className="inline-block rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
         >
           Build off this template
         </a>
@@ -94,32 +93,15 @@ function TemplateHeader({
   );
 }
 
-function CheckIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 20 20" fill="none" aria-hidden>
-      <path
-        d="M5 10l3.5 3.5L15 7"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 export default async function TemplateDetailPage({ params }: Props) {
   const { slug } = await params;
   const template = getTemplateBySlug(slug);
   if (!template) notFound();
 
-  const related = TEMPLATES.filter(
-    (t) => t.category === template.category && t.slug !== template.slug,
-  ).slice(0, 3);
-
   return (
     <>
-      <section className="px-6 pt-24 md:pt-28">
+      {/* Bottom padding keeps the last content ("Perfect for") off the footer. */}
+      <section className="px-6 pb-24 pt-24 md:pb-28 md:pt-28">
         <div className="mx-auto max-w-6xl">
           {/* Mobile: title/CTA lead the page, above the gallery */}
           <TemplateHeader template={template} className="lg:hidden" />
@@ -133,32 +115,32 @@ export default async function TemplateDetailPage({ params }: Props) {
                 <h2 className="text-2xl font-medium tracking-tight md:text-3xl">
                   About this template
                 </h2>
-                <p className="mt-6 text-lg leading-[1.75] text-foreground/80">
+                <p className="mt-6 text-base leading-[1.75] text-foreground/80 md:text-[1.0625rem] md:leading-[1.85]">
                   {template.longDescription}
                 </p>
-                <p className="mt-6 text-lg leading-[1.75] text-foreground/80">
+                <p className="mt-5 text-base leading-[1.75] text-foreground/80 md:mt-6 md:text-[1.0625rem] md:leading-[1.85]">
                   Start from this template and describe what you want to change
                   in plain English — Assembly Studio adapts the layout, fields,
                   and flow to your firm, then publishes it to your client portal
                   in minutes. No code required.
                 </p>
 
-                <h3 className="mt-12 text-lg font-medium">
+                <h3 className="mt-12 text-lg font-medium md:mt-14">
                   What you can customize
                 </h3>
-                <ul className="mt-5 space-y-3.5">
+                <ul className="mt-5 space-y-3">
                   {CUSTOMIZABLE.map((item) => (
                     <li key={item} className="flex items-start gap-3">
-                      <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-foreground/40" />
-                      <span className="text-lg leading-[1.6] text-foreground/80">
+                      <span className="mt-[0.7rem] size-1.5 shrink-0 rounded-full bg-foreground/40" />
+                      <span className="text-base leading-[1.7] text-foreground/80 md:text-[1.0625rem]">
                         {item}
                       </span>
                     </li>
                   ))}
                 </ul>
 
-                <h3 className="mt-12 text-lg font-medium">Perfect for</h3>
-                <p className="mt-3 text-muted-foreground">
+                <h3 className="mt-12 text-lg font-medium md:mt-14">Perfect for</h3>
+                <p className="mt-3 text-base text-muted-foreground md:text-[1.0625rem]">
                   {template.industries && template.industries.length > 0
                     ? template.industries
                         .join(", ")
@@ -169,63 +151,18 @@ export default async function TemplateDetailPage({ params }: Props) {
               </div>
             </div>
 
-            {/* Right — sticky header + CTA + highlights (desktop). On mobile the
-                header renders above and only the highlights remain here. */}
+            {/* Right — sticky header + CTA (desktop). On mobile the header
+                renders above the gallery instead. */}
             <div className="lg:sticky lg:top-28 lg:self-start">
               <TemplateHeader
                 template={template}
                 className="hidden lg:block"
               />
-
-              {/* Key highlights */}
-              <div className="mt-12 lg:mt-10">
-                <h2 className="text-sm font-medium text-muted-foreground">
-                  Key highlights
-                </h2>
-                <ul className="mt-4 space-y-3">
-                  {template.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-3">
-                      <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-foreground/[0.06] text-foreground">
-                        <CheckIcon />
-                      </span>
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
             </div>
           </div>
 
         </div>
       </section>
-
-      {/* Related */}
-      {related.length > 0 && (
-        <Section className="mt-8">
-          <div className="mx-auto max-w-6xl">
-            <p className="text-sm text-muted-foreground">
-              More {template.category} templates
-            </p>
-            <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {related.map((t) => (
-                <Link
-                  key={t.slug}
-                  href={`/templates/${t.slug}`}
-                  className="group overflow-hidden rounded-xl border border-border transition-colors hover:border-foreground/20"
-                >
-                  <div className="aspect-[5/3] bg-muted" />
-                  <div className="p-4">
-                    <h3 className="text-sm font-medium">{t.title}</h3>
-                    <p className="mt-1.5 text-sm text-muted-foreground">
-                      {t.description}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </Section>
-      )}
     </>
   );
 }

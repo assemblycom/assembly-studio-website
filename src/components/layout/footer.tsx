@@ -20,25 +20,22 @@ const FOOTER_SECTIONS: { title: string; links: NavLink[] }[] = [
     links: [
       { label: "X", href: "https://x.com", external: true },
       { label: "LinkedIn", href: "https://linkedin.com", external: true },
+      { label: "Instagram", href: "https://instagram.com", external: true },
       { label: "YouTube", href: "https://youtube.com", external: true },
     ],
   },
 ];
 
-export function Footer({ rounded = false }: { rounded?: boolean }) {
-  // The landing page (rounded variant) is a dark sheet with a rounded bottom
-  // that lifts to reveal the green wordmark panel below; light contents. Every
-  // other page keeps the neutral muted footer with dark contents.
-  const heading = rounded ? "text-white" : "";
-  const muted = rounded ? "text-white/50" : "text-muted-foreground";
-  const linkHover = rounded ? "hover:text-white" : "hover:text-foreground";
+export function Footer({ reveal = false }: { reveal?: boolean }) {
+  // The landing page (reveal variant) is a dark sheet that lifts to reveal the
+  // wordmark panel below; light contents, square corners. Every other page keeps
+  // the neutral muted footer with dark contents.
+  const heading = reveal ? "text-white" : "";
+  const muted = reveal ? "text-white/50" : "text-muted-foreground";
+  const linkHover = reveal ? "hover:text-white" : "hover:text-foreground";
   return (
     <footer
-      className={
-        rounded
-          ? "rounded-b-[2.5rem] bg-[#101010] text-white"
-          : "bg-muted"
-      }
+      className={reveal ? "bg-[#101010] text-white" : "bg-background"}
     >
       {/* Footer links */}
       <div className="mx-auto max-w-7xl px-6 py-16">
@@ -50,7 +47,7 @@ export function Footer({ rounded = false }: { rounded?: boolean }) {
               alt="Assembly Studio"
               width={28}
               height={28}
-              className={rounded ? "invert" : ""}
+              className={reveal ? "invert" : ""}
             />
           </div>
 
