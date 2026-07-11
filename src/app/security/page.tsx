@@ -195,28 +195,21 @@ export default function SecurityPage() {
             {/* Right — headline, pull quote, attribution, CTA (centered so the
                 card doesn't leave a big empty band at the bottom) */}
             <div className="flex flex-col justify-center gap-5 px-2 py-6 md:px-10 md:py-12">
-              <p className="text-sm text-muted-foreground">Customer story</p>
+              <p className="font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-muted-foreground">
+                Customer story
+              </p>
               <h3 className="text-2xl font-medium tracking-tight">
                 {SPOTLIGHT.title}
               </h3>
               <blockquote className="border-l-2 border-border pl-4 leading-relaxed text-muted-foreground">
                 &ldquo;{SPOTLIGHT.quote}&rdquo;
               </blockquote>
-              <div className="flex items-center gap-3">
-                <Image
-                  src={SPOTLIGHT.image}
-                  alt={SPOTLIGHT.person.name}
-                  width={96}
-                  height={96}
-                  className="size-10 rounded-full object-cover"
-                />
-                <div>
-                  <div className="text-sm font-medium">
-                    {SPOTLIGHT.person.name}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {SPOTLIGHT.person.role}
-                  </div>
+              {/* No avatar here — the large photo on the left is the same
+                  person, so a small circular repeat would be redundant. */}
+              <div>
+                <div className="text-sm">{SPOTLIGHT.person.name}</div>
+                <div className="text-sm text-muted-foreground">
+                  {SPOTLIGHT.person.role}
                 </div>
               </div>
               <a
