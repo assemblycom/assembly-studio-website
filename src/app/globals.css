@@ -265,6 +265,14 @@ body {
   color: var(--foreground);
 }
 
+/* In dark mode the page ground is near-black; the muted overscroll canvas above
+   read as a gray flash when rubber-banding at the top. Match it to the page
+   background so the overscroll blends. (Light keeps --muted for the iOS note.) */
+[data-theme="dark"],
+[data-theme="dark"] body {
+  background-color: var(--background);
+}
+
 /* Shimmering outline for the hero input. A light sweep travels across a
    1.5px border ring (drawn with a masked ::before), fading in when the box is
    focused. Kept monochrome to stay on the black-and-white brand — reads as a
