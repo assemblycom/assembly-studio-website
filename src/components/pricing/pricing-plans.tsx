@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { APP_URL, DEMO_URL } from "@/lib/constants";
+import { APP_URL } from "@/lib/constants";
 
 interface PlanFeatureGroup {
   label: string;
@@ -87,7 +86,7 @@ const PLANS: Plan[] = [
     name: "Professional",
     priceMonthly: 99,
     priceYearly: 82,
-    description: "For growing teams serving more clients.",
+    description: "For teams serving more clients.",
     featureGroups: [
       {
         label: "Fundamentals",
@@ -118,7 +117,7 @@ const PLANS: Plan[] = [
     name: "Advanced",
     priceMonthly: 299,
     priceYearly: 249,
-    description: "For scaling firms with compliance needs.",
+    description: "For compliance-focused firms.",
     featureGroups: [
       {
         label: "Fundamentals",
@@ -222,7 +221,7 @@ export function PricingPlans() {
         <div
           role="radiogroup"
           aria-label="Billing period"
-          className="flex w-full items-center gap-1 rounded-full border border-border bg-muted p-1.5 text-base md:inline-flex md:w-auto md:p-1 md:text-sm"
+          className="flex w-full items-center gap-1 rounded-full border border-border p-1.5 text-base md:inline-flex md:w-auto md:p-1 md:text-sm"
         >
           <button
             role="radio"
@@ -247,15 +246,6 @@ export function PricingPlans() {
             }`}
           >
             Yearly
-            <span
-              className={`rounded-full px-2 py-0.5 text-xs ${
-                billing === "yearly"
-                  ? "bg-background/20 text-background"
-                  : "bg-accent/10 text-accent"
-              }`}
-            >
-              Save 17%
-            </span>
           </button>
         </div>
       </div>
@@ -264,48 +254,42 @@ export function PricingPlans() {
       <div className="mt-5 grid gap-6 sm:grid-cols-2 md:mt-12 lg:grid-cols-4">
         {PLANS.map((plan) => {
           const price = billing === "yearly" ? plan.priceYearly : plan.priceMonthly;
+          // Original structure kept: filled header panel (price pinned to the
+          // bottom) → detached button → features. The only addition is an
+          // outline around the WHOLE card (outer wrapper); the header panel no
+          // longer carries its own border so the outline reads once, around all.
           return (
             <div
               key={plan.name}
-              className={`flex flex-col rounded-xl border bg-muted p-8 ${
-                plan.highlighted ? "border-foreground/40" : "border-border"
-              }`}
+              className="flex flex-col rounded-2xl border border-border p-3"
             >
-              <h3 className="text-lg font-medium">{plan.name}</h3>
-              <p className="mt-1 min-h-[40px] text-sm text-muted-foreground">
-                {plan.description}
-              </p>
-
-              <div className="mt-6 flex items-baseline">
-                <AnimatedPrice value={price} />
-                {plan.priceMonthly > 0 && (
-                  <span className="ml-1 text-muted-foreground">/mo</span>
-                )}
+              {/* Filled header panel — uniform light surface across all plans. */}
+              <div className="flex min-h-[200px] flex-col justify-between rounded-xl bg-muted p-5">
+                <div>
+                  <h3 className="text-lg font-medium">{plan.name}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {plan.description}
+                  </p>
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-1.5">
+                    <AnimatedPrice value={price} />
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {planSubtitle(plan, billing)}
+                  </p>
+                </div>
               </div>
-              <p className="mt-1 min-h-[16px] text-xs text-muted-foreground">
-                {planSubtitle(plan, billing)}
-              </p>
 
+              {/* Detached CTA — our standard rounded-lg button. */}
               <a
                 href={APP_URL}
-                className={`mt-6 rounded-lg px-6 py-2.5 text-center text-sm transition-[background-color,opacity] ${
-                  plan.highlighted
-                    ? "bg-foreground text-background hover:opacity-90"
-                    : "border border-border bg-foreground/[0.06] text-foreground hover:bg-foreground/10"
-                }`}
+                className="mt-3 rounded-lg bg-foreground px-6 py-2.5 text-center text-sm text-background transition-opacity hover:opacity-90"
               >
                 {plan.cta}
               </a>
-              {/* Secondary CTA under each plan — a quiet "Book a demo" so it
-                  doesn't compete with the primary Get started action. */}
-              <Link
-                href={DEMO_URL}
-                className="mt-2 rounded-lg px-6 py-2.5 text-center text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                Book a demo
-              </Link>
 
-              <div className="mt-8 flex flex-1 flex-col gap-6">
+              <div className="mt-6 flex flex-1 flex-col gap-6 px-2 pb-2">
                 {plan.featureGroups.map((group) => (
                   <div key={group.label}>
                     <p className="text-sm font-medium">{group.label}</p>

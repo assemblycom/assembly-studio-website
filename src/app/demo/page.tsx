@@ -40,7 +40,7 @@ export default function DemoPage() {
       <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-2 md:gap-16 lg:gap-24">
         {/* Left — value proposition */}
         <div>
-          <h1 className="max-w-md text-4xl font-medium tracking-tight md:text-5xl">
+          <h1 className="type-display max-w-md">
             See Assembly Studio in action
           </h1>
           <p className="mt-6 max-w-md text-lg text-muted-foreground">

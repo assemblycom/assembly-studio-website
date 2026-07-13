@@ -74,7 +74,7 @@ function MetaCard({ study }: { study: CaseStudy }) {
       {/* Facts panel — logo, name, and the at-a-glance rows. A subtle card tint
           (--card) lifts it off the page: white in light, a soft near-black in
           dark so the panel reads as its own surface, not a bordered void. */}
-      <div className="overflow-hidden rounded-lg border border-border bg-card">
+      <div className="cursor-default overflow-hidden rounded-lg border border-border bg-card">
         <div className="flex flex-col items-center px-6 pb-6 pt-8">
           <div className="flex size-24 items-center justify-center rounded-full bg-background ring-1 ring-border">
             <span className="text-2xl font-medium tracking-tight">
@@ -116,7 +116,7 @@ function BodyBlock({ block }: { block: ContentBlock }) {
   switch (block.type) {
     case "heading":
       return (
-        <h2 className="mt-14 text-2xl font-medium tracking-tight first:mt-0 md:mt-20 md:text-3xl">
+        <h2 className="type-h3 mt-14 first:mt-0 md:mt-20">
           {block.text}
         </h2>
       );
@@ -186,7 +186,7 @@ function RelatedCard({ study }: { study: CaseStudy }) {
         </p>
         <IconArrow className="size-4 shrink-0 text-muted-foreground transition-[transform,color] duration-200 group-hover:translate-x-0.5 group-hover:text-foreground" />
       </div>
-      <h3 className="mt-8 text-2xl font-medium tracking-tight md:text-3xl">
+      <h3 className="type-h3 mt-8">
         {study.company}
       </h3>
       <p className="mt-3 text-[0.9375rem] leading-relaxed text-muted-foreground">
@@ -234,7 +234,7 @@ export default async function CaseStudyPage({ params }: Props) {
             <span className="text-foreground">{study.company}</span>
           </nav>
 
-          <h1 className="mt-7 max-w-3xl text-balance text-4xl font-medium leading-[1.1] tracking-tight md:mx-auto md:text-5xl">
+          <h1 className="type-display mt-7 max-w-3xl text-balance md:mx-auto">
             {study.headline}
           </h1>
 
@@ -301,21 +301,21 @@ export default async function CaseStudyPage({ params }: Props) {
         <>
           <Section>
             <div className="mx-auto max-w-2xl">
-              <h2 className="text-2xl font-medium tracking-tight md:text-3xl">
+              <h2 className="type-h3">
                 The challenge
               </h2>
               <p className="mt-6 text-lg leading-[1.75] text-muted-foreground">
                 {study.challenge}
               </p>
 
-              <h2 className="mt-16 text-2xl font-medium tracking-tight md:text-3xl">
+              <h2 className="type-h3 mt-16">
                 The solution
               </h2>
               <p className="mt-6 text-lg leading-[1.75] text-muted-foreground">
                 {study.solution}
               </p>
 
-              <h2 className="mt-16 text-2xl font-medium tracking-tight md:text-3xl">
+              <h2 className="type-h3 mt-16">
                 Results
               </h2>
               <ul className="mt-6 space-y-4">
@@ -364,7 +364,7 @@ export default async function CaseStudyPage({ params }: Props) {
                 >
                   Read next
                 </p>
-                <h2 className="mt-2 text-3xl font-medium tracking-tight md:text-4xl">
+                <h2 className="type-h2 mt-2">
                   More customer stories
                 </h2>
               </div>

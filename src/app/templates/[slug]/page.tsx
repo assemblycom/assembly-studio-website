@@ -61,7 +61,7 @@ function TemplateHeader({
         <span className="text-foreground">{template.category}</span>
       </nav>
 
-      <h1 className="mt-5 text-3xl font-medium tracking-tight md:text-4xl">
+      <h1 className="type-h2 mt-5">
         {template.title}
       </h1>
       <p className="mt-3 text-lg text-muted-foreground">
@@ -112,7 +112,7 @@ export default async function TemplateDetailPage({ params }: Props) {
               <TemplateGallery title={template.title} />
 
               <div className="mt-14 lg:mt-20">
-                <h2 className="text-2xl font-medium tracking-tight md:text-3xl">
+                <h2 className="type-h3">
                   About this template
                 </h2>
                 <p className="mt-6 text-base leading-[1.75] text-foreground/80 md:text-[1.0625rem] md:leading-[1.85]">

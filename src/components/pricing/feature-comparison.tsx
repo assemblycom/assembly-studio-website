@@ -204,7 +204,7 @@ export function FeatureComparison() {
 
   return (
     <div>
-      <h2 className="text-2xl font-medium tracking-tight md:text-3xl">
+      <h2 className="type-h3">
         Compare plans
       </h2>
 

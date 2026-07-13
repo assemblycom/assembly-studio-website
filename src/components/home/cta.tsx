@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { V66Composer } from "./hero-v66";
 import { useTheme } from "@/components/theme/theme-provider";
 
@@ -23,9 +23,42 @@ const BUILD_EXAMPLES = [
   "a project tracker for every client milestone",
 ];
 
-function useCyclingPrompt() {
+function useCyclingPrompt(
+  inputRef: React.RefObject<HTMLTextAreaElement | null>,
+) {
   const [prompt, setPrompt] = useState(PROMPT_PREFIX);
+  // Once the visitor focuses or types, the demo typewriter must stop —
+  // otherwise its ticks keep overwriting what they type. engagedRef is the
+  // synchronous guard (blocks an in-flight tick); userEngaged tears the
+  // animation effect down.
+  const [userEngaged, setUserEngaged] = useState(false);
+  const engagedRef = useRef(false);
+  const clearedRef = useRef(false);
   useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    const engage = () => {
+      engagedRef.current = true;
+      setUserEngaged(true);
+    };
+    // On first focus, wipe the leftover demo text so the visitor types into a
+    // clean box — but only if it's still the animation's text.
+    const onFocus = () => {
+      if (!clearedRef.current) {
+        clearedRef.current = true;
+        if (el.value.startsWith(PROMPT_PREFIX)) setPrompt("");
+      }
+      engage();
+    };
+    el.addEventListener("focus", onFocus);
+    el.addEventListener("input", engage);
+    return () => {
+      el.removeEventListener("focus", onFocus);
+      el.removeEventListener("input", engage);
+    };
+  }, [inputRef]);
+  useEffect(() => {
+    if (userEngaged) return;
     const reduce =
       typeof window !== "undefined" &&
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -38,6 +71,7 @@ function useCyclingPrompt() {
     let deleting = false;
     let timer: ReturnType<typeof setTimeout>;
     const tick = () => {
+      if (engagedRef.current) return;
       // Timers are throttled/paused while the tab is hidden; wait and retry so
       // the loop resumes cleanly on return instead of stalling mid-word.
       if (typeof document !== "undefined" && document.hidden) {
@@ -66,19 +100,22 @@ function useCyclingPrompt() {
     };
     timer = setTimeout(tick, 600);
     return () => clearTimeout(timer);
-  }, []);
+  }, [userEngaged, inputRef]);
   return [prompt, setPrompt] as const;
 }
 
 export function CTA() {
   // Dark sheet flowing into the black footer below; the green wordmark panel is
   // revealed beneath (square top, footer rounds the bottom).
-  const [prompt, setPrompt] = useCyclingPrompt();
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [prompt, setPrompt] = useCyclingPrompt(inputRef);
   const { theme } = useTheme();
   const dark = theme === "dark";
   return (
-    <section className={`px-6 py-20 md:py-28 ${dark ? "bg-background" : "bg-[#fcfcfd]"}`}>
-      <div className="mx-auto max-w-3xl text-center">
+    <section className={`px-6 py-14 md:py-20 ${dark ? "bg-background" : "bg-[#fcfcfd]"}`}>
+      {/* Extra bottom room so the Prompt Ideas menu (opens downward, up to
+          20rem tall) never runs into the footer below. */}
+      <div className="mx-auto max-w-3xl pb-72 pt-16 text-center md:pt-24">
         <p className={`type-eyebrow ${dark ? "text-white/60" : "text-neutral-500"}`}>AI App Builder</p>
         <h2 className={`type-h2 mt-3 ${dark ? "text-white" : "text-neutral-900"}`}>
           Ready to build?
@@ -87,6 +124,7 @@ export function CTA() {
             theme-aware surface — so the top and bottom boxes read identically. */}
         <div className="mx-auto mt-10 max-w-2xl text-left">
           <V66Composer
+            textareaRef={inputRef}
             glow={false}
             tone={theme}
             compact

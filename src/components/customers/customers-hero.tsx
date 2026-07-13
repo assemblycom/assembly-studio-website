@@ -25,7 +25,7 @@ export function CustomersHero() {
         <link key={src} rel="preload" as="image" href={src} />
       ))}
       <div className="mx-auto max-w-3xl px-6">
-        <h1 className="text-balance text-4xl font-medium tracking-tight md:text-5xl">
+        <h1 className="type-display text-balance">
           {/* Keep the hyphenated compound intact so it never wraps mid-word to a
               lonely "-enabled" line on narrow screens. */}
           Made for <span className="whitespace-nowrap">tech-enabled</span>{" "}

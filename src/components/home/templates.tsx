@@ -10,7 +10,7 @@ export function Templates() {
     <Section id="templates">
       <div className="flex items-end justify-between">
         <div>
-          <h2 className="text-3xl font-medium tracking-tight md:text-4xl">
+          <h2 className="type-h2">
             Start with a template
           </h2>
           <p className="mt-4 max-w-2xl text-muted-foreground">

@@ -138,11 +138,11 @@ export function TemplatesBrowser({ templates }: Props) {
           {filtered.map((template) => (
             <article
               key={template.slug}
-              className="group relative overflow-hidden rounded-xl border border-border transition-colors hover:border-foreground/20"
+              className="group relative rounded-xl border border-border p-2 transition-colors hover:border-foreground/20"
             >
               <Link href={`/templates/${template.slug}`} className="block">
                 {template.image ? (
-                  <div className="relative aspect-[5/3] overflow-hidden bg-muted">
+                  <div className="relative aspect-[5/3] overflow-hidden rounded-lg bg-muted">
                     <Image
                       src={template.image}
                       alt=""
@@ -152,9 +152,9 @@ export function TemplatesBrowser({ templates }: Props) {
                     />
                   </div>
                 ) : (
-                  <div className="aspect-[5/3] bg-muted" />
+                  <div className="aspect-[5/3] rounded-lg bg-muted" />
                 )}
-                <div className="p-4">
+                <div className="p-3">
                   <h3 className="text-balance text-sm font-medium">{template.title}</h3>
                   <p className="mt-1.5 text-pretty text-sm text-muted-foreground">
                     {template.description}

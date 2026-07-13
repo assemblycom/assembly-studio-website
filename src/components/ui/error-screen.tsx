@@ -13,7 +13,7 @@ interface ErrorScreenProps {
 export function ErrorScreen({ title, description, children }: ErrorScreenProps) {
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 py-24 text-center">
-      <h1 className="max-w-xl text-3xl font-medium tracking-tight md:text-4xl">
+      <h1 className="type-h2 max-w-xl">
         {title}
       </h1>
       <p className="mt-5 max-w-md text-base leading-relaxed text-muted-foreground">

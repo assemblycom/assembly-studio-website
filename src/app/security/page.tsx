@@ -14,12 +14,20 @@ const SPOTLIGHT = {
   stat: { value: "1,100+", label: "Hotel partners onboarded" },
   title:
     "How Capital One Luxury Travel balanced 'build vs. buy' with Assembly",
-  quote:
-    "Before Assembly, we managed hotel partners through spreadsheets and email chains — it just didn't scale.",
-  person: {
-    name: "Phillip LaRue",
-    role: "Sr. Director of Luxury Travel at Capital One",
-  },
+};
+
+// Second story — a security/compliance-led case study shown as a text-only
+// (no photo) contrast card beside the Capital One spotlight. Facts drawn from
+// the Metta Health case study (see src/lib/case-studies.ts).
+const SPOTLIGHT_SECURITY = {
+  company: "Metta Health",
+  href: "/customers/metta-health",
+  eyebrow: "Healthcare · HIPAA-compliant",
+  title:
+    "How Metta Health scales HIPAA-compliant patient authorizations with Assembly",
+  description:
+    "Sensitive patient authorization forms at scale — white-labeled, so patients trust the sender.",
+  stat: { value: "50+", label: "Authorization templates managed" },
 };
 
 export const metadata: Metadata = {
@@ -84,7 +92,7 @@ export default function SecurityPage() {
           card); the plain light nav sits above it on the white page. */}
       <section className="px-6 pb-24 pt-24 text-center md:pb-36 md:pt-32">
         <div className="mx-auto max-w-3xl">
-          <h1 className="text-balance text-4xl font-medium tracking-tight md:text-5xl">
+          <h1 className="type-display text-balance">
             Don&apos;t let AI generate your{" "}
             <br className="hidden md:block" />
             software security
@@ -117,7 +125,7 @@ export default function SecurityPage() {
         <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-2 md:gap-16">
           {/* Left — heading stays in view while the list scrolls */}
           <div className="md:sticky md:top-28 md:self-start">
-            <h2 className="text-3xl font-medium tracking-tight md:text-4xl">
+            <h2 className="type-h2">
               What makes Assembly Studio different
             </h2>
             <p className="mt-6 max-w-md text-muted-foreground">
@@ -131,9 +139,9 @@ export default function SecurityPage() {
             {DIFFERENTIATORS.map((card, i) => (
               <li
                 key={card.title}
-                className="grid grid-cols-[auto_1fr] gap-x-6 border-t border-border py-8 first:border-t-0 first:pt-0"
+                className="border-t border-border py-8 first:border-t-0 first:pt-0 md:grid md:grid-cols-[auto_1fr] md:gap-x-6"
               >
-                <span className="pt-0.5 font-mono text-sm tabular-nums tracking-widest text-muted-foreground">
+                <span className="mb-3 block font-mono text-sm tabular-nums tracking-widest text-muted-foreground md:mb-0 md:pt-0.5">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <div>
@@ -151,7 +159,7 @@ export default function SecurityPage() {
       {/* Comparison — capability benchmark across AI app builders */}
       <Section className="pt-16 md:pt-24">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-2xl font-medium tracking-tight md:text-3xl">
+          <h2 className="type-h3">
             Assembly vs. other AI app builders
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
@@ -165,66 +173,99 @@ export default function SecurityPage() {
       {/* Social proof — customer spotlight */}
       <Section className="pt-0">
         <div className="mx-auto max-w-6xl">
-          <h2 className="max-w-2xl text-3xl font-medium tracking-tight md:text-4xl">
+          <h2 className="type-h2 max-w-2xl">
             See how enterprises trust Assembly at scale
           </h2>
 
-          <div className="mt-10 grid gap-4 overflow-hidden rounded-3xl border border-border p-3 md:grid-cols-2 md:p-4">
-            {/* Left — photo with a stat overlay */}
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl md:aspect-auto">
-              <Image
-                src={SPOTLIGHT.image}
-                alt={SPOTLIGHT.company}
-                fill
-                sizes="(min-width: 768px) 45vw, 100vw"
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
-              {/* Always white — this sits on the photo's dark gradient, not the
-                  page surface, so it must not follow the (dark) page theme. */}
-              <div className="absolute bottom-6 left-6 text-white">
-                <p className="text-sm text-white/80">
-                  {SPOTLIGHT.stat.label}
-                </p>
-                <p className="text-4xl font-medium tracking-tight">
-                  {SPOTLIGHT.stat.value}
-                </p>
+          {/* Three-panel band, à la Paraform: the Capital One story reads as
+              text (left) + photo (middle) inside one card, and the Metta Health
+              story is the dark contrast card (right). Each card is its own link. */}
+          <div className="mt-10 grid items-stretch gap-4 md:grid-cols-3">
+            {/* Card 1 — Capital One: text + photo, spanning two columns. */}
+            <a
+              href={SPOTLIGHT.href}
+              className="group grid overflow-hidden rounded-3xl border border-border md:col-span-2 md:grid-cols-2"
+            >
+              {/* Text (left on desktop, below the photo on mobile). */}
+              <div className="order-2 flex flex-col justify-between p-6 md:order-1 md:p-8">
+                <div>
+                  <p className="font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-muted-foreground">
+                    Customer story
+                  </p>
+                  {/* font-normal — on this site 500 loads PP Mori SemiBold,
+                      which reads bold inside these cards. Sized a step below
+                      the section scale so the cards read calm, not shouty. */}
+                  <h3 className="mt-4 max-w-sm text-xl font-normal leading-snug">
+                    {SPOTLIGHT.title}
+                  </h3>
+                </div>
+                <span className="mt-10 inline-flex w-fit items-center gap-2 text-sm">
+                  Read the story
+                  <span
+                    aria-hidden
+                    className="transition-transform group-hover:translate-x-0.5"
+                  >
+                    →
+                  </span>
+                </span>
               </div>
-            </div>
-
-            {/* Right — headline, pull quote, attribution, CTA (centered so the
-                card doesn't leave a big empty band at the bottom) */}
-            <div className="flex flex-col justify-center gap-5 px-2 py-6 md:px-10 md:py-12">
-              <p className="font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-muted-foreground">
-                Customer story
-              </p>
-              <h3 className="text-2xl font-medium tracking-tight">
-                {SPOTLIGHT.title}
-              </h3>
-              <blockquote className="border-l-2 border-border pl-4 leading-relaxed text-muted-foreground">
-                &ldquo;{SPOTLIGHT.quote}&rdquo;
-              </blockquote>
-              {/* No avatar here — the large photo on the left is the same
-                  person, so a small circular repeat would be redundant. */}
-              <div>
-                <div className="text-sm">{SPOTLIGHT.person.name}</div>
-                <div className="text-sm text-muted-foreground">
-                  {SPOTLIGHT.person.role}
+              {/* Photo (middle overall) with the stat overlay. Fills the card's
+                  height on desktop; a fixed aspect on mobile. */}
+              <div className="relative order-1 aspect-[4/3] overflow-hidden md:order-2 md:aspect-auto">
+                <Image
+                  src={SPOTLIGHT.image}
+                  alt={SPOTLIGHT.company}
+                  fill
+                  sizes="(min-width: 768px) 33vw, 100vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
+                {/* Always white — this sits on the photo's dark gradient, not the
+                    page surface, so it must not follow the (dark) page theme. */}
+                <div className="absolute bottom-6 left-6 text-white">
+                  <p className="text-sm text-white/80">{SPOTLIGHT.stat.label}</p>
+                  <p className="text-4xl font-normal tracking-tight">
+                    {SPOTLIGHT.stat.value}
+                  </p>
                 </div>
               </div>
-              <a
-                href={SPOTLIGHT.href}
-                className="group mt-1 inline-flex w-fit items-center gap-2 rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
-              >
-                Read the story
-                <span
-                  aria-hidden
-                  className="transition-transform group-hover:translate-x-0.5"
-                >
-                  →
+            </a>
+
+            {/* Card 2 — security/compliance story, no photo. Inverted surface
+                (bg-foreground) makes it the high-contrast counterpart. */}
+            <a
+              href={SPOTLIGHT_SECURITY.href}
+              className="group flex flex-col justify-between rounded-3xl bg-foreground p-6 text-background md:p-8"
+            >
+              <div>
+                <p className="font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-background/60">
+                  {SPOTLIGHT_SECURITY.eyebrow}
+                </p>
+                <h3 className="mt-4 max-w-sm text-xl font-normal leading-snug">
+                  {SPOTLIGHT_SECURITY.title}
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-background/60">
+                  {SPOTLIGHT_SECURITY.description}
+                </p>
+              </div>
+              <div className="mt-8">
+                <p className="text-3xl font-normal tracking-tight">
+                  {SPOTLIGHT_SECURITY.stat.value}
+                </p>
+                <p className="mt-1 text-sm text-background/60">
+                  {SPOTLIGHT_SECURITY.stat.label}
+                </p>
+                <span className="mt-6 inline-flex w-fit items-center gap-2 text-sm">
+                  Read the story
+                  <span
+                    aria-hidden
+                    className="transition-transform group-hover:translate-x-0.5"
+                  >
+                    →
+                  </span>
                 </span>
-              </a>
-            </div>
+              </div>
+            </a>
           </div>
         </div>
       </Section>
@@ -232,10 +273,11 @@ export default function SecurityPage() {
       {/* Security FAQ */}
       <FAQ heading="Security FAQ" items={SECURITY_FAQS} />
 
-      {/* Final CTA */}
-      <Section className="pt-0">
-        <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-medium tracking-tight md:text-4xl">
+      {/* Final CTA — generous padding to match the templates page CTA. */}
+      <section className="px-6 py-14 md:py-20">
+        <div className="mx-auto flex max-w-6xl items-center justify-center px-6 py-16 md:py-24">
+          <div className="text-center">
+          <h2 className="type-h2 mx-auto max-w-2xl text-balance">
             Build AI apps on a trusted platform
           </h2>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -249,13 +291,14 @@ export default function SecurityPage() {
               href={TRUST_CENTER_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-border bg-background px-5 py-2.5 text-sm text-foreground transition-colors hover:bg-muted"
+              className="rounded-lg border border-foreground/25 bg-background px-5 py-2.5 text-sm text-foreground transition-colors hover:bg-muted"
             >
               Explore Trust Center
             </a>
           </div>
+          </div>
         </div>
-      </Section>
+      </section>
     </>
   );
 }

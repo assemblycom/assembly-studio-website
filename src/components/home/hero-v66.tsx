@@ -157,7 +157,7 @@ function V66Nav() {
 // The prompt box. Kept top-level so its menu state doesn't remount. `tone`
 // flips the text + control colors so the same box can sit on a light panel or
 // on a dark/glass hero.
-export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 ring-black/[0.06]", surfaceRadiusClass = "rounded-[22px]", minHeightClass = "min-h-[188px]", tone = "light", typewriter = false, mutedControls = false, submitLabel, submitDark = false, accent = LIME, hidePlus = false, hideHowTo = false, howToLabel = "How it works", howToSide = "left", promptPicker = false, promptPickerLabel = "Select a prompt", promptPickerSide = "left", promptItems, plusItems, compact = false, minimalControls = false, plusAsAttach = false, footerLeading, showSubmit = true, textDimmed = false, value: valueProp, onValueChange, textareaRef }: { glow?: boolean; surfaceClassName?: string; surfaceRadiusClass?: string; minHeightClass?: string; tone?: "light" | "dark"; typewriter?: boolean; mutedControls?: boolean; submitLabel?: string; submitDark?: boolean; accent?: string; hidePlus?: boolean; hideHowTo?: boolean; howToLabel?: string; howToSide?: "left" | "right"; promptPicker?: boolean; promptPickerLabel?: string; promptPickerSide?: "left" | "right"; promptItems?: string[]; plusItems?: { label: string; icon: "attach" | "transfer" }[]; compact?: boolean; minimalControls?: boolean; plusAsAttach?: boolean; footerLeading?: React.ReactNode; showSubmit?: boolean; textDimmed?: boolean; value?: string; onValueChange?: (v: string) => void; textareaRef?: React.Ref<HTMLTextAreaElement> } = {}) {
+export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 ring-black/[0.06]", surfaceRadiusClass = "rounded-[22px]", minHeightClass = "min-h-[188px]", tone = "light", typewriter = false, mutedControls = false, submitLabel, submitDark = false, accent = LIME, hidePlus = false, hideHowTo = false, howToLabel = "How it works", howToSide = "left", promptPicker = false, promptPickerLabel = "Select a prompt", promptPickerSide = "left", promptPickerUp = false, promptItems, plusItems, compact = false, minimalControls = false, plusAsAttach = false, footerLeading, showSubmit = true, textDimmed = false, value: valueProp, onValueChange, textareaRef }: { glow?: boolean; surfaceClassName?: string; surfaceRadiusClass?: string; minHeightClass?: string; tone?: "light" | "dark"; typewriter?: boolean; mutedControls?: boolean; submitLabel?: string; submitDark?: boolean; accent?: string; hidePlus?: boolean; hideHowTo?: boolean; howToLabel?: string; howToSide?: "left" | "right"; promptPicker?: boolean; promptPickerLabel?: string; promptPickerSide?: "left" | "right"; promptPickerUp?: boolean; promptItems?: string[]; plusItems?: { label: string; icon: "attach" | "transfer" }[]; compact?: boolean; minimalControls?: boolean; plusAsAttach?: boolean; footerLeading?: React.ReactNode; showSubmit?: boolean; textDimmed?: boolean; value?: string; onValueChange?: (v: string) => void; textareaRef?: React.Ref<HTMLTextAreaElement> } = {}) {
   // Prompt-picker entries. Default: the shared "Build a …" examples. A hero can
   // pass `promptItems` to show its own list inserted verbatim (e.g. bare app
   // names, no "Build" prefix).
@@ -290,7 +290,19 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
   // The starter-prompt picker ("Ideas"). Rendered on the left or right of the
   // footer per `promptPickerSide`; when on the right it opens right-aligned so
   // the menu doesn't spill past the composer edge.
-  const pickerAlign = promptPickerSide === "right" ? "right-0 origin-top-right" : "left-0 origin-top-left";
+  // Vertical open direction: downward by default, upward when the composer sits
+  // near the page bottom (e.g. the footer CTA) so the menu never collides with
+  // whatever follows.
+  const pickerSideCls = promptPickerSide === "right" ? "right-0" : "left-0";
+  const pickerOrigin = promptPickerUp
+    ? promptPickerSide === "right"
+      ? "origin-bottom-right"
+      : "origin-bottom-left"
+    : promptPickerSide === "right"
+      ? "origin-top-right"
+      : "origin-top-left";
+  const pickerVert = promptPickerUp ? "bottom-full mb-2" : "top-full mt-2";
+  const pickerAlign = `${pickerSideCls} ${pickerOrigin}`;
   const promptPickerNode = promptPicker ? (
     <div ref={promptRef} className="relative">
       <button
@@ -306,7 +318,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
       {promptOpen && (
         <div
           role="menu"
-          className={`absolute ${pickerAlign} top-full z-40 mt-2 max-h-[min(60vh,20rem)] w-[min(19rem,calc(100vw-2.5rem))] animate-menu-in overflow-y-auto overflow-x-hidden overscroll-contain rounded-2xl border p-1.5 shadow-[0_28px_64px_-24px_rgba(0,0,0,0.85),inset_0_1px_0_rgba(255,255,255,0.07)] ${menuSurfaceCls}`}
+          className={`absolute ${pickerAlign} ${pickerVert} z-40 max-h-[min(60vh,20rem)] w-[min(19rem,calc(100vw-2.5rem))] animate-menu-in overflow-y-auto overflow-x-hidden overscroll-contain rounded-2xl border p-1.5 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.3)] ${menuSurfaceCls}`}
         >
           {promptEntries.map((entry) => (
             <button
