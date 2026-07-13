@@ -5,6 +5,10 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Template } from "@/lib/templates";
 import { TEMPLATE_CATEGORIES } from "@/lib/templates";
+import {
+  TemplateModalBrowser,
+  type ModalTemplate,
+} from "@/components/templates/template-modal";
 
 interface Props {
   templates: Template[];
@@ -62,6 +66,30 @@ export function TemplatesBrowser({ templates }: Props) {
     ? categories
     : categories.slice(0, COLLAPSED_CHIP_COUNT);
   const hiddenCatCount = categories.length - COLLAPSED_CHIP_COUNT;
+
+  // Detail modal — plain client state with a shallow pushState so the URL is
+  // shareable and the back button closes it (see TemplateModalBrowser for why
+  // this isn't an intercepting route). Modifier-clicks fall through to the
+  // Link so open-in-new-tab still gets the full page.
+  const [modalSlug, setModalSlug] = useState<string | null>(null);
+  const modalTemplates = useMemo<ModalTemplate[]>(
+    () =>
+      templates.map((t) => ({
+        slug: t.slug,
+        title: t.title,
+        description: t.description,
+        longDescription: t.longDescription,
+        category: t.category,
+        industries: t.industries,
+      })),
+    [templates],
+  );
+  const openModal = (e: React.MouseEvent, slug: string) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    window.history.pushState(null, "", `/templates/${slug}`);
+    setModalSlug(slug);
+  };
 
   return (
     <div>
@@ -140,7 +168,11 @@ export function TemplatesBrowser({ templates }: Props) {
               key={template.slug}
               className="group relative rounded-xl border border-border p-2 transition-colors hover:border-foreground/20"
             >
-              <Link href={`/templates/${template.slug}`} className="block">
+              <Link
+                href={`/templates/${template.slug}`}
+                className="block"
+                onClick={(e) => openModal(e, template.slug)}
+              >
                 {template.image ? (
                   <div className="relative aspect-[5/3] overflow-hidden rounded-lg bg-muted">
                     <Image
@@ -177,6 +209,14 @@ export function TemplatesBrowser({ templates }: Props) {
                 : "No templates in the selected categories yet."}
           </p>
         </div>
+      )}
+
+      {modalSlug && (
+        <TemplateModalBrowser
+          templates={modalTemplates}
+          initialSlug={modalSlug}
+          onClose={() => setModalSlug(null)}
+        />
       )}
     </div>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { TemplateGallery } from "@/components/templates/template-gallery";
 import { SIGNUP_URL } from "@/lib/constants";
 
@@ -29,19 +28,22 @@ const CUSTOMIZABLE = [
  * backdrop; the detail renders in a large sheet with the full detail page's
  * composition (gallery + about scroll left, title/CTA sidebar sticky right).
  *
- * Prev/next flip through templates in CLIENT STATE, syncing the URL with
- * history.replaceState — deliberately not router navigation, which would
- * re-intercept the route and stack (.) markers. Close is one router.back()
- * to the grid; expand is a plain <a> (full document load → full page).
+ * The modal is plain client state opened by the grid (the grid pushState-es
+ * the template URL when it opens this) — deliberately NOT a Next intercepting
+ * route, whose dev matcher corrupts itself on hot reloads and stacks (.)
+ * markers. Prev/next flip templates in state and sync the URL with
+ * replaceState; close is one history.back() (popstate → onClose), so the
+ * browser back button closes it too. Expand is a plain <a> (full page load).
  */
 export function TemplateModalBrowser({
   templates,
   initialSlug,
+  onClose,
 }: {
   templates: ModalTemplate[];
   initialSlug: string;
+  onClose: () => void;
 }) {
-  const router = useRouter();
   const [index, setIndex] = useState(() =>
     Math.max(
       0,
@@ -49,7 +51,14 @@ export function TemplateModalBrowser({
     ),
   );
   const template = templates[index];
-  const close = useCallback(() => router.back(), [router]);
+  const close = useCallback(() => window.history.back(), []);
+
+  // The grid pushed a history entry when it opened the modal, so the back
+  // button (and close(), which is just history.back()) lands here.
+  useEffect(() => {
+    window.addEventListener("popstate", onClose);
+    return () => window.removeEventListener("popstate", onClose);
+  }, [onClose]);
 
   const step = (dir: 1 | -1) => {
     const nextIndex = (index + dir + templates.length) % templates.length;
@@ -73,7 +82,7 @@ export function TemplateModalBrowser({
     "flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground";
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center md:p-8">
       {/* Backdrop */}
       <button
         type="button"
@@ -81,18 +90,21 @@ export function TemplateModalBrowser({
         onClick={close}
         className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
       />
-      {/* Sheet */}
+      {/* Sheet — full-bleed on mobile (Notion-style, edge to edge), a floating
+          card on desktop. ring-border keeps the panel edge readable in dark
+          mode, where the surface matches the page and the shadow disappears. */}
       <div
         role="dialog"
         aria-modal="true"
-        className="animate-fade-in relative flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-background shadow-[0_40px_120px_-24px_rgba(0,0,0,0.45)]"
+        className="animate-fade-in relative flex h-dvh w-full flex-col overflow-hidden bg-background ring-1 ring-border shadow-[0_40px_120px_-24px_rgba(0,0,0,0.45)] md:h-auto md:max-h-[92vh] md:max-w-6xl md:rounded-2xl"
       >
         {/* Control bar — expand · prev/next … close. */}
         <div className="flex items-center gap-1 border-b border-border px-4 py-3">
+          {/* Expand is pointless on mobile — the sheet is already full-bleed. */}
           <a
             href={`/templates/${template.slug}`}
             aria-label="Open full page"
-            className={iconBtn}
+            className={`${iconBtn} hidden md:flex`}
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
               <path
@@ -104,7 +116,7 @@ export function TemplateModalBrowser({
               />
             </svg>
           </a>
-          <span aria-hidden className="mx-1.5 h-5 w-px bg-border" />
+          <span aria-hidden className="mx-1.5 hidden h-5 w-px bg-border md:block" />
           <button
             type="button"
             aria-label="Previous template"
@@ -154,8 +166,9 @@ export function TemplateModalBrowser({
           </button>
         </div>
 
-        {/* Scrollable body — same composition as the full detail page. */}
-        <div className="overflow-y-auto overscroll-contain px-6 pb-12 pt-8 md:px-10">
+        {/* Scrollable body — same composition as the full detail page. Extra
+            bottom padding on mobile clears the floating action bar. */}
+        <div className="overflow-y-auto overscroll-contain px-6 pb-28 pt-8 md:px-10 md:pb-12">
           <div className="grid gap-10 md:grid-cols-[1.5fr_1fr] md:gap-12">
             {/* Left — gallery + about; scrolls with the sheet. */}
             <div>
@@ -187,8 +200,9 @@ export function TemplateModalBrowser({
               </div>
             </div>
 
-            {/* Right — sticky sidebar: category, title, description, tags, CTA. */}
-            <div className="md:sticky md:top-0 md:self-start">
+            {/* Right — sticky sidebar: category, title, description, tags, CTA.
+                On mobile it stacks FIRST so the title leads the sheet. */}
+            <div className="order-first md:order-none md:sticky md:top-0 md:self-start">
               <p className="font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-muted-foreground">
                 {template.category}
               </p>
@@ -210,7 +224,8 @@ export function TemplateModalBrowser({
                 </div>
               )}
 
-              <div className="mt-6">
+              {/* Desktop CTA — on mobile the floating action bar carries it. */}
+              <div className="mt-6 hidden md:block">
                 <a
                   href={SIGNUP_URL}
                   className="inline-block rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
@@ -219,6 +234,19 @@ export function TemplateModalBrowser({
                 </a>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Mobile action bar — Notion-style: the one CTA floats over the
+            sheet's foot on a fade so content visibly scrolls beneath it. */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background/85 to-transparent pb-4 pt-12 md:hidden">
+          <div className="pointer-events-auto flex justify-center px-4">
+            <a
+              href={SIGNUP_URL}
+              className="w-full max-w-sm rounded-lg bg-foreground px-6 py-2.5 text-center text-sm text-background"
+            >
+              Build off this template
+            </a>
           </div>
         </div>
       </div>
