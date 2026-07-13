@@ -719,18 +719,18 @@ html:not([data-theme="dark"]) .v63-gradient-border:focus-within::before {
   background: color-mix(in srgb, var(--border) 70%, var(--foreground));
 }
 
-/* Animated gradient ring for the highlighted pricing plan: a soft accent
-   sweep orbits an otherwise token-colored border. Drawn by a masked
-   conic-gradient pseudo-element so it adds no layout on top of the card's
-   (transparent) 1px border. Browsers without @property get a static ring. */
-@property --plan-ring-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-@keyframes planRingSpin {
-  to {
-    --plan-ring-angle: 360deg;
+/* Gradient ring for the highlighted pricing plan, in the site's brand
+   blue→green (same pair as the hero composer's light ring). No sweep — the
+   ring just breathes, echoing the footer aurora, so it distinguishes the
+   card without pulling the eye. Masked pseudo-element: no layout on top of
+   the card's (transparent) 1px border. */
+@keyframes planRingBreathe {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
   }
 }
 .plan-ring-popular::before {
@@ -739,18 +739,12 @@ html:not([data-theme="dark"]) .v63-gradient-border:focus-within::before {
   inset: -1px;
   border-radius: inherit;
   padding: 1.5px;
-  background: conic-gradient(
-    from var(--plan-ring-angle),
-    var(--border),
-    #7da4ff 18%,
-    color-mix(in srgb, #7da4ff 45%, var(--border)) 30%,
-    var(--border) 45%
-  );
+  background: linear-gradient(135deg, #6f96f0, #93c53a);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
-  animation: planRingSpin 5s linear infinite;
+  animation: planRingBreathe 4.5s ease-in-out infinite;
   pointer-events: none;
 }
 @media (prefers-reduced-motion: reduce) {
