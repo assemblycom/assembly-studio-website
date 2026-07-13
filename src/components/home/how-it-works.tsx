@@ -66,26 +66,35 @@ function AppWindow({ crumb }: { crumb: string }) {
 
 export function HowItWorks() {
   const [active, setActive] = useState(0);
+  const [progress, setProgress] = useState<number[]>(() => STEPS.map(() => 0));
   const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     // Active step = whichever step's center is nearest the viewport middle.
     // Driven by scroll position (not IntersectionObserver) so it updates
-    // reliably; the menu underlines whichever step you're reading.
+    // reliably. Each menu row's underline doubles as a progress bar: it fills
+    // as the viewport midline travels through that step, and stays filled for
+    // steps already read (scrolling back rewinds it).
     const compute = () => {
       const mid = window.innerHeight / 2;
       let best = 0;
       let bestDist = Infinity;
+      const fills: number[] = [];
       stepRefs.current.forEach((el, i) => {
-        if (!el) return;
+        if (!el) {
+          fills[i] = 0;
+          return;
+        }
         const r = el.getBoundingClientRect();
         const dist = Math.abs(r.top + r.height / 2 - mid);
         if (dist < bestDist) {
           bestDist = dist;
           best = i;
         }
+        fills[i] = Math.min(1, Math.max(0, (mid - r.top) / r.height));
       });
       setActive(best);
+      setProgress(fills);
     };
     compute();
     window.addEventListener("scroll", compute, { passive: true });
@@ -113,13 +122,20 @@ export function HowItWorks() {
                 type="button"
                 onClick={() => scrollToStep(i)}
                 aria-current={active === i ? "true" : undefined}
-                className={`block w-full border-b py-3 text-left text-[15px] transition-colors ${
+                className={`relative block w-full border-b border-border py-3 text-left text-[15px] transition-colors ${
                   active === i
-                    ? "border-foreground text-foreground"
-                    : "border-border text-muted-foreground hover:text-foreground"
+                    ? "text-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {step.menu}
+                {/* The underline as a progress bar — fills left-to-right as
+                    the step is read; scaleX so the scrub costs no layout. */}
+                <span
+                  aria-hidden
+                  className="absolute -bottom-px left-0 h-px w-full origin-left bg-foreground"
+                  style={{ transform: `scaleX(${progress[i] ?? 0})` }}
+                />
               </button>
             ))}
           </div>
