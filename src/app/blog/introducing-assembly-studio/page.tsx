@@ -147,7 +147,8 @@ export default function IntroducingAssemblyStudioPage() {
             <div className="mt-6 space-y-5">
               {BUILD_STEPS.map((step, i) => (
                 <div key={step.name} className="flex gap-4">
-                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-sm text-foreground tabular-nums">
+                  {/* Solid ink chip — the muted circle washed out on white. */}
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-[13px] text-background tabular-nums">
                     {i + 1}
                   </span>
                   <div>
