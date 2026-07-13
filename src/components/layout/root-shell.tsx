@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { StudioNav } from "@/components/home/studio-nav";
 import { Footer } from "@/components/layout/footer";
@@ -27,6 +28,16 @@ export function RootShell({ children }: { children: React.ReactNode }) {
     pathname === "/pricing" ||
     pathname === "/templates" ||
     pathname.startsWith("/templates/");
+
+  // Tell CSS which footer tone this page ends in, so the bottom overscroll /
+  // iOS toolbar zone can match it (dark under the reveal footer, light under
+  // the plain one) — see the html/body background rules in globals.css.
+  useEffect(() => {
+    document.documentElement.setAttribute(
+      "data-footer",
+      usesRevealFooter ? "dark" : "light",
+    );
+  }, [usesRevealFooter]);
 
   // The shared nav carries the site theme toggle and never shows "Book a demo"
   // (it's a demo-page/pricing-hero CTA, not a nav item). Its contents ride

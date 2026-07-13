@@ -265,12 +265,25 @@ body {
   color: var(--foreground);
 }
 
+/* Pages ending in the dark reveal footer (tagged by RootShell): split the
+   overscroll canvas so each rubber-band zone matches what it touches — the
+   top bounce keeps the light canvas, while the bottom bounce (and the strip
+   iOS paints behind its collapsing toolbar) shows the footer's dark ground
+   instead of flashing a light strip under the black footer. */
+html[data-footer="dark"],
+html[data-footer="dark"] body {
+  background: linear-gradient(to bottom, var(--muted) 50%, #101010 50%);
+}
+
 /* In dark mode the page ground is near-black; the muted overscroll canvas above
    read as a gray flash when rubber-banding at the top. Match it to the page
    background so the overscroll blends. (Light keeps --muted for the iOS note.) */
-[data-theme="dark"],
-[data-theme="dark"] body {
-  background-color: var(--background);
+html[data-theme="dark"],
+html[data-theme="dark"] body {
+  /* `background` (not -color) so it also clears the light split gradient;
+     `html` prefix keeps it at the same specificity as the data-footer rule
+     above so source order lets dark win. */
+  background: var(--background);
 }
 
 /* Shimmering outline for the hero input. A light sweep travels across a
