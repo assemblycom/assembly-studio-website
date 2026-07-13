@@ -221,7 +221,7 @@ export function DemoForm() {
 
       <button
         type="submit"
-        className="group mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-foreground px-6 py-3 text-sm text-background transition-opacity hover:opacity-90"
+        className="group mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
       >
         Book a demo
         <IconArrow className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />

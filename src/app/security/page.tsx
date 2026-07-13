@@ -286,7 +286,7 @@ export default function SecurityPage() {
               href={TRUST_CENTER_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-foreground/25 bg-background px-5 py-2.5 text-sm text-foreground transition-colors hover:bg-muted"
+              className="rounded-lg border border-border bg-background px-5 py-2.5 text-sm text-foreground transition-colors hover:bg-muted"
             >
               Explore Trust Center
             </a>

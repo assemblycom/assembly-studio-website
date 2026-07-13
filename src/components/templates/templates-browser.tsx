@@ -139,8 +139,8 @@ export function TemplatesBrowser({ templates }: Props) {
                 onClick={() => toggleCategory(cat)}
                 className={`rounded-md px-2.5 py-1 font-[family-name:var(--font-diatype-mono)] text-xs uppercase transition-colors ${
                   active
-                    ? "bg-foreground/[0.16] text-foreground"
-                    : "bg-foreground/[0.08] text-muted-foreground hover:text-foreground"
+                    ? "bg-foreground/10 text-foreground"
+                    : "bg-muted text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {cat}
@@ -174,7 +174,7 @@ export function TemplatesBrowser({ templates }: Props) {
                 onClick={(e) => openModal(e, template.slug)}
               >
                 {template.image ? (
-                  <div className="relative aspect-[5/3] overflow-hidden rounded-lg bg-muted">
+                  <div className="relative aspect-[2/1] overflow-hidden rounded-lg bg-muted sm:aspect-[5/3]">
                     <Image
                       src={template.image}
                       alt=""
@@ -184,7 +184,7 @@ export function TemplatesBrowser({ templates }: Props) {
                     />
                   </div>
                 ) : (
-                  <div className="aspect-[5/3] rounded-lg bg-muted" />
+                  <div className="aspect-[2/1] rounded-lg bg-muted sm:aspect-[5/3]" />
                 )}
                 <div className="p-3">
                   <h3 className="text-balance text-sm font-medium">{template.title}</h3>

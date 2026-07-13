@@ -73,7 +73,7 @@ function TemplateHeader({
           {template.industries.map((industry) => (
             <span
               key={industry}
-              className="rounded-md bg-foreground/10 px-2.5 py-1 font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-foreground/80"
+              className="rounded-md bg-muted px-2.5 py-1 font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-muted-foreground"
             >
               {industry}
             </span>

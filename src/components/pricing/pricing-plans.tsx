@@ -261,7 +261,11 @@ export function PricingPlans() {
           return (
             <div
               key={plan.name}
-              className="flex flex-col rounded-2xl border border-border p-3"
+              // The highlighted (most popular) plan swaps its static border
+              // for the animated gradient ring — same 1px of layout either way.
+              className={`flex flex-col rounded-2xl border p-3 ${
+                plan.highlighted ? "plan-ring-popular relative border-transparent" : "border-border"
+              }`}
             >
               {/* Filled header panel — uniform light surface across all plans. */}
               <div className="flex min-h-[200px] flex-col justify-between rounded-xl bg-muted p-5">
@@ -284,7 +288,7 @@ export function PricingPlans() {
               {/* Detached CTA — our standard rounded-lg button. */}
               <a
                 href={APP_URL}
-                className="mt-3 rounded-lg bg-foreground px-6 py-2.5 text-center text-sm text-background transition-opacity hover:opacity-90"
+                className="mt-3 rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background transition-opacity hover:opacity-90"
               >
                 {plan.cta}
               </a>

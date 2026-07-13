@@ -245,7 +245,7 @@ export default async function CaseStudyPage({ params }: Props) {
             {study.stats.slice(0, 2).map((stat) => (
               <span
                 key={stat.label}
-                className="inline-flex items-center gap-1.5 rounded-md bg-foreground/[0.05] px-3 py-1.5 font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide"
+                className="inline-flex items-center gap-1.5 rounded-md bg-muted px-3 py-1.5 font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide"
               >
                 <span className="text-foreground">{stat.value}</span>
                 <span className="text-muted-foreground">{stat.label}</span>

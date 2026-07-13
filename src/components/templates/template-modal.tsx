@@ -216,7 +216,7 @@ export function TemplateModalBrowser({
                   {template.industries.map((industry) => (
                     <span
                       key={industry}
-                      className="rounded-md bg-foreground/10 px-2.5 py-1 font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-foreground/80"
+                      className="rounded-md bg-muted px-2.5 py-1 font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-muted-foreground"
                     >
                       {industry}
                     </span>
@@ -243,7 +243,7 @@ export function TemplateModalBrowser({
           <div className="pointer-events-auto flex justify-center px-4">
             <a
               href={SIGNUP_URL}
-              className="w-full max-w-sm rounded-lg bg-foreground px-6 py-2.5 text-center text-sm text-background"
+              className="w-full max-w-sm rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background"
             >
               Build off this template
             </a>
