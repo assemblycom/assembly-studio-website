@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { APP_URL, DOCS_URL, type NavLink } from "@/lib/constants";
+import { DOCS_URL, type NavLink } from "@/lib/constants";
 import { DiaGradient } from "@/components/ui/dia-gradient";
 
 // V71's brand aurora (from hero-iterations) — green + blue on a near-black
@@ -17,6 +17,19 @@ const BRAND_AURORA = [
   { offset: 0.76, color: "#c6e84f" },
   { offset: 0.88, color: "#d9ed92" },
   { offset: 1, color: "#d9ed9200" },
+];
+
+// "Ask AI about Assembly" — each button opens the assistant with the question
+// prefilled. Gemini has no public prefill URL, so its button goes to Google's
+// AI Mode (Gemini-powered) which does accept a query.
+const AI_PROMPT = encodeURIComponent(
+  "Tell me about Assembly Studio (assembly.com) — the AI app builder for client-facing experiences. What can firms build with it, and how does it work?",
+);
+const ASK_AI = [
+  { src: "/images/ai-chatgpt.svg", label: "ChatGPT", href: `https://chatgpt.com/?q=${AI_PROMPT}` },
+  { src: "/images/ai-claude.svg", label: "Claude", href: `https://claude.ai/new?q=${AI_PROMPT}` },
+  { src: "/images/ai-gemini.svg", label: "Gemini", href: `https://www.google.com/search?udm=50&q=${AI_PROMPT}` },
+  { src: "/images/ai-vector.svg", label: "Grok", href: `https://grok.com/?q=${AI_PROMPT}` },
 ];
 
 // Two-column link set for the reveal footer (IntegratedBio-style composition):
@@ -115,15 +128,10 @@ export function Footer({ reveal = false }: { reveal?: boolean }) {
               <div className="md:border-l md:border-white/15 md:pl-8">
                 <p className={monoLabel}>Ask AI about Assembly</p>
                 <div className="mt-4 flex items-center gap-2">
-                  {[
-                    { src: "/images/ai-chatgpt.svg", label: "ChatGPT" },
-                    { src: "/images/ai-claude.svg", label: "Claude" },
-                    { src: "/images/ai-gemini.svg", label: "Gemini" },
-                    { src: "/images/ai-vector.svg", label: "Grok" },
-                  ].map((ai) => (
+                  {ASK_AI.map((ai) => (
                     <a
                       key={ai.label}
-                      href={APP_URL}
+                      href={ai.href}
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={`Ask ${ai.label} about Assembly Studio`}
