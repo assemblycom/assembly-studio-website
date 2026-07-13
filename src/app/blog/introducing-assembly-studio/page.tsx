@@ -87,9 +87,19 @@ export default function IntroducingAssemblyStudioPage() {
         </p>
       </header>
 
-      {/* Utility row */}
-      <div className="mx-auto mt-12 flex max-w-3xl items-center justify-between border-t border-border px-6 py-3">
+      {/* Byline — one quiet centered line, no rules: monogram, author, read
+          time, and the share affordance kept to the same muted register. */}
+      <div className="mx-auto mt-10 flex max-w-3xl items-center justify-center gap-3 px-6">
+        <span
+          aria-hidden
+          className="flex size-8 items-center justify-center rounded-full bg-muted text-[11px] tracking-wide text-foreground/70"
+        >
+          MM
+        </span>
+        <span className="text-sm text-foreground">Marlon Misra</span>
+        <span aria-hidden className="text-muted-foreground/60">·</span>
         <span className="text-sm text-muted-foreground">6 min read</span>
+        <span aria-hidden className="text-muted-foreground/60">·</span>
         <CopyLinkButton />
       </div>
 
