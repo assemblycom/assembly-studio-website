@@ -1,6 +1,6 @@
 "use client";
 
-import { APP_URL } from "@/lib/constants";
+import Link from "next/link";
 
 /**
  * GA / launch announcement bar — a thin white strip at the very top of the
@@ -11,8 +11,8 @@ export function AnnouncementBar() {
   return (
     <div className="announcement-bar h-10 w-full">
       <div className="flex h-full items-center justify-center px-4 sm:px-12">
-        <a
-          href={APP_URL}
+        <Link
+          href="/blog/introducing-assembly-studio"
           className="group inline-flex min-w-0 max-w-full items-center gap-2 text-sm"
         >
           {/* Shorter headline on mobile so it never truncates in the narrow bar;
@@ -30,7 +30,7 @@ export function AnnouncementBar() {
               →
             </span>
           </span>
-        </a>
+        </Link>
       </div>
     </div>
   );

@@ -27,7 +27,8 @@ export function RootShell({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/customers/") ||
     pathname === "/pricing" ||
     pathname === "/templates" ||
-    pathname.startsWith("/templates/");
+    pathname.startsWith("/templates/") ||
+    pathname.startsWith("/blog/");
 
   // Tell CSS which footer tone this page ends in, so the bottom overscroll /
   // iOS toolbar zone can match it (dark under the reveal footer, light under
