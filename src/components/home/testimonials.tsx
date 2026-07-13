@@ -26,12 +26,14 @@ const TESTIMONIALS = [
     company: "Ditto",
     slug: "ditto-by-dbc",
   },
+  // Zen Aegis (not Heritage Law Partners) closes the row — the collapsed
+  // column is narrow and a long company name gets clipped by the nowrap label.
   {
     quote:
-      "I really like how smooth it is and intuitive for our clients to use. Our approach definitely puts us in the top tier for client care among estate planning firms.",
-    author: "Eliana Emery",
-    company: "Heritage Law Partners",
-    slug: "heritage-law-partners",
+      "Assembly saves us from building custom portals from scratch. We can go fast and create lasting value for the businesses we serve.",
+    author: "Robert Prochnow",
+    company: "Zen Aegis",
+    slug: "zen-aegis",
   },
 ];
 
@@ -90,7 +92,7 @@ export function Testimonials() {
                   height={56}
                   className="size-14 rounded-xl object-cover"
                 />
-                <span className="whitespace-nowrap text-base font-medium text-muted-foreground">
+                <span className="whitespace-nowrap text-base font-normal text-muted-foreground">
                   {t.company}
                 </span>
               </span>

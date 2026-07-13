@@ -111,8 +111,10 @@ export function CTA() {
   const [prompt, setPrompt] = useCyclingPrompt(inputRef);
   const { theme } = useTheme();
   const dark = theme === "dark";
+  // bg-background in both themes so the CTA sits on the same canvas as the
+  // rest of the landing page instead of introducing its own tint.
   return (
-    <section className={`px-6 py-14 md:py-20 ${dark ? "bg-background" : "bg-[#fcfcfd]"}`}>
+    <section className="bg-background px-6 py-14 md:py-20">
       {/* Extra bottom room so the Prompt Ideas menu (opens downward, up to
           20rem tall) never runs into the footer below. */}
       <div className="mx-auto max-w-3xl pb-72 pt-16 text-center md:pt-24">
