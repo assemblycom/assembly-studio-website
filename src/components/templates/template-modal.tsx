@@ -168,7 +168,7 @@ export function TemplateModalBrowser({
 
         {/* Scrollable body — same composition as the full detail page. Extra
             bottom padding on mobile clears the floating action bar. */}
-        <div className="overflow-y-auto overscroll-contain px-6 pb-28 pt-8 md:px-10 md:pb-12">
+        <div className="scrollbar-slim overflow-y-auto overscroll-contain px-6 pb-28 pt-8 md:px-10 md:pb-12">
           <div className="grid gap-10 md:grid-cols-[1.5fr_1fr] md:gap-12">
             {/* Left — gallery + about; scrolls with the sheet. */}
             <div>
