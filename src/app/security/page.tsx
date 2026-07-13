@@ -17,16 +17,14 @@ const SPOTLIGHT = {
 };
 
 // Second story — a security/compliance-led case study shown as a text-only
-// (no photo) contrast card beside the Capital One spotlight. Facts drawn from
+// (no photo) quiet card beside the Capital One spotlight. Facts drawn from
 // the Metta Health case study (see src/lib/case-studies.ts).
 const SPOTLIGHT_SECURITY = {
   company: "Metta Health",
   href: "/customers/metta-health",
-  eyebrow: "Healthcare · HIPAA-compliant",
+  eyebrow: "Metta Health",
   title:
     "How Metta Health scales HIPAA-compliant patient authorizations with Assembly",
-  description:
-    "Sensitive patient authorization forms at scale — white-labeled, so patients trust the sender.",
   stat: { value: "50+", label: "Authorization templates managed" },
 };
 
@@ -231,28 +229,25 @@ export default function SecurityPage() {
               </div>
             </a>
 
-            {/* Card 2 — security/compliance story, no photo. Inverted surface
-                (bg-foreground) makes it the high-contrast counterpart. */}
+            {/* Card 2 — security/compliance story, no photo. Quiet muted
+                surface; the big stat carries the card instead of body copy. */}
             <a
               href={SPOTLIGHT_SECURITY.href}
-              className="group flex flex-col justify-between rounded-3xl bg-foreground p-6 text-background md:p-8"
+              className="group flex flex-col justify-between rounded-3xl bg-muted p-6 md:p-8"
             >
               <div>
-                <p className="font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-background/60">
+                <p className="font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-muted-foreground">
                   {SPOTLIGHT_SECURITY.eyebrow}
                 </p>
                 <h3 className="mt-4 max-w-sm text-xl font-normal leading-snug">
                   {SPOTLIGHT_SECURITY.title}
                 </h3>
-                <p className="mt-3 text-sm leading-relaxed text-background/60">
-                  {SPOTLIGHT_SECURITY.description}
-                </p>
               </div>
               <div className="mt-8">
-                <p className="text-3xl font-normal tracking-tight">
+                <p className="text-5xl font-normal tracking-tight md:text-6xl">
                   {SPOTLIGHT_SECURITY.stat.value}
                 </p>
-                <p className="mt-1 text-sm text-background/60">
+                <p className="mt-2 text-sm text-muted-foreground">
                   {SPOTLIGHT_SECURITY.stat.label}
                 </p>
                 <span className="mt-6 inline-flex w-fit items-center gap-2 text-sm">
