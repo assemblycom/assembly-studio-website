@@ -155,7 +155,7 @@ export function CustomersHub() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search…"
               aria-label="Search customer stories"
-              className="w-full rounded-lg border border-border bg-muted py-2.5 pl-11 pr-4 text-sm outline-none transition-colors focus:border-foreground/40"
+              className="w-full rounded-lg border border-border bg-muted py-2.5 pl-11 pr-4 text-base outline-none sm:text-sm transition-colors focus:border-foreground/40"
             />
           </div>
 

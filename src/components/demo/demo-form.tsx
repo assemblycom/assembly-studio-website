@@ -6,7 +6,7 @@ import { IconArrow } from "@/components/home/icons";
 const TEAM_SIZES = ["Just me", "2–10", "11–50", "51–200", "200+"];
 
 const inputCls =
-  "w-full rounded-lg border border-border bg-background px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/30";
+  "w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground outline-none sm:text-sm transition-colors placeholder:text-muted-foreground focus:border-foreground/30";
 
 function Field({
   label,
