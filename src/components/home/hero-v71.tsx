@@ -100,7 +100,6 @@ function CardDashboard() {
     ["Sat", 46],
     ["Sun", 48],
   ];
-  const GOAL = 65;
   return (
     <div className="flex h-full flex-col gap-2 p-3.5" style={{ backgroundColor: DASH_GREEN }}>
       <div className="flex items-center gap-1.5 text-[10px] font-medium" style={{ color: DASH_LIGHT }}>
@@ -115,14 +114,6 @@ function CardDashboard() {
       </div>
       <div className="flex min-h-0 flex-1 flex-col gap-1 pt-1">
         <div className="relative flex flex-1 items-end gap-1.5">
-          {/* Target line across the chart. */}
-          <div
-            className="pointer-events-none absolute inset-x-0 z-10 flex items-center"
-            style={{ bottom: `${GOAL}%` }}
-          >
-            <span className="size-1 shrink-0 rounded-full bg-white" />
-            <span className="h-px flex-1" style={{ backgroundColor: "rgba(255,255,255,0.55)" }} />
-          </div>
           {days.map(([day, h], i) => (
             <div
               key={day}
