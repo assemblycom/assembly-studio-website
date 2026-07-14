@@ -56,15 +56,11 @@ function IconChevron({ className }: { className?: string }) {
 const TemplateCard = memo(function TemplateCard({
   template,
   index,
-  selected,
-  selectionActive,
   onSelect,
   dark,
 }: {
   template: Template;
   index: number;
-  selected: boolean;
-  selectionActive: boolean;
   onSelect: (i: number) => void;
   dark: boolean;
 }) {
@@ -78,8 +74,7 @@ const TemplateCard = memo(function TemplateCard({
       // here — that's product logic for later).
       onMouseEnter={() => onSelect(index)}
       onFocus={() => onSelect(index)}
-      style={{ opacity: selectionActive && !selected ? 0.5 : 1 }}
-      className="group w-[236px] shrink-0 origin-center cursor-pointer text-left outline-none transition-[transform,opacity] duration-200 ease-out [will-change:opacity]"
+      className="group w-[236px] shrink-0 origin-center cursor-pointer text-left outline-none transition-transform duration-200 ease-out"
     >
       <Card
         size="sm"
@@ -411,8 +406,6 @@ export function HeroV76({
                     key={t.slug}
                     template={t}
                     index={i}
-                    selected={selectedIndex === i}
-                    selectionActive={isDesktop}
                     onSelect={setSelectedIndex}
                     dark={dark}
                   />
