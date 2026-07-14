@@ -49,12 +49,12 @@ export function Testimonials() {
           />
         </div>
 
-        {/* Attribution leads the section. */}
-        <p className="text-[15px] text-foreground md:pr-44">
+        {/* Attribution leads the section — small caps in the mono face, the
+            colour shift (not a divider glyph) separates name from role. */}
+        <p className="font-[family-name:var(--font-diatype-mono)] text-[12px] uppercase tracking-[0.08em] text-foreground md:pr-44">
           &mdash; {FEATURED.name}
-          <span className="text-muted-foreground">
-            {" "}
-            &middot; {FEATURED.title}, {FEATURED.firm}
+          <span className="ml-3 text-muted-foreground">
+            {FEATURED.title}, {FEATURED.firm}
           </span>
         </p>
 

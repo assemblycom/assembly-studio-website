@@ -65,9 +65,9 @@ export function ReplaceTools() {
               replacing the picked tool. */}
           {/* No downward drop shadow — its bottom halo sits outside the fade
               and reads as a hard line. Top/side definition comes from the
-              border; the window has no bottom border and shares the page bg,
-              so the fade below dissolves the bottom edge entirely. */}
-          <div className="pointer-events-none mx-auto flex h-[400px] w-full max-w-[1000px] select-none overflow-hidden rounded-t-lg border border-b-0 border-border bg-background shadow-[0_-1px_40px_-24px_rgba(16,24,40,0.25)] md:h-[520px]">
+              border; a mask fades the window itself (side borders included)
+              so no edge of the rectangle survives at the bottom. */}
+          <div className="pointer-events-none mx-auto flex h-[400px] w-full max-w-[1000px] select-none overflow-hidden rounded-t-lg border border-b-0 border-border bg-background shadow-[0_-1px_40px_-24px_rgba(16,24,40,0.25)] [mask-image:linear-gradient(to_bottom,#000_55%,transparent_96%)] md:h-[520px]">
             {/* Sidebar — the workspace shell every app lives in. */}
             <div className="hidden w-[190px] shrink-0 flex-col border-r border-border bg-muted/40 p-3 sm:flex">
               <div className="flex items-center gap-2 px-1.5 pb-4 pt-1">
@@ -104,7 +104,7 @@ export function ReplaceTools() {
 
           {/* The patchwork — a dock of the tools being retired. Fades over
               the window bottom; items grow mac-style from the baseline. */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-background via-background to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-background via-background/90 to-transparent" />
           <div className="absolute inset-x-0 -bottom-3 flex justify-center">
             <div className="flex items-end gap-1.5 rounded-2xl border border-border bg-background/80 p-2 shadow-[0_16px_40px_-20px_rgba(16,24,40,0.4)] backdrop-blur-md md:gap-2">
               {TOOLS.map((t, i) => (

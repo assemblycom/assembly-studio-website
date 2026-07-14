@@ -19,7 +19,7 @@ import { useTheme } from "@/components/theme/theme-provider";
 
 const MONO = '"ABC Diatype Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
 const RAIL = "mx-auto max-w-[1600px] px-6 md:px-10";
-const FRAME_PAD = 5; // a tight hug between the card and the selector ring
+const FRAME_PAD = 6; // breathing room between the card and the selector ring
 
 // Prompt Ideas data + seeded-composer behavior live in prompt-ideas.ts,
 // shared with the bottom CTA so the two boxes read identically.
@@ -39,10 +39,15 @@ const CAROUSEL: Template[] = STRIP_ORDER
   .map((slug) => TEMPLATES.find((t) => t.slug === slug))
   .filter((t): t is Template => Boolean(t));
 
+// Stack shows templates that are NOT already cards in the strip, so the
+// see-all tile teases what's beyond the row instead of repeating it. The
+// stack is static — no fan-out on hover.
 const SEE_ALL_STACK = [
-  { slug: "content-approval-flow", z: "z-[1]", rest: "[transform:translate(-50%,-50%)_translateY(8px)_scale(0.9)]", hover: "group-hover:[transform:translate(-50%,-50%)_translateX(-24px)_translateY(-2px)_rotate(-7deg)]" },
-  { slug: "client-project-tracker", z: "z-[2]", rest: "[transform:translate(-50%,-50%)_translateY(4px)_scale(0.95)]", hover: "group-hover:[transform:translate(-50%,-50%)_translateY(-8px)]" },
-  { slug: "client-engagement-dashboard", z: "z-[3]", rest: "[transform:translate(-50%,-50%)]", hover: "group-hover:[transform:translate(-50%,-50%)_translateX(24px)_translateY(-2px)_rotate(7deg)]" },
+  { slug: "time-tracker", z: "z-[1]", rest: "[transform:translate(-50%,-50%)_translateY(8px)_scale(0.9)]" },
+  { slug: "data-visualization", z: "z-[2]", rest: "[transform:translate(-50%,-50%)_translateY(4px)_scale(0.95)]" },
+  // goal-tracker's visual is removed for now, so the report chart tops the
+  // stack instead of a blank face.
+  { slug: "monthly-client-report", z: "z-[3]", rest: "[transform:translate(-50%,-50%)]" },
 ];
 
 function IconChevron({ className }: { className?: string }) {
@@ -53,18 +58,11 @@ function IconChevron({ className }: { className?: string }) {
   );
 }
 
-// Per-template full-bleed card hue. Each rail widget sits on a distinct but
-// similarly-deep colour with white content (the .v72-mock-color skin), like a
-// gallery of Apple widgets. Engagement is omitted — it self-colours green.
-const CARD_HUE: Record<string, string> = {
-  "onboarding-wizard": "#3d4f8f",
-  "client-project-tracker": "#574a9c",
-  "client-support-requests": "#9c5560",
-  "client-ai-assistant": "#22242a",
-  "document-collection": "#2f6b74",
-  "proposal-builder": "#9c7735",
-  "content-approval-flow": "#6e4a78",
-};
+// Rail widgets render on the neutral light mock skin (white surface, grey wells,
+// dark ink) — a calm, monochrome gallery rather than saturated colour tiles.
+// Kept as an (empty) override map so a card can opt back into a full-bleed hue
+// later without restructuring; today none do.
+const CARD_HUE: Record<string, string> = {};
 
 const TemplateCard = memo(function TemplateCard({
   template,
@@ -87,18 +85,18 @@ const TemplateCard = memo(function TemplateCard({
       // here — that's product logic for later).
       onMouseEnter={() => onSelect(index)}
       onFocus={() => onSelect(index)}
-      className="group w-[236px] shrink-0 origin-center cursor-pointer text-left outline-none transition-transform duration-200 ease-out"
+      className="group w-[212px] shrink-0 origin-center cursor-pointer text-left outline-none transition-transform duration-200 ease-out"
     >
       <Card
         size="sm"
-        className={`gap-0 py-0 pb-0! ring-1 transition-[transform,box-shadow] duration-200 ease-out [will-change:transform] ${dark ? "ring-white/8 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)]" : "ring-black/[0.07] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_28px_-18px_rgba(16,24,40,0.20)]"}`}
+        className={`gap-0 rounded-[20px] py-0 pb-0! ring-1 transition-[transform,box-shadow] duration-200 ease-out [will-change:transform] ${dark ? "ring-white/8 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)]" : "ring-black/[0.07] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_28px_-18px_rgba(16,24,40,0.20)]"}`}
       >
         {(() => {
           const hue = CARD_HUE[template.slug];
           return (
             <div
               data-slot="card-media"
-              className={`h-[188px] w-full overflow-hidden [font-family:var(--font-inter),system-ui,sans-serif] ${hue ? "v72-mock-color" : dark ? "v72-mock-dark" : ""}`}
+              className={`h-[212px] w-full overflow-hidden [font-family:var(--font-inter),system-ui,sans-serif] ${hue ? "v72-mock-color" : dark ? "v72-mock-dark" : ""}`}
               style={hue ? { backgroundColor: hue } : undefined}
             >
               <div className="h-full w-full">
@@ -140,7 +138,7 @@ export function HeroV76({
 
   // The selected card — framed by the selector ring, bright while the rest dim.
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [frame, setFrame] = useState({ x: 24 - FRAME_PAD, top: 24 - FRAME_PAD, w: 236 + 2 * FRAME_PAD, h: 188 + 2 * FRAME_PAD });
+  const [frame, setFrame] = useState({ x: 24 - FRAME_PAD, top: 24 - FRAME_PAD, w: 212 + 2 * FRAME_PAD, h: 212 + 2 * FRAME_PAD });
   // Gate the glide transition until after the first measure has painted, so the
   // frame snaps to the selected card on load instead of visibly sliding in from
   // its placeholder position.
@@ -259,14 +257,17 @@ export function HeroV76({
         "--muted-foreground": "rgba(255,255,255,0.5)",
       }
     : {
-        "--card": "#ffffff",
+        // Card faces take the ground tone instead of white, so the tiles read
+        // as part of the page; wells step a notch darker to stay legible and
+        // chips stay white so they pop against the gray face.
+        "--card": "#f7f8fa",
         "--card-foreground": "#1a1a1a",
         "--foreground": "#111111",
         "--muted-foreground": "rgba(0,0,0,0.5)",
-        "--v69-box": "#ffffff",
-        "--v69-card": "#ffffff",
-        "--v69-well": "#f1f2f4",
-        "--v69-well-2": "#e9eaee",
+        "--v69-box": "#f7f8fa",
+        "--v69-card": "#f7f8fa",
+        "--v69-well": "#eaecef",
+        "--v69-well-2": "#e1e4e9",
         "--v69-chip": "#ffffff",
         "--v69-chip-border": "rgba(16,24,40,0.1)",
         "--v69-ink": "#101828",
@@ -377,44 +378,18 @@ export function HeroV76({
                   style={{ transform: `translateX(${frame.x}px)`, top: frame.top, width: frame.w, height: frame.h }}
                 >
                   {(() => {
-                    // The selector is a ring + a solid tab, same colour so they read
-                    // as one piece. The tab is FLUSH RIGHT: its right edge is the
-                    // ring's right edge, and the ring's top-right is squared so the
-                    // two right edges are one continuous line. The tab's bottom sits
-                    // exactly on the ring's top edge (same colour → seamless), so it
-                    // rests on the border line rather than floating above it.
+                    // The selector is a plain ring — no label tab.
                     const W = frame.w;
                     const H = frame.h;
-                    const T = 30; // tab height above the frame
-                    const R = 17; // frame corner radius = card radius (12) + gap (5) so corners run parallel
-                    const K = 10; // tab top-corner radius
-                    const CR = 9; // concave fillet where the tab meets the frame's top edge
-                    const TAB_W = 120;
+                    const R = 26; // frame corner radius = card radius (20) + gap (6) so corners run parallel
                     const selectorColor = dark ? "#9a9aa0" : "#e5e6ea";
-                    // Inset the tab from the frame's rounded top-right corner so both
-                    // of its bases land on the straight run of the top edge — the
-                    // right fillet ends exactly where the corner curve begins.
-                    const tabRight = W - R - CR;
-                    const tabLeft = tabRight - TAB_W;
-                    // Frame: a plain rounded rectangle — all four corners share R.
-                    const ring = `M ${R} ${T} H ${W - R} Q ${W} ${T} ${W} ${T + R} V ${T + H - R} Q ${W} ${T + H} ${W - R} ${T + H} H ${R} Q 0 ${T + H} 0 ${T + H - R} V ${T + R} Q 0 ${T} ${R} ${T} Z`;
-                    // Tab: rounded top corners (K); each bottom corner eases into the
-                    // frame's top edge with a concave fillet (CR) so the junction is
-                    // a soft curve rather than a hard notch.
-                    const tab = `M ${tabLeft - CR} ${T} Q ${tabLeft} ${T} ${tabLeft} ${T - CR} L ${tabLeft} ${K} Q ${tabLeft} 0 ${tabLeft + K} 0 H ${tabRight - K} Q ${tabRight} 0 ${tabRight} ${K} L ${tabRight} ${T - CR} Q ${tabRight} ${T} ${tabRight + CR} ${T} Z`;
+                    const ring = `M ${R} 0 H ${W - R} Q ${W} 0 ${W} ${R} V ${H - R} Q ${W} ${H} ${W - R} ${H} H ${R} Q 0 ${H} 0 ${H - R} V ${R} Q 0 0 ${R} 0 Z`;
+                    // Stroke matches the card's own 1px ring so the two
+                    // outlines read as one family.
                     return (
-                      <>
-                        <svg width={W} height={T + H} viewBox={`0 0 ${W} ${T + H}`} fill="none" className="absolute left-0 overflow-visible" style={{ top: -T }}>
-                          <path d={ring} stroke={selectorColor} strokeWidth="1.5" />
-                          <path d={tab} fill={selectorColor} />
-                        </svg>
-                        <span
-                          className="absolute flex items-center justify-center text-[12.5px] font-normal leading-none text-neutral-900"
-                          style={{ left: tabLeft, top: -T, width: TAB_W, height: T }}
-                        >
-                          Or use a template
-                        </span>
-                      </>
+                      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} fill="none" className="absolute left-0 top-0 overflow-visible">
+                        <path d={ring} stroke={selectorColor} strokeWidth="1" />
+                      </svg>
                     );
                   })()}
                 </div>
@@ -435,23 +410,22 @@ export function HeroV76({
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="See all templates"
-                  className="group w-[236px] shrink-0 origin-center opacity-50 transition-opacity duration-200 ease-out hover:opacity-100"
+                  className="group w-[212px] shrink-0 origin-center opacity-50 transition-opacity duration-200 ease-out hover:opacity-100"
                 >
                   <Card
                     size="sm"
-                    className={`gap-0 py-0 pb-0! ring-1 transition-[transform,box-shadow] duration-200 ease-out group-hover:-translate-y-0.5 ${dark ? "ring-white/8 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)] group-hover:shadow-[0_14px_34px_-22px_rgba(0,0,0,0.85)]" : "ring-black/[0.07] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_28px_-18px_rgba(16,24,40,0.20)] group-hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_18px_36px_-20px_rgba(16,24,40,0.24)]"}`}
+                    className={`gap-0 rounded-[20px] py-0 pb-0! ring-1 transition-[transform,box-shadow] duration-200 ease-out group-hover:-translate-y-0.5 ${dark ? "ring-white/8 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)] group-hover:shadow-[0_14px_34px_-22px_rgba(0,0,0,0.85)]" : "ring-black/[0.07] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_28px_-18px_rgba(16,24,40,0.20)] group-hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_18px_36px_-20px_rgba(16,24,40,0.24)]"}`}
                   >
-                    <div data-slot="card-media" className={`relative h-[188px] w-full overflow-hidden ${dark ? "" : "bg-[#eef0f2]"}`}>
-                      {/* Square minis skinned like the rail cards (same dark
-                          mock treatment, not white) so the stack reads as more
-                          of the same templates. The mock fills the square's
-                          height and crops a little on the right. */}
+                    <div data-slot="card-media" className={`relative h-[212px] w-full overflow-hidden ${dark ? "" : "bg-[#eef0f2]"}`}>
+                      {/* Square minis (116px) track the now-square 236×236
+                          card face, scaled to fit exactly — each mock renders
+                          whole, no crops — with a soft, close shadow. */}
                       {SEE_ALL_STACK.map((t) => (
                         <div
                           key={t.slug}
-                          className={`absolute left-1/2 top-1/2 size-[124px] origin-center overflow-hidden rounded-md border transition-transform duration-300 ease-out [font-family:var(--font-inter),system-ui,sans-serif] ${dark ? "border-white/10 bg-[#151515] shadow-[0_12px_28px_-10px_rgba(0,0,0,0.9)]" : "border-black/[0.08] bg-white shadow-[0_12px_28px_-10px_rgba(16,24,40,0.35)]"} ${t.z} ${t.rest} ${t.hover}`}
+                          className={`absolute left-1/2 top-1/2 size-[116px] origin-center overflow-hidden rounded-md border [font-family:var(--font-inter),system-ui,sans-serif] ${dark ? "border-white/10 bg-[#151515] shadow-[0_5px_14px_-8px_rgba(0,0,0,0.6)]" : "border-black/[0.08] bg-white shadow-[0_5px_14px_-8px_rgba(16,24,40,0.22)]"} ${t.z} ${t.rest}`}
                         >
-                          <div className={`h-[188px] w-[236px] origin-top-left scale-[0.6596] ${dark ? "v72-mock-dark" : ""}`}>
+                          <div className={`h-[236px] w-[236px] origin-top-left scale-[0.4915] ${dark ? "v72-mock-dark" : ""}`}>
                             <V69CardMock slug={t.slug} />
                           </div>
                         </div>
@@ -462,7 +436,7 @@ export function HeroV76({
                     See all templates
                     <IconArrow className={`size-3.5 transition-transform group-hover:translate-x-0.5 ${dark ? "text-white/50" : "text-neutral-400"}`} />
                   </p>
-                  <p className={`mt-1 text-[11px] ${dark ? "text-white/50" : "text-neutral-500"}`}>+{TEMPLATES.length - CAROUSEL.length} more</p>
+                  <p className={`mt-1 text-[11px] ${dark ? "text-white/50" : "text-neutral-500"}`}>{TEMPLATES.length - CAROUSEL.length} more</p>
                 </a>
               </div>
             </div>
