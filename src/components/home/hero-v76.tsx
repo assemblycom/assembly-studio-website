@@ -5,7 +5,7 @@ import { APP_URL } from "@/lib/constants";
 import { TEMPLATES, type Template } from "@/lib/templates";
 import { IconArrow } from "./icons";
 import { V66Composer } from "./hero-v66";
-import { PROMPT_IDEAS, useSeededPrompt } from "./prompt-ideas";
+import { PROMPT_IDEAS } from "./prompt-ideas";
 import { V69CardMock } from "./hero-v71";
 import { StudioNav } from "./studio-nav";
 import { Card } from "@/components/ui/card";
@@ -101,11 +101,10 @@ export function HeroV76({
   const { theme, toggleTheme } = useTheme();
   const dark = theme === "dark";
 
-  // The box opens showing slot 1 of Prompt Ideas verbatim — it acts as the
-  // hero's second line of copy, so there's no separate placeholder and no
-  // typewriter. It renders in secondary ink until the visitor engages.
+  // The box opens empty with the animated "Build …" typewriter placeholder;
+  // typing or picking a Prompt Idea replaces it with the visitor's own text.
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const { prompt, onPromptChange, userEngaged } = useSeededPrompt(inputRef);
+  const [prompt, setPrompt] = useState("");
 
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
@@ -283,12 +282,10 @@ export function HeroV76({
                 <div className="v63-gradient-border relative rounded-[14px] md:rounded-[22px]">
                   <V66Composer
                     textareaRef={inputRef}
-                    // The demo prompt types in secondary ink and hides the CTA;
-                    // both flip on once the visitor starts their own prompt.
-                    textDimmed={!userEngaged}
-                    // Arrow stays visible but inert over the seeded text; it
+                    typewriter
+                    // Arrow stays visible but inert over the empty box; it
                     // becomes the CTA once the visitor types or picks a prompt.
-                    submitDisabled={!userEngaged || prompt.trim().length === 0}
+                    submitDisabled={prompt.trim().length === 0}
                     glow={false}
                     tone={theme}
                     compact
@@ -302,7 +299,7 @@ export function HeroV76({
                     plusAsAttach
                     submitLabel="Start building"
                     value={prompt}
-                    onValueChange={onPromptChange}
+                    onValueChange={setPrompt}
                     accent="#7DA4FF"
                     surfaceRadiusClass="rounded-[14px] md:rounded-[22px]"
                     surfaceClassName={

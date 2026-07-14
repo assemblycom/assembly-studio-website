@@ -29,9 +29,9 @@ const FEATURED = TEMPLATES.slice(0, 14);
 // Animated placeholder (opt-in via the `typewriter` prop) — a static verb prefix
 // plus a rotating example that types out, holds, erases, and cycles. Shared with
 // the studio site's composer so the hero reads the same.
-const PH_PREFIX = "Assembly Studio build ";
+const PH_PREFIX = "Build ";
 const PH_EXAMPLES = [
-  "a client intake form",
+  "an onboarding wizard for new clients",
   "a client engagement dashboard",
   "a client project tracker",
   "a content approval flow",

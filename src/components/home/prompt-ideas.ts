@@ -1,13 +1,8 @@
-"use client";
-
-import { useEffect, useRef, useState } from "react";
-
 // Prompt Ideas: the menu shows the label, picking inserts the full prompt.
-// Slot 1 doubles as the composer's default text (there is no separate
-// placeholder), so with no subhead it carries the client-facing wedge on its
-// own. Every prompt is deliberately spec-rich — the visitor's first lesson in
+// Every prompt is deliberately spec-rich — the visitor's first lesson in
 // how to talk to the app builder. Shared by the hero and the bottom CTA so
-// the two boxes read identically.
+// the two boxes read identically. The empty box shows the animated
+// "Build …" typewriter placeholder (see hero-v66) instead of seeded text.
 export const PROMPT_IDEAS = [
   {
     label: "Onboarding wizard",
@@ -46,48 +41,3 @@ export const PROMPT_IDEAS = [
   },
 ];
 
-export const DEFAULT_PROMPT = PROMPT_IDEAS[0].prompt;
-
-// Composer state for a box seeded with slot 1: the default renders as real
-// text (secondary ink until engagement), the first focus wipes it so the
-// visitor types into a clean box, and any value change from the composer
-// (typing or picking a prompt idea) counts as engagement — which is what
-// keeps a picked prompt from being treated as clearable seed text.
-export function useSeededPrompt(
-  inputRef: React.RefObject<HTMLTextAreaElement | null>,
-) {
-  const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
-  const [userEngaged, setUserEngaged] = useState(false);
-  const engagedRef = useRef(false);
-  const clearedRef = useRef(false);
-
-  useEffect(() => {
-    const el = inputRef.current;
-    if (!el) return;
-    const engage = () => {
-      engagedRef.current = true;
-      setUserEngaged(true);
-    };
-    const onFocus = () => {
-      if (!clearedRef.current) {
-        clearedRef.current = true;
-        if (!engagedRef.current && el.value === DEFAULT_PROMPT) setPrompt("");
-      }
-      engage();
-    };
-    el.addEventListener("focus", onFocus);
-    el.addEventListener("input", engage);
-    return () => {
-      el.removeEventListener("focus", onFocus);
-      el.removeEventListener("input", engage);
-    };
-  }, [inputRef]);
-
-  const onPromptChange = (v: string) => {
-    engagedRef.current = true;
-    setUserEngaged(true);
-    setPrompt(v);
-  };
-
-  return { prompt, onPromptChange, userEngaged };
-}

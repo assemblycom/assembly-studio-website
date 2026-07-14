@@ -1,17 +1,17 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { V66Composer } from "./hero-v66";
-import { PROMPT_IDEAS, useSeededPrompt } from "./prompt-ideas";
+import { PROMPT_IDEAS } from "./prompt-ideas";
 import { useTheme } from "@/components/theme/theme-provider";
 
 export function CTA() {
   // Dark sheet flowing into the black footer below; the green wordmark panel is
   // revealed beneath (square top, footer rounds the bottom).
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  // Same prompt data + seeded default as the hero composer, so the top and
-  // bottom boxes read identically.
-  const { prompt, onPromptChange, userEngaged } = useSeededPrompt(inputRef);
+  // Same prompt data + animated "Build …" placeholder as the hero composer,
+  // so the top and bottom boxes read identically.
+  const [prompt, setPrompt] = useState("");
   const { theme } = useTheme();
   const dark = theme === "dark";
   // bg-background in both themes so the CTA sits on the same canvas as the
@@ -28,10 +28,10 @@ export function CTA() {
         <div className="mx-auto mt-10 max-w-2xl text-left">
           <V66Composer
             textareaRef={inputRef}
-            textDimmed={!userEngaged}
-            // Arrow stays visible but inert over the seeded text; it becomes
+            typewriter
+            // Arrow stays visible but inert over the empty box; it becomes
             // the CTA once the visitor types or picks a prompt.
-            submitDisabled={!userEngaged || prompt.trim().length === 0}
+            submitDisabled={prompt.trim().length === 0}
             glow={false}
             tone={theme}
             compact
@@ -44,7 +44,7 @@ export function CTA() {
             plusAsAttach
             submitLabel="Start building"
             value={prompt}
-            onValueChange={onPromptChange}
+            onValueChange={setPrompt}
             accent="#7DA4FF"
             surfaceRadiusClass="rounded-[14px] md:rounded-[22px]"
             surfaceClassName={
