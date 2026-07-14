@@ -75,14 +75,16 @@ export function ReplaceTools() {
               </div>
               <div className="flex flex-col gap-0.5 text-[12px]">
                 <span className="flex items-center gap-2 rounded px-1.5 py-1.5 text-muted-foreground">
-                  <IconHouse className="size-3.5" /> Home
+                  <IconHouse className="size-3.5 shrink-0" /> Home
                 </span>
                 <span className="flex items-center gap-2 rounded px-1.5 py-1.5 text-muted-foreground">
-                  <IconChat className="size-3.5" /> Messages
+                  <IconChat className="size-3.5 shrink-0" /> Messages
                 </span>
-                {/* The picked app, installed in the sidebar like any other. */}
+                {/* The picked app, installed in the sidebar like any other.
+                    Truncates — a sidebar item must never wrap to two lines. */}
                 <span className="flex items-center gap-2 rounded bg-foreground/[0.06] px-1.5 py-1.5 text-foreground">
-                  <tool.icon className="size-3.5" /> {tool.appTitle}
+                  <tool.icon className="size-3.5 shrink-0" />
+                  <span className="truncate">{tool.appTitle}</span>
                 </span>
               </div>
               <div className="mt-auto px-1.5 text-[11px] text-muted-foreground">
