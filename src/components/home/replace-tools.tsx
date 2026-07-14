@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { V69CardMock } from "./hero-v71";
-import { useTheme } from "@/components/theme/theme-provider";
 import {
   IconAreaChart,
   IconCard,
@@ -45,8 +43,6 @@ const TOOLS: {
 
 export function ReplaceTools() {
   const [active, setActive] = useState(0);
-  const { theme } = useTheme();
-  const dark = theme === "dark";
   const tool = TOOLS[active];
 
   return (
@@ -94,27 +90,10 @@ export function ReplaceTools() {
               </div>
             </div>
 
-            {/* Content — all mocks stay mounted in one grid cell and
-                crossfade, so their internal animations don't restart. */}
-            <div className="relative grid min-w-0 flex-1">
-              {TOOLS.map((t, i) => (
-                <div
-                  key={t.slug}
-                  aria-hidden={active !== i}
-                  className={`col-start-1 row-start-1 flex items-start justify-center pt-8 transition-opacity duration-300 md:pt-14 ${
-                    active === i ? "opacity-100" : "pointer-events-none opacity-0"
-                  }`}
-                >
-                  {/* Zoomed out enough that the whole app fits inside the
-                      window with room to breathe. */}
-                  <div
-                    className={`h-[188px] w-[236px] shrink-0 origin-top scale-[1.2] md:scale-[1.6] [font-family:var(--font-inter),system-ui,sans-serif] ${dark ? "v72-mock-dark" : ""}`}
-                  >
-                    <V69CardMock slug={t.slug} />
-                  </div>
-                </div>
-              ))}
-            </div>
+            {/* Content — intentionally empty for now; the per-app content
+                mocks are being redesigned. The sidebar still names the app
+                the picked dock tool becomes. */}
+            <div className="min-w-0 flex-1" />
           </div>
 
           {/* The patchwork — a dock of the tools being retired. Fades over
