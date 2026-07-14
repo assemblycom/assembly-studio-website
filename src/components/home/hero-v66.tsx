@@ -317,7 +317,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
         onClick={() => setPromptOpen((o) => !o)}
         aria-haspopup="menu"
         aria-expanded={promptOpen}
-        className={`flex ${ctrlH} items-center rounded-full ${pillPad} ${pillText} ${squishCls} ${pillCls} ${pillTextCls}`}
+        className={`flex ${ctrlH} items-center rounded-lg ${pillPad} ${pillText} ${squishCls} ${pillCls} ${pillTextCls}`}
       >
         <span className="whitespace-nowrap">{promptPickerLabel}</span>
         <IconChevronDown className={`size-3.5 shrink-0 transition-transform duration-200 ${promptOpen ? "rotate-180" : ""}`} />
@@ -351,7 +351,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
   const howToNode = !hideHowTo ? (
     <button
       type="button"
-      className={`group/howto flex ${ctrlH} items-center gap-2 rounded-full ${videoPad} transition-colors duration-200 ${pillCls}`}
+      className={`group/howto flex ${ctrlH} items-center gap-2 rounded-lg ${videoPad} transition-colors duration-200 ${pillCls}`}
     >
       <span className={`flex ${badgeSize} items-center justify-center rounded-full ${badgeCls}`}>
         <IconPlay className="size-2 transition-transform duration-300 ease-out group-hover/howto:translate-x-px" />

@@ -1,6 +1,5 @@
 import { HeroV76 } from "@/components/home/hero-v76";
 import { HowItWorks } from "@/components/home/how-it-works";
-import { PricingTeaser } from "@/components/home/pricing-teaser";
 import { Testimonials } from "@/components/home/testimonials";
 import { FAQ } from "@/components/home/faq";
 import { CTA } from "@/components/home/cta";
@@ -30,7 +29,8 @@ export default function HomePage() {
       {/* The lower half stays on the light hero surface too, so the whole page
           reads as one continuous light canvas until the dark CTA + footer.
           Order: production gap → whole stack → replace tools → testimonials →
-          pricing → FAQ (per the landing narrative doc). */}
+          FAQ (per the landing narrative doc — no pricing section; the final
+          CTA carries the free-plan line instead). */}
       <div className="section-follow relative z-10">
         <Reveal>
           <ProductionGap />
@@ -43,9 +43,6 @@ export default function HomePage() {
         </Reveal>
         <Reveal>
           <Testimonials />
-        </Reveal>
-        <Reveal>
-          <PricingTeaser />
         </Reveal>
         <Reveal>
           <FAQ />

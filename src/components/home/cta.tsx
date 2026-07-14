@@ -26,6 +26,11 @@ export function CTA() {
           What are you waiting for?
         </h2>
         <div className="mx-auto mt-10 max-w-2xl text-left">
+          {/* Composer sits above its under-card strip (Langdock-style): the
+              strip peeks out beneath the box and carries the pricing line,
+              so the reassurance reads as part of the composer, not a
+              floating caption. */}
+          <div className="relative z-10">
           <V66Composer
             textareaRef={inputRef}
             typewriter
@@ -53,10 +58,17 @@ export function CTA() {
                 : "bg-white ring-1 ring-black/[0.06] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_24px_60px_-30px_rgba(16,24,40,0.18)]"
             }
           />
+          </div>
+          <div
+            className={`relative -mt-3 mx-2 rounded-b-[18px] px-5 pb-2.5 pt-5 text-[13px] ${
+              dark
+                ? "bg-white/[0.05] text-white/50 ring-1 ring-white/[0.08]"
+                : "bg-black/[0.03] text-neutral-500 ring-1 ring-black/[0.04]"
+            }`}
+          >
+            Free forever plan. No credit card required.
+          </div>
         </div>
-        <p className={`mt-5 text-sm ${dark ? "text-white/50" : "text-neutral-500"}`}>
-          Free forever plan. No credit card required.
-        </p>
       </div>
     </section>
   );
