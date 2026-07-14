@@ -2,9 +2,10 @@
 
 import { memo, useEffect, useRef, useState } from "react";
 import { APP_URL } from "@/lib/constants";
-import { getFeaturedTemplates, TEMPLATES, type Template } from "@/lib/templates";
+import { TEMPLATES, type Template } from "@/lib/templates";
 import { IconArrow } from "./icons";
 import { V66Composer } from "./hero-v66";
+import { PROMPT_IDEAS, useSeededPrompt } from "./prompt-ideas";
 import { V69CardMock } from "./hero-v71";
 import { StudioNav } from "./studio-nav";
 import { Card } from "@/components/ui/card";
@@ -20,38 +21,23 @@ const MONO = '"ABC Diatype Mono", ui-monospace, SFMono-Regular, Menlo, monospace
 const RAIL = "mx-auto max-w-[1600px] px-6 md:px-10";
 const FRAME_PAD = 5; // a tight hug between the card and the selector ring
 
-const V76_PROMPTS = [
-  "Client intake form",
-  "Client engagement dashboard",
-  "Client project tracker",
-  "Content approval flow",
-  "Document collection checklist",
-  "Proposal clients can e-sign",
-];
+// Prompt Ideas data + seeded-composer behavior live in prompt-ideas.ts,
+// shared with the bottom CTA so the two boxes read identically.
 
-// The composer leads with a fixed instruction; only the "what to build" part
-// animates, cycling through examples so the box stays anchored instead of
-// typing an entire sentence from scratch.
-const PROMPT_PREFIX = "Build me ";
-const BUILD_EXAMPLES = [
-  "a client intake form with company details and an e-signature",
-  "a dashboard that tracks client engagement over time",
-  "a proposal builder with line items and a running total",
-  "a project tracker for every client milestone",
+// Strip shows the most-used templates, ranked by real usage.
+const STRIP_ORDER = [
+  "onboarding-wizard",
+  "client-project-tracker",
+  "client-support-requests",
+  "client-ai-assistant",
+  "client-engagement-dashboard",
+  "document-collection",
+  "proposal-builder",
+  "content-approval-flow",
 ];
-
-const LEAD_SLUG = "client-engagement-dashboard";
-const FEATURED = getFeaturedTemplates(6);
-const CAROUSEL: Template[] = (() => {
-  const ordered = [
-    ...FEATURED,
-    ...TEMPLATES.filter((t) => !FEATURED.some((f) => f.slug === t.slug)),
-  ].slice(0, 12);
-  return [
-    ...ordered.filter((t) => t.slug === LEAD_SLUG),
-    ...ordered.filter((t) => t.slug !== LEAD_SLUG),
-  ];
-})();
+const CAROUSEL: Template[] = STRIP_ORDER
+  .map((slug) => TEMPLATES.find((t) => t.slug === slug))
+  .filter((t): t is Template => Boolean(t));
 
 const SEE_ALL_STACK = [
   { slug: "content-approval-flow", z: "z-[1]", rest: "[transform:translate(-50%,-50%)_translateY(8px)_scale(0.9)]", hover: "group-hover:[transform:translate(-50%,-50%)_translateX(-24px)_translateY(-2px)_rotate(-7deg)]" },
@@ -120,86 +106,11 @@ export function HeroV76({
   const { theme, toggleTheme } = useTheme();
   const dark = theme === "dark";
 
-  // The prefix is always present (static); only the example after it types in,
-  // holds, deletes, and advances to the next — so the box never types a whole
-  // sentence from empty.
-  const [prompt, setPrompt] = useState(PROMPT_PREFIX);
-  // Once the visitor focuses or types in the composer, the demo typewriter must
-  // stop — otherwise its ticks keep overwriting what they type. engagedRef is
-  // the synchronous guard (blocks an in-flight tick); userEngaged tears the
-  // animation effect down.
-  const [userEngaged, setUserEngaged] = useState(false);
-  const engagedRef = useRef(false);
-  const clearedRef = useRef(false);
+  // The box opens showing slot 1 of Prompt Ideas verbatim — it acts as the
+  // hero's second line of copy, so there's no separate placeholder and no
+  // typewriter. It renders in secondary ink until the visitor engages.
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  useEffect(() => {
-    const el = inputRef.current;
-    if (!el) return;
-    const engage = () => {
-      engagedRef.current = true;
-      setUserEngaged(true);
-    };
-    // On the first focus, wipe the leftover demo text so the visitor types into
-    // a clean box — but only if it's still the animation's text (starts with
-    // the prefix), never a prompt-idea the picker inserted.
-    const onFocus = () => {
-      if (!clearedRef.current) {
-        clearedRef.current = true;
-        if (el.value.startsWith(PROMPT_PREFIX)) setPrompt("");
-      }
-      engage();
-    };
-    el.addEventListener("focus", onFocus);
-    el.addEventListener("input", engage);
-    return () => {
-      el.removeEventListener("focus", onFocus);
-      el.removeEventListener("input", engage);
-    };
-  }, []);
-  useEffect(() => {
-    if (userEngaged) return;
-    const reduce =
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
-      setPrompt(PROMPT_PREFIX + BUILD_EXAMPLES[0]);
-      return;
-    }
-    let exampleIdx = 0;
-    let charIdx = 0;
-    let deleting = false;
-    let timer: ReturnType<typeof setTimeout>;
-    const tick = () => {
-      if (engagedRef.current) return;
-      // Timers are throttled/paused while the tab is hidden; wait and retry so
-      // the loop resumes cleanly on return instead of stalling mid-word.
-      if (typeof document !== "undefined" && document.hidden) {
-        timer = setTimeout(tick, 500);
-        return;
-      }
-      const full = BUILD_EXAMPLES[exampleIdx];
-      if (!deleting) {
-        charIdx += 1;
-        setPrompt(PROMPT_PREFIX + full.slice(0, charIdx));
-        if (charIdx < full.length) timer = setTimeout(tick, 34);
-        else {
-          deleting = true;
-          timer = setTimeout(tick, 2000); // hold on the full example
-        }
-      } else {
-        charIdx -= 1;
-        setPrompt(PROMPT_PREFIX + full.slice(0, charIdx));
-        if (charIdx > 0) timer = setTimeout(tick, 16);
-        else {
-          deleting = false;
-          exampleIdx = (exampleIdx + 1) % BUILD_EXAMPLES.length;
-          timer = setTimeout(tick, 350);
-        }
-      }
-    };
-    timer = setTimeout(tick, 600);
-    return () => clearTimeout(timer);
-  }, [userEngaged]);
+  const { prompt, onPromptChange, userEngaged } = useSeededPrompt(inputRef);
 
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
@@ -319,7 +230,7 @@ export function HeroV76({
   const rowMask = `linear-gradient(to right, transparent 0, #000 ${canLeft ? FADE : 0}px, #000 calc(100% - ${canRight ? FADE : 0}px), transparent 100%)`;
 
   const groundGradient = dark
-    ? "linear-gradient(180deg, #141416 0%, #0d0d0e 55%, #0a0a0b 100%)"
+    ? "linear-gradient(180deg, #141414 0%, #0d0d0d 55%, #0a0a0a 100%)"
     : "linear-gradient(180deg, #fcfcfd 0%, #f7f8fa 52%, #ffffff 100%)";
   const chevronCls = dark
     ? "bg-white/[0.06] text-white/70 ring-white/10 hover:bg-white/15 hover:text-white"
@@ -354,35 +265,35 @@ export function HeroV76({
         restPaddingClass="px-6 md:px-10"
         themeToggle={{ theme, onToggle: toggleTheme }}
       />
-      <section className={`relative -mt-14 pb-24 md:-mt-16 ${dark ? "bg-[#0a0a0b]" : "bg-white"}`}>
+      <section className={`relative -mt-14 pb-24 md:-mt-16 ${dark ? "bg-[#0a0a0a]" : "bg-white"}`}>
         <div className="relative overflow-hidden" style={{ background: groundGradient }}>
           <div aria-hidden className={`pointer-events-none absolute inset-x-0 top-0 h-px ${dark ? "bg-white/12" : "bg-black/[0.06]"}`} />
 
           <div className={`relative z-10 ${RAIL} pb-16 pt-36 md:pt-36 lg:pb-20`}>
             <div className="relative z-30 max-w-2xl">
-              <h1 className={`type-display max-w-xl text-center md:text-left ${dark ? "text-white" : "text-neutral-900"}`}>
-                The AI app builder
-                {/* Mobile breaks after "builder" so "for" starts line 2; desktop keeps the break after "for". */}
-                <br className="md:hidden" />{" "}
-                for
-                <br className="hidden md:block" />{" "}
-                client-facing experiences
+              <h1 className={`type-display mx-auto max-w-xl text-center md:mx-0 md:text-left ${dark ? "text-white" : "text-neutral-900"}`}>
+                The platform firms
+                {/* Fixed two-line lockup on every breakpoint. */}
+                <br />
+                run on and build on
               </h1>
 
               {showBody && (
-                <p className={`type-lead mt-4 max-w-lg text-center md:text-left ${dark ? "text-white/55" : "text-neutral-500"}`}>
+                <p className={`type-lead mx-auto mt-4 max-w-lg text-center md:mx-0 md:text-left ${dark ? "text-white/55" : "text-neutral-500"}`}>
                   Describe what you need in plain language and Assembly ships a polished, client-ready app — no code, no handoffs.
                 </p>
               )}
 
-              <div className="mt-8 max-w-xl">
+              <div className="mx-auto mt-8 max-w-xl md:mx-0">
                 <div className="v63-gradient-border relative rounded-[14px] md:rounded-[22px]">
                   <V66Composer
                     textareaRef={inputRef}
                     // The demo prompt types in secondary ink and hides the CTA;
                     // both flip on once the visitor starts their own prompt.
                     textDimmed={!userEngaged}
-                    showSubmit={userEngaged && prompt.trim().length > 0}
+                    // Arrow stays visible but inert over the seeded text; it
+                    // becomes the CTA once the visitor types or picks a prompt.
+                    submitDisabled={!userEngaged || prompt.trim().length === 0}
                     glow={false}
                     tone={theme}
                     compact
@@ -390,13 +301,13 @@ export function HeroV76({
                     promptPicker
                     promptPickerLabel="Prompt Ideas"
                     promptPickerSide="left"
-                    promptItems={V76_PROMPTS}
+                    promptItems={PROMPT_IDEAS}
                     hidePlus={!showPlus}
                     hideHowTo
                     plusAsAttach
                     submitLabel="Start building"
                     value={prompt}
-                    onValueChange={setPrompt}
+                    onValueChange={onPromptChange}
                     accent="#7DA4FF"
                     surfaceRadiusClass="rounded-[14px] md:rounded-[22px]"
                     surfaceClassName={
@@ -552,23 +463,6 @@ export function HeroV76({
           </div>
         </div>
 
-        {/* Logos carousel. */}
-        <div className="mx-auto mt-24 max-w-7xl px-6 md:mt-28">
-          <p className={`mb-8 text-center font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wider ${dark ? "text-white/40" : "text-neutral-400"}`}>
-            Trusted by teams at
-          </p>
-          <div className="mx-auto max-w-2xl overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]">
-            <div className="flex w-max animate-marquee items-center gap-12">
-              {["Capital One", "Collective", "Ditto", "Heritage Law", "Waymaker", "Aura", "CoverPanda", "Northwind"]
-                .concat(["Capital One", "Collective", "Ditto", "Heritage Law", "Waymaker", "Aura", "CoverPanda", "Northwind"])
-                .map((name, i) => (
-                  <span key={i} className={`shrink-0 text-base font-medium ${dark ? "text-white/55" : "text-neutral-500"}`}>
-                    {name}
-                  </span>
-                ))}
-            </div>
-          </div>
-        </div>
       </section>
     </>
   );

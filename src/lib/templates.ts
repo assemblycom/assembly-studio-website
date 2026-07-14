@@ -44,6 +44,7 @@ export const TEMPLATE_INDUSTRIES = [
 // Industry tags kept out of the template objects to keep that list readable.
 // Each template carries 2–4 industries it most naturally serves.
 const INDUSTRY_BY_SLUG: Record<string, string[]> = {
+  "onboarding-wizard": ["Accounting", "Legal", "Consulting", "Marketing"],
   "new-client-intake": ["Accounting", "Legal", "Consulting", "Marketing"],
   "document-collection": ["Accounting", "Legal", "Real estate", "Financial services"],
   "pdf-to-digital-intake": ["Legal", "Healthcare", "Accounting", "Real estate"],
@@ -67,6 +68,17 @@ const INDUSTRY_BY_SLUG: Record<string, string[]> = {
 
 const BASE_TEMPLATES: Template[] = [
   // Onboarding
+  {
+    slug: "onboarding-wizard",
+    title: "Onboarding wizard",
+    description: "Multi-step flow with saved progress",
+    icon: "🪄",
+    category: "Onboarding",
+    longDescription:
+      "Walk new clients through a multi-step onboarding flow — welcome, identity, goals, timelines, and file upload — with progress saved so they can return later.",
+    features: ["Multi-step flow", "Saved progress", "File upload", "Guided steps"],
+    featured: true,
+  },
   {
     slug: "new-client-intake",
     title: "New client intake",
