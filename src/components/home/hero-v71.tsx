@@ -342,8 +342,9 @@ function CardOnboarding() {
           {STEP}/{TOTAL}
         </span>
       </div>
-      {/* One-line title — short enough never to wrap at the card width. */}
-      <div className="text-[12.5px] font-medium leading-tight text-neutral-900">
+      {/* One-line title — short enough never to wrap at the card width.
+          Regular weight: medium reads bold at this size. */}
+      <div className="text-[12.5px] font-normal leading-tight text-neutral-900">
         Your contact details
       </div>
       <div className="flex flex-col gap-2">
