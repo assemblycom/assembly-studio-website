@@ -52,7 +52,7 @@ export function Testimonials() {
         {/* Attribution leads the section — small caps in the mono face, the
             colour shift (not a divider glyph) separates name from role. */}
         <p className="font-[family-name:var(--font-diatype-mono)] text-[12px] uppercase tracking-[0.08em] text-foreground md:pr-44">
-          &mdash; {FEATURED.name}
+          {FEATURED.name}
           <span className="ml-3 text-muted-foreground">
             {FEATURED.title}, {FEATURED.firm}
           </span>
@@ -86,9 +86,13 @@ export function Testimonials() {
             desktop; sits below the bars on mobile. */}
         <Link
           href={`/customers/${FEATURED.slug}`}
-          className="group mt-6 inline-flex items-center gap-1.5 text-[15px] text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground md:absolute md:bottom-[210px] md:right-0 md:mt-0 lg:bottom-[218px]"
+          className="group mt-6 inline-flex items-center gap-1.5 text-[15px] text-foreground md:absolute md:bottom-[210px] md:right-0 md:mt-0 lg:bottom-[218px]"
         >
-          Read full story
+          {/* Underline only the text — an underlined arrow that also nudges
+              on hover reads as a rendering glitch. */}
+          <span className="underline decoration-border underline-offset-4 transition-colors group-hover:decoration-foreground">
+            Read full story
+          </span>
           <span className="transition-transform duration-200 group-hover:translate-x-0.5">
             &rarr;
           </span>

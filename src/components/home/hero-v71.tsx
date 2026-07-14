@@ -251,13 +251,7 @@ function CardProposal() {
           <span>Proposal</span>
           <span>Acme Co</span>
         </div>
-        <div className="mt-4 flex items-end justify-between">
-          <span className="text-[24px] font-medium leading-none tracking-tight tabular-nums text-neutral-900">$18,500</span>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="mb-0.5 text-neutral-300">
-            <path d="M7 17L17 7" />
-            <path d="M8 7h9v9" />
-          </svg>
-        </div>
+        <div className="mt-4 text-[24px] font-medium leading-none tracking-tight tabular-nums text-neutral-900">$18,500</div>
       </div>
       {/* Page dots. */}
       <div className="mt-3 flex items-center justify-center gap-1">
@@ -742,9 +736,9 @@ function CardSupport() {
   let elapsed = 0;
   return (
     <div className="flex h-full flex-col gap-3 bg-[var(--v69-card)] p-4">
-      {/* Headline + bar share one chip panel — same treatment as the
-          proposal card's balance panel, so the two tops read as one family. */}
-      <div className="flex flex-col gap-3 rounded-[16px] bg-[var(--v69-chip)] p-3.5 shadow-[0_1px_2px_rgba(16,24,40,0.06),inset_0_0_0_1px_rgba(16,24,40,0.03)]">
+      {/* Headline + bar share one outlined block so the number reads WITH its
+          chart instead of floating above it; statuses follow underneath. */}
+      <div className="flex flex-col gap-3 rounded-xl p-3.5 ring-1 ring-[var(--v69-chip-border)]">
         <div className="flex items-baseline gap-1.5">
           <span className="text-[24px] font-medium leading-none tracking-tight text-neutral-900">{total}</span>
           <span className="text-[10px] text-neutral-400">requests this week</span>

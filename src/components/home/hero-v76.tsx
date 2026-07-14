@@ -366,7 +366,10 @@ export function HeroV76({
                 {isDesktop && (
                 <div
                   aria-hidden
-                  className={`pointer-events-none absolute left-0 top-0 z-20 ${frameReady ? "transition-transform duration-[380ms] ease-[cubic-bezier(0.22,1,0.36,1)]" : ""}`}
+                  // Apple-style glide: a longer settle with no overshoot
+                  // (0.32,0.72,0,1), kept on the compositor via will-change
+                  // so the ring never stutters mid-flight.
+                  className={`pointer-events-none absolute left-0 top-0 z-20 [will-change:transform] ${frameReady ? "transition-transform duration-[500ms] ease-[cubic-bezier(0.32,0.72,0,1)]" : ""}`}
                   style={{ transform: `translateX(${frame.x}px)`, top: frame.top, width: frame.w, height: frame.h }}
                 >
                   {/* A plain bordered div, not an SVG path: CSS border-radius
