@@ -58,7 +58,9 @@ export function ReplaceTools() {
           for your clients, apps built for exactly how you operate.
         </p>
 
-        <div className="relative mt-10 overflow-hidden rounded-2xl border border-border bg-muted/40 px-6 pt-10 md:pt-14">
+        {/* No containing panel — the tall window sits straight on the page
+            (like the reference), with the dock floating over its bottom. */}
+        <div className="relative mt-12">
           {/* The one workspace — a single window whose content is the
               Assembly app replacing the picked tool. */}
           <div className="mx-auto w-full max-w-[600px] overflow-hidden rounded-t-xl border border-b-0 border-border bg-card shadow-[0_24px_60px_-30px_rgba(16,24,40,0.35)]">
@@ -75,8 +77,9 @@ export function ReplaceTools() {
               <span className="w-[46px]" aria-hidden />
             </div>
             {/* All mocks stay mounted in one grid cell and crossfade, so
-                their internal animations don't restart on every pick. */}
-            <div className="relative grid h-[230px] md:h-[300px]">
+                their internal animations don't restart on every pick. Tall
+                enough to show (nearly) the whole app. */}
+            <div className="relative grid h-[330px] md:h-[430px]">
               {TOOLS.map((t, i) => (
                 <div
                   key={t.slug}
@@ -97,8 +100,8 @@ export function ReplaceTools() {
 
           {/* The patchwork — a dock of the tools being retired. Fades over
               the window bottom; items grow mac-style from the baseline. */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background/85 to-transparent" />
-          <div className="absolute inset-x-0 bottom-5 flex justify-center">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent" />
+          <div className="absolute inset-x-0 -bottom-3 flex justify-center">
             <div className="flex items-end gap-1.5 rounded-2xl border border-border bg-background/80 p-2 shadow-[0_16px_40px_-20px_rgba(16,24,40,0.4)] backdrop-blur-md md:gap-2">
               {TOOLS.map((t, i) => (
                 <button
