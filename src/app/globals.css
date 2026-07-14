@@ -526,7 +526,7 @@ html[data-theme="dark"] body {
     font-weight: 500;
   }
   .type-lead {
-    font-size: 1.0625rem; /* 17px */
+    font-size: 1rem; /* 16px */
     line-height: 1.6;
     font-weight: 400;
   }
@@ -546,7 +546,7 @@ html[data-theme="dark"] body {
       font-size: 1.875rem; /* 30px */
     }
     .type-lead {
-      font-size: 1.125rem; /* 18px */
+      font-size: 1.0625rem; /* 17px */
     }
   }
 }

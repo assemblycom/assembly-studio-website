@@ -16,11 +16,13 @@ export const metadata: Metadata = {
 // on the right. Copy drawn from the internal "About Assembly Studio" hub doc.
 // ─────────────────────────────────────────────────────────────────────────
 
+// TOC labels are deliberately shorter than the section headings — the rail
+// is 240px and a label must never wrap to two lines.
 const SECTIONS = [
-  { id: "only-you", label: "Build the firm only you can build" },
-  { id: "how-it-works", label: "From description to deployed app" },
-  { id: "production-gap", label: "Where other builders stop" },
-  { id: "security", label: "Security the AI can't get wrong" },
+  { id: "only-you", label: "Only you can build" },
+  { id: "how-it-works", label: "Description to app" },
+  { id: "production-gap", label: "Where builders stop" },
+  { id: "security", label: "Security by structure" },
   { id: "what-firms-build", label: "What firms build" },
   { id: "get-started", label: "Available today" },
 ];
