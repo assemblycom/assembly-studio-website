@@ -34,10 +34,5 @@ export const PROMPT_IDEAS = [
     prompt:
       "Build a service request app. Internal users define services the firm offers; each contact picks one, fills out a scoping form, and submits. Internal users review requests and confirm the scope or reply with questions, and each contact can see where their request stands.",
   },
-  {
-    label: "Client performance dashboard",
-    prompt:
-      "Build a dashboard app where each contact sees their key metrics. Internal users configure which metrics to track and keep the values current per contact and see an overview across all contacts.",
-  },
 ];
 

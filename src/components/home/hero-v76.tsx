@@ -417,7 +417,7 @@ export function HeroV76({
                 >
                   <Card
                     size="sm"
-                    className={`gap-0 py-0 ring-1 transition-[transform,box-shadow] duration-200 ease-out group-hover:-translate-y-0.5 ${dark ? "ring-white/8 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)] group-hover:shadow-[0_14px_34px_-22px_rgba(0,0,0,0.85)]" : "ring-black/[0.07] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_28px_-18px_rgba(16,24,40,0.20)] group-hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_18px_36px_-20px_rgba(16,24,40,0.24)]"}`}
+                    className={`gap-0 py-0 pb-0! ring-1 transition-[transform,box-shadow] duration-200 ease-out group-hover:-translate-y-0.5 ${dark ? "ring-white/8 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)] group-hover:shadow-[0_14px_34px_-22px_rgba(0,0,0,0.85)]" : "ring-black/[0.07] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_28px_-18px_rgba(16,24,40,0.20)] group-hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_18px_36px_-20px_rgba(16,24,40,0.24)]"}`}
                   >
                     <div data-slot="card-media" className={`relative h-[188px] w-full overflow-hidden ${dark ? "" : "bg-[#eef0f2]"}`}>
                       {/* Square minis skinned like the rail cards (same dark
