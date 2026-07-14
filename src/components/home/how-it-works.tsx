@@ -144,8 +144,10 @@ export function HowItWorks() {
         </div>
 
         {/* Right — single visual panel. All steps stay mounted in one grid
-            cell and crossfade, so their internal animations don't restart. */}
-        <div className="mt-8 grid md:mt-0">
+            cell and crossfade, so their internal animations don't restart.
+            Pulled up beside the section heading so the tall panel doesn't
+            sit low against the step list. */}
+        <div className="mt-8 grid md:-mt-20 lg:-mt-24">
           {STEPS.map((step, i) => (
             <div
               key={step.id}
