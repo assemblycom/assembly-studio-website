@@ -59,10 +59,9 @@ export function WholeStack() {
               Everything after the prompt, already built.
             </h2>
             <p className="type-lead mt-5 text-muted-foreground">
-              Ship a real app without wiring up auth, configuring a database,
-              or figuring out how clients log in. Assembly is the foundation
-              your apps are born into — not infrastructure you assemble
-              around them.
+              Ship a real app without wiring up auth, a database, or client
+              login. Assembly is the foundation your apps are born into —
+              not infrastructure you assemble around them.
             </p>
           </div>
 
