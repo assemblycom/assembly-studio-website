@@ -99,10 +99,10 @@ export default function SecurityPage() {
             Build as fast as you want. Encryption, access controls, and
             certifications are engineered, audited, and on by default.
           </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <div className="mx-auto mt-8 flex w-full max-w-xs flex-col items-stretch gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:justify-center">
             <a
               href={DEMO_URL}
-              className="rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
+              className="rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background transition-opacity hover:opacity-90"
             >
               Book demo
             </a>
@@ -110,7 +110,7 @@ export default function SecurityPage() {
               href={TRUST_CENTER_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-border bg-background px-5 py-2.5 text-sm text-foreground transition-colors hover:bg-muted"
+              className="rounded-lg border border-foreground/25 bg-background px-5 py-2.5 text-center text-sm text-foreground transition-colors hover:bg-muted"
             >
               View Trust Center
             </a>
@@ -182,7 +182,7 @@ export default function SecurityPage() {
             {/* Card 1 — Capital One: text + photo, spanning two columns. */}
             <a
               href={SPOTLIGHT.href}
-              className="group grid overflow-hidden rounded-3xl border border-border md:col-span-2 md:grid-cols-2"
+              className="group grid overflow-hidden rounded-3xl bg-muted md:col-span-2 md:grid-cols-2"
             >
               {/* Text (left on desktop, below the photo on mobile). */}
               <div className="order-2 flex flex-col justify-between p-6 md:order-1 md:p-8">
@@ -275,10 +275,10 @@ export default function SecurityPage() {
           <h2 className="type-h2 mx-auto max-w-2xl text-balance">
             Build AI apps on a trusted platform
           </h2>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <div className="mx-auto mt-8 flex w-full max-w-xs flex-col items-stretch gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:justify-center">
             <a
               href={DEMO_URL}
-              className="rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
+              className="rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background transition-opacity hover:opacity-90"
             >
               Book demo
             </a>
@@ -286,7 +286,7 @@ export default function SecurityPage() {
               href={TRUST_CENTER_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-border bg-background px-5 py-2.5 text-sm text-foreground transition-colors hover:bg-muted"
+              className="rounded-lg border border-foreground/25 bg-background px-5 py-2.5 text-center text-sm text-foreground transition-colors hover:bg-muted"
             >
               Explore Trust Center
             </a>

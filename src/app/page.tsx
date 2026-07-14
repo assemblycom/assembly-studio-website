@@ -5,8 +5,9 @@ import { Testimonials } from "@/components/home/testimonials";
 import { FAQ } from "@/components/home/faq";
 import { CTA } from "@/components/home/cta";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
-import { SectionPlaceholder } from "@/components/home/section-placeholder";
 import { ProductionGap } from "@/components/home/production-gap";
+import { WholeStack } from "@/components/home/whole-stack";
+import { ReplaceTools } from "@/components/home/replace-tools";
 import { Reveal } from "@/components/ui/reveal";
 
 export default function HomePage() {
@@ -35,18 +36,10 @@ export default function HomePage() {
           <ProductionGap />
         </Reveal>
         <Reveal>
-          <SectionPlaceholder
-            id="whole-stack"
-            title="The whole stack"
-            note="Placeholder — enumerates the proof behind the wedge claim, carrying the security story too."
-          />
+          <WholeStack />
         </Reveal>
         <Reveal>
-          <SectionPlaceholder
-            id="replace-tools"
-            title="Replace the tools you've outgrown"
-            note="Placeholder — consolidation ROI, the second proof pattern."
-          />
+          <ReplaceTools />
         </Reveal>
         <Reveal>
           <Testimonials />

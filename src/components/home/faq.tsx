@@ -12,27 +12,32 @@ const FAQS: FAQEntry[] = [
   {
     question: "What can I actually build?",
     answer:
-      "Assembly Studio works well for client-facing workflows. Examples include year-end checklists (accounting), deliverable reviews (consulting), case trackers (law), approval flows (marketing), and mood board approvals (design). Any describable client workflow is buildable.",
+      "Any client workflow you can describe. Firms build year-end checklists (accounting), deliverable reviews (consulting), case trackers (legal), and approval flows (marketing) — plus whatever is specific to how you work.",
   },
   {
     question: "Do I need to know how to code?",
     answer:
-      "No coding required. Describe your desired app in plain English, and Assembly Studio generates it. Refinements happen through conversation.",
-  },
-  {
-    question: "What if I already have an Assembly.com workspace?",
-    answer:
-      "Currently, Assembly Studio operates on its own pricing. Changing to Assembly Studio pricing will enable the AI app builder in your Assembly.com workspace.",
-  },
-  {
-    question: "How do I get in touch with the team?",
-    answer:
-      "Contact the team at studio@assembly.com for Assembly Studio inquiries.",
+      "No coding required. Describe the app you want in plain English and Assembly Studio builds it. Refinements happen the same way — by conversation.",
   },
   {
     question: "What is Assembly Studio not good for?",
     answer:
-      "Assembly is best for authenticated customer experiences. Pure publicly accessible projects like marketing websites, or streaming video platforms, or public web apps are not ideal.",
+      "Assembly Studio is built for authenticated client experiences — apps your clients sign into. It's not the right tool for public marketing websites, streaming platforms, or public web apps.",
+  },
+  {
+    question: "I already use a portal tool — what happens to it?",
+    answer:
+      "You don't have to rip anything out. Many firms start by running Assembly Studio alongside their existing portal and move one workflow at a time. When you're ready to switch fully, contact the team and we'll walk through what carries over.",
+  },
+  {
+    question: "Who owns the apps I build?",
+    answer:
+      "You do. Apps you build live in your workspace, and your data and client relationships stay yours.",
+  },
+  {
+    question: "What does it cost? What if I already have an Assembly workspace?",
+    answer:
+      "Start free, forever — see the plans above for what's included as you grow. If you already have an Assembly.com workspace, switching to Assembly Studio pricing enables the AI app builder right in your existing workspace.",
   },
 ];
 

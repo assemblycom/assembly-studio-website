@@ -420,7 +420,7 @@ export function PromptComposer({
                     submit();
                   }}
                   disabled={!hasInput}
-                  className="flex items-center gap-2 rounded-full bg-foreground px-5 py-2 text-sm text-background transition-all hover:opacity-90 active:scale-95 disabled:opacity-30 disabled:active:scale-100"
+                  className="flex items-center gap-2 rounded-lg bg-foreground px-5 py-2 text-sm text-background transition-all hover:opacity-90 active:scale-95 disabled:opacity-30 disabled:active:scale-100"
                 >
                   {pillLabel}
                   <IconArrow className="size-4" />

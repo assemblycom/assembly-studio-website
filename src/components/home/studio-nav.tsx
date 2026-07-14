@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { NAV_LINKS, APP_URL, DEMO_URL } from "@/lib/constants";
 
@@ -42,6 +42,27 @@ export function StudioNav({
   // The menu is portaled to <body>, so it needs the client to have mounted.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  // Lock page scroll while the full-screen menu is open. The lock must not
+  // move or freeze the scroll position (a fixed-body freeze made page
+  // transitions jitter — the old scroll offset leaked onto the next page), so:
+  // <html> gets overflow:hidden (stops wheel/keyboard scrolling), and a
+  // non-passive touchmove guard on the overlay stops iOS touch scrolling,
+  // while still allowing the menu's own list to scroll if it overflows.
+  const menuScrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const prev = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    const preventTouch = (e: TouchEvent) => {
+      if (!menuScrollRef.current?.contains(e.target as Node)) e.preventDefault();
+    };
+    document.addEventListener("touchmove", preventTouch, { passive: false });
+    return () => {
+      document.documentElement.style.overflow = prev;
+      document.removeEventListener("touchmove", preventTouch);
+    };
+  }, [mobileMenuOpen]);
   // The scrolled pill now matches the surface theme: a light capsule in light
   // contexts, a dark one over a dark hero/theme (darkTop). So contents are light
   // only in a dark context — dark otherwise, whether at rest or scrolled.
@@ -219,11 +240,11 @@ export function StudioNav({
           <div className="flex flex-1 items-center justify-end gap-1.5">
             {themeToggle && (() => {
               const light = themeToggle.theme === "light";
-              // A single round icon button (not a two-segment toggle — that ate
-              // too much nav width). It shows the mode you'd switch TO: a moon in
-              // light, a sun in dark. Hidden below xl where the nav gets crammed;
-              // the mobile menu still carries an Appearance switch.
-              const ring = lightContent ? "ring-white/25" : "ring-foreground/15";
+              // A bare icon glyph (no ring — the outlined circle read heavy in
+              // the nav). It shows the mode you'd switch TO: a moon in light, a
+              // sun in dark, with only a soft hover fill like the nav links.
+              // Hidden below xl where the nav gets crammed; the mobile menu
+              // still carries an Appearance switch.
               const ink = lightContent
                 ? "text-white/70 hover:text-white hover:bg-white/10"
                 : "text-foreground/60 hover:text-foreground hover:bg-foreground/[0.06]";
@@ -232,7 +253,7 @@ export function StudioNav({
                   type="button"
                   onClick={themeToggle.onToggle}
                   aria-label={light ? "Switch to dark theme" : "Switch to light theme"}
-                  className={`mr-1.5 hidden size-8 items-center justify-center rounded-full ring-1 transition-colors xl:flex ${ring} ${ink}`}
+                  className={`mr-1.5 hidden size-8 items-center justify-center rounded-full transition-colors xl:flex ${ink}`}
                 >
                   {light ? (
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -259,7 +280,7 @@ export function StudioNav({
               Log in
             </a>
             <a href={APP_URL} className={ctaCls}>
-              Get started
+              Start building
             </a>
           </div>
         </div>
@@ -287,18 +308,6 @@ export function StudioNav({
               />
             </Link>
             <div className="flex items-center gap-4">
-              <a
-                href={APP_URL}
-                className={`text-sm ${menuMuted}`}
-              >
-                Log in
-              </a>
-              <a
-                href={APP_URL}
-                className={`rounded-lg px-4 py-2 text-sm ${menuCta}`}
-              >
-                Get started
-              </a>
               <button
                 onClick={() => setMobileMenuOpen(false)}
                 aria-label="Close menu"
@@ -318,86 +327,92 @@ export function StudioNav({
             </div>
           </div>
 
-          <ul className="flex flex-1 flex-col gap-1 px-6 pt-6">
-            {NAV_LINKS.map((link) => (
-              <li key={link.href}>
-                {link.disabled ? (
-                  <span
-                    aria-disabled="true"
-                    className={`block py-3 text-lg ${menuMuted}`}
-                  >
-                    {link.label}
-                  </span>
-                ) : link.external ? (
-                  <a
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`block py-3 text-lg ${menuInk}`}
-                  >
-                    {link.label}
-                  </a>
-                ) : (
-                  <Link
-                    href={link.href}
-                    className={`block py-3 text-lg ${menuInk}`}
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    {link.label}
-                  </Link>
-                )}
-              </li>
-            ))}
-          </ul>
+          <div ref={menuScrollRef} className="flex flex-1 flex-col overflow-y-auto overscroll-contain px-5 pt-6">
+            <ul className="flex flex-col gap-1">
+              {NAV_LINKS.map((link) => (
+                <li key={link.href}>
+                  {link.disabled ? (
+                    <span
+                      aria-disabled="true"
+                      className={`block py-3 text-lg ${menuMuted}`}
+                    >
+                      {link.label}
+                    </span>
+                  ) : link.external ? (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`block py-3 text-lg ${menuInk}`}
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      href={link.href}
+                      className={`block py-3 text-lg ${menuInk}`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {link.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
 
-          {themeToggle && (() => {
-            const light = themeToggle.theme === "light";
-            // Compact icon-only segments (sun / moon) — no labels; each targets an
-            // explicit theme so only the inactive one acts on tap.
-            const segCls = (active: boolean) =>
-              `flex size-8 items-center justify-center rounded-full transition-colors ${active ? menuSegActive : menuMuted}`;
-            return (
-              <div className={`mt-auto flex justify-end border-t px-6 py-5 ${menuBorder}`}>
-                <div className={`flex items-center gap-1 rounded-full border p-1 ${menuBorder}`} role="group" aria-label="Appearance">
-                  <button
-                    type="button"
-                    onClick={() => { if (!light) themeToggle.onToggle(); }}
-                    aria-pressed={light}
-                    aria-label="Light theme"
-                    className={segCls(light)}
-                  >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                      <circle cx="12" cy="12" r="4" />
-                      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => { if (light) themeToggle.onToggle(); }}
-                    aria-pressed={!light}
-                    aria-label="Dark theme"
-                    className={segCls(!light)}
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                    </svg>
-                  </button>
+            {/* Appearance toggle — kept with the nav list (under Pricing)
+                rather than pinned to the bottom of the sheet. */}
+            {themeToggle && (() => {
+              const light = themeToggle.theme === "light";
+              const segCls = (active: boolean) =>
+                `flex size-6 items-center justify-center rounded-full transition-colors ${active ? menuSegActive : menuMuted}`;
+              return (
+                <div className="mt-3">
+                  <div className={`inline-flex items-center gap-0.5 rounded-full border p-0.5 ${menuBorder}`} role="group" aria-label="Appearance">
+                    <button
+                      type="button"
+                      onClick={() => { if (!light) themeToggle.onToggle(); }}
+                      aria-pressed={light}
+                      aria-label="Light theme"
+                      className={segCls(light)}
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { if (light) themeToggle.onToggle(); }}
+                      aria-pressed={!light}
+                      aria-label="Dark theme"
+                      className={segCls(!light)}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })()}
+              );
+            })()}
+          </div>
 
-          {!hideDemo && (
-            <div className={`border-t px-6 py-6 ${menuBorder}`}>
-              <Link
-                href={DEMO_URL}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`flex w-full items-center justify-center rounded-lg border px-4 py-3 text-sm ${menuDemo}`}
-              >
-                Book a demo
-              </Link>
-            </div>
-          )}
+          {/* Bottom actions — stacked full-width so both read the same size. */}
+          <div className="flex flex-col gap-3 px-5 pb-8 pt-4">
+            <a
+              href={APP_URL}
+              className={`flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm ${menuCta}`}
+            >
+              Start building
+            </a>
+            <a
+              href={APP_URL}
+              className={`flex w-full items-center justify-center rounded-lg border px-4 py-3 text-sm ${menuDemo}`}
+            >
+              Log in
+            </a>
+          </div>
         </div>,
         document.body,
       )}

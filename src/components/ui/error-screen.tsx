@@ -19,7 +19,8 @@ export function ErrorScreen({ title, description, children }: ErrorScreenProps) 
       <p className="mt-5 max-w-md text-base leading-relaxed text-muted-foreground">
         {description}
       </p>
-      <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+      {/* Stacked equal-width buttons on mobile; inline row from sm up. */}
+      <div className="mx-auto mt-9 flex w-full max-w-xs flex-col items-stretch gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:justify-center [&>a]:text-center [&>button]:text-center">
         {children}
       </div>
     </div>

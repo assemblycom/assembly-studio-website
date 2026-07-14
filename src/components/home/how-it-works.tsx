@@ -1,167 +1,165 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Section } from "@/components/ui/section";
+import { DescribeVisual } from "@/components/home/describe-visual";
+import { BuildAppVisual } from "@/components/home/build-app-visual";
+import { BrandPortalVisual } from "@/components/home/brand-portal-visual";
+import { BuildStepVisual } from "@/components/home/build-step-visual";
 
 // ─────────────────────────────────────────────────────────────────────────
-// HOW IT WORKS — Granola-style composition: a sticky menu of the three
-// phases on the left (scroll-spy underlines the one you're reading; clicking
-// scrolls to it), and each step's text + app-window visual stacked on the
-// right. Native scroll throughout.
+// HOW IT WORKS — Sierra-style composition: the step list sits on the left
+// (the active step expands to reveal its copy; a hairline progress bar runs
+// the dwell time), one visual panel on the right crossfades between steps.
+// Compact by design so the visitor keeps scrolling.
 // ─────────────────────────────────────────────────────────────────────────
 
 interface Step {
   id: string;
-  menu: string;
   title: string;
   body: string;
-  crumb: string;
+  visual: React.ReactNode;
 }
 
 const STEPS: Step[] = [
   {
+    id: "describe",
+    title: "Describe",
+    body: "Say what you want in plain language, or start with an app template.",
+    visual: <DescribeVisual />,
+  },
+  {
+    id: "plan",
+    title: "Plan",
+    body: "The app builder asks a few product questions and shows you a plan. You approve or edit before anything is built.",
+    visual: <BuildAppVisual />,
+  },
+  {
     id: "build",
-    menu: "Build the app",
-    title: "Describe an app, ship it in minutes",
-    body: "Start from a template or describe your app in plain language. Assembly ships a secure, client-ready app in one click — no code, no infrastructure, no developers.",
-    crumb: "Engagement",
+    title: "Build",
+    body: "A real app deploys into your workspace. Team views in your dashboard, client views in your client experience.",
+    visual: <BrandPortalVisual />,
   },
   {
-    id: "brand",
-    menu: "Brand the portal",
-    title: "A branded portal your clients want to use",
-    body: "Your apps and native Assembly apps live side by side in a portal branded as your firm. Organize them into folders and set permissions so each client sees only what's meant for them.",
-    crumb: "Branding",
-  },
-  {
-    id: "team",
-    menu: "Run it as a team",
-    title: "Your team's command center",
-    body: "A built-in CRM for contacts and companies, a unified notification center, and an internal team view of every app you build — automatically.",
-    crumb: "Team",
+    id: "iterate",
+    title: "Iterate",
+    body: "Keep chatting to change anything, before or after launch.",
+    visual: <BuildStepVisual />,
   },
 ];
 
-// The app-window visual for a step.
-function AppWindow({ crumb }: { crumb: string }) {
-  return (
-    <div className="flex flex-col overflow-hidden rounded-lg bg-card ring-1 ring-border shadow-[0_1px_2px_rgba(16,24,40,0.04),0_18px_40px_-28px_rgba(16,24,40,0.18)]">
-      <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-        <span className="text-[13px] text-foreground">Client portal</span>
-        <span className="text-[13px] text-muted-foreground">/ {crumb}</span>
-        <span className="ml-auto flex gap-1.5">
-          <span className="size-2 rounded-full bg-border" />
-          <span className="size-2 rounded-full bg-border" />
-        </span>
-      </div>
-      <div className="bg-muted p-3 md:p-4">
-        <div
-          className="mx-auto w-full overflow-hidden rounded-lg bg-background ring-1 ring-border"
-          style={{ aspectRatio: "16 / 9" }}
-        />
-      </div>
-    </div>
-  );
-}
+const STEP_MS = 7000;
 
 export function HowItWorks() {
   const [active, setActive] = useState(0);
-  const [progress, setProgress] = useState<number[]>(() => STEPS.map(() => 0));
-  const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
+  // Bumped on manual selection so the progress animation restarts even when
+  // the same step is re-picked.
+  const [cycle, setCycle] = useState(0);
+  const [inView, setInView] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
 
+  // Only cycle while the section is on screen, so the dwell time isn't spent
+  // before the visitor ever sees it.
   useEffect(() => {
-    // Active step = whichever step's center is nearest the viewport middle.
-    // Driven by scroll position (not IntersectionObserver) so it updates
-    // reliably. Each menu row's underline doubles as a progress bar: it fills
-    // as the viewport midline travels through that step, and stays filled for
-    // steps already read (scrolling back rewinds it).
-    const compute = () => {
-      const mid = window.innerHeight / 2;
-      let best = 0;
-      let bestDist = Infinity;
-      const fills: number[] = [];
-      stepRefs.current.forEach((el, i) => {
-        if (!el) {
-          fills[i] = 0;
-          return;
-        }
-        const r = el.getBoundingClientRect();
-        const dist = Math.abs(r.top + r.height / 2 - mid);
-        if (dist < bestDist) {
-          bestDist = dist;
-          best = i;
-        }
-        fills[i] = Math.min(1, Math.max(0, (mid - r.top) / r.height));
-      });
-      setActive(best);
-      setProgress(fills);
-    };
-    compute();
-    window.addEventListener("scroll", compute, { passive: true });
-    window.addEventListener("resize", compute);
-    return () => {
-      window.removeEventListener("scroll", compute);
-      window.removeEventListener("resize", compute);
-    };
+    const el = rootRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0.3 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
-  const scrollToStep = (i: number) => {
-    stepRefs.current[i]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  useEffect(() => {
+    if (!inView) return;
+    const t = setTimeout(
+      () => setActive((a) => (a + 1) % STEPS.length),
+      STEP_MS,
+    );
+    return () => clearTimeout(t);
+  }, [inView, active, cycle]);
+
+  const select = (i: number) => {
+    setActive(i);
+    setCycle((c) => c + 1);
   };
 
   return (
-    <Section id="how-it-works">
-      <div className="lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-16 xl:gap-24">
-        {/* Left — sticky phase menu (desktop only). Each row underlines; the
-            active row reads in full ink with a dark underline. */}
-        <nav aria-label="How it works steps" className="hidden lg:block">
-          <div className="sticky top-24">
-            {STEPS.map((step, i) => (
-              <button
-                key={step.id}
-                type="button"
-                onClick={() => scrollToStep(i)}
-                aria-current={active === i ? "true" : undefined}
-                className={`relative block w-full border-b border-border py-3 text-left text-[15px] transition-colors ${
+    // Same rail as the nav/hero (max-w-[1600px], px-10 at md) so the step
+    // list's left edge lines up with the nav logo above it.
+    <section id="how-it-works" className="py-20 md:py-28">
+      <div ref={rootRef} className="mx-auto max-w-[1600px] px-6 md:px-10">
+        <h2 className="type-h2 text-foreground">How it works</h2>
+        <div className="mt-10 md:mt-14 md:grid md:grid-cols-[minmax(0,340px)_minmax(0,1fr)] md:items-start md:gap-12 lg:gap-20">
+        {/* Left — step list. The active row expands to show its copy. */}
+        <div role="tablist" aria-label="How it works steps">
+          {STEPS.map((step, i) => (
+            <button
+              key={step.id}
+              type="button"
+              role="tab"
+              aria-selected={active === i}
+              onClick={() => select(i)}
+              className="relative block w-full border-t border-border py-4 text-left"
+            >
+              {/* The top hairline doubles as the step's progress bar. */}
+              {active === i && (
+                <span
+                  aria-hidden
+                  key={`${active}-${cycle}`}
+                  className="absolute inset-x-0 -top-px h-px origin-left bg-foreground"
+                  style={{
+                    animation: `hiw-fill ${STEP_MS}ms linear forwards`,
+                    animationPlayState: inView ? "running" : "paused",
+                  }}
+                />
+              )}
+              <span
+                className={`block text-[17px] transition-colors ${
                   active === i
                     ? "text-foreground"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {step.menu}
-                {/* The underline as a progress bar — fills left-to-right as
-                    the step is read; scaleX so the scrub costs no layout. */}
-                <span
-                  aria-hidden
-                  className="absolute -bottom-px left-0 h-px w-full origin-left bg-foreground"
-                  style={{ transform: `scaleX(${progress[i] ?? 0})` }}
-                />
-              </button>
-            ))}
-          </div>
-        </nav>
+                {step.title}
+              </span>
+              {/* Copy reveals via the 0fr→1fr grid-rows trick so height
+                  animates without measuring. */}
+              <span
+                className="grid transition-[grid-template-rows] duration-500 ease-out"
+                style={{ gridTemplateRows: active === i ? "1fr" : "0fr" }}
+              >
+                <span className="overflow-hidden">
+                  <span
+                    className={`block pt-2 text-[15px] leading-relaxed text-muted-foreground transition-opacity duration-300 ${
+                      active === i ? "opacity-100" : "opacity-0"
+                    }`}
+                  >
+                    {step.body}
+                  </span>
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
 
-        {/* Right — each step: text, then its visual. */}
-        <div className="flex flex-col gap-16 lg:gap-28">
+        {/* Right — single visual panel. All steps stay mounted in one grid
+            cell and crossfade, so their internal animations don't restart. */}
+        <div className="mt-8 grid md:mt-0">
           {STEPS.map((step, i) => (
             <div
               key={step.id}
-              ref={(el) => {
-                stepRefs.current[i] = el;
-              }}
-              className="scroll-mt-24"
+              className={`col-start-1 row-start-1 transition-opacity duration-500 ${
+                active === i ? "opacity-100" : "pointer-events-none opacity-0"
+              }`}
+              aria-hidden={active !== i}
             >
-              <h3 className="type-h3">{step.title}</h3>
-              <p className="type-lead mt-3 max-w-2xl text-muted-foreground">
-                {step.body}
-              </p>
-              <div className="mt-7">
-                <AppWindow crumb={step.crumb} />
-              </div>
+              {step.visual}
             </div>
           ))}
         </div>
+        </div>
       </div>
-    </Section>
+    </section>
   );
 }

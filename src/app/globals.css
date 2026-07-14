@@ -60,21 +60,42 @@
   --v69-chip-border: rgba(16, 24, 40, 0.1);
   --v69-ink: #101828;
   --v69-box: #ffffff;
+
+  /* Status-pill tints for the how-it-works product mocks (Approved/Pending/
+     Active/Inactive). Quiet washes so they read as UI chrome, not brand. */
+  --mock-positive-bg: #e8f4ec;
+  --mock-positive-fg: #1d7f45;
+  --mock-warning-bg: #faf2df;
+  --mock-warning-fg: #8f6a12;
+  --mock-negative-bg: #fbeceb;
+  --mock-negative-fg: #b8443a;
 }
 
 /* Site-wide dark theme. The theme toggle writes data-theme="dark" on <html>,
    which redefines the design tokens so every token-based surface across all
    pages flips with no per-component restyling. Light is the default (:root). */
 [data-theme="dark"] {
-  --background: #0a0a0b;
-  --foreground: #ededed;
-  --muted: #1a1a1c;
-  --muted-foreground: #a3a3a3;
-  --border: #262629;
-  --accent: #ededed;
+  /* Dark scale: strictly NEUTRAL grays (equal RGB — any blue cast reads cheap
+     on OLED, à la Cursor's dark mode) stepping up from the ground in only two
+     surface levels, with hairlines kept quiet. */
+  --background: #0a0a0a;
+  --foreground: #f2f2f2;
+  --muted: #1c1c1c;
+  --muted-foreground: #a1a1a1;
+  --border: #2a2a2a;
+  --accent: #f2f2f2;
   --accent-foreground: #ffffff;
-  --card: #141416;
-  --card-foreground: #ededed;
+  --card: #151515;
+  --card-foreground: #f2f2f2;
+
+  /* Mock status pills go translucent so they sit on dark surfaces without
+     glowing; fg stays desaturated to match the neutral-gray dark scale. */
+  --mock-positive-bg: rgba(94, 200, 137, 0.14);
+  --mock-positive-fg: #85cba1;
+  --mock-warning-bg: rgba(226, 191, 105, 0.14);
+  --mock-warning-fg: #cdb37a;
+  --mock-negative-bg: rgba(224, 122, 113, 0.14);
+  --mock-negative-fg: #d9928b;
 }
 
 @theme inline {
@@ -154,6 +175,16 @@
 }
 /* .section-follow inherits the current theme tokens — no override needed. */
 
+/* Template detail sheet — in dark mode it reads as an ELEVATED surface
+   (lighter than the page, like a native dialog) so the modal and its preview
+   wells stay legible against the near-black backdrop. Light mode inherits. */
+[data-theme="dark"] .template-sheet {
+  --background: #1c1c1c;
+  --muted: #2c2c2c;
+  --border: #3a3a3a;
+  --card: #262626;
+}
+
 /* Contrast = opposite of the current theme. In light it's a dark sheet; in
    dark it flips to a light sheet. */
 .section-contrast {
@@ -188,10 +219,11 @@
   color: #0a0a0a;
 }
 [data-theme="dark"] .announcement-bar {
-  /* Match the page ground (not a lighter strip) so the bar reads as one
-     continuous surface with the hero below — same intent as light mode, where
-     it matches #fcfcfd. A lighter strip left a visible seam under the bar. */
-  background-color: var(--background);
+  /* Match the dark hero's TOP gradient stop (#141414 — see hero-v76's ground)
+     so the bar reads as one continuous surface with the hero below — same
+     intent as light mode, where it matches the hero's #fcfcfd. Using the page
+     background here left the bar visibly darker than the hero's lighter top. */
+  background-color: #141414;
   color: #ededed;
 }
 [data-theme="dark"] .announcement-bar .ab-muted {
@@ -234,6 +266,16 @@
   color: var(--foreground);
 }
 
+/* How-it-works tab underline: fills over the step's dwell time. */
+@keyframes hiw-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 /* Gentle idle float for the customers hero cards. */
 @keyframes float {
   0%,
@@ -254,6 +296,24 @@ html {
      reveal the fixed wordmark panel behind it. `clip` (not `hidden`) avoids
      creating a scroll container, so sticky headers keep working. */
   overflow-x: clip;
+  /* Also suppress the horizontal rubber-band on touch devices — the bounce
+     briefly exposed the canvas behind the page edges on iOS. */
+  overscroll-behavior-x: none;
+  /* Slim page scrollbar — the default classic bar reads heavy against the
+     page edge, especially on narrow viewports. */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: color-mix(in oklab, var(--foreground) 25%, transparent)
+    transparent;
+}
+html::-webkit-scrollbar {
+  width: 8px;
+}
+html::-webkit-scrollbar-track {
+  background: transparent;
+}
+html::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--foreground) 25%, transparent);
 }
 
 body {
@@ -284,6 +344,14 @@ html[data-theme="dark"] body {
      `html` prefix keeps it at the same specificity as the data-footer rule
      above so source order lets dark win. */
   background: var(--background);
+}
+
+/* Text selection — the browser default (translucent gray-blue) reads muddy
+   over both themes, so invert with the tokens instead: light text on ink in
+   light mode, ink on light gray in dark. Stays on the black-and-white brand. */
+::selection {
+  background: var(--foreground);
+  color: var(--background);
 }
 
 /* Shimmering outline for the hero input. A light sweep travels across a

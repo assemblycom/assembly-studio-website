@@ -1,188 +1,91 @@
-"use client";
-
-import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Section } from "@/components/ui/section";
+import { MaskLogo } from "@/components/customers/mask-logo";
 
-const TESTIMONIALS = [
-  {
-    quote:
-      "Assembly flows directly into our internal quality control processes. Instead of duplicating work across systems, everything is connected, saving our team time and ensuring we always have the most accurate, up-to-date information.",
-    author: "Phillip LaRue",
-    company: "Capital One",
-    slug: "capital-one-luxury-travel",
-  },
-  {
-    quote:
-      "Assembly was the only solution that let us flexibly build our own version of a client portal, uniting elements of their technology with existing external core applications that we wanted to keep using.",
-    author: "Kyle Pearson",
-    company: "Collective CPA",
-    slug: "collective-cpa",
-  },
-  {
-    quote:
-      "Assembly isn’t just a portal—it’s our infrastructure. We’re tying it to Microsoft Azure, automating workflows, and preparing to scale campaigns for massive organizations.",
-    author: "Carlos Williams",
-    company: "Ditto",
-    slug: "ditto-by-dbc",
-  },
-  // Zen Aegis (not Heritage Law Partners) closes the row — the collapsed
-  // column is narrow and a long company name gets clipped by the nowrap label.
-  {
-    quote:
-      "Assembly saves us from building custom portals from scratch. We can go fast and create lasting value for the businesses we serve.",
-    author: "Robert Prochnow",
-    company: "Zen Aegis",
-    slug: "zen-aegis",
-  },
-];
+// ─────────────────────────────────────────────────────────────────────────
+// FEATURED STORY — one pull quote, a few killer stats, and a link to the
+// case study (per the landing narrative doc: almost no-one clicks through
+// to the other quotes, so lean into the strongest one). The doc wants this
+// filled by an Assembly Studio beta firm once that content exists — until
+// then Jungle Luxe carries it, the strongest outcome-shaped story we have.
+// Swap FEATURED when the beta-firm content lands.
+// ─────────────────────────────────────────────────────────────────────────
+
+const FEATURED = {
+  quote:
+    "We've definitely reduced inquiries by owners by at least 50%. It probably saved the cost of a whole extra administrator from my company.",
+  name: "Rachel Hugenschmidt",
+  title: "Founder",
+  firm: "Jungle Luxe",
+  vertical: "Property management, 110+ owners",
+  stats: [
+    { value: "50%+", label: "fewer owner inquiries" },
+    { value: "110+", label: "owners using the portal" },
+    { value: "1 FTE", label: "cost saved" },
+  ],
+  slug: "jungle-luxe",
+};
 
 export function Testimonials() {
-  const [active, setActive] = useState(0);
-
   return (
     <Section id="testimonials">
-      <div className="text-center">
-        <h2 className="type-h2">
-          What our customers say
-        </h2>
-      </div>
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:items-stretch lg:gap-16">
+        {/* Quote + stats. The pull quote leads the section — no eyebrow, no
+            generic header; the customer's words are the headline. */}
+        <div className="flex flex-col justify-between">
+          <blockquote className="type-h3 max-w-2xl text-foreground">
+            &ldquo;{FEATURED.quote}&rdquo;
+          </blockquote>
 
-      {/* Expanding panels — Square-style. The active panel widens to reveal the
-          full quote; the others collapse to columns showing the company name
-          (read normally, not rotated). The whole card is a link — click anywhere
-          to read the story. On mobile they stack as full cards. */}
-      <div className="mt-12 flex flex-col gap-3 lg:h-[460px] lg:flex-row">
-        {TESTIMONIALS.map((t, i) => {
-          const isActive = i === active;
-          return (
-            <div
-              key={t.company}
-              role="button"
-              tabIndex={0}
-              // Expand/collapse only — the panel no longer navigates to the case
-              // study. Desktop expands on hover; mobile (no hover) expands on tap.
-              onClick={() => setActive(i)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  setActive(i);
-                }
-              }}
-              onMouseEnter={() => setActive(i)}
-              onFocus={() => setActive(i)}
-              aria-expanded={isActive}
-              className={`group relative flex cursor-pointer overflow-hidden rounded-2xl border border-border bg-muted text-left transition-[flex-grow,background-color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                isActive
-                  ? "lg:flex-[6]"
-                  : "lg:min-w-[170px] lg:flex-[1] lg:hover:bg-muted/70"
-              }`}
-            >
-              {/* Collapsed label. Desktop: photo above the company name, pinned
-                  bottom. Mobile: a compact row you tap to open. Hidden when open. */}
-              <span
-                className={`pointer-events-none absolute inset-x-0 bottom-0 hidden flex-col gap-3 p-6 transition-opacity duration-300 lg:flex ${
-                  isActive ? "opacity-0" : "opacity-100"
-                }`}
-              >
-                <Image
-                  src={`/images/customers/${t.slug}.jpg`}
-                  alt={t.company}
-                  width={56}
-                  height={56}
-                  className="size-14 rounded-xl object-cover"
-                />
-                <span className="whitespace-nowrap text-base font-normal text-muted-foreground">
-                  {t.company}
-                </span>
+          <div className="mt-10">
+            <p className="text-[15px] text-foreground">
+              {FEATURED.name} &middot; {FEATURED.title}, {FEATURED.firm}{" "}
+              <span className="text-muted-foreground">
+                &middot; {FEATURED.vertical}
               </span>
+            </p>
 
-              {/* Expanded content. Mobile: an accordion — the header row (photo +
-                  name) is always visible and tapping it slides the quote open via
-                  a grid-rows [0fr→1fr] transition, so height animates smoothly
-                  with no measuring and no jump. Desktop: a large portrait sits
-                  beside the quote, and the fixed width keeps the text from
-                  reflowing as the panel grows, so the hover expand reads as a
-                  smooth slide while non-active panels fade out via opacity. */}
-              <div
-                className={`flex min-w-0 flex-col transition-opacity duration-300 lg:w-[min(686px,calc(100vw-594px))] lg:shrink-0 lg:flex-row ${
-                  isActive ? "opacity-100 lg:delay-100" : "opacity-100 lg:opacity-0"
-                }`}
-              >
-                {/* Large portrait — desktop only; fills the open card's height. */}
-                <div className="hidden shrink-0 p-3 lg:block">
-                  <Image
-                    src={`/images/customers/${t.slug}.jpg`}
-                    alt={t.author}
-                    width={320}
-                    height={440}
-                    className="h-full w-48 rounded-xl object-cover xl:w-60"
-                  />
+            <div className="mt-8 grid grid-cols-3 gap-3">
+              {FEATURED.stats.map((s) => (
+                <div
+                  key={s.label}
+                  className="rounded-2xl border border-border bg-muted px-5 py-6"
+                >
+                  <p className="type-h3 text-foreground">{s.value}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {s.label}
+                  </p>
                 </div>
-                <div className="flex min-w-0 flex-1 flex-col p-5 lg:justify-between lg:p-8">
-                  {/* Mobile header row — the always-visible tap target. */}
-                  <div className="flex items-center gap-3 lg:hidden">
-                    <Image
-                      src={`/images/customers/${t.slug}.jpg`}
-                      alt={t.author}
-                      width={80}
-                      height={80}
-                      className="size-12 shrink-0 rounded-lg object-cover"
-                    />
-                    <span className="flex min-w-0 flex-1 flex-col">
-                      <span className="text-[15px] font-medium">{t.author}</span>
-                      <span className="text-sm text-muted-foreground">
-                        {t.company}
-                      </span>
-                    </span>
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 16 16"
-                      fill="none"
-                      aria-hidden
-                      className={`shrink-0 text-muted-foreground transition-transform duration-300 ${
-                        isActive ? "rotate-180" : ""
-                      }`}
-                    >
-                      <path
-                        d="M4 6l4 4 4-4"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                  {/* Quote — collapsible on mobile, always open on desktop. */}
-                  <div
-                    className={`grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] lg:block ${
-                      isActive ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-                    }`}
-                  >
-                    <div className="min-h-0 overflow-hidden">
-                      <p
-                        className={`pt-4 text-base leading-relaxed transition-opacity duration-300 md:text-lg lg:pt-0 lg:opacity-100 ${
-                          isActive ? "opacity-100 delay-100" : "opacity-0"
-                        }`}
-                      >
-                        &ldquo;{t.quote}&rdquo;
-                      </p>
-                    </div>
-                  </div>
-                  {/* Desktop attribution — anchored at the foot; on mobile the
-                      header row already carries it. */}
-                  <div className="mt-6 hidden flex-col lg:flex">
-                    <span className="text-base font-medium">{t.author}</span>
-                    <span className="text-sm text-muted-foreground">
-                      {t.company}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
-          );
-        })}
+
+            <Link
+              href={`/customers/${FEATURED.slug}`}
+              className="mt-8 inline-block text-[15px] text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
+            >
+              Read {FEATURED.firm}&rsquo;s story &rarr;
+            </Link>
+          </div>
+        </div>
+
+        {/* Headshot + firm logo. */}
+        <div className="relative min-h-[320px] overflow-hidden rounded-2xl lg:min-h-0">
+          <Image
+            src={`/images/customers/${FEATURED.slug}.jpg`}
+            alt={FEATURED.name}
+            fill
+            sizes="(min-width: 1024px) 380px, 100vw"
+            className="object-cover"
+          />
+          <div className="absolute bottom-4 left-4 text-white">
+            <MaskLogo
+              src={`/images/customers/${FEATURED.slug}-logo-mask.png`}
+              aspect="181 / 285"
+              className="w-8"
+            />
+          </div>
+        </div>
       </div>
     </Section>
   );

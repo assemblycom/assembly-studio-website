@@ -157,11 +157,14 @@ function V66Nav() {
 // The prompt box. Kept top-level so its menu state doesn't remount. `tone`
 // flips the text + control colors so the same box can sit on a light panel or
 // on a dark/glass hero.
-export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 ring-black/[0.06]", surfaceRadiusClass = "rounded-[22px]", minHeightClass = "min-h-[188px]", tone = "light", typewriter = false, mutedControls = false, submitLabel, submitDark = false, accent = LIME, hidePlus = false, hideHowTo = false, howToLabel = "How it works", howToSide = "left", promptPicker = false, promptPickerLabel = "Select a prompt", promptPickerSide = "left", promptPickerUp = false, promptItems, plusItems, compact = false, minimalControls = false, plusAsAttach = false, footerLeading, showSubmit = true, textDimmed = false, value: valueProp, onValueChange, textareaRef }: { glow?: boolean; surfaceClassName?: string; surfaceRadiusClass?: string; minHeightClass?: string; tone?: "light" | "dark"; typewriter?: boolean; mutedControls?: boolean; submitLabel?: string; submitDark?: boolean; accent?: string; hidePlus?: boolean; hideHowTo?: boolean; howToLabel?: string; howToSide?: "left" | "right"; promptPicker?: boolean; promptPickerLabel?: string; promptPickerSide?: "left" | "right"; promptPickerUp?: boolean; promptItems?: string[]; plusItems?: { label: string; icon: "attach" | "transfer" }[]; compact?: boolean; minimalControls?: boolean; plusAsAttach?: boolean; footerLeading?: React.ReactNode; showSubmit?: boolean; textDimmed?: boolean; value?: string; onValueChange?: (v: string) => void; textareaRef?: React.Ref<HTMLTextAreaElement> } = {}) {
+export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 ring-black/[0.06]", surfaceRadiusClass = "rounded-[22px]", minHeightClass = "min-h-[188px]", tone = "light", typewriter = false, mutedControls = false, submitLabel, submitDark = false, accent = LIME, hidePlus = false, hideHowTo = false, howToLabel = "How it works", howToSide = "left", promptPicker = false, promptPickerLabel = "Select a prompt", promptPickerSide = "left", promptPickerUp = false, promptItems, plusItems, compact = false, minimalControls = false, plusAsAttach = false, footerLeading, showSubmit = true, submitDisabled, textDimmed = false, value: valueProp, onValueChange, textareaRef }: { glow?: boolean; surfaceClassName?: string; surfaceRadiusClass?: string; minHeightClass?: string; tone?: "light" | "dark"; typewriter?: boolean; mutedControls?: boolean; submitLabel?: string; submitDark?: boolean; accent?: string; hidePlus?: boolean; hideHowTo?: boolean; howToLabel?: string; howToSide?: "left" | "right"; promptPicker?: boolean; promptPickerLabel?: string; promptPickerSide?: "left" | "right"; promptPickerUp?: boolean; promptItems?: (string | { label: string; prompt: string })[]; plusItems?: { label: string; icon: "attach" | "transfer" }[]; compact?: boolean; minimalControls?: boolean; plusAsAttach?: boolean; footerLeading?: React.ReactNode; showSubmit?: boolean; submitDisabled?: boolean; textDimmed?: boolean; value?: string; onValueChange?: (v: string) => void; textareaRef?: React.Ref<HTMLTextAreaElement> } = {}) {
   // Prompt-picker entries. Default: the shared "Build a …" examples. A hero can
-  // pass `promptItems` to show its own list inserted verbatim (e.g. bare app
-  // names, no "Build" prefix).
-  const promptEntries = (promptItems ?? PH_EXAMPLES.map((ex) => `Build ${ex}`));
+  // pass `promptItems` as plain strings (shown and inserted verbatim) or as
+  // {label, prompt} pairs — the menu shows the short label, picking inserts
+  // the full prompt.
+  const promptEntries = (promptItems ?? PH_EXAMPLES.map((ex) => `Build ${ex}`)).map(
+    (item) => (typeof item === "string" ? { label: item, prompt: item } : item),
+  );
   // "+" menu entries — attach / transfer. Overridable per hero.
   const plusMenuItems = plusItems ?? [
     { label: "Attach file", icon: "attach" as const },
@@ -246,6 +249,8 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
   // The "+" carries a persistent gray fill (not hover-only) so it always reads
   // as an actionable control.
   const plusBgCls = dark ? "bg-white/10 hover:bg-white/[0.16]" : "bg-black/[0.05] hover:bg-black/[0.08]";
+  // Footer controls squish slightly on hover and a touch more on press.
+  const squishCls = "transition-all duration-150 ease-out hover:scale-[0.96] active:scale-[0.92]";
   // Compact scales the footer controls down (v73/v74) without touching the
   // default composer other heroes use. All controls (+, pills, submit) share
   // the same subtle pill styling so nothing pops.
@@ -310,7 +315,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
         onClick={() => setPromptOpen((o) => !o)}
         aria-haspopup="menu"
         aria-expanded={promptOpen}
-        className={`flex ${ctrlH} items-center rounded-full ${pillPad} ${pillText} transition-colors ${pillCls} ${pillTextCls}`}
+        className={`flex ${ctrlH} items-center rounded-full ${pillPad} ${pillText} ${squishCls} ${pillCls} ${pillTextCls}`}
       >
         <span className="whitespace-nowrap">{promptPickerLabel}</span>
         <IconChevronDown className={`size-3.5 shrink-0 transition-transform duration-200 ${promptOpen ? "rotate-180" : ""}`} />
@@ -322,16 +327,16 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
         >
           {promptEntries.map((entry) => (
             <button
-              key={entry}
+              key={entry.label}
               type="button"
               role="menuitem"
               onClick={() => {
-                setValue(entry);
+                setValue(entry.prompt);
                 setPromptOpen(false);
               }}
               className={`block w-full rounded-lg px-3 py-2 text-left text-sm leading-snug transition-colors ${menuItemCls}`}
             >
-              {entry}
+              {entry.label}
             </button>
           ))}
         </div>
@@ -449,7 +454,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
                   }
                   fileInputRef.current?.click();
                 }}
-                className={`flex ${plusSize} items-center justify-center rounded-full transition-colors ${plusBgCls} ${pillTextCls}`}
+                className={`flex ${plusSize} items-center justify-center rounded-lg ${squishCls} ${plusBgCls} ${pillTextCls}`}
               >
                 <IconPlus />
               </button>
@@ -481,7 +486,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
                 onClick={() => setMenuOpen((o) => !o)}
                 aria-label="Add"
                 aria-expanded={menuOpen}
-                className={`flex ${plusSize} items-center justify-center rounded-full transition-colors ${plusBgCls} ${pillTextCls}`}
+                className={`flex ${plusSize} items-center justify-center rounded-lg ${squishCls} ${plusBgCls} ${pillTextCls}`}
               >
                 <IconPlus />
               </button>
@@ -515,30 +520,33 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
           <div className="flex items-center gap-2">
             {howToSide === "right" && howToNode}
             {promptPickerSide === "right" && promptPickerNode}
-            {/* Submit — grey circle while empty (Notion-style); once there's text
-                it turns the accent, and (with submitLabel) expands into a pill.
-                Hidden entirely when showSubmit is false (e.g. during the hero's
-                demo animation) so the CTA only appears once the visitor types. */}
-            {showSubmit && (
+            {/* Submit — grey disabled circle until there's real input; then it
+                turns the accent and (with submitLabel) expands into a pill.
+                `submitDisabled` lets a hero keep it inert while the box shows
+                seeded text (which would otherwise read as submittable). */}
+            {showSubmit && (() => {
+              const submitActive = submitDisabled === undefined ? Boolean(value.trim()) : !submitDisabled;
+              return (
             <button
               type="button"
-              disabled={!value.trim()}
+              disabled={!submitActive}
               aria-label={submitLabel ?? "Build it"}
-              className={`flex ${submitH} items-center justify-center gap-1.5 rounded-full ${pillText} font-normal transition-all active:scale-95 ${
-                value.trim()
+              className={`flex ${submitH} items-center justify-center gap-1.5 rounded-lg ${pillText} font-normal transition-all duration-150 ease-out hover:scale-[0.96] active:scale-[0.92] disabled:pointer-events-none ${
+                submitActive
                   ? submitDark
                     ? "text-white hover:opacity-90"
                     : "text-neutral-900 hover:brightness-95"
                   : dark
                     ? "bg-white/10 text-white/40"
                     : "bg-neutral-200/70 text-neutral-400"
-              } ${submitLabel && value.trim() ? `${submitW} sm:w-auto sm:pl-3.5 sm:pr-2.5` : submitW}`}
-              style={value.trim() ? { backgroundColor: submitDark ? "#171717" : accent } : undefined}
+              } ${submitLabel && submitActive ? `${submitW} sm:w-auto sm:pl-3.5 sm:pr-2.5` : submitW}`}
+              style={submitActive ? { backgroundColor: submitDark ? "#171717" : accent } : undefined}
             >
-              {submitLabel && value.trim() && <span className="hidden whitespace-nowrap sm:inline">{submitLabel}</span>}
+              {submitLabel && submitActive && <span className="hidden whitespace-nowrap sm:inline">{submitLabel}</span>}
               <IconArrow className="size-4" />
             </button>
-            )}
+              );
+            })()}
           </div>
         </div>
       </div>

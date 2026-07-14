@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { IconArrow } from "@/components/home/icons";
 
 const TEAM_SIZES = ["Just me", "2–10", "11–50", "51–200", "200+"];
 
@@ -221,15 +220,10 @@ export function DemoForm() {
 
       <button
         type="submit"
-        className="group mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
+        className="mt-6 flex w-full items-center justify-center rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
       >
         Book a demo
-        <IconArrow className="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
       </button>
-      <p className="mt-3 text-center text-xs text-muted-foreground">
-        By submitting, you agree to Assembly&rsquo;s terms. We&rsquo;ll never
-        share your details.
-      </p>
     </form>
   );
 }

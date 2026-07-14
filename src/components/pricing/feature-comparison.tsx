@@ -212,7 +212,10 @@ export function FeatureComparison() {
       <div className="md:hidden">
         {/* Scrollable plan tabs, pinned under the nav so they stay reachable as
             you read down the list. */}
-        <div className="sticky top-12 z-20 -mx-6 flex gap-6 overflow-x-auto border-b border-border bg-background px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* overflow-y-hidden: overflow-x-auto alone also makes this a vertical
+            scroll container, and the -mb-px underline trick let it scroll up
+            by a pixel-high strip. */}
+        <div className="sticky top-12 z-20 -mx-6 flex gap-6 overflow-x-auto overflow-y-hidden border-b border-border bg-background px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {PLAN_NAMES.map((name, i) => (
             <button
               key={name}
@@ -257,9 +260,9 @@ export function FeatureComparison() {
           <div
             className={`${GRID} sticky top-14 z-20 items-end border-b border-border bg-background py-4`}
           >
-            <div className="text-lg font-medium">Features</div>
+            <div className="text-lg font-normal">Features</div>
             {PLAN_NAMES.map((name) => (
-              <div key={name} className="text-lg font-medium">
+              <div key={name} className="text-lg font-normal">
                 {name}
               </div>
             ))}

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArticleToc, CopyLinkButton } from "@/components/blog/article-rail";
+import { ArticleToc, MobileArticleToc } from "@/components/blog/article-rail";
 import { APP_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -69,42 +69,34 @@ const EXAMPLE_APPS = [
 
 const PROSE = "text-base leading-[1.75] text-foreground/80";
 
+// Paste the launch video's YouTube embed URL (https://www.youtube.com/embed/VIDEO_ID)
+// here to swap the placeholder gradient for the real video.
+const HERO_VIDEO_URL = "";
 export default function IntroducingAssemblyStudioPage() {
   return (
-    <article className="bg-background">
+    <article className="relative bg-background">
       {/* ── Header — centered, OpenAI-release style. ── */}
-      <header className="mx-auto max-w-3xl px-6 pt-20 text-center md:pt-28">
-        <p className="font-[family-name:var(--font-diatype-mono)] text-xs text-muted-foreground">
-          July 13, 2026 · Product
+      <header className="relative mx-auto max-w-3xl px-6 pt-20 text-center md:pt-28">
+        <p className="font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-muted-foreground">
+          July 13, 2026
         </p>
         <h1 className="type-display mt-6 [text-wrap:balance]">
           Introducing Assembly Studio
         </h1>
         <p className="type-lead mx-auto mt-5 max-w-2xl text-muted-foreground">
-          The AI app builder for professional service firms — describe what you
-          want in your own words, and it goes live where your team and clients
-          already are.
+          The AI app builder for professional service firms — describe what
+          you want, and it goes live for your team and clients.
         </p>
+        {/* Category tag — same mono chip treatment as the case-study pages. */}
+        <span className="mt-7 inline-flex items-center rounded-md bg-muted px-3 py-1.5 font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-foreground/70">
+          Product release
+        </span>
       </header>
 
-      {/* Byline — one quiet centered line, no rules: monogram, author, read
-          time, and the share affordance kept to the same muted register. */}
-      <div className="mx-auto mt-10 flex max-w-3xl items-center justify-center gap-3 px-6">
-        <span
-          aria-hidden
-          className="flex size-8 items-center justify-center rounded-full bg-muted text-[11px] tracking-wide text-foreground/70"
-        >
-          MM
-        </span>
-        <span className="text-sm text-foreground">Marlon Misra</span>
-        <span aria-hidden className="text-muted-foreground/60">·</span>
-        <span className="text-sm text-muted-foreground">6 min read</span>
-        <span aria-hidden className="text-muted-foreground/60">·</span>
-        <CopyLinkButton />
-      </div>
-
       {/* ── Body — sticky TOC left, prose right. ── */}
-      <div className="mx-auto max-w-6xl px-6 pb-24 pt-6 md:pt-10 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-16 xl:gap-20">
+      <div className="relative mx-auto max-w-6xl px-6 pb-24 pt-10 md:pt-14 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-16 xl:gap-20">
+        {/* Mobile reading menu — sticky current-section bar, unfolds to the TOC. */}
+        <MobileArticleToc sections={SECTIONS} />
         <aside className="hidden lg:block">
           <div className="sticky top-24">
             <ArticleToc sections={SECTIONS} />
@@ -112,15 +104,39 @@ export default function IntroducingAssemblyStudioPage() {
         </aside>
 
         <div className="max-w-2xl">
-          {/* Hero visual — the brand aurora as a quiet opening image. */}
-          <div
-            aria-hidden
-            className="h-56 overflow-hidden rounded-2xl md:h-72"
-            style={{
-              background:
-                "linear-gradient(160deg, #0a0e1c 0%, #243c9e 30%, #4f6bf9 52%, #9fd6c4 74%, #c6e84f 92%, #d9ed92 100%)",
-            }}
-          />
+          {/* Hero — the launch video slot. Shows the brand aurora until
+              HERO_VIDEO_URL is filled in; the player then takes this exact
+              spot with no other change. */}
+          <div className="aspect-video overflow-hidden rounded-lg">
+            {HERO_VIDEO_URL !== "" ? (
+              <iframe
+                src={HERO_VIDEO_URL}
+                title="Introducing Assembly Studio"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="size-full border-0"
+              />
+            ) : (
+              // Placeholder player chrome — center play + control bar — so the
+              // slot reads as a video while we wait for the real one.
+              <div
+                aria-hidden
+                className="relative size-full"
+                style={{
+                  background:
+                    "linear-gradient(160deg, #0a0e1c 0%, #243c9e 30%, #4f6bf9 52%, #9fd6c4 74%, #c6e84f 92%, #d9ed92 100%)",
+                }}
+              >
+                {/* Center play — same frosted treatment as the customer-story
+                    player. */}
+                <span className="absolute left-1/2 top-1/2 flex size-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-lg bg-white/15 text-white ring-1 ring-white/30 backdrop-blur md:size-14">
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="size-5" aria-hidden>
+                    <path d="M9 7.5v9a.75.75 0 0 0 1.14.64l7.2-4.5a.75.75 0 0 0 0-1.28l-7.2-4.5A.75.75 0 0 0 9 7.5Z" />
+                  </svg>
+                </span>
+              </div>
+            )}
+          </div>
 
           <section id="only-you" className="scroll-mt-24 pt-14">
             <h2 className="type-h3">Build the firm only you can build</h2>
@@ -145,16 +161,10 @@ export default function IntroducingAssemblyStudioPage() {
           <section id="how-it-works" className="scroll-mt-24 pt-14">
             <h2 className="type-h3">From description to deployed app</h2>
             <div className="mt-6 space-y-5">
-              {BUILD_STEPS.map((step, i) => (
-                <div key={step.name} className="flex gap-4">
-                  {/* Solid ink chip — the muted circle washed out on white. */}
-                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-foreground text-[13px] text-background tabular-nums">
-                    {i + 1}
-                  </span>
-                  <div>
-                    <p className="text-base font-medium text-foreground">{step.name}</p>
-                    <p className={`mt-1 ${PROSE}`}>{step.text}</p>
-                  </div>
+              {BUILD_STEPS.map((step) => (
+                <div key={step.name}>
+                  <p className="text-base font-medium text-foreground">{step.name}</p>
+                  <p className={`mt-1 ${PROSE}`}>{step.text}</p>
                 </div>
               ))}
             </div>

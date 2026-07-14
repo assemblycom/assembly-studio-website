@@ -10,8 +10,94 @@ import {
   type ContentBlock,
 } from "@/lib/case-studies";
 import { VideoPlayer } from "@/components/customers/video-player";
+import { CapitalOneLogo } from "@/components/customers/capital-one-logo";
+import { MaskLogo } from "@/components/customers/mask-logo";
 import { IconArrow } from "@/components/home/icons";
 import { APP_URL } from "@/lib/constants";
+
+// Customers with a real wordmark; everyone else falls back to the monogram
+// circle. Each entry sets its own width so different wordmark proportions
+// sit optically balanced inside the same circle.
+const CUSTOMER_LOGOS: Record<
+  string,
+  React.ComponentType<{ surface?: string }>
+> = {
+  "capital-one-luxury-travel": ({ surface }) => (
+    <CapitalOneLogo className="w-16 text-foreground" surface={surface} />
+  ),
+  "ditto-by-dbc": () => (
+    <MaskLogo
+      src="/images/customers/ditto-logo-mask.png"
+      aspect="398 / 174"
+      className="w-14 text-foreground"
+    />
+  ),
+  "collective-cpa": () => (
+    <MaskLogo
+      src="/images/customers/collective-logo-mask.png"
+      aspect="1024 / 200"
+      className="w-[74px] text-foreground"
+    />
+  ),
+  // Portrait emblem — sized by what fits the circle's height.
+  "jungle-luxe": () => (
+    <MaskLogo
+      src="/images/customers/jungle-luxe-logo-mask.png"
+      aspect="181 / 285"
+      className="w-10 text-foreground"
+    />
+  ),
+  "orca-accounting": () => (
+    <MaskLogo
+      src="/images/customers/orca-logo-mask.png"
+      aspect="1126 / 566"
+      className="w-16 text-foreground"
+    />
+  ),
+  "valuenode-accounting": () => (
+    <MaskLogo
+      src="/images/customers/valuenode-logo-mask.png"
+      aspect="543 / 143"
+      className="w-16 text-foreground"
+    />
+  ),
+  // Portrait shield — sized by the circle's height.
+  "zen-aegis": () => (
+    <MaskLogo
+      src="/images/customers/zen-aegis-logo-mask.png"
+      aspect="842 / 988"
+      className="w-10 text-foreground"
+    />
+  ),
+  "metta-health": () => (
+    <MaskLogo
+      src="/images/customers/metta-logo-mask.png"
+      aspect="497 / 87"
+      className="w-[74px] text-foreground"
+    />
+  ),
+  "vacation-rental-license": () => (
+    <MaskLogo
+      src="/images/customers/vrl-logo-mask.png"
+      aspect="368 / 185"
+      className="w-14 text-foreground"
+    />
+  ),
+  "heritage-law-partners": () => (
+    <MaskLogo
+      src="/images/customers/heritage-logo-mask.png"
+      aspect="401 / 138"
+      className="w-16 text-foreground"
+    />
+  ),
+  "durrick-designs": () => (
+    <MaskLogo
+      src="/images/customers/durrick-logo-mask.png"
+      aspect="1 / 1"
+      className="w-12 text-foreground"
+    />
+  ),
+};
 
 // Matches the mono eyebrow treatment used across the site (e.g. the hero's
 // "Trusted by teams at"). ABC Diatype Mono isn't bundled, so the system mono
@@ -41,7 +127,8 @@ function MetaCard({ study }: { study: CaseStudy }) {
   if (!study.glance) return null;
   const g = study.glance;
 
-  // Monogram stand-in for a customer logo — first letters of the first two words.
+  // Real wordmark when we have one; monogram stand-in otherwise.
+  const Logo = CUSTOMER_LOGOS[study.slug];
   const monogram = study.company
     .split(/\s+/)
     .slice(0, 2)
@@ -77,9 +164,13 @@ function MetaCard({ study }: { study: CaseStudy }) {
       <div className="cursor-default overflow-hidden rounded-lg border border-border bg-card">
         <div className="flex flex-col items-center px-6 pb-6 pt-8">
           <div className="flex size-24 items-center justify-center rounded-full bg-background ring-1 ring-border">
-            <span className="text-2xl font-medium tracking-tight">
-              {monogram}
-            </span>
+            {Logo ? (
+              <Logo surface="var(--background)" />
+            ) : (
+              <span className="text-2xl font-medium tracking-tight">
+                {monogram}
+              </span>
+            )}
           </div>
           <p className="mt-4 text-center font-medium tracking-tight">
             {study.company}

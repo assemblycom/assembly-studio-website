@@ -96,7 +96,7 @@ export function TemplateModalBrowser({
       <div
         role="dialog"
         aria-modal="true"
-        className="animate-fade-in relative flex h-dvh w-full flex-col overflow-hidden bg-background ring-1 ring-border shadow-[0_40px_120px_-24px_rgba(0,0,0,0.45)] md:h-auto md:max-h-[92vh] md:max-w-6xl md:rounded-2xl"
+        className="template-sheet animate-fade-in relative flex h-dvh w-full flex-col overflow-hidden bg-background ring-1 ring-border shadow-[0_40px_120px_-24px_rgba(0,0,0,0.45)] md:h-auto md:max-h-[92vh] md:max-w-6xl md:rounded-2xl"
       >
         {/* Control bar — expand · prev/next … close. */}
         <div className="flex items-center gap-1 border-b border-border px-4 py-3">

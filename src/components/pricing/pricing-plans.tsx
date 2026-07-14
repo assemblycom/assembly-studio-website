@@ -221,15 +221,23 @@ export function PricingPlans() {
         <div
           role="radiogroup"
           aria-label="Billing period"
-          className="flex w-full items-center gap-1 rounded-full border border-border p-1.5 text-base md:inline-flex md:w-auto md:p-1 md:text-sm"
+          className="relative grid w-full grid-cols-2 rounded-lg border border-border p-1 text-base md:inline-grid md:w-auto md:text-sm"
         >
+          {/* Sliding thumb — one surface gliding between the halves, so the
+              switch animates instead of the fill jumping across. */}
+          <span
+            aria-hidden
+            className={`absolute inset-y-1 left-1 w-[calc(50%-0.25rem)] rounded-md bg-foreground transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+              billing === "yearly" ? "translate-x-full" : ""
+            }`}
+          />
           <button
             role="radio"
             aria-checked={billing === "monthly"}
             onClick={() => setBilling("monthly")}
-            className={`flex-1 rounded-full px-5 py-2.5 text-center transition-colors md:flex-none md:px-4 md:py-1.5 ${
+            className={`relative px-5 py-2 text-center transition-colors duration-300 md:px-4 md:py-1.5 ${
               billing === "monthly"
-                ? "bg-foreground text-background"
+                ? "text-background"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -239,9 +247,9 @@ export function PricingPlans() {
             role="radio"
             aria-checked={billing === "yearly"}
             onClick={() => setBilling("yearly")}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-full px-5 py-2.5 transition-colors md:flex-none md:px-4 md:py-1.5 ${
+            className={`relative flex items-center justify-center gap-2 px-5 py-2 transition-colors duration-300 md:px-4 md:py-1.5 ${
               billing === "yearly"
-                ? "bg-foreground text-background"
+                ? "text-background"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >

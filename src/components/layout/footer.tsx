@@ -82,10 +82,14 @@ export function Footer({ reveal = false }: { reveal?: boolean }) {
   // left, Navigate/Connect columns + back-to-top on the right, and the brand
   // word set huge across the bottom.
   if (reveal) {
+    // inline-block + vertical padding keeps each row a comfortable tap target
+    // on touch screens — the bare 15px text line was easy to miss-tap.
     const linkCls =
-      "text-[15px] text-white/60 transition-colors hover:text-white";
+      "inline-block py-1 text-[15px] text-white/60 transition-colors hover:text-white";
+    // leading-none pins the label glyphs to the top of their line box, so the
+    // three column labels can't drift apart across font/engine differences.
     const monoLabel =
-      "font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-white/40";
+      "font-[family-name:var(--font-diatype-mono)] text-xs uppercase leading-none tracking-wide text-white/40";
     return (
       <footer className="footer-reveal overflow-hidden bg-[#101010] text-white">
         <div className="mx-auto max-w-7xl px-6 pt-16 md:pt-20">
@@ -100,9 +104,9 @@ export function Footer({ reveal = false }: { reveal?: boolean }) {
                 className="invert"
               />
               {/* Navigate */}
-              <div className="md:border-l md:border-white/15 md:pl-8">
+              <div>
                 <p className={monoLabel}>Navigate</p>
-                <ul className="mt-4 flex flex-col gap-2.5">
+                <ul className="mt-4 flex flex-col gap-1">
                   {NAVIGATE.map((link) => (
                     <li key={link.label}>
                       <FooterLink link={link} className={linkCls} />
@@ -111,9 +115,9 @@ export function Footer({ reveal = false }: { reveal?: boolean }) {
                 </ul>
               </div>
               {/* Connect */}
-              <div className="md:border-l md:border-white/15 md:pl-8">
+              <div>
                 <p className={monoLabel}>Connect</p>
-                <ul className="mt-4 flex flex-col gap-2.5">
+                <ul className="mt-4 flex flex-col gap-1">
                   {CONNECT.map((link) => (
                     <li key={link.label}>
                       <FooterLink link={link} className={linkCls} />
@@ -123,9 +127,10 @@ export function Footer({ reveal = false }: { reveal?: boolean }) {
               </div>
             </div>
 
-            {/* Right cluster — Ask AI column + back-to-top. */}
-            <div className="flex items-start gap-10 md:gap-14">
-              <div className="md:border-l md:border-white/15 md:pl-8">
+            {/* Right cluster — Ask AI column + back-to-top. self-start is
+                explicit so the block always pins to the top of the row. */}
+            <div className="flex items-start gap-10 self-start md:gap-14">
+              <div>
                 <p className={monoLabel}>Ask AI about Assembly</p>
                 <div className="mt-4 flex items-center gap-2">
                   {ASK_AI.map((ai) => (
@@ -235,7 +240,7 @@ export function Footer({ reveal = false }: { reveal?: boolean }) {
                   <li key={link.label}>
                     <FooterLink
                       link={link}
-                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      className="inline-block py-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
                     />
                   </li>
                 ))}
