@@ -1,15 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Section } from "@/components/ui/section";
-import { MaskLogo } from "@/components/customers/mask-logo";
-import { CapitalOneLogo } from "@/components/customers/capital-one-logo";
 
 // ─────────────────────────────────────────────────────────────────────────
-// CUSTOMER STORIES — one featured story treated as a proper card (quote +
-// stats + portrait on a single surface, not floating on black), followed by
-// a monochrome logo strip for breadth. Pattern borrowed from the polished
-// social-proof sections on elevenlabs / sana / fin: a contained hero quote
-// over a quiet logo wall.
+// CUSTOMER STORIES — one featured story treated as a proper card: quote +
+// stats + portrait on a single surface, not floating on black.
 //
 // The featured story wants a real Assembly Studio beta firm once that
 // content exists; until then Jungle Luxe carries it — the strongest
@@ -30,42 +25,6 @@ const FEATURED = {
   ],
   slug: "jungle-luxe",
 };
-
-// Monochrome logo wall — real case-study customers, muted by default and
-// lifting to full ink on hover. Widths reuse the tuned values from the
-// case-study logo map so they sit at even optical weight.
-const LOGOS: { slug: string; node: React.ReactNode }[] = [
-  {
-    slug: "capital-one-luxury-travel",
-    node: <CapitalOneLogo className="w-[68px]" surface="var(--background)" />,
-  },
-  {
-    slug: "collective-cpa",
-    node: (
-      <MaskLogo src="/images/customers/collective-logo-mask.png" aspect="1024 / 200" className="w-[76px]" />
-    ),
-  },
-  {
-    slug: "ditto-by-dbc",
-    node: <MaskLogo src="/images/customers/ditto-logo-mask.png" aspect="398 / 174" className="w-12" />,
-  },
-  {
-    slug: "orca-accounting",
-    node: <MaskLogo src="/images/customers/orca-logo-mask.png" aspect="1126 / 566" className="w-14" />,
-  },
-  {
-    slug: "valuenode-accounting",
-    node: <MaskLogo src="/images/customers/valuenode-logo-mask.png" aspect="543 / 143" className="w-16" />,
-  },
-  {
-    slug: "metta-health",
-    node: <MaskLogo src="/images/customers/metta-logo-mask.png" aspect="497 / 87" className="w-[76px]" />,
-  },
-  {
-    slug: "heritage-law-partners",
-    node: <MaskLogo src="/images/customers/heritage-logo-mask.png" aspect="401 / 138" className="w-16" />,
-  },
-];
 
 export function Testimonials() {
   return (
@@ -129,21 +88,6 @@ export function Testimonials() {
             className="object-cover"
           />
         </div>
-      </div>
-
-      {/* Logo wall — breadth beneath the single hero story. */}
-      <p className="mt-14 text-center text-[13px] text-muted-foreground">
-        Trusted by modern firms
-      </p>
-      <div className="mt-7 flex flex-wrap items-center justify-center gap-x-10 gap-y-6 text-muted-foreground/55 md:gap-x-14">
-        {LOGOS.map((logo) => (
-          <span
-            key={logo.slug}
-            className="transition-colors duration-200 hover:text-foreground"
-          >
-            {logo.node}
-          </span>
-        ))}
       </div>
     </Section>
   );
