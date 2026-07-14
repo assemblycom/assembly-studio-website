@@ -29,9 +29,6 @@ export function CTA() {
           <V66Composer
             textareaRef={inputRef}
             typewriter
-            // Arrow stays visible but inert over the empty box; it becomes
-            // the CTA once the visitor types or picks a prompt.
-            submitDisabled={prompt.trim().length === 0}
             glow={false}
             tone={theme}
             compact

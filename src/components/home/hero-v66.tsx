@@ -520,18 +520,18 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
           <div className="flex items-center gap-2">
             {howToSide === "right" && howToNode}
             {promptPickerSide === "right" && promptPickerNode}
-            {/* Submit — grey disabled circle until there's real input; then it
+            {/* Submit — a quiet grey circle until there's real input; then it
                 turns the accent and (with submitLabel) expands into a pill.
-                `submitDisabled` lets a hero keep it inert while the box shows
-                seeded text (which would otherwise read as submittable). */}
+                Always pressable either way: with no prompt it still hands the
+                visitor straight to onboarding. */}
             {showSubmit && (() => {
               const submitActive = submitDisabled === undefined ? Boolean(value.trim()) : !submitDisabled;
               return (
             <button
               type="button"
-              disabled={!submitActive}
+              onClick={() => window.open(APP_URL, "_blank", "noopener,noreferrer")}
               aria-label={submitLabel ?? "Build it"}
-              className={`flex ${submitH} items-center justify-center gap-1.5 rounded-lg ${pillText} font-normal transition-all duration-150 ease-out hover:scale-[0.96] active:scale-[0.92] disabled:pointer-events-none ${
+              className={`flex ${submitH} items-center justify-center gap-1.5 rounded-lg ${pillText} font-normal transition-all duration-150 ease-out hover:scale-[0.96] active:scale-[0.92] ${
                 submitActive
                   ? submitDark
                     ? "text-white hover:opacity-90"
