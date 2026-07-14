@@ -81,30 +81,63 @@ function CardIntake() {
   );
 }
 
+// Client engagement dashboard — a full-colour Apple-widget: a deep-green card
+// with an eyebrow, a big goal fraction, and a weekday bar chart crossed by a
+// target line. The one card that goes full-bleed colour (the others accent a
+// neutral surface), so the rail has a hero moment.
+const DASH_GREEN = "#2f6b57";
+const DASH_BAR = "#74cda8";
+const DASH_LIGHT = "#9fe0c5";
 function CardDashboard() {
-  // A dense column histogram (à la a trading/analytics readout): a shallow early
-  // dip that climbs steadily to the "now". All bars share one neutral tone.
-  const bars = [
-    44, 40, 33, 27, 22, 18, 16, 19, 17, 23, 27, 25, 31, 35, 33, 39, 43, 41, 47,
-    51, 49, 57, 61, 59, 67, 73, 79, 87, 94, 100,
+  // Weekday engagement vs. the target line (~65%). Wed peaks, Tue dips —
+  // mirrors the reference's shape.
+  const days: [string, number][] = [
+    ["Mon", 62],
+    ["Tue", 30],
+    ["Wed", 96],
+    ["Thu", 72],
+    ["Fri", 72],
+    ["Sat", 46],
+    ["Sun", 48],
   ];
+  const GOAL = 65;
   return (
-    <div className="flex h-full flex-col gap-2 bg-[var(--v69-card)] px-3.5 pt-3.5">
-      <div>
-        <div className="text-[9px] text-neutral-400">Engagement score</div>
-        <div className="mt-1 flex items-center gap-2">
-          <span aria-label="82" className="v69-score-num text-[30px] font-medium leading-none tracking-tight text-neutral-900 group-hover:[animation:v69Count_0.9s_ease-out_both] group-[.is-inview]:[animation:v69Count_0.9s_ease-out_both]" />
-          <span className="rounded-full px-2.5 py-1 text-[9px] font-medium leading-none group-hover:[animation:v69Pop_0.35s_ease-out_0.9s_both] group-[.is-inview]:[animation:v69Pop_0.35s_ease-out_0.9s_both]" style={{ color: "#10b981", backgroundColor: "color-mix(in srgb, #10b981 14%, transparent)" }}>+5%</span>
-        </div>
+    <div className="flex h-full flex-col gap-2 p-3.5" style={{ backgroundColor: DASH_GREEN }}>
+      <div className="flex items-center gap-1.5 text-[10px] font-medium" style={{ color: DASH_LIGHT }}>
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <path d="M3 3v18h18" />
+          <path d="M7 14l4-4 3 3 5-6" />
+        </svg>
+        Engagement
       </div>
-      <div className="flex min-h-0 flex-1 items-end gap-[2px] pt-1">
-        {bars.map((h, i) => (
+      <div className="text-[19px] font-medium leading-none tracking-tight text-white">
+        82<span style={{ color: DASH_LIGHT }}>/100</span>
+      </div>
+      <div className="flex min-h-0 flex-1 flex-col gap-1 pt-1">
+        <div className="relative flex flex-1 items-end gap-1.5">
+          {/* Target line across the chart. */}
           <div
-            key={i}
-            className="w-full origin-bottom rounded-[1px] group-hover:[animation:v69GrowY_0.6s_ease-out_both] group-[.is-inview]:[animation:v69GrowY_0.6s_ease-out_both]"
-            style={{ height: `${h}%`, animationDelay: `${i * 0.02}s`, backgroundColor: "color-mix(in srgb, #10b981 78%, transparent)" }}
-          />
-        ))}
+            className="pointer-events-none absolute inset-x-0 z-10 flex items-center"
+            style={{ bottom: `${GOAL}%` }}
+          >
+            <span className="size-1 shrink-0 rounded-full bg-white" />
+            <span className="h-px flex-1" style={{ backgroundColor: "rgba(255,255,255,0.55)" }} />
+          </div>
+          {days.map(([day, h], i) => (
+            <div
+              key={day}
+              className="w-full origin-bottom rounded-t-[2px] group-hover:[animation:v69GrowY_0.6s_ease-out_both] group-[.is-inview]:[animation:v69GrowY_0.6s_ease-out_both]"
+              style={{ height: `${h}%`, animationDelay: `${i * 0.05}s`, backgroundColor: DASH_BAR }}
+            />
+          ))}
+        </div>
+        <div className="flex gap-1.5">
+          {days.map(([day]) => (
+            <span key={day} className="w-full text-center text-[6.5px] leading-none" style={{ color: DASH_LIGHT }}>
+              {day}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
