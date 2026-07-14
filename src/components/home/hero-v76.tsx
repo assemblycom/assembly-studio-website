@@ -283,6 +283,9 @@ export function HeroV76({
                   <V66Composer
                     textareaRef={inputRef}
                     typewriter
+                    // Always accented — the arrow routes to onboarding even
+                    // with an empty box, so it never reads as disabled.
+                    submitDisabled={false}
                     glow={false}
                     tone={theme}
                     compact
