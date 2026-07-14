@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { APP_URL } from "@/lib/constants";
+import { getStudioOnboardingUrl } from "@/lib/constants";
 import { IconArrow, IconFile, IconPaperclip, IconX } from "./icons";
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -238,7 +238,8 @@ export function PromptComposer({
   };
 
   const submit = () => {
-    if (userInput.trim()) window.open(APP_URL);
+    const prompt = userInput.trim();
+    if (prompt) window.location.href = getStudioOnboardingUrl(prompt);
   };
 
   // Every composer starts as a compact arrow-only circle and grows into a
