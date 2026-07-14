@@ -146,3 +146,87 @@ export function FAQ({
     </Section>
   );
 }
+
+// Landing-page grouping of the doc's ten questions — a category rail on the
+// left filters the list, so ten answers read as four small sets instead of
+// one long wall. Question order inside each group follows the doc.
+const HOME_GROUPS: { label: string; questions: string[] }[] = [
+  {
+    label: "Building apps",
+    questions: [
+      "What can I actually build?",
+      "Do I need to know how to code?",
+      "Are there templates I can start from?",
+      "Can I keep changing an app after it's live?",
+    ],
+  },
+  {
+    label: "Platform",
+    questions: [
+      "How is Assembly Studio different from other AI app builders?",
+      "Can my apps connect to the tools I already use?",
+      "What is Assembly Studio not good for?",
+    ],
+  },
+  {
+    label: "Pricing",
+    questions: ["What does it cost?"],
+  },
+  {
+    label: "Security & account",
+    questions: [
+      "Is my data secure?",
+      "I already have an Assembly.com workspace — can I use the app builder?",
+    ],
+  },
+];
+
+// Homepage-only FAQ with the category rail; /security keeps the plain list.
+export function HomeFAQ() {
+  const [active, setActive] = useState(0);
+  const group = HOME_GROUPS[active];
+  const items = group.questions
+    .map((q) => FAQS.find((f) => f.question === q))
+    .filter((f): f is FAQEntry => Boolean(f));
+
+  return (
+    <Section id="faq">
+      <div className="mx-auto max-w-5xl">
+        <h2 className="type-h2">Frequently asked questions</h2>
+
+        <div className="mt-10 md:mt-12 md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-12 lg:gap-16">
+          {/* Category rail — sticky on desktop, a chip row on mobile. */}
+          <nav aria-label="FAQ categories">
+            <ul className="flex gap-2 overflow-x-auto pb-2 [scrollbar-width:none] md:sticky md:top-24 md:flex-col md:gap-1 md:overflow-visible md:pb-0 [&::-webkit-scrollbar]:hidden">
+              {HOME_GROUPS.map((g, i) => (
+                <li key={g.label} className="shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setActive(i)}
+                    aria-current={active === i}
+                    className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-left text-[14px] transition-colors md:w-full ${
+                      active === i
+                        ? "bg-muted text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {g.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div className="mt-6 md:mt-0">
+            <p className="text-[15px] text-muted-foreground">{group.label}</p>
+            <div className="mt-4 space-y-3">
+              {items.map((faq) => (
+                <FAQItem key={faq.question} {...faq} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </Section>
+  );
+}

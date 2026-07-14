@@ -1,12 +1,11 @@
 import { HeroV76 } from "@/components/home/hero-v76";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { Testimonials } from "@/components/home/testimonials";
-import { FAQ } from "@/components/home/faq";
+import { HomeFAQ } from "@/components/home/faq";
 import { CTA } from "@/components/home/cta";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { ProductionGap } from "@/components/home/production-gap";
 import { WholeStack } from "@/components/home/whole-stack";
-import { ReplaceTools } from "@/components/home/replace-tools";
 import { Reveal } from "@/components/ui/reveal";
 
 export default function HomePage() {
@@ -28,9 +27,9 @@ export default function HomePage() {
 
       {/* The lower half stays on the light hero surface too, so the whole page
           reads as one continuous light canvas until the dark CTA + footer.
-          Order: production gap → whole stack → replace tools → testimonials →
-          FAQ (per the landing narrative doc — no pricing section; the final
-          CTA carries the free-plan line instead). */}
+          Order: production gap → whole stack → testimonials → FAQ (per the
+          landing narrative doc page map — no pricing or replace-tools
+          sections; the final CTA carries the free-plan line instead). */}
       <div className="section-follow relative z-10">
         <Reveal>
           <ProductionGap />
@@ -39,13 +38,10 @@ export default function HomePage() {
           <WholeStack />
         </Reveal>
         <Reveal>
-          <ReplaceTools />
-        </Reveal>
-        <Reveal>
           <Testimonials />
         </Reveal>
         <Reveal>
-          <FAQ />
+          <HomeFAQ />
         </Reveal>
       </div>
 
