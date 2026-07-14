@@ -114,7 +114,7 @@ export function BuildStepVisual() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none flex select-none flex-col overflow-hidden rounded-lg bg-background ring-1 ring-border sm:aspect-[16/9.6]"
+      className="pointer-events-none flex select-none flex-col overflow-hidden rounded-lg bg-background ring-1 ring-border sm:aspect-[16/11]"
     >
       <div className="flex min-h-0 flex-1">
         {/* Team workspace sidebar — the deployed app sits among the others. */}
