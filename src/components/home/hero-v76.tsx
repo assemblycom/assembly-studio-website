@@ -420,22 +420,16 @@ export function HeroV76({
                     className={`gap-0 py-0 ring-1 transition-[transform,box-shadow] duration-200 ease-out group-hover:-translate-y-0.5 ${dark ? "ring-white/8 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)] group-hover:shadow-[0_14px_34px_-22px_rgba(0,0,0,0.85)]" : "ring-black/[0.07] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_28px_-18px_rgba(16,24,40,0.20)] group-hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_18px_36px_-20px_rgba(16,24,40,0.24)]"}`}
                   >
                     <div data-slot="card-media" className={`relative h-[188px] w-full overflow-hidden ${dark ? "" : "bg-[#eef0f2]"}`}>
+                      {/* Square minis skinned like the rail cards (same dark
+                          mock treatment, not white) so the stack reads as more
+                          of the same templates. The mock fills the square's
+                          height and crops a little on the right. */}
                       {SEE_ALL_STACK.map((t) => (
                         <div
                           key={t.slug}
-                          style={
-                            dark
-                              ? ({
-                                  "--v69-card": "#c4c6ca",
-                                  "--v69-well": "#b6b8bd",
-                                  "--v69-well-2": "#acaeb3",
-                                  "--v69-chip": "#cccdd1",
-                                } as React.CSSProperties)
-                              : undefined
-                          }
-                          className={`absolute left-1/2 top-1/2 h-[116px] w-[146px] origin-center overflow-hidden rounded-md border border-black/[0.08] shadow-[0_12px_28px_-10px_rgba(0,0,0,0.9)] transition-transform duration-300 ease-out [font-family:var(--font-inter),system-ui,sans-serif] ${dark ? "bg-[#c4c6ca]" : "bg-white"} ${t.z} ${t.rest} ${t.hover}`}
+                          className={`absolute left-1/2 top-1/2 size-[124px] origin-center overflow-hidden rounded-md border transition-transform duration-300 ease-out [font-family:var(--font-inter),system-ui,sans-serif] ${dark ? "border-white/10 bg-[#151515] shadow-[0_12px_28px_-10px_rgba(0,0,0,0.9)]" : "border-black/[0.08] bg-white shadow-[0_12px_28px_-10px_rgba(16,24,40,0.35)]"} ${t.z} ${t.rest} ${t.hover}`}
                         >
-                          <div className="h-[188px] w-[236px] origin-top-left scale-[0.6186]">
+                          <div className={`h-[188px] w-[236px] origin-top-left scale-[0.6596] ${dark ? "v72-mock-dark" : ""}`}>
                             <V69CardMock slug={t.slug} />
                           </div>
                         </div>
