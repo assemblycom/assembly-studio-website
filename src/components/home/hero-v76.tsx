@@ -39,16 +39,6 @@ const CAROUSEL: Template[] = STRIP_ORDER
   .map((slug) => TEMPLATES.find((t) => t.slug === slug))
   .filter((t): t is Template => Boolean(t));
 
-// Stack shows templates that are NOT already cards in the strip, so the
-// see-all tile teases what's beyond the row instead of repeating it. The
-// stack is static — no fan-out on hover.
-const SEE_ALL_STACK = [
-  { slug: "time-tracker", z: "z-[1]", rest: "[transform:translate(-50%,-50%)_translateY(8px)_scale(0.9)]" },
-  { slug: "data-visualization", z: "z-[2]", rest: "[transform:translate(-50%,-50%)_translateY(4px)_scale(0.95)]" },
-  // goal-tracker's visual is removed for now, so the report chart tops the
-  // stack instead of a blank face.
-  { slug: "monthly-client-report", z: "z-[3]", rest: "[transform:translate(-50%,-50%)]" },
-];
 
 function IconChevron({ className }: { className?: string }) {
   return (
@@ -89,7 +79,7 @@ const TemplateCard = memo(function TemplateCard({
     >
       <Card
         size="sm"
-        className={`gap-0 rounded-[20px] py-0 pb-0! ring-1 transition-[transform,box-shadow] duration-200 ease-out [will-change:transform] ${dark ? "ring-white/8 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)]" : "ring-black/[0.07] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_28px_-18px_rgba(16,24,40,0.20)]"}`}
+        className={`gap-0 rounded-[20px] py-0 pb-0! ring-1 transition-[transform,box-shadow] duration-200 ease-out [will-change:transform] ${dark ? "ring-white/15 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)]" : "ring-black/[0.07] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_28px_-18px_rgba(16,24,40,0.20)]"}`}
       >
         {(() => {
           const hue = CARD_HUE[template.slug];
@@ -365,10 +355,12 @@ export function HeroV76({
                 ref={rowRef}
                 onScroll={updateArrows}
                 style={{ maskImage: rowMask, WebkitMaskImage: rowMask, ...rowTokens } as React.CSSProperties}
-                // pl is px-6 (24px) + FRAME_PAD (5px) so the selected card's
-                // selector frame — which hugs 5px outside the card — lines its
-                // left edge up with the hero title, prompt box, and logo.
-                className="relative -mx-6 mt-3 flex gap-4 overflow-x-auto pb-10 pl-[29px] pr-6 pt-3 md:pt-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                // pl is px-6 (24px) + FRAME_PAD (6px) so the selected card's
+                // selector frame — which hugs 6px outside the card — lines its
+                // left edge up with the hero title, prompt box, and logo. Top
+                // padding only needs to clear the frame now the tab is gone,
+                // which pulls the row up close to the arrows.
+                className="relative -mx-6 mt-3 flex gap-4 overflow-x-auto pb-10 pl-[30px] pr-6 pt-3 md:pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               >
                 {/* Selector frame — glides to the selected card. */}
                 {isDesktop && (
@@ -381,7 +373,10 @@ export function HeroV76({
                     // The selector is a plain ring — no label tab.
                     const W = frame.w;
                     const H = frame.h;
-                    const R = 26; // frame corner radius = card radius (20) + gap (6) so corners run parallel
+                    // Optically between the card's 20px and the geometric
+                    // ideal (20 + 6): the exact-parallel radius read rounder
+                    // than the card at this gap, so the corners felt mismatched.
+                    const R = 24;
                     const selectorColor = dark ? "#9a9aa0" : "#e5e6ea";
                     const ring = `M ${R} 0 H ${W - R} Q ${W} 0 ${W} ${R} V ${H - R} Q ${W} ${H} ${W - R} ${H} H ${R} Q 0 ${H} 0 ${H - R} V ${R} Q 0 0 ${R} 0 Z`;
                     // Stroke matches the card's own 1px ring so the two
@@ -414,23 +409,11 @@ export function HeroV76({
                 >
                   <Card
                     size="sm"
-                    className={`gap-0 rounded-[20px] py-0 pb-0! ring-1 transition-[transform,box-shadow] duration-200 ease-out group-hover:-translate-y-0.5 ${dark ? "ring-white/8 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)] group-hover:shadow-[0_14px_34px_-22px_rgba(0,0,0,0.85)]" : "ring-black/[0.07] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_28px_-18px_rgba(16,24,40,0.20)] group-hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_18px_36px_-20px_rgba(16,24,40,0.24)]"}`}
+                    className={`gap-0 rounded-[20px] py-0 pb-0! ring-1 transition-[transform,box-shadow] duration-200 ease-out group-hover:-translate-y-0.5 ${dark ? "ring-white/15 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)] group-hover:shadow-[0_14px_34px_-22px_rgba(0,0,0,0.85)]" : "ring-black/[0.07] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_28px_-18px_rgba(16,24,40,0.20)] group-hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_18px_36px_-20px_rgba(16,24,40,0.24)]"}`}
                   >
-                    <div data-slot="card-media" className={`relative h-[212px] w-full overflow-hidden ${dark ? "" : "bg-[#eef0f2]"}`}>
-                      {/* Square minis (116px) track the now-square 236×236
-                          card face, scaled to fit exactly — each mock renders
-                          whole, no crops — with a soft, close shadow. */}
-                      {SEE_ALL_STACK.map((t) => (
-                        <div
-                          key={t.slug}
-                          className={`absolute left-1/2 top-1/2 size-[116px] origin-center overflow-hidden rounded-md border [font-family:var(--font-inter),system-ui,sans-serif] ${dark ? "border-white/10 bg-[#151515] shadow-[0_5px_14px_-8px_rgba(0,0,0,0.6)]" : "border-black/[0.08] bg-white shadow-[0_5px_14px_-8px_rgba(16,24,40,0.22)]"} ${t.z} ${t.rest}`}
-                        >
-                          <div className={`h-[236px] w-[236px] origin-top-left scale-[0.4915] ${dark ? "v72-mock-dark" : ""}`}>
-                            <V69CardMock slug={t.slug} />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    {/* No visual for now — a plain gray face until a better
+                        composition lands. */}
+                    <div data-slot="card-media" className={`h-[212px] w-full ${dark ? "bg-white/[0.04]" : "bg-[#eef0f2]"}`} />
                   </Card>
                   <p className={`mt-3 inline-flex items-center gap-1.5 text-[13px] font-normal ${dark ? "text-white" : "text-neutral-900"}`}>
                     See all templates
