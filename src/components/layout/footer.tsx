@@ -19,19 +19,6 @@ const BRAND_AURORA = [
   { offset: 1, color: "#d9ed9200" },
 ];
 
-// "Ask AI about Assembly" — each button opens the assistant with the question
-// prefilled. Gemini has no public prefill URL, so its button goes to Google's
-// AI Mode (Gemini-powered) which does accept a query.
-const AI_PROMPT = encodeURIComponent(
-  "Tell me about Assembly Studio (assembly.com) — the AI app builder for client-facing experiences. What can firms build with it, and how does it work?",
-);
-const ASK_AI = [
-  { src: "/images/ai-chatgpt.svg", label: "ChatGPT", href: `https://chatgpt.com/?q=${AI_PROMPT}` },
-  { src: "/images/ai-claude.svg", label: "Claude", href: `https://claude.ai/new?q=${AI_PROMPT}` },
-  { src: "/images/ai-gemini.svg", label: "Gemini", href: `https://www.google.com/search?udm=50&q=${AI_PROMPT}` },
-  { src: "/images/ai-vector.svg", label: "Grok", href: `https://grok.com/?q=${AI_PROMPT}` },
-];
-
 // Two-column link set for the reveal footer (IntegratedBio-style composition):
 // site pages under "Navigate", socials under "Connect".
 const NAVIGATE: NavLink[] = [
@@ -127,32 +114,9 @@ export function Footer({ reveal = false }: { reveal?: boolean }) {
               </div>
             </div>
 
-            {/* Right cluster — Ask AI column + back-to-top. self-start is
-                explicit so the block always pins to the top of the row. */}
+            {/* Right cluster — back-to-top. self-start pins it to the top of
+                the row. */}
             <div className="flex items-start gap-10 self-start md:gap-14">
-              <div>
-                <p className={monoLabel}>Ask AI about Assembly</p>
-                <div className="mt-4 flex items-center gap-2">
-                  {ASK_AI.map((ai) => (
-                    <a
-                      key={ai.label}
-                      href={ai.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`Ask ${ai.label} about Assembly Studio`}
-                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-white transition-transform hover:-translate-y-0.5"
-                    >
-                      <Image
-                        src={ai.src}
-                        alt={ai.label}
-                        width={18}
-                        height={18}
-                        className="h-[18px] w-[18px] object-contain"
-                      />
-                    </a>
-                  ))}
-                </div>
-              </div>
               {/* Back to top — desktop only; on mobile the footer is compact
                   enough that the control is just clutter. */}
               <button

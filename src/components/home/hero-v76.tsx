@@ -53,6 +53,19 @@ function IconChevron({ className }: { className?: string }) {
   );
 }
 
+// Per-template full-bleed card hue. Each rail widget sits on a distinct but
+// similarly-deep colour with white content (the .v72-mock-color skin), like a
+// gallery of Apple widgets. Engagement is omitted — it self-colours green.
+const CARD_HUE: Record<string, string> = {
+  "onboarding-wizard": "#3d4f8f",
+  "client-project-tracker": "#574a9c",
+  "client-support-requests": "#9c5560",
+  "client-ai-assistant": "#22242a",
+  "document-collection": "#2f6b74",
+  "proposal-builder": "#9c7735",
+  "content-approval-flow": "#6e4a78",
+};
+
 const TemplateCard = memo(function TemplateCard({
   template,
   index,
@@ -80,11 +93,20 @@ const TemplateCard = memo(function TemplateCard({
         size="sm"
         className={`gap-0 py-0 pb-0! ring-1 transition-[transform,box-shadow] duration-200 ease-out [will-change:transform] ${dark ? "ring-white/8 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)]" : "ring-black/[0.07] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_28px_-18px_rgba(16,24,40,0.20)]"}`}
       >
-        <div data-slot="card-media" className={`h-[188px] w-full overflow-hidden [font-family:var(--font-inter),system-ui,sans-serif] ${dark ? "v72-mock-dark" : ""}`}>
-          <div className="h-full w-full">
-            <V69CardMock slug={template.slug} />
-          </div>
-        </div>
+        {(() => {
+          const hue = CARD_HUE[template.slug];
+          return (
+            <div
+              data-slot="card-media"
+              className={`h-[188px] w-full overflow-hidden [font-family:var(--font-inter),system-ui,sans-serif] ${hue ? "v72-mock-color" : dark ? "v72-mock-dark" : ""}`}
+              style={hue ? { backgroundColor: hue } : undefined}
+            >
+              <div className="h-full w-full">
+                <V69CardMock slug={template.slug} />
+              </div>
+            </div>
+          );
+        })()}
       </Card>
       <p className={`mt-3 line-clamp-2 text-[13px] font-normal leading-[1.3] ${dark ? "text-white" : "text-neutral-900"}`}>{template.title}</p>
       <p className={`mt-1 text-[11px] ${dark ? "text-white/50" : "text-neutral-500"}`}>{template.category}</p>

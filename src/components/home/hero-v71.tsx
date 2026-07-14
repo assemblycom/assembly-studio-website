@@ -73,7 +73,7 @@ function CardIntake() {
         type="button"
         tabIndex={-1}
         className="mt-3 flex h-[26px] items-center justify-center rounded-[6px] text-[11px] font-medium text-white [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.55s_ease-out_0.28s_both] group-[.is-inview]:[animation:cardRowIn_0.55s_ease-out_0.28s_both]"
-        style={{ backgroundColor: "#3b82f6" }}
+        style={{ backgroundColor: "#7DA4FF" }}
       >
         Create client
       </button>
@@ -86,7 +86,7 @@ function CardIntake() {
 // target line. The one card that goes full-bleed colour (the others accent a
 // neutral surface), so the rail has a hero moment.
 const DASH_GREEN = "#2f6b57";
-const DASH_BAR = "#74cda8";
+const DASH_BAR = "#5BE9C2";
 const DASH_LIGHT = "#9fe0c5";
 function CardDashboard() {
   // Weekday engagement vs. the target line (~65%). Wed peaks, Tue dips —
@@ -312,7 +312,7 @@ function CardProposal() {
           style={{ animationDelay: `${items.length * 0.09}s` }}
         >
           <span className="text-neutral-500">Total</span>
-          <span className="text-[17px] font-medium leading-none tracking-tight tabular-nums" style={{ color: "#10b981" }}>$18,500</span>
+          <span className="text-[17px] font-medium leading-none tracking-tight tabular-nums text-neutral-900">$18,500</span>
         </div>
       </div>
     </div>
@@ -323,7 +323,7 @@ function CardChat() {
   return (
     <div className="flex h-full flex-col justify-center gap-2 bg-[var(--v69-card)] p-4 text-[11px]">
       <div className="max-w-[85%] rounded-xl rounded-tl-sm bg-[var(--v69-well-2)] px-3 py-2 text-neutral-700 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.03)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]">When does my project kick off?</div>
-      <div className="ml-auto max-w-[85%] rounded-xl rounded-tr-sm px-3 py-2 leading-relaxed text-white shadow-[0_2px_6px_-2px_rgba(59,130,246,0.45)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_0.35s_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_0.35s_both]" style={{ backgroundColor: "#3b82f6" }}>Kickoff is Mon, Apr 8.</div>
+      <div className="ml-auto max-w-[85%] rounded-xl rounded-tr-sm px-3 py-2 leading-relaxed text-white [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_0.35s_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_0.35s_both]" style={{ backgroundColor: "#7DA4FF" }}>Kickoff is Mon, Apr 8.</div>
       <div className="mt-auto flex h-7 items-center rounded-full bg-[var(--v69-well)] px-3 text-[10px] text-neutral-400 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.04)]">
         <span>Ask a question…</span>
         <span className="ml-px h-3 w-px bg-neutral-500 opacity-0 group-hover:[animation:v69Blink_0.9s_steps(1)_0.7s_infinite] group-[.is-inview]:[animation:v69Blink_0.9s_steps(1)_0.7s_infinite]" />
@@ -332,63 +332,69 @@ function CardChat() {
   );
 }
 
-// Onboarding wizard — a numbered stepper whose completed steps check in and
-// whose progress bar fills on hover. Apple-widget colour: a single blue hue
-// introduces colour (filled checks, a gradient bar, a tinted active row)
-// while the card stays otherwise minimal. The hue is the same in light and
-// dark, like a real widget accent.
-const ONBOARDING_ACCENT = "#3b82f6";
-const ONBOARDING_ACCENT_2 = "#6366f1";
+// Onboarding wizard — a single guided step: a segmented step-progress, the
+// step's question, and radio options with one selected (à la the
+// "recategorize" card). Reads as a real wizard step, not an abstract meter.
+// White accents — the card sits on a full-bleed colour (see .v72-mock-color),
+// so the step UI reads as light-on-colour.
+const ONBOARDING_ACCENT = "#ffffff";
 function CardOnboarding() {
-  const steps: [string, "done" | "active" | "todo"][] = [
-    ["Account created", "done"],
-    ["Company details", "done"],
-    ["Goals & scope", "active"],
-    ["Review & submit", "todo"],
+  // 4-step flow, on step 3 of 4.
+  const STEP = 3;
+  const TOTAL = 4;
+  const options: [string, boolean][] = [
+    ["Brand & website", true],
+    ["Ongoing retainer", false],
+    ["One-off project", false],
   ];
   return (
-    <div className="flex h-full flex-col justify-center gap-3.5 bg-[var(--v69-card)] p-4">
-      <div className="flex items-center gap-2.5">
-        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--v69-well-2)]">
-          <div
-            className="h-full w-1/2 origin-left rounded-full group-hover:[animation:v69GrowX_0.9s_ease-out_both] group-[.is-inview]:[animation:v69GrowX_0.9s_ease-out_both]"
-            style={{ backgroundImage: `linear-gradient(90deg, ${ONBOARDING_ACCENT}, ${ONBOARDING_ACCENT_2})` }}
-          />
+    <div className="flex h-full flex-col justify-center gap-3 bg-[var(--v69-card)] p-4">
+      {/* Segmented step progress. */}
+      <div className="flex items-center gap-2">
+        <div className="flex flex-1 gap-1">
+          {Array.from({ length: TOTAL }, (_, i) => (
+            <div
+              key={i}
+              className="h-1 flex-1 rounded-full"
+              style={{
+                backgroundColor:
+                  i < STEP - 1
+                    ? ONBOARDING_ACCENT
+                    : i === STEP - 1
+                      ? `color-mix(in srgb, ${ONBOARDING_ACCENT} 45%, var(--v69-well-2))`
+                      : "var(--v69-well-2)",
+              }}
+            />
+          ))}
         </div>
-        <span className="text-[10px] font-medium tabular-nums" style={{ color: ONBOARDING_ACCENT }}>50%</span>
+        <span className="text-[8px] tabular-nums text-neutral-400">
+          {STEP}/{TOTAL}
+        </span>
       </div>
-      <div className="flex flex-col gap-0.5">
-        {steps.map(([label, state], i) => (
+      <div className="text-[12.5px] font-medium leading-tight text-neutral-900">
+        What&rsquo;s the engagement?
+      </div>
+      <div className="flex flex-col gap-1.5">
+        {options.map(([label, selected], i) => (
           <div
             key={label}
-            className="flex items-center gap-2.5 rounded-md px-2 py-1.5 [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]"
+            className="flex items-center gap-2 rounded-md px-2 py-1.5 [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]"
             style={{
-              animationDelay: `${i * 0.08}s`,
-              backgroundColor:
-                state === "active"
-                  ? `color-mix(in srgb, ${ONBOARDING_ACCENT} 13%, transparent)`
-                  : undefined,
+              animationDelay: `${i * 0.07}s`,
+              backgroundColor: selected
+                ? `color-mix(in srgb, ${ONBOARDING_ACCENT} 24%, transparent)`
+                : "var(--v69-well)",
             }}
           >
             <span
-              className="flex size-4 shrink-0 items-center justify-center rounded-full text-white"
+              className="flex size-3.5 shrink-0 items-center justify-center rounded-full"
               style={
-                state === "done"
+                selected
                   ? { backgroundColor: ONBOARDING_ACCENT }
-                  : state === "active"
-                    ? { boxShadow: `inset 0 0 0 1.5px ${ONBOARDING_ACCENT}` }
-                    : { boxShadow: "inset 0 0 0 1px rgba(130,130,140,0.45)" }
+                  : { boxShadow: "inset 0 0 0 1.5px rgba(255,255,255,0.5)" }
               }
-            >
-              {state === "done" ? (
-                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-              ) : state === "active" ? (
-                <span className="size-1.5 rounded-full" style={{ backgroundColor: ONBOARDING_ACCENT }} />
-              ) : null}
-            </span>
-            <span className={`text-[11px] ${state === "todo" ? "text-neutral-400" : "text-neutral-800"}`}>{label}</span>
+            />
+            <span className={`text-[10.5px] ${selected ? "text-neutral-800" : "text-neutral-500"}`}>{label}</span>
           </div>
         ))}
       </div>
@@ -412,9 +418,9 @@ function CardChecklist() {
           <div key={label} className="flex items-center gap-2 rounded-md bg-[var(--v69-well)] px-2.5 py-1.5 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.04)]">
             <span
               className={`flex size-3.5 shrink-0 items-center justify-center rounded-[4px] ${
-                done ? "text-white group-hover:[animation:v69Pop_0.8s_cubic-bezier(0.22,1,0.36,1)_both] group-[.is-inview]:[animation:v69Pop_0.8s_cubic-bezier(0.22,1,0.36,1)_both]" : "border border-black/10 bg-[var(--v69-chip)]"
+                done ? "group-hover:[animation:v69Pop_0.8s_cubic-bezier(0.22,1,0.36,1)_both] group-[.is-inview]:[animation:v69Pop_0.8s_cubic-bezier(0.22,1,0.36,1)_both]" : "border border-black/10 bg-[var(--v69-chip)]"
               }`}
-              style={done ? { animationDelay: `${0.28 + i * 0.26}s`, backgroundColor: "#10b981" } : undefined}
+              style={done ? { animationDelay: `${0.28 + i * 0.26}s`, backgroundColor: "#ffffff", color: "#235a63" } : undefined}
             >
               {done && (
                 <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -621,33 +627,108 @@ function CardInfo() {
   );
 }
 
-// Client project tracker — a phase-progress (Gantt-ish) read, deliberately
-// distinct from the status-pill approval list so the two don't look alike: each
-// phase is a labeled bar that fills to its completion on hover.
+// Client project tracker — a GitHub-style contribution heatmap: a headline
+// count over a weekday × week grid of violet cells whose intensity encodes
+// daily task activity, tapering to empty in the "future" weeks on the right.
+const TRACKER_VIOLET = "#ffffff";
+const TRACKER_COLS = 15;
+const TRACKER_ROWS = 7;
+// Deterministic 0–3 intensity per cell (no Math.random, so it can't flicker
+// between renders): a hash gives organic variation, the last few columns are
+// forced empty to read as upcoming weeks, and the first column ramps in.
+function trackerLevel(r: number, c: number): number {
+  if (c >= TRACKER_COLS - 2) return 0;
+  const h = (r * 5 + c * 11 + r * c * 7 + c * c * 3) % 13;
+  let lvl = h < 3 ? 0 : h < 6 ? 1 : h < 10 ? 2 : 3;
+  if (c === 0 && r < 2) lvl = 0; // ragged start, like a mid-week first day
+  return lvl;
+}
+const TRACKER_ROW_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 function CardTracker() {
-  // Monotone neutral tracks — the phase names and fill lengths carry the state,
-  // so no status colour is needed.
-  const phases: [string, number][] = [
-    ["Discovery & scope", 1],
-    ["Design phase", 0.55],
-    ["Build & QA", 0],
-  ];
+  const cellFill = (lvl: number) =>
+    lvl === 0
+      ? "var(--v69-well)"
+      : lvl === 1
+        ? `color-mix(in srgb, ${TRACKER_VIOLET} 32%, var(--v69-well))`
+        : lvl === 2
+          ? `color-mix(in srgb, ${TRACKER_VIOLET} 62%, transparent)`
+          : TRACKER_VIOLET;
   return (
-    <div className="flex h-full flex-col justify-center gap-3.5 bg-[var(--v69-card)] p-4">
-      {phases.map(([label, pct], i) => (
-        <div key={label} className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] text-neutral-700">{label}</span>
-            <span className="text-[10px] tabular-nums text-neutral-400">{Math.round(pct * 100)}%</span>
-          </div>
-          <div className="h-1.5 overflow-hidden rounded-full bg-[var(--v69-well)]">
-            <div
-              className="h-full origin-left rounded-full group-hover:[animation:v69GrowX_0.9s_ease-out_both] group-[.is-inview]:[animation:v69GrowX_0.9s_ease-out_both]"
-              style={{ width: `${pct * 100}%`, animationDelay: `${i * 0.12}s`, backgroundImage: "linear-gradient(90deg, #8b5cf6, #a855f7)" }}
-            />
-          </div>
+    <div className="flex h-full flex-col gap-2 bg-[var(--v69-card)] p-3.5">
+      <div>
+        <div className="text-[12.5px] font-medium leading-tight text-neutral-900">Tasks completed</div>
+        <div className="mt-0.5 text-[9.5px] leading-none text-neutral-400">Since Jan 1</div>
+        <div className="mt-1.5 text-[27px] font-medium leading-none tracking-tight text-neutral-900">96</div>
+      </div>
+      <div className="flex min-h-0 flex-1 gap-1">
+        {/* Weekday labels. */}
+        <div className="flex shrink-0 flex-col justify-between py-[1px] text-[5.5px] leading-none text-neutral-400">
+          {TRACKER_ROW_LABELS.map((d, i) => (
+            <span key={i}>{d}</span>
+          ))}
         </div>
-      ))}
+        {/* Week columns. */}
+        <div className="flex min-w-0 flex-1 gap-[2px]">
+          {Array.from({ length: TRACKER_COLS }, (_, c) => (
+            <div key={c} className="flex flex-1 flex-col gap-[2px]">
+              {Array.from({ length: TRACKER_ROWS }, (_, r) => (
+                <div
+                  key={r}
+                  className="flex-1 rounded-[1.5px]"
+                  style={{ backgroundColor: cellFill(trackerLevel(r, c)) }}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* Month labels — spread across the grid. */}
+      <div className="flex pl-[14px] text-[6.5px] leading-none text-neutral-400">
+        {["Jan", "Feb", "Mar", "Apr"].map((m) => (
+          <span key={m} className="flex-1">{m}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Client support requests — a status summary: a request count, a segmented
+// distribution bar, and a legend with per-status counts. An aggregate read,
+// distinct from the plain status-pill list.
+// White ladder — the card is full-bleed rose, so status reads by brightness.
+const SUPPORT_SEGMENTS: { label: string; count: number; color: string }[] = [
+  { label: "Open", count: 5, color: "rgba(255,255,255,0.95)" },
+  { label: "In progress", count: 4, color: "rgba(255,255,255,0.6)" },
+  { label: "Resolved", count: 3, color: "rgba(255,255,255,0.34)" },
+];
+function CardSupport() {
+  const total = SUPPORT_SEGMENTS.reduce((n, s) => n + s.count, 0);
+  return (
+    <div className="flex h-full flex-col justify-center gap-3 bg-[var(--v69-card)] p-4">
+      <div className="flex items-baseline gap-1.5">
+        <span className="text-[26px] font-medium leading-none tracking-tight text-neutral-900">{total}</span>
+        <span className="text-[10px] text-neutral-400">requests this week</span>
+      </div>
+      {/* Distribution bar. */}
+      <div className="flex h-2 gap-0.5 overflow-hidden">
+        {SUPPORT_SEGMENTS.map((s, i) => (
+          <div
+            key={s.label}
+            className={`h-full origin-left ${i === 0 ? "rounded-l-full" : ""} ${i === SUPPORT_SEGMENTS.length - 1 ? "rounded-r-full" : ""} group-hover:[animation:v69GrowX_0.7s_ease-out_both] group-[.is-inview]:[animation:v69GrowX_0.7s_ease-out_both]`}
+            style={{ width: `${(s.count / total) * 100}%`, backgroundColor: s.color, animationDelay: `${i * 0.08}s` }}
+          />
+        ))}
+      </div>
+      {/* Legend. */}
+      <div className="flex flex-col gap-1.5">
+        {SUPPORT_SEGMENTS.map((s) => (
+          <div key={s.label} className="flex items-center gap-2 text-[10.5px]">
+            <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: s.color }} />
+            <span className="text-neutral-700">{s.label}</span>
+            <span className="ml-auto tabular-nums text-neutral-400">{s.count}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -658,24 +739,15 @@ export function V69CardMock({ slug }: { slug: string }) {
   if (slug === "data-visualization") return <CardDataViz />;
   if (slug === "time-tracker") return <CardTimeTracker />;
   if (slug === "goal-tracker") return <CardGoalTracker />;
-  if (slug === "client-support-requests")
-    return (
-      <CardList
-        rows={[
-          ["Login issue", "Open", "#f59e0b"],
-          ["Billing question", "In progress", "#3b82f6"],
-          ["Feature request", "Resolved", "#10b981"],
-        ]}
-      />
-    );
+  if (slug === "client-support-requests") return <CardSupport />;
   if (slug === "client-project-tracker") return <CardTracker />;
   if (slug === "content-approval-flow")
     return (
       <CardList
         rows={[
-          ["March newsletter", "Approved", "#10b981"],
-          ["Launch announcement", "In review", "#f59e0b"],
-          ["Case study", "Draft", "color-mix(in srgb, var(--v69-ink) 35%, transparent)"],
+          ["March newsletter", "Approved", "rgba(255,255,255,0.95)"],
+          ["Launch announcement", "In review", "rgba(255,255,255,0.6)"],
+          ["Case study", "Draft", "rgba(255,255,255,0.34)"],
         ]}
       />
     );

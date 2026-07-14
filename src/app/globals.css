@@ -679,6 +679,31 @@ html:not([data-theme="dark"]) .v63-gradient-border:focus-within::before {
   --color-red-500: #f87171;
 }
 
+/* On-colour skin — reskins a light mock to sit on a full-bleed coloured card
+   (the parent supplies the hue). Wells become translucent white, ink + all
+   neutral text become white ladders, so a widget reads as light-on-colour in
+   BOTH themes without editing the shared components. Applied instead of
+   .v72-mock-dark for the coloured rail cards. */
+.v72-mock-color {
+  --v69-card: transparent;
+  --v69-well: rgba(255, 255, 255, 0.15);
+  --v69-well-2: rgba(255, 255, 255, 0.24);
+  --v69-chip: rgba(255, 255, 255, 0.17);
+  --v69-chip-border: rgba(255, 255, 255, 0.26);
+  --v69-ink: #ffffff;
+
+  --color-white: #ffffff;
+  --color-black: #ffffff;
+
+  --color-neutral-300: rgba(255, 255, 255, 0.45);
+  --color-neutral-400: rgba(255, 255, 255, 0.62);
+  --color-neutral-500: rgba(255, 255, 255, 0.72);
+  --color-neutral-600: rgba(255, 255, 255, 0.8);
+  --color-neutral-700: rgba(255, 255, 255, 0.86);
+  --color-neutral-800: rgba(255, 255, 255, 0.92);
+  --color-neutral-900: #ffffff;
+}
+
 /* Typewriter reveal — grows the text's layout width left-to-right in steps. */
 @keyframes v68Type {
   from { max-width: 0; }
