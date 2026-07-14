@@ -1,10 +1,14 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 
 // ─────────────────────────────────────────────────────────────────────────
 // THE WHOLE STACK — itemizes the proof behind the production-gap claim:
 // everything a firm would otherwise build or buy after a code generator
 // hands them an app. Section 3 asserts the gap; each row here lands as
-// evidence. Copy from the landing narrative doc.
+// evidence. Layout per the landing narrative doc: short manifesto copy on
+// the left, an arrow-row list on the right with rows that expand.
 // ─────────────────────────────────────────────────────────────────────────
 
 const ROWS: { title: string; body: string; href?: string; linkLabel?: string }[] = [
@@ -41,43 +45,95 @@ const ROWS: { title: string; body: string; href?: string; linkLabel?: string }[]
 ];
 
 export function WholeStack() {
+  // One row open at a time; the first is open on arrival so the list never
+  // reads as a bare index.
+  const [open, setOpen] = useState(0);
+
   return (
     <section id="whole-stack" className="py-20 md:py-28">
       <div className="mx-auto max-w-[1600px] px-6 md:px-10">
-        <h2 className="type-h2 max-w-xl text-foreground">
-          Everything after the prompt, already built.
-        </h2>
-        <p className="type-lead mt-5 max-w-xl text-muted-foreground">
-          Ship a real app without wiring up auth, configuring a database, or
-          figuring out how clients log in. Assembly is the foundation your
-          apps are born into — not infrastructure you assemble around them.
-        </p>
+        <div className="md:grid md:grid-cols-[minmax(0,420px)_minmax(0,1fr)] md:items-start md:gap-16 lg:gap-24">
+          {/* Manifesto copy — short, left. */}
+          <div>
+            <h2 className="type-h2 text-foreground">
+              Everything after the prompt, already built.
+            </h2>
+            <p className="type-lead mt-5 text-muted-foreground">
+              Ship a real app without wiring up auth, configuring a database,
+              or figuring out how clients log in. Assembly is the foundation
+              your apps are born into — not infrastructure you assemble
+              around them.
+            </p>
+          </div>
 
-        {/* Spec-table rows — title on the left, evidence on the right, echoing
-            the hairline list language of How it works. */}
-        <div className="mt-12 border-b border-border">
-          {ROWS.map((row) => (
-            <div
-              key={row.title}
-              className="grid gap-2 border-t border-border py-5 md:grid-cols-[minmax(0,340px)_minmax(0,1fr)] md:gap-12"
-            >
-              <h3 className="text-[17px] text-foreground">{row.title}</h3>
-              <p className="text-[15px] leading-relaxed text-muted-foreground">
-                {row.body}
-                {row.href && (
-                  <>
-                    {" "}
-                    <Link
-                      href={row.href}
-                      className="whitespace-nowrap text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
+          {/* Arrow-row list — each row expands to its evidence line. */}
+          <div className="mt-12 border-b border-border md:mt-2">
+            {ROWS.map((row, i) => {
+              const isOpen = open === i;
+              return (
+                <div key={row.title} className="border-t border-border">
+                  <button
+                    type="button"
+                    onClick={() => setOpen(isOpen ? -1 : i)}
+                    aria-expanded={isOpen}
+                    className="flex w-full items-center justify-between gap-4 py-5 text-left"
+                  >
+                    <span
+                      className={`text-[17px] transition-colors ${
+                        isOpen
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
                     >
-                      {row.linkLabel}
-                    </Link>
-                  </>
-                )}
-              </p>
-            </div>
-          ))}
+                      {row.title}
+                    </span>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      aria-hidden
+                      className={`shrink-0 text-muted-foreground transition-transform duration-300 ${
+                        isOpen ? "rotate-90" : ""
+                      }`}
+                    >
+                      <path
+                        d="M6 4l4 4-4 4"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </button>
+                  {/* Smooth reveal via grid-rows 0fr → 1fr — animates
+                      without measuring. */}
+                  <div
+                    className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+                      isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="max-w-xl pb-5 text-[15px] leading-relaxed text-muted-foreground">
+                        {row.body}
+                        {row.href && (
+                          <>
+                            {" "}
+                            <Link
+                              href={row.href}
+                              className="whitespace-nowrap text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground"
+                            >
+                              {row.linkLabel}
+                            </Link>
+                          </>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>
