@@ -54,8 +54,7 @@ export function Testimonials() {
           &mdash; {FEATURED.name}
           <span className="text-muted-foreground">
             {" "}
-            &middot; {FEATURED.title}, {FEATURED.firm} &middot;{" "}
-            {FEATURED.vertical}
+            &middot; {FEATURED.title}, {FEATURED.firm}
           </span>
         </p>
 
@@ -74,7 +73,9 @@ export function Testimonials() {
               <p className="text-[24px] leading-none tracking-[-0.01em] text-foreground md:text-[34px]">
                 {s.value}
               </p>
-              <p className="text-[13px] leading-snug text-muted-foreground md:text-sm">
+              {/* Small caps label in the mono face — standing in for ABC
+                  Diatype Caplock, which isn't in our bundled fonts yet. */}
+              <p className="font-[family-name:var(--font-diatype-mono)] text-[11px] uppercase leading-snug tracking-[0.06em] text-muted-foreground">
                 {s.label}
               </p>
             </div>

@@ -72,7 +72,8 @@ function CardIntake() {
       <button
         type="button"
         tabIndex={-1}
-        className="mt-3 flex h-[26px] items-center justify-center rounded-[6px] bg-[var(--v69-chip)] text-[11px] font-medium text-neutral-700 ring-1 ring-[color:var(--v69-chip-border)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.55s_ease-out_0.28s_both] group-[.is-inview]:[animation:cardRowIn_0.55s_ease-out_0.28s_both]"
+        className="mt-3 flex h-[26px] items-center justify-center rounded-[6px] text-[11px] font-medium text-white [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.55s_ease-out_0.28s_both] group-[.is-inview]:[animation:cardRowIn_0.55s_ease-out_0.28s_both]"
+        style={{ backgroundColor: "#3b82f6" }}
       >
         Create client
       </button>
@@ -93,15 +94,15 @@ function CardDashboard() {
         <div className="text-[9px] text-neutral-400">Engagement score</div>
         <div className="mt-1 flex items-center gap-2">
           <span aria-label="82" className="v69-score-num text-[30px] font-medium leading-none tracking-tight text-neutral-900 group-hover:[animation:v69Count_0.9s_ease-out_both] group-[.is-inview]:[animation:v69Count_0.9s_ease-out_both]" />
-          <span className="rounded-full bg-[var(--v69-well)] px-2.5 py-1 text-[9px] font-medium leading-none text-neutral-400 group-hover:[animation:v69Pop_0.35s_ease-out_0.9s_both] group-[.is-inview]:[animation:v69Pop_0.35s_ease-out_0.9s_both]">+5%</span>
+          <span className="rounded-full px-2.5 py-1 text-[9px] font-medium leading-none group-hover:[animation:v69Pop_0.35s_ease-out_0.9s_both] group-[.is-inview]:[animation:v69Pop_0.35s_ease-out_0.9s_both]" style={{ color: "#10b981", backgroundColor: "color-mix(in srgb, #10b981 14%, transparent)" }}>+5%</span>
         </div>
       </div>
       <div className="flex min-h-0 flex-1 items-end gap-[2px] pt-1">
         {bars.map((h, i) => (
           <div
             key={i}
-            className="w-full origin-bottom rounded-[1px] bg-neutral-500/70 group-hover:[animation:v69GrowY_0.6s_ease-out_both] group-[.is-inview]:[animation:v69GrowY_0.6s_ease-out_both]"
-            style={{ height: `${h}%`, animationDelay: `${i * 0.02}s` }}
+            className="w-full origin-bottom rounded-[1px] group-hover:[animation:v69GrowY_0.6s_ease-out_both] group-[.is-inview]:[animation:v69GrowY_0.6s_ease-out_both]"
+            style={{ height: `${h}%`, animationDelay: `${i * 0.02}s`, backgroundColor: "color-mix(in srgb, #10b981 78%, transparent)" }}
           />
         ))}
       </div>
@@ -287,7 +288,7 @@ function CardProposal() {
           style={{ animationDelay: `${items.length * 0.09}s` }}
         >
           <span className="text-neutral-500">Total</span>
-          <span className="text-[17px] font-medium leading-none tracking-tight tabular-nums text-neutral-900">$18,500</span>
+          <span className="text-[17px] font-medium leading-none tracking-tight tabular-nums" style={{ color: "#10b981" }}>$18,500</span>
         </div>
       </div>
     </div>
@@ -298,7 +299,7 @@ function CardChat() {
   return (
     <div className="flex h-full flex-col justify-center gap-2 bg-[var(--v69-card)] p-4 text-[11px]">
       <div className="max-w-[85%] rounded-xl rounded-tl-sm bg-[var(--v69-well-2)] px-3 py-2 text-neutral-700 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.03)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]">When does my project kick off?</div>
-      <div className="ml-auto max-w-[85%] rounded-xl rounded-tr-sm bg-neutral-900 px-3 py-2 leading-relaxed text-white shadow-[0_2px_6px_-2px_rgba(16,24,40,0.3)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_0.35s_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_0.35s_both]">Kickoff is Mon, Apr 8.</div>
+      <div className="ml-auto max-w-[85%] rounded-xl rounded-tr-sm px-3 py-2 leading-relaxed text-white shadow-[0_2px_6px_-2px_rgba(59,130,246,0.45)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_0.35s_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_0.35s_both]" style={{ backgroundColor: "#3b82f6" }}>Kickoff is Mon, Apr 8.</div>
       <div className="mt-auto flex h-7 items-center rounded-full bg-[var(--v69-well)] px-3 text-[10px] text-neutral-400 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.04)]">
         <span>Ask a question…</span>
         <span className="ml-px h-3 w-px bg-neutral-500 opacity-0 group-hover:[animation:v69Blink_0.9s_steps(1)_0.7s_infinite] group-[.is-inview]:[animation:v69Blink_0.9s_steps(1)_0.7s_infinite]" />
@@ -308,7 +309,12 @@ function CardChat() {
 }
 
 // Onboarding wizard — a numbered stepper whose completed steps check in and
-// whose progress bar fills on hover.
+// whose progress bar fills on hover. Apple-widget colour: a single blue hue
+// introduces colour (filled checks, a gradient bar, a tinted active row)
+// while the card stays otherwise minimal. The hue is the same in light and
+// dark, like a real widget accent.
+const ONBOARDING_ACCENT = "#3b82f6";
+const ONBOARDING_ACCENT_2 = "#6366f1";
 function CardOnboarding() {
   const steps: [string, "done" | "active" | "todo"][] = [
     ["Account created", "done"],
@@ -318,32 +324,44 @@ function CardOnboarding() {
   ];
   return (
     <div className="flex h-full flex-col justify-center gap-3.5 bg-[var(--v69-card)] p-4">
-      {/* Progress first (the status), then the steps — done ✓, current row
-          highlighted, upcoming muted. Monotone: neutral tones only. */}
       <div className="flex items-center gap-2.5">
         <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--v69-well-2)]">
-          <div className="h-full w-1/2 origin-left rounded-full bg-neutral-500 group-hover:[animation:v69GrowX_0.9s_ease-out_both] group-[.is-inview]:[animation:v69GrowX_0.9s_ease-out_both]" />
+          <div
+            className="h-full w-1/2 origin-left rounded-full group-hover:[animation:v69GrowX_0.9s_ease-out_both] group-[.is-inview]:[animation:v69GrowX_0.9s_ease-out_both]"
+            style={{ backgroundImage: `linear-gradient(90deg, ${ONBOARDING_ACCENT}, ${ONBOARDING_ACCENT_2})` }}
+          />
         </div>
-        <span className="text-[10px] tabular-nums text-neutral-400">50%</span>
+        <span className="text-[10px] font-medium tabular-nums" style={{ color: ONBOARDING_ACCENT }}>50%</span>
       </div>
       <div className="flex flex-col gap-0.5">
         {steps.map(([label, state], i) => (
           <div
             key={label}
-            className={`flex items-center gap-2.5 rounded-md px-2 py-1.5 [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both] ${state === "active" ? "bg-[var(--v69-well)]" : ""}`}
-            style={{ animationDelay: `${i * 0.08}s` }}
+            className="flex items-center gap-2.5 rounded-md px-2 py-1.5 [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]"
+            style={{
+              animationDelay: `${i * 0.08}s`,
+              backgroundColor:
+                state === "active"
+                  ? `color-mix(in srgb, ${ONBOARDING_ACCENT} 13%, transparent)`
+                  : undefined,
+            }}
           >
             <span
-              className={`flex size-4 shrink-0 items-center justify-center rounded-full ${
+              className="flex size-4 shrink-0 items-center justify-center rounded-full text-white"
+              style={
                 state === "done"
-                  ? "bg-neutral-700 text-white"
-                  : "border border-neutral-400/40"
-              }`}
+                  ? { backgroundColor: ONBOARDING_ACCENT }
+                  : state === "active"
+                    ? { boxShadow: `inset 0 0 0 1.5px ${ONBOARDING_ACCENT}` }
+                    : { boxShadow: "inset 0 0 0 1px rgba(130,130,140,0.45)" }
+              }
             >
               {state === "done" ? (
                 <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <path d="M20 6L9 17l-5-5" />
                 </svg>
+              ) : state === "active" ? (
+                <span className="size-1.5 rounded-full" style={{ backgroundColor: ONBOARDING_ACCENT }} />
               ) : null}
             </span>
             <span className={`text-[11px] ${state === "todo" ? "text-neutral-400" : "text-neutral-800"}`}>{label}</span>
@@ -370,9 +388,9 @@ function CardChecklist() {
           <div key={label} className="flex items-center gap-2 rounded-md bg-[var(--v69-well)] px-2.5 py-1.5 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.04)]">
             <span
               className={`flex size-3.5 shrink-0 items-center justify-center rounded-[4px] ${
-                done ? "bg-neutral-700 text-white group-hover:[animation:v69Pop_0.8s_cubic-bezier(0.22,1,0.36,1)_both] group-[.is-inview]:[animation:v69Pop_0.8s_cubic-bezier(0.22,1,0.36,1)_both]" : "border border-black/10 bg-[var(--v69-chip)]"
+                done ? "text-white group-hover:[animation:v69Pop_0.8s_cubic-bezier(0.22,1,0.36,1)_both] group-[.is-inview]:[animation:v69Pop_0.8s_cubic-bezier(0.22,1,0.36,1)_both]" : "border border-black/10 bg-[var(--v69-chip)]"
               }`}
-              style={done ? { animationDelay: `${0.28 + i * 0.26}s` } : undefined}
+              style={done ? { animationDelay: `${0.28 + i * 0.26}s`, backgroundColor: "#10b981" } : undefined}
             >
               {done && (
                 <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -600,8 +618,8 @@ function CardTracker() {
           </div>
           <div className="h-1.5 overflow-hidden rounded-full bg-[var(--v69-well)]">
             <div
-              className="h-full origin-left rounded-full bg-neutral-500 group-hover:[animation:v69GrowX_0.9s_ease-out_both] group-[.is-inview]:[animation:v69GrowX_0.9s_ease-out_both]"
-              style={{ width: `${pct * 100}%`, animationDelay: `${i * 0.12}s` }}
+              className="h-full origin-left rounded-full group-hover:[animation:v69GrowX_0.9s_ease-out_both] group-[.is-inview]:[animation:v69GrowX_0.9s_ease-out_both]"
+              style={{ width: `${pct * 100}%`, animationDelay: `${i * 0.12}s`, backgroundImage: "linear-gradient(90deg, #8b5cf6, #a855f7)" }}
             />
           </div>
         </div>
@@ -620,9 +638,9 @@ export function V69CardMock({ slug }: { slug: string }) {
     return (
       <CardList
         rows={[
-          ["Login issue", "Open", "color-mix(in srgb, var(--v69-ink) 90%, transparent)"],
-          ["Billing question", "In progress", "color-mix(in srgb, var(--v69-ink) 55%, transparent)"],
-          ["Feature request", "Resolved", "color-mix(in srgb, var(--v69-ink) 30%, transparent)"],
+          ["Login issue", "Open", "#f59e0b"],
+          ["Billing question", "In progress", "#3b82f6"],
+          ["Feature request", "Resolved", "#10b981"],
         ]}
       />
     );
@@ -631,8 +649,8 @@ export function V69CardMock({ slug }: { slug: string }) {
     return (
       <CardList
         rows={[
-          ["March newsletter", "Approved", "color-mix(in srgb, var(--v69-ink) 90%, transparent)"],
-          ["Launch announcement", "In review", "color-mix(in srgb, var(--v69-ink) 55%, transparent)"],
+          ["March newsletter", "Approved", "#10b981"],
+          ["Launch announcement", "In review", "#f59e0b"],
           ["Case study", "Draft", "color-mix(in srgb, var(--v69-ink) 35%, transparent)"],
         ]}
       />

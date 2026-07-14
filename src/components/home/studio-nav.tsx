@@ -165,7 +165,7 @@ export function StudioNav({
       {/* Mobile header — mirrors the desktop nav: transparent with light
           contents over the dark hero, settling into the same dark glass pill on
           scroll. Logo on the left, grid menu button on the right. */}
-      <header className={`${position} z-50 border-b transition-colors ${ease} md:hidden ${scrolled ? `${scrolledSurface} ${scrolledBorder}` : "border-transparent"}`}>
+      <header className={`${position} z-50 border-b transition-colors ${ease} lg:hidden ${scrolled ? `${scrolledSurface} ${scrolledBorder}` : "border-transparent"}`}>
         <div className={`flex items-center justify-between px-5 transition-[height] ${ease} ${scrolled ? "h-12" : "h-14"}`}>
           <Link href="/" className="flex items-center">
             {logoMark}
@@ -192,7 +192,7 @@ export function StudioNav({
 
       {/* Desktop header — full-bleed bar: transparent at the top, frosted
           full-width surface with a hairline bottom border on scroll */}
-      <header className={`${position} z-50 hidden border-b transition-colors ${ease} md:block ${scrolled ? `${scrolledSurface} ${scrolledBorder}` : "border-transparent"}`}>
+      <header className={`${position} z-50 hidden border-b transition-colors ${ease} lg:block ${scrolled ? `${scrolledSurface} ${scrolledBorder}` : "border-transparent"}`}>
         <div className={`relative mx-auto flex items-center ${contentRail} transition-[height] ${ease} ${scrolled ? "h-14" : "h-16"}`}>
           {/* Three balanced columns keep the nav truly centred while the equal
               side columns guarantee it never crowds the logo or the actions. */}
@@ -243,8 +243,9 @@ export function StudioNav({
               // A bare icon glyph (no ring — the outlined circle read heavy in
               // the nav). It shows the mode you'd switch TO: a moon in light, a
               // sun in dark, with only a soft hover fill like the nav links.
-              // Hidden below xl where the nav gets crammed; the mobile menu
-              // still carries an Appearance switch.
+              // Shown whenever the centered desktop nav is (lg+). Below lg the
+              // whole bar collapses to the hamburger, whose menu carries an
+              // Appearance switch instead.
               const ink = lightContent
                 ? "text-white/70 hover:text-white hover:bg-white/10"
                 : "text-foreground/60 hover:text-foreground hover:bg-foreground/[0.06]";
@@ -253,7 +254,7 @@ export function StudioNav({
                   type="button"
                   onClick={themeToggle.onToggle}
                   aria-label={light ? "Switch to dark theme" : "Switch to light theme"}
-                  className={`mr-1.5 hidden size-8 items-center justify-center rounded-full transition-colors xl:flex ${ink}`}
+                  className={`mr-1.5 hidden size-8 items-center justify-center rounded-full transition-colors lg:flex ${ink}`}
                 >
                   {light ? (
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
