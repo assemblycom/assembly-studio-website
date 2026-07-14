@@ -23,7 +23,7 @@ export function CTA() {
       <div className="mx-auto max-w-3xl pb-72 pt-16 text-center md:pt-24">
         <p className={`type-eyebrow ${dark ? "text-white/60" : "text-neutral-500"}`}>AI App Builder</p>
         <h2 className={`type-h2 mt-3 ${dark ? "text-white" : "text-neutral-900"}`}>
-          Ready to build?
+          What are you waiting for?
         </h2>
         <div className="mx-auto mt-10 max-w-2xl text-left">
           <V66Composer
@@ -54,6 +54,9 @@ export function CTA() {
             }
           />
         </div>
+        <p className={`mt-5 text-sm ${dark ? "text-white/50" : "text-neutral-500"}`}>
+          Free forever plan. No credit card required.
+        </p>
       </div>
     </section>
   );

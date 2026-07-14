@@ -19,5 +19,6 @@ export const NAV_LINKS: NavLink[] = [
 ];
 export const APP_URL = "https://app.assembly.com";
 export const SIGNUP_URL = "https://app.assembly.com/signup";
-export const DEMO_URL = "/demo";
-export const TRUST_CENTER_URL = "https://trust.assembly.com";
+// Same booking link as the main site for now; Chili Piper routing is TBD.
+export const DEMO_URL = "https://assembly.com/book-demo";
+export const TRUST_CENTER_URL = "https://security.assembly.com";

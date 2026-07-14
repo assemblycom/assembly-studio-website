@@ -87,7 +87,6 @@ function CardIntake() {
 // 900 type scale; fills use these. INK_SOLID caps selected/solid surfaces
 // below full black so no element on the rail screams.
 const ink = (pct: number) => `color-mix(in srgb, var(--v69-ink) ${pct}%, transparent)`;
-const INK_WASH = ink(3); // row / pill washes
 const INK_FAINT = ink(16); // lightest data fill
 const INK_MID = ink(38); // mid data fill
 const INK_STRONG = ink(62); // strongest data fill
@@ -111,13 +110,7 @@ function CardDashboard() {
   ];
   return (
     <div className="flex h-full flex-col gap-2 bg-[var(--v69-card)] p-3.5">
-      <div className="flex items-center gap-1.5 text-[10px] font-medium text-neutral-400">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-          <path d="M3 3v18h18" />
-          <path d="M7 14l4-4 3 3 5-6" />
-        </svg>
-        Engagement
-      </div>
+      <div className="text-[10px] font-medium text-neutral-400">Engagement</div>
       <div className="text-[19px] font-medium leading-none tracking-tight text-neutral-900">
         82<span className="text-neutral-400">/100</span>
       </div>
@@ -221,73 +214,69 @@ function CardGoalTracker() {
 
 // Static (non-animated) filling mocks for the remaining featured cards — rows
 // centered with even gaps so the card reads composed, not top-clustered.
-function CardList({
-  header,
-  icon,
-  badge,
-  rows,
-}: {
-  header?: string;
-  icon?: React.ReactNode;
-  badge?: string;
-  rows: [string, string, string][];
-}) {
-  return (
-    <div className="flex h-full flex-col gap-2 bg-[var(--v69-card)] p-3.5">
-      {header && (
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            {icon}
-            <span className="text-[11px] font-medium text-neutral-800">{header}</span>
-          </div>
-          {badge && <span className="rounded-full bg-[var(--v69-well-2)] px-2 py-0.5 text-[9px] text-neutral-500">{badge}</span>}
-        </div>
-      )}
-      <div className="flex flex-1 flex-col justify-center gap-2">
-        {/* Rows read as soft pills (iOS-widget-style): a light wash, generous
-            radius, and the status as plain darker-gray text — no dot, no chip. */}
-        {rows.map(([label, status], i) => (
-          <div
-            key={label + i}
-            className="flex items-center justify-between rounded-[10px] px-3 py-2.5 [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]"
-            style={{ animationDelay: `${i * 0.09}s`, backgroundColor: INK_WASH }}
-          >
-            <span className="text-[10px] text-neutral-800">{label}</span>
-            <span className="text-[9px] text-neutral-600">{status}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
+// Proposal builder — banking-widget composition (à la the iOS wallet card):
+// a white panel carrying the proposal total up top, page dots, then a row of
+// circular actions beneath. The chip/well tokens keep it dark-skin safe.
 function CardProposal() {
-  const items: [string, string][] = [
-    ["Brand strategy", "$4,000"],
-    ["Visual identity", "$6,500"],
-    ["Website design", "$8,000"],
+  const actions: [string, React.ReactNode][] = [
+    [
+      "Add item",
+      <svg key="i" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+        <path d="M12 5v14M5 12h14" />
+      </svg>,
+    ],
+    [
+      "E-sign",
+      <svg key="i" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M12 19l7-7 3 3-7 7-3-3z" />
+        <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+      </svg>,
+    ],
+    [
+      "Send",
+      <svg key="i" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M5 12h14" />
+        <path d="M13 6l6 6-6 6" />
+      </svg>,
+    ],
   ];
   return (
-    // Full-bleed well — the gray IS the card surface, not an inset panel.
-    <div className="flex h-full flex-col bg-[var(--v69-well)] p-4">
-      <div className="flex flex-1 flex-col justify-center gap-3 text-[11px]">
-        {items.map(([l, p], i) => (
+    <div className="flex h-full flex-col bg-[var(--v69-card)] p-3.5">
+      {/* Balance-style panel: quiet label row, then the total with a
+          detail-arrow — the proposal's "money moment" front and center. */}
+      <div
+        className="rounded-[16px] bg-[var(--v69-chip)] px-3.5 pb-4 pt-3 shadow-[0_1px_2px_rgba(16,24,40,0.06),inset_0_0_0_1px_rgba(16,24,40,0.03)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]"
+      >
+        <div className="flex items-center justify-between text-[8.5px] text-neutral-400">
+          <span>Proposal</span>
+          <span>Acme Co</span>
+        </div>
+        <div className="mt-4 flex items-end justify-between">
+          <span className="text-[24px] font-medium leading-none tracking-tight tabular-nums text-neutral-900">$18,500</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="mb-0.5 text-neutral-300">
+            <path d="M7 17L17 7" />
+            <path d="M8 7h9v9" />
+          </svg>
+        </div>
+      </div>
+      {/* Page dots. */}
+      <div className="mt-3 flex items-center justify-center gap-1">
+        <span className="h-[3px] w-[3px] rounded-full bg-[var(--v69-well-2)]" />
+        <span className="h-[3px] w-3 rounded-full bg-neutral-400" />
+        <span className="h-[3px] w-[3px] rounded-full bg-[var(--v69-well-2)]" />
+      </div>
+      {/* Circular actions, staggered in on hover. */}
+      <div className="mt-auto flex items-start justify-between px-2 pb-1">
+        {actions.map(([label, icon], i) => (
           <div
-            key={l}
-            className="flex items-center justify-between [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]"
-            style={{ animationDelay: `${i * 0.09}s` }}
+            key={label as string}
+            className="flex flex-col items-center gap-1.5 [will-change:transform,opacity] group-hover:[animation:v69Pop_0.4s_ease-out_both] group-[.is-inview]:[animation:v69Pop_0.4s_ease-out_both]"
+            style={{ animationDelay: `${0.15 + i * 0.08}s` }}
           >
-            <span className="text-neutral-600">{l}</span>
-            <span className="tabular-nums text-neutral-500">{p}</span>
+            <span className="flex size-9 items-center justify-center rounded-full bg-[var(--v69-well-2)] text-neutral-600">{icon}</span>
+            <span className="text-[8.5px] text-neutral-600">{label}</span>
           </div>
         ))}
-        <div
-          className="mt-1 flex items-baseline justify-between border-t border-black/[0.07] pt-2.5 [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]"
-          style={{ animationDelay: `${items.length * 0.09}s` }}
-        >
-          <span className="text-neutral-500">Total</span>
-          <span className="text-[17px] font-medium leading-none tracking-tight tabular-nums text-neutral-900">$18,500</span>
-        </div>
       </div>
     </div>
   );
@@ -296,9 +285,9 @@ function CardProposal() {
 function CardChat() {
   return (
     <div className="flex h-full flex-col bg-[var(--v69-card)] p-4 text-[11px]">
-      {/* Bubbles centre in the space above the input, so the square card
-          doesn't open a hole between the conversation and the composer. */}
-      <div className="flex min-h-0 flex-1 flex-col justify-center gap-2">
+      {/* Thread hugs the top with the composer pinned at the bottom — how a
+          real chat renders — so the bubbles read anchored, not floating. */}
+      <div className="flex min-h-0 flex-1 flex-col justify-start gap-2 pt-1">
         <div className="max-w-[85%] rounded-xl rounded-tl-sm bg-[var(--v69-well-2)] px-3 py-2 text-neutral-700 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.03)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]">When does my project kick off?</div>
         {/* Sent bubble: ink surface + card-toned text, so it inverts cleanly on
             the dark skin (white bubble, dark text) instead of vanishing. */}
@@ -312,20 +301,22 @@ function CardChat() {
   );
 }
 
-// Onboarding wizard — a single guided step: a segmented step-progress, the
-// step's question, and radio options with one selected (à la the
-// "recategorize" card). Reads as a real wizard step, not an abstract meter.
-// Ink accent — the selected step and radio read as ink-on-card in the light
-// skin and flip to white on the dark skin automatically.
+// Onboarding wizard — a single guided step: a segmented step-progress, a
+// one-line title, and contact-detail fields mid-entry. Reads as a real
+// wizard step, not an abstract meter. Ink accent — the active step reads as
+// ink-on-card in the light skin and flips to white on the dark skin.
 const ONBOARDING_ACCENT = "var(--v69-ink)";
 function CardOnboarding() {
-  // 4-step flow, on step 3 of 4.
-  const STEP = 3;
+  // The identity step of the wizard's welcome → identity → goals flow, so
+  // it sits early in the count.
+  const STEP = 2;
   const TOTAL = 4;
-  const options: [string, boolean][] = [
-    ["Brand & website", true],
-    ["Ongoing retainer", false],
-    ["One-off project", false],
+  // Contact-detail fields a new client fills in mid-onboarding; the last one
+  // is still empty so the step reads in-progress, not finished.
+  const fields: [string, string][] = [
+    ["Name", "Riley Chen"],
+    ["Email", "riley@acme.co"],
+    ["Phone", ""],
   ];
   return (
     <div className="flex h-full flex-col justify-center gap-3.5 bg-[var(--v69-card)] p-4">
@@ -351,34 +342,25 @@ function CardOnboarding() {
           {STEP}/{TOTAL}
         </span>
       </div>
+      {/* One-line title — short enough never to wrap at the card width. */}
       <div className="text-[12.5px] font-medium leading-tight text-neutral-900">
-        What are we working on?
+        Your contact details
       </div>
       <div className="flex flex-col gap-2">
-        {options.map(([label, selected], i) => (
+        {fields.map(([label, value], i) => (
           <div
             key={label}
-            className="flex items-center gap-2 rounded-md px-2 py-1.5 [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]"
-            style={{
-              animationDelay: `${i * 0.07}s`,
-              backgroundColor: selected ? INK_FAINT : "var(--v69-well)",
-            }}
+            className="flex items-baseline justify-between gap-2 rounded-md bg-[var(--v69-well)] px-2.5 py-2 [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]"
+            style={{ animationDelay: `${i * 0.07}s` }}
           >
-            <span
-              className="flex size-3.5 shrink-0 items-center justify-center rounded-full"
-              style={
-                selected
-                  ? { backgroundColor: INK_SOLID, color: "var(--color-white)" }
-                  : { boxShadow: `inset 0 0 0 1.5px ${ink(22)}` }
-              }
-            >
-              {selected && (
-                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-              )}
-            </span>
-            <span className={`text-[10.5px] ${selected ? "text-neutral-800" : "text-neutral-500"}`}>{label}</span>
+            <span className="text-[8.5px] text-neutral-400">{label}</span>
+            {value ? (
+              <span className="text-[10px] text-neutral-800">{value}</span>
+            ) : (
+              // The empty field carries a blinking caret so the step reads
+              // as mid-entry (same device as the chat card's composer).
+              <span className="ml-px inline-block h-3 w-px bg-neutral-500 opacity-0 group-hover:[animation:v69Blink_0.9s_steps(1)_0.5s_infinite] group-[.is-inview]:[animation:v69Blink_0.9s_steps(1)_0.5s_infinite]" />
+            )}
           </div>
         ))}
       </div>
@@ -388,6 +370,56 @@ function CardOnboarding() {
 
 // Document collection — an upload checklist where each requested doc checks off
 // with a staggered pop on hover.
+// Content approval — an app-like "slide to approve" control (à la iOS "slide
+// to transfer"): the item under review sits in a soft panel, and on hover the
+// white thumb glides across the track while the hint label fades out.
+function CardApproval() {
+  return (
+    // Two queued items instead of one stretched panel, so every block keeps
+    // its natural height. Tokens follow the sibling cards: well panels with
+    // the checklist's inset ring, p-3.5 face padding, tracker-style header.
+    <div className="flex h-full flex-col gap-2 bg-[var(--v69-card)] p-3.5">
+      <div className="flex items-center justify-between text-[9px] text-neutral-400">
+        <span>Waiting on you</span>
+        <span>2</span>
+      </div>
+      {(
+        [
+          ["March newsletter", "Draft v3 · from Sarah"],
+          ["Launch announcement", "Draft v1 · from Alex"],
+        ] as [string, string][]
+      ).map(([title, meta], i) => (
+        <div
+          key={title}
+          className="rounded-[10px] bg-[var(--v69-well)] px-3 py-2.5 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.04)] [will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]"
+          style={{ animationDelay: `${i * 0.09}s` }}
+        >
+          <div className="text-[10.5px] font-medium leading-tight text-neutral-900">{title}</div>
+          <div className="mt-0.5 text-[9px] text-neutral-500">{meta}</div>
+        </div>
+      ))}
+      <div className="relative mt-auto h-9 shrink-0 overflow-hidden rounded-full bg-[var(--v69-well-2)] shadow-[inset_0_0_0_1px_rgba(16,24,40,0.04)]">
+        {/* The label holds for ~700ms after hover so it can actually be read;
+            it fades just as the thumb starts to travel over it. */}
+        <span className="absolute inset-0 flex items-center justify-center text-[9.5px] text-neutral-500 transition-opacity duration-500 group-hover:opacity-0 group-hover:delay-[700ms] group-[.is-inview]:opacity-0 group-[.is-inview]:delay-[700ms]">
+          Slide to approve
+        </span>
+        {/* Thumb travel: 184px track (212 − 2×14 padding) − 3px inset each
+            side − 48px thumb = 130px, landing flush with the same 3px margin
+            it starts with. A transition (not keyframes) with a hover-only
+            delay: it waits ~700ms, glides slowly, and returns immediately on
+            mouse-out. */}
+        <span className="absolute bottom-[3px] left-[3px] top-[3px] flex w-12 items-center justify-center rounded-full bg-[var(--v69-chip)] text-neutral-800 shadow-[0_1px_2px_rgba(16,24,40,0.12)] transition-transform duration-[900ms] ease-[cubic-bezier(0.3,0.7,0.3,1)] group-hover:translate-x-[130px] group-hover:delay-[700ms] group-[.is-inview]:translate-x-[130px] group-[.is-inview]:delay-[700ms]">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M5 12h14" />
+            <path d="M13 6l6 6-6 6" />
+          </svg>
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function CardChecklist() {
   const docs: [string, boolean][] = [
     ["Signed contract", true],
@@ -396,7 +428,8 @@ function CardChecklist() {
     ["Logo files", false],
   ];
   return (
-    <div className="flex h-full flex-col justify-center gap-2 bg-[var(--v69-card)] p-4">
+    // Items hug the top (like the sibling cards) instead of centering.
+    <div className="flex h-full flex-col justify-start gap-2 bg-[var(--v69-card)] p-4 pt-5">
       <div className="flex flex-col gap-2">
         {docs.map(([label, done], i) => (
           <div key={label} className="flex items-center gap-2 rounded-md bg-[var(--v69-well)] px-2.5 py-1.5 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.04)]">
@@ -644,7 +677,7 @@ function CardTracker() {
       {/* One quiet label + one big number — matches the hierarchy of the
           sibling metric cards (label never competes with the value). */}
       <div>
-        <div className="text-[9px] text-neutral-400">Tasks completed since Jan 1</div>
+        <div className="text-[9px] text-neutral-400">Tasks completed</div>
         <div className="mt-1 text-[27px] font-medium leading-none tracking-tight text-neutral-900">96</div>
       </div>
       {/* Fixed-height grid pinned above the month labels — flexing it made
@@ -660,13 +693,22 @@ function CardTracker() {
         <div className="flex min-w-0 flex-1 gap-[2px]">
           {Array.from({ length: TRACKER_COLS }, (_, c) => (
             <div key={c} className="flex flex-1 flex-col gap-[2px]">
-              {Array.from({ length: TRACKER_ROWS }, (_, r) => (
-                <div
-                  key={r}
-                  className="flex-1 rounded-[1.5px]"
-                  style={{ backgroundColor: cellFill(trackerLevel(r, c)) }}
-                />
-              ))}
+              {Array.from({ length: TRACKER_ROWS }, (_, r) => {
+                const lvl = trackerLevel(r, c);
+                // A sheen sweeps the whole grid left to right (slight row
+                // offset makes it diagonal) — cells lighten and settle back
+                // in place rather than popping in.
+                return (
+                  <div
+                    key={r}
+                    className="flex-1 rounded-[1.5px] group-hover:[animation:v69Shimmer_0.6s_ease-in-out_both] group-[.is-inview]:[animation:v69Shimmer_0.6s_ease-in-out_both]"
+                    style={{
+                      backgroundColor: cellFill(lvl),
+                      animationDelay: `${c * 45 + r * 12}ms`,
+                    }}
+                  />
+                );
+              })}
             </div>
           ))}
         </div>
@@ -699,9 +741,9 @@ function CardSupport() {
   let elapsed = 0;
   return (
     <div className="flex h-full flex-col gap-3 bg-[var(--v69-card)] p-4">
-      {/* Headline + bar share one outlined block so the number reads WITH its
-          chart instead of floating above it; statuses follow underneath. */}
-      <div className="flex flex-col gap-3 rounded-xl p-3.5 ring-1 ring-[var(--v69-chip-border)]">
+      {/* Headline + bar share one chip panel — same treatment as the
+          proposal card's balance panel, so the two tops read as one family. */}
+      <div className="flex flex-col gap-3 rounded-[16px] bg-[var(--v69-chip)] p-3.5 shadow-[0_1px_2px_rgba(16,24,40,0.06),inset_0_0_0_1px_rgba(16,24,40,0.03)]">
         <div className="flex items-baseline gap-1.5">
           <span className="text-[24px] font-medium leading-none tracking-tight text-neutral-900">{total}</span>
           <span className="text-[10px] text-neutral-400">requests this week</span>
@@ -745,16 +787,7 @@ export function V69CardMock({ slug }: { slug: string }) {
   if (slug === "goal-tracker") return <CardGoalTracker />;
   if (slug === "client-support-requests") return <CardSupport />;
   if (slug === "client-project-tracker") return <CardTracker />;
-  if (slug === "content-approval-flow")
-    return (
-      <CardList
-        rows={[
-          ["March newsletter", "Approved", "rgba(16,24,40,0.82)"],
-          ["Launch announcement", "In review", "rgba(16,24,40,0.5)"],
-          ["Case study", "Draft", "rgba(16,24,40,0.24)"],
-        ]}
-      />
-    );
+  if (slug === "content-approval-flow") return <CardApproval />;
   if (slug === "proposal-builder") return <CardProposal />;
   if (slug === "client-ai-assistant") return <CardChat />;
   if (slug === "onboarding-wizard") return <CardOnboarding />;

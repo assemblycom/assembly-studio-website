@@ -644,6 +644,20 @@ html:not([data-theme="dark"]) .v63-gradient-border:focus-within::before {
   opacity: 0.8;
 }
 
+/* Hovering one hero template card dims the rest of the row so the hovered one
+   reads as focused. Hover-capable pointers only — on touch the row is a plain
+   swipeable strip. */
+@media (hover: hover) and (pointer: fine) {
+  .v76-card-row [data-card] {
+    transition:
+      opacity 200ms ease-out,
+      transform 200ms ease-out;
+  }
+  .v76-card-row:has([data-card]:hover) [data-card]:not(:hover) {
+    opacity: 0.5;
+  }
+}
+
 /* Dark-mode skin for the reused template-card mocks. Tailwind v4 utilities read
    their color from --color-* theme vars, so scoping these on the mock wrapper
    reskins the light mocks to dark WITHOUT editing the shared component. */
@@ -758,6 +772,18 @@ html:not([data-theme="dark"]) .v63-gradient-border:focus-within::before {
   content: counter(v69-score);
 }
 /* Pop-in for checkmarks, badges, and status chips. */
+/* Sheen for the tracker heatmap: each cell briefly lightens and settles back,
+   staggered per column, so a band of light sweeps across the grid. Cells never
+   move or vanish — it's a surface highlight, not an entrance. */
+@keyframes v69Shimmer {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  45% {
+    filter: brightness(1.6);
+  }
+}
 @keyframes v69Pop {
   0% { opacity: 0; transform: scale(0.7); }
   55% { opacity: 1; }

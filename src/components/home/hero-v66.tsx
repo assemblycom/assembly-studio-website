@@ -265,7 +265,9 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
   const badgeSize = compact ? "size-[18px]" : "size-6";
   const videoPad = compact ? "pl-1 pr-3" : "pl-1.5 pr-4";
   const badgeCls = dark ? "bg-white/70 text-neutral-900" : "bg-neutral-900 text-white";
-  const menuSurfaceCls = dark ? "border-white/15 bg-[#262626]" : "border-black/[0.06] bg-white";
+  // Menu takes the page ground tone (not white) so it reads as part of the
+  // canvas instead of a bright card floating over it.
+  const menuSurfaceCls = dark ? "border-white/15 bg-[#262626]" : "border-black/[0.06] bg-[#f7f8fa]";
   const menuItemCls = dark ? "text-white/90 hover:bg-white/[0.08]" : "text-neutral-800 hover:bg-black/[0.04]";
   const menuIconCls = dark ? "text-white/50" : "text-neutral-500";
 

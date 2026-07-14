@@ -92,7 +92,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "document-collection",
-    title: "Document collection",
+    title: "Document collector",
     description: "Requested docs with upload checklist",
     icon: "📂",
     category: "Onboarding",
@@ -137,7 +137,7 @@ const BASE_TEMPLATES: Template[] = [
   // Trackers
   {
     slug: "client-project-tracker",
-    title: "Client project tracker",
+    title: "Project tracker",
     description: "Milestones and progress per engagement",
     icon: "✅",
     category: "Trackers",
@@ -180,13 +180,13 @@ const BASE_TEMPLATES: Template[] = [
     featured: true,
   },
 
-  // Requests
+  // Support
   {
     slug: "client-support-requests",
-    title: "Client support requests",
+    title: "Client help desk",
     description: "Categorized requests with a shared triage queue",
     icon: "📥",
-    category: "Requests",
+    category: "Support",
     longDescription:
       "Centralize incoming client requests into a categorized, shared triage queue so nothing gets lost.",
     features: ["Categorized requests", "Shared triage queue", "Priority", "Real-time updates"],

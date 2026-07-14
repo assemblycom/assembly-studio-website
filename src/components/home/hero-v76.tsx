@@ -360,7 +360,7 @@ export function HeroV76({
                 // left edge up with the hero title, prompt box, and logo. Top
                 // padding only needs to clear the frame now the tab is gone,
                 // which pulls the row up close to the arrows.
-                className="relative -mx-6 mt-3 flex gap-4 overflow-x-auto pb-10 pl-[30px] pr-6 pt-3 md:pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                className="v76-card-row relative -mx-6 mt-3 flex gap-4 overflow-x-auto pb-10 pl-[30px] pr-6 pt-3 md:pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               >
                 {/* Selector frame — glides to the selected card. */}
                 {isDesktop && (
@@ -369,24 +369,19 @@ export function HeroV76({
                   className={`pointer-events-none absolute left-0 top-0 z-20 ${frameReady ? "transition-transform duration-[380ms] ease-[cubic-bezier(0.22,1,0.36,1)]" : ""}`}
                   style={{ transform: `translateX(${frame.x}px)`, top: frame.top, width: frame.w, height: frame.h }}
                 >
-                  {(() => {
-                    // The selector is a plain ring — no label tab.
-                    const W = frame.w;
-                    const H = frame.h;
-                    // Optically between the card's 20px and the geometric
-                    // ideal (20 + 6): the exact-parallel radius read rounder
-                    // than the card at this gap, so the corners felt mismatched.
-                    const R = 24;
-                    const selectorColor = dark ? "#9a9aa0" : "#e5e6ea";
-                    const ring = `M ${R} 0 H ${W - R} Q ${W} 0 ${W} ${R} V ${H - R} Q ${W} ${H} ${W - R} ${H} H ${R} Q 0 ${H} 0 ${H - R} V ${R} Q 0 0 ${R} 0 Z`;
-                    // Stroke matches the card's own 1px ring so the two
-                    // outlines read as one family.
-                    return (
-                      <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} fill="none" className="absolute left-0 top-0 overflow-visible">
-                        <path d={ring} stroke={selectorColor} strokeWidth="1" />
-                      </svg>
-                    );
-                  })()}
+                  {/* A plain bordered div, not an SVG path: CSS border-radius
+                      renders true circular corners identical to the card's,
+                      where the old Bézier approximation read slightly flat.
+                      Radius stays concentric: card radius (20) + gap. */}
+                  <div
+                    className="absolute inset-0 border"
+                    style={{
+                      borderRadius: 20 + FRAME_PAD,
+                      // Dark ring sits a notch above the cards' white/15 ring
+                      // — present but quiet, not a bright halo.
+                      borderColor: dark ? "rgba(255,255,255,0.3)" : "#e5e6ea",
+                    }}
+                  />
                 </div>
                 )}
 
@@ -409,11 +404,15 @@ export function HeroV76({
                 >
                   <Card
                     size="sm"
-                    className={`gap-0 rounded-[20px] py-0 pb-0! ring-1 transition-[transform,box-shadow] duration-200 ease-out group-hover:-translate-y-0.5 ${dark ? "ring-white/15 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.8)] group-hover:shadow-[0_14px_34px_-22px_rgba(0,0,0,0.85)]" : "ring-black/[0.07] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_28px_-18px_rgba(16,24,40,0.20)] group-hover:shadow-[0_2px_4px_rgba(16,24,40,0.05),0_18px_36px_-20px_rgba(16,24,40,0.24)]"}`}
+                    // Flat and page-toned (no shadow, face = ground color) so
+                    // the empty tile recedes behind the real template cards.
+                    className={`gap-0 rounded-[20px] py-0 pb-0! shadow-none ring-1 transition-transform duration-200 ease-out group-hover:-translate-y-0.5 ${dark ? "ring-white/15" : "ring-black/[0.07]"}`}
                   >
-                    {/* No visual for now — a plain gray face until a better
-                        composition lands. */}
-                    <div data-slot="card-media" className={`h-[212px] w-full ${dark ? "bg-white/[0.04]" : "bg-[#eef0f2]"}`} />
+                    <div data-slot="card-media" className={`flex h-[212px] w-full items-center justify-center bg-[var(--card)] ${dark ? "text-white/35" : "text-neutral-400"}`}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden>
+                        <path d="M12 5v14M5 12h14" />
+                      </svg>
+                    </div>
                   </Card>
                   <p className={`mt-3 inline-flex items-center gap-1.5 text-[13px] font-normal ${dark ? "text-white" : "text-neutral-900"}`}>
                     See all templates

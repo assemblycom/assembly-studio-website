@@ -13,9 +13,9 @@ export function ProductionGap() {
           Generation is the easy part
         </h2>
         <p className="type-lead mt-5 max-w-xl text-muted-foreground">
-          The hard part comes after — who logs in, what each client sees,
-          whose brand it carries. Assembly Studio apps are born with all of
-          it handled.
+          The hard part comes after — deployment, authentication, permissions,
+          notifications, branding. Assembly Studio apps ship inside your
+          unified client experience, all of it handled.
         </p>
         <div
           className="mt-10 flex items-center justify-center rounded-2xl border border-dashed border-border bg-muted/40"
