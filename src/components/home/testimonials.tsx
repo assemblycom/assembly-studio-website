@@ -3,8 +3,11 @@ import Link from "next/link";
 import { Section } from "@/components/ui/section";
 
 // ─────────────────────────────────────────────────────────────────────────
-// CUSTOMER STORIES — one featured story treated as a proper card: quote +
-// stats + portrait on a single surface, not floating on black.
+// CUSTOMER STORIES — one featured story, composed editorially: attribution
+// leads, then a large pull quote, a portrait pinned upper-right, and the
+// stats as a descending "bar chart" (tallest → shortest). The story link
+// floats in the whitespace above the shortest bar. Same copy as before —
+// only the composition changed.
 //
 // The featured story wants a real Assembly Studio beta firm once that
 // content exists; until then Jungle Luxe carries it — the strongest
@@ -26,68 +29,69 @@ const FEATURED = {
   slug: "jungle-luxe",
 };
 
+// Descending bar heights (md+) so the row reads as a small chart and leaves
+// empty space above the last bar for the story link to sit in.
+const BAR_HEIGHTS = ["md:h-[280px]", "md:h-[228px]", "md:h-[186px]"];
+
 export function Testimonials() {
   return (
     <Section id="testimonials">
-      <p className="type-eyebrow text-muted-foreground">Customer stories</p>
-
-      {/* Featured story — quote + stats + portrait on one surface. */}
-      <div className="mt-6 overflow-hidden rounded-3xl border border-border bg-muted/40 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,400px)]">
-        <div className="flex flex-col justify-between gap-10 p-8 md:p-12">
-          <blockquote className="max-w-xl text-[22px] leading-[1.32] tracking-[-0.01em] text-foreground md:text-[27px]">
-            &ldquo;{FEATURED.quote}&rdquo;
-          </blockquote>
-
-          <div>
-            <p className="text-[15px] text-foreground">
-              {FEATURED.name}
-              <span className="text-muted-foreground">
-                {" "}
-                &middot; {FEATURED.title}, {FEATURED.firm} &middot;{" "}
-                {FEATURED.vertical}
-              </span>
-            </p>
-
-            {/* Stats — plain number/label columns split by hairlines; no
-                nested cards, which read busy inside a card. */}
-            <div className="mt-8 grid grid-cols-3 border-t border-border">
-              {FEATURED.stats.map((s, i) => (
-                <div
-                  key={s.label}
-                  className={`pt-5 ${i > 0 ? "border-l border-border pl-5" : ""}`}
-                >
-                  <p className="text-[26px] leading-none tracking-[-0.01em] text-foreground">
-                    {s.value}
-                  </p>
-                  <p className="mt-2 text-[13px] leading-snug text-muted-foreground">
-                    {s.label}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <Link
-              href={`/customers/${FEATURED.slug}`}
-              className="group mt-8 inline-flex items-center gap-1.5 text-[15px] text-foreground"
-            >
-              Read {FEATURED.firm}&rsquo;s story
-              <span className="transition-transform duration-200 group-hover:translate-x-0.5">
-                &rarr;
-              </span>
-            </Link>
-          </div>
-        </div>
-
-        {/* Portrait — bleeds to the card's edges. */}
-        <div className="relative h-64 lg:h-auto">
+      <div className="relative">
+        {/* Portrait — pinned upper-right (desktop only, to avoid overlapping
+            the quote on narrow screens). */}
+        <div className="absolute right-0 top-0 hidden size-32 overflow-hidden rounded-xl md:block lg:size-36">
           <Image
             src={`/images/customers/${FEATURED.slug}.jpg`}
             alt={FEATURED.name}
             fill
-            sizes="(min-width: 1024px) 400px, 100vw"
+            sizes="144px"
             className="object-cover"
           />
         </div>
+
+        {/* Attribution leads the section. */}
+        <p className="text-[15px] text-foreground md:pr-44">
+          &mdash; {FEATURED.name}
+          <span className="text-muted-foreground">
+            {" "}
+            &middot; {FEATURED.title}, {FEATURED.firm} &middot;{" "}
+            {FEATURED.vertical}
+          </span>
+        </p>
+
+        {/* Pull quote — the hero of the section. */}
+        <blockquote className="mt-5 max-w-3xl text-[27px] font-medium leading-[1.15] tracking-[-0.02em] text-foreground md:pr-44 md:text-[38px]">
+          &ldquo;{FEATURED.quote}&rdquo;
+        </blockquote>
+
+        {/* Stats as a descending bar chart. */}
+        <div className="mt-12 flex items-end gap-3 md:mt-16 md:gap-5">
+          {FEATURED.stats.map((s, i) => (
+            <div
+              key={s.label}
+              className={`flex h-40 flex-1 flex-col justify-between rounded-lg bg-muted p-5 md:p-6 ${BAR_HEIGHTS[i]}`}
+            >
+              <p className="text-[24px] leading-none tracking-[-0.01em] text-foreground md:text-[34px]">
+                {s.value}
+              </p>
+              <p className="text-[13px] leading-snug text-muted-foreground md:text-sm">
+                {s.label}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Story link — floats in the whitespace above the shortest bar on
+            desktop; sits below the bars on mobile. */}
+        <Link
+          href={`/customers/${FEATURED.slug}`}
+          className="group mt-6 inline-flex items-center gap-1.5 text-[15px] text-foreground underline decoration-border underline-offset-4 transition-colors hover:decoration-foreground md:absolute md:bottom-[210px] md:right-0 md:mt-0 lg:bottom-[218px]"
+        >
+          Read full story
+          <span className="transition-transform duration-200 group-hover:translate-x-0.5">
+            &rarr;
+          </span>
+        </Link>
       </div>
     </Section>
   );
