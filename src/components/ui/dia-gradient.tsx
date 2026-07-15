@@ -107,6 +107,10 @@ export function DiaGradient({
             <feGaussianBlur stdDeviation={blur} />
           </filter>
         </defs>
+        {/* Blur each bar in its OWN filter pass: the overlapping per-bar blur
+            halos are what create the vertical striations — the "lines" that
+            give the field its aurora texture. Merging every bar into a single
+            filter pass smooths those seams away and flattens it into one blob. */}
         {heights.map((h, i) => (
           <g key={i} filter={`url(#${blurId})`}>
             <rect x={i * colW} y={VBH - h} width={colW * 1.23} height={h} fill={`url(#${gradId})`} />
