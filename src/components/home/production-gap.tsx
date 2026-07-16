@@ -315,18 +315,20 @@ export function ProductionGap() {
               {/* Fixed height so the window is the same size on either toggle
                   state (Elsewhere / On Assembly), independent of how the lines
                   wrap. The surface follows the theme (bg-card). */}
-              <div className="flex h-[288px] w-[300px] flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[0_28px_80px_-24px_rgba(16,24,40,0.28)]">
-                <div className="flex items-center gap-2 border-b border-border px-5 py-3">
-                  <span className="flex gap-1.5">
-                    <span className="size-2.5 rounded-full bg-foreground/15" />
-                    <span className="size-2.5 rounded-full bg-foreground/15" />
-                    <span className="size-2.5 rounded-full bg-foreground/15" />
+              <div className="flex h-[300px] w-[320px] flex-col overflow-hidden rounded-2xl border border-black/[0.07] bg-card/85 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_28px_-10px_rgba(16,24,40,0.14),0_40px_72px_-28px_rgba(16,24,40,0.30)] backdrop-blur-xl dark:border-white/[0.08]">
+                {/* Title bar — macOS traffic lights on the left, window title
+                    centered, à la a real window / Notes popover. */}
+                <div className="relative flex items-center border-b border-border/60 px-4 py-3">
+                  <span className="flex gap-[7px]">
+                    <span className="size-3 rounded-full bg-foreground/[0.13]" />
+                    <span className="size-3 rounded-full bg-foreground/[0.13]" />
+                    <span className="size-3 rounded-full bg-foreground/[0.13]" />
                   </span>
-                  <span className="type-caption ml-1 truncate text-muted-foreground">
-                    {current.label}
+                  <span className="type-caption pointer-events-none absolute inset-x-0 text-center text-muted-foreground">
+                    {current.labelShort}
                   </span>
                 </div>
-                <ul className={`flex flex-col gap-3 px-5 py-4 ${current.listClassName}`}>
+                <ul className={`flex flex-1 flex-col justify-center gap-3.5 px-5 ${current.listClassName}`}>
                   {current.items.map((item) => {
                     const { Icon } = current;
                     return (

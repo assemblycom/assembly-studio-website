@@ -64,7 +64,7 @@ function FeaturedCell({ study }: { study: CaseStudy }) {
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className={`group flex flex-col gap-4 overflow-hidden p-3 transition-colors hover:bg-muted/40 sm:col-span-2 md:min-h-[340px] md:flex-row md:gap-6 ${CELL_BORDER}`}
+      className={`group flex flex-col gap-5 overflow-hidden p-5 transition-colors hover:bg-muted/40 sm:col-span-2 md:min-h-[340px] md:flex-row ${CELL_BORDER}`}
     >
       {study.image && (
         // Inset + rounded, framed by the card's padding rather than bleeding to
@@ -81,9 +81,9 @@ function FeaturedCell({ study }: { study: CaseStudy }) {
         </div>
       )}
       {/* Same top-anchored structure as every grid cell — company + arrow on
-          top, tags pinned to the bottom — so the flagship reads as the biggest
-          member of one family, not a differently-composed card. */}
-      <div className="flex flex-1 flex-col py-3 pr-3 md:py-5 md:pr-5">
+          top, tags pinned to the bottom — and the same p-5 inset, so the label
+          lines up with the neighbouring card's title rather than sitting low. */}
+      <div className="flex flex-1 flex-col">
         <div className="flex items-start justify-between gap-4">
           <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
             {study.company}
