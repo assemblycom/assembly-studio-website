@@ -64,12 +64,12 @@ function FeaturedCell({ study }: { study: CaseStudy }) {
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className={`group flex flex-col gap-5 overflow-hidden p-5 transition-colors hover:bg-muted/40 sm:col-span-2 md:min-h-[340px] md:flex-row ${CELL_BORDER}`}
+      className={`group flex flex-col gap-4 overflow-hidden p-3 transition-colors hover:bg-muted/40 sm:col-span-2 md:min-h-[340px] md:flex-row ${CELL_BORDER}`}
     >
       {study.image && (
-        // Inset + rounded, framed by the card's padding rather than bleeding to
-        // the edges. The brand label rides on the photo itself.
-        <div className="relative aspect-[16/10] overflow-hidden rounded-xl md:aspect-auto md:w-2/5 md:shrink-0 md:self-stretch">
+        // Lightly inset + rounded — framed, not bleeding to the edges, but with
+        // a slim margin so the photo stays large. The brand label rides on it.
+        <div className="relative aspect-[16/10] overflow-hidden rounded-xl md:aspect-auto md:w-1/2 md:shrink-0 md:self-stretch">
           <Image
             src={study.image}
             alt={study.company}
@@ -84,9 +84,10 @@ function FeaturedCell({ study }: { study: CaseStudy }) {
         </div>
       )}
       {/* Title + arrow on top, tags pinned to the bottom — the same shape as
-          every grid cell, so the headline reads as the card title (no separate
-          eyebrow) and lines up with the neighbouring card. */}
-      <div className="flex flex-1 flex-col">
+          every grid cell. The text keeps a p-5-equivalent inset (card p-3 +
+          py-2) so the headline still lines up with the neighbouring card even
+          though the photo's margin is slimmer. */}
+      <div className="flex flex-1 flex-col md:py-2 md:pr-2">
         <div className="flex items-start justify-between gap-4">
           <h3 className="text-pretty text-xl leading-snug tracking-tight text-foreground md:text-2xl">
             {study.headline}
