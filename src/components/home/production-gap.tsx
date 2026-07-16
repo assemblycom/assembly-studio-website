@@ -363,12 +363,14 @@ export function ProductionGap() {
                       className="ml-px inline-block h-[18px] w-[2px] animate-pulse rounded-full bg-[#e8b923]"
                     />
                   </p>
+                  {/* Terser copy (the mobile set) so every line stays on one
+                      row and the checklist never overflows the window. */}
                   <ul className={`mt-3 flex flex-col gap-2.5 ${current.listClassName}`}>
-                    {current.items.map((item) => {
+                    {current.itemsShort.map((item) => {
                       const { Icon } = current;
                       return (
-                        <li key={item} className="type-body flex items-start gap-2.5">
-                          <span className={`mt-0.5 shrink-0 ${current.iconClassName}`}>
+                        <li key={item} className="type-body flex items-center gap-2.5">
+                          <span className={`shrink-0 ${current.iconClassName}`}>
                             <Icon />
                           </span>
                           {item}
