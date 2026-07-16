@@ -320,7 +320,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
         className={`flex ${ctrlH} items-center rounded-lg ${pillPad} ${pillText} ${squishCls} ${pillCls} ${pillTextCls}`}
       >
         <span className="whitespace-nowrap">{promptPickerLabel}</span>
-        <IconChevronDown className={`size-3.5 shrink-0 transition-transform duration-200 ${promptOpen ? "rotate-180" : ""}`} />
+        <IconChevronDown className={`size-3.5 shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${promptOpen ? "rotate-180" : ""}`} />
       </button>
       {promptOpen && (
         <div
@@ -336,7 +336,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
                 setValue(entry.prompt);
                 setPromptOpen(false);
               }}
-              className={`block w-full rounded-lg px-3 py-2 text-left text-sm leading-snug transition-colors ${menuItemCls}`}
+              className={`flex min-h-[42px] w-full items-center rounded-lg px-3 text-left text-sm leading-snug transition-colors ${menuItemCls}`}
             >
               {entry.label}
             </button>

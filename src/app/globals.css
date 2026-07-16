@@ -60,6 +60,10 @@
   --v69-chip-border: rgba(16, 24, 40, 0.1);
   --v69-ink: #101828;
   --v69-box: #ffffff;
+  /* Slider/toggle knob — a light knob with a dark glyph, so it stays legible on
+     both the light track (here) and the dark track (see .v72-mock-dark). */
+  --v69-knob: #ffffff;
+  --v69-knob-ink: #1a1a1a;
 
   /* Status-pill tints for the how-it-works product mocks (Approved/Pending/
      Active/Inactive). Quiet washes so they read as UI chrome, not brand. */
@@ -109,7 +113,9 @@
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --font-sans: var(--font-pp-mori);
-  --font-mono: var(--font-geist-mono);
+  /* The site has one monospace — ABC Diatype Mono. (Was pointing at an
+     undefined --font-geist-mono, so `font-mono` fell back to the OS mono.) */
+  --font-mono: var(--font-diatype-mono);
 }
 
 @theme {
@@ -205,33 +211,6 @@
 /* Announcement bar follows the theme. Light is a clean white bar; dark is a
    lighter-black strip (a full white bar reads too loud over the near-black
    hero). Light is the default. */
-/* Match the hero's top ground color (#fcfcfd) so the bar reads as one
-   continuous surface with the hero below it rather than a brighter strip. */
-.announcement-bar {
-  background-color: #fcfcfd;
-  color: #0a0a0a;
-}
-/* (announcement bar matches hero ground) */
-.announcement-bar .ab-muted {
-  color: #737373;
-}
-.announcement-bar .group:hover .ab-muted {
-  color: #0a0a0a;
-}
-[data-theme="dark"] .announcement-bar {
-  /* Match the dark hero's TOP gradient stop (#141414 — see hero-v76's ground)
-     so the bar reads as one continuous surface with the hero below — same
-     intent as light mode, where it matches the hero's #fcfcfd. Using the page
-     background here left the bar visibly darker than the hero's lighter top. */
-  background-color: #141414;
-  color: #ededed;
-}
-[data-theme="dark"] .announcement-bar .ab-muted {
-  color: #8a8a90;
-}
-[data-theme="dark"] .announcement-bar .group:hover .ab-muted {
-  color: #ededed;
-}
 
 /* Theme toggle crossfades the whole page in one GPU-composited pass via the
    View Transitions API (see theme-provider). Tuning just the root snapshots
@@ -526,14 +505,32 @@ html[data-theme="dark"] body {
     font-weight: 500;
   }
   .type-lead {
-    font-size: 1rem; /* 16px */
+    font-size: 0.9375rem; /* 15px */
+    line-height: 1.55;
+    font-weight: 400;
+  }
+  /* Reading text (FAQ questions/answers, list copy) — the default body step. */
+  .type-body {
+    font-size: 0.9375rem; /* 15px */
     line-height: 1.6;
     font-weight: 400;
   }
+  /* Small labels / meta (section kickers, secondary UI copy). */
+  .type-caption {
+    font-size: 0.8125rem; /* 13px */
+    line-height: 1.5;
+    font-weight: 400;
+  }
+  /* The mono kicker seen across the site (RACHEL HUGENSCHMIDT · JUNGLE LUXE).
+     Previously defined as plain 14px sans and never used, while the real
+     eyebrow was hand-written as a long className in seven places. */
   .type-eyebrow {
-    font-size: 0.875rem; /* 14px */
+    font-family: var(--font-diatype-mono);
+    font-size: 0.75rem; /* 12px */
     line-height: 1.4;
     font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
   @media (min-width: 768px) {
     .type-display {
@@ -546,7 +543,7 @@ html[data-theme="dark"] body {
       font-size: 1.875rem; /* 30px */
     }
     .type-lead {
-      font-size: 1.0625rem; /* 17px */
+      font-size: 1rem; /* 16px */
     }
   }
 }
@@ -668,6 +665,10 @@ html:not([data-theme="dark"]) .v63-gradient-border:focus-within::before {
   --v69-chip: #2a2a2a;
   --v69-chip-border: rgba(255, 255, 255, 0.1);
   --v69-ink: #ffffff;
+  /* Keep the knob a light disc with a dark glyph so it stays visible on the
+     dark slider track (the reskin would otherwise make it #2a2a2a on #2e2e2e). */
+  --v69-knob: #e6e6e8;
+  --v69-knob-ink: #1a1a1a;
 
   --color-white: #191b22;
   --color-black: #ffffff;

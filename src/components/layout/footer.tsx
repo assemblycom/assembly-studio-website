@@ -8,7 +8,7 @@ import { DiaGradient } from "@/components/ui/dia-gradient";
 // V71's brand aurora (from hero-iterations) — green + blue on a near-black
 // base, rising into blue → mint → lime and fading to transparent. Lives at the
 // bottom of the reveal footer itself (one sheet, not a separate layer).
-const BRAND_AURORA = [
+export const BRAND_AURORA = [
   { offset: 0, color: "#0a0e1c" },
   { offset: 0.16, color: "#243c9e" },
   { offset: 0.33, color: "#4f6bf9" },
@@ -76,7 +76,7 @@ export function Footer({ reveal = false }: { reveal?: boolean }) {
     // leading-none pins the label glyphs to the top of their line box, so the
     // three column labels can't drift apart across font/engine differences.
     const monoLabel =
-      "font-[family-name:var(--font-diatype-mono)] text-xs uppercase leading-none tracking-wide text-white/40";
+      "font-mono text-xs uppercase leading-none tracking-wide text-white/40";
     return (
       <footer className="footer-reveal overflow-hidden bg-[#101010] text-white">
         <div className="mx-auto max-w-7xl px-6 pt-16 md:pt-20">
@@ -163,13 +163,13 @@ export function Footer({ reveal = false }: { reveal?: boolean }) {
             should stay compact. */}
         <div
           aria-hidden
-          className="pointer-events-none relative mt-10 h-[22vh] md:mt-0 md:h-[42vh]"
+          className="pointer-events-none relative mt-10 h-[48vh] md:mt-0 md:h-[42vh]"
         >
           <div className="footer-aurora absolute inset-x-0 bottom-0 h-full">
             <DiaGradient
               stops={BRAND_AURORA}
-              bars={11}
-              blur={26}
+              bars={14}
+              blur={30}
               peak={0.72}
               valley={0.45}
               riseMs={1300}

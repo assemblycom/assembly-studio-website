@@ -17,8 +17,13 @@ export const NAV_LINKS: NavLink[] = [
   { label: "Docs", href: DOCS_URL, external: true },
   { label: "Pricing", href: "/pricing" },
 ];
-export const APP_URL = "https://app.assembly.com";
-export const SIGNUP_URL = "https://app.assembly.com/signup";
+// The app lives at dashboard.assembly.com (app.assembly.com does not resolve).
+export const APP_URL = "https://dashboard.assembly.com";
+export const SIGNUP_URL = "https://dashboard.assembly.com/signup";
 // Same booking link as the main site for now; Chili Piper routing is TBD.
 export const DEMO_URL = "https://assembly.com/book-demo";
 export const TRUST_CENTER_URL = "https://security.assembly.com";
+
+// Review-platform listings for Assembly.
+export const G2_URL = "https://www.g2.com/products/assemblysoftware/reviews";
+export const CAPTERRA_URL = "https://www.capterra.com/p/214210/Assembly/";

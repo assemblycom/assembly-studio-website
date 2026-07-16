@@ -19,7 +19,6 @@ import { useTheme } from "@/components/theme/theme-provider";
 
 const MONO = '"ABC Diatype Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
 const RAIL = "mx-auto max-w-[1600px] px-6 md:px-10";
-const FRAME_PAD = 6; // breathing room between the card and the selector ring
 
 // Prompt Ideas data + seeded-composer behavior live in prompt-ideas.ts,
 // shared with the bottom CTA so the two boxes read identically.
@@ -57,25 +56,18 @@ const CARD_HUE: Record<string, string> = {};
 const TemplateCard = memo(function TemplateCard({
   template,
   index,
-  onSelect,
   dark,
 }: {
   template: Template;
   index: number;
-  onSelect: (i: number) => void;
   dark: boolean;
 }) {
   return (
     <div
-      role="button"
-      tabIndex={0}
       data-card={index}
-      // Hover (and keyboard focus) glides the selector frame to this card;
-      // the actual click is reserved for routing to the login/app (not wired
-      // here — that's product logic for later).
-      onMouseEnter={() => onSelect(index)}
-      onFocus={() => onSelect(index)}
-      className="group w-[212px] shrink-0 origin-center cursor-pointer text-left outline-none transition-transform duration-200 ease-out"
+      // `group` drives the mock's hover animation on desktop; `data-card` lets
+      // the mobile in-view observer replay the animation on scroll.
+      className="group w-[212px] shrink-0 origin-center text-left"
     >
       <Card
         size="sm"
@@ -127,19 +119,8 @@ export function HeroV76({
   };
 
   // The selected card — framed by the selector ring, bright while the rest dim.
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [frame, setFrame] = useState({ x: 24 - FRAME_PAD, top: 24 - FRAME_PAD, w: 212 + 2 * FRAME_PAD, h: 212 + 2 * FRAME_PAD });
-  // Gate the glide transition until after the first measure has painted, so the
-  // frame snaps to the selected card on load instead of visibly sliding in from
-  // its placeholder position.
-  const [frameReady, setFrameReady] = useState(false);
-  useEffect(() => {
-    const id = requestAnimationFrame(() => requestAnimationFrame(() => setFrameReady(true)));
-    return () => cancelAnimationFrame(id);
-  }, []);
-
-  // The selector frame + video CTA are a desktop experience; on mobile the
-  // templates are just a plain swipeable row.
+  // The in-view replay is a mobile behavior; on desktop the mocks animate on
+  // hover instead.
   const [isDesktop, setIsDesktop] = useState(true);
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");
@@ -148,52 +129,6 @@ export function HeroV76({
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
   }, []);
-
-  // Set by the arrows (not hover): the next measure scrolls the card fully clear
-  // of the edge fade so it never lands half-hidden under the mask. Hover keeps
-  // its gentle in-view nudge untouched.
-  const stepScrollRef = useRef(false);
-
-  // Measure the selected card and glide the frame to it; keep it in view.
-  // getBoundingClientRect (not offsetLeft) so it's independent of which
-  // ancestor is the offsetParent; re-measured on layout via ResizeObserver.
-  useEffect(() => {
-    const row = rowRef.current;
-    if (!row) return;
-    const measure = () => {
-      const cardEl = row.querySelector<HTMLElement>(`[data-card="${selectedIndex}"]`);
-      const media = cardEl?.querySelector<HTMLElement>('[data-slot="card-media"]');
-      if (!cardEl || !media) return;
-      const rowRect = row.getBoundingClientRect();
-      const mRect = media.getBoundingClientRect();
-      if (mRect.width < 40 || mRect.height < 40) return; // not laid out yet
-      setFrame({
-        x: mRect.left - rowRect.left + row.scrollLeft - FRAME_PAD,
-        top: mRect.top - rowRect.top - FRAME_PAD,
-        w: mRect.width + 2 * FRAME_PAD,
-        h: mRect.height + 2 * FRAME_PAD,
-      });
-      // Keep the selected card in view (horizontal scroll only). Measure the WHOLE
-      // card — not just its media — so an arrow step lands the entire card fully
-      // past the edge fade instead of clipping its trailing edge. Arrow steps ask
-      // for a wider clearance (72px); hover keeps the gentle 24px nudge.
-      const cRect = cardEl.getBoundingClientRect();
-      const step = stepScrollRef.current;
-      stepScrollRef.current = false;
-      const edge = step ? 72 : 8;
-      const clear = step ? 72 : 24;
-      if (cRect.left < rowRect.left + edge) row.scrollBy({ left: cRect.left - rowRect.left - clear, behavior: "smooth" });
-      else if (cRect.right > rowRect.right - edge) row.scrollBy({ left: cRect.right - rowRect.right + clear, behavior: "smooth" });
-    };
-    measure();
-    const raf = requestAnimationFrame(measure);
-    const ro = new ResizeObserver(measure);
-    ro.observe(row);
-    return () => {
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-    };
-  }, [selectedIndex]);
 
   useEffect(() => {
     updateArrows();
@@ -221,13 +156,11 @@ export function HeroV76({
     cards.forEach((c) => io.observe(c));
     return () => io.disconnect();
   }, [isDesktop]);
-  // The arrows step the selected card (which glides the frame + tab and keeps
-  // itself in view via the measure effect), so browsing and selecting are one
-  // and the same gesture.
-  const lastCardIndex = CAROUSEL.length - 1;
-  const stepSelection = (dir: 1 | -1) => {
-    stepScrollRef.current = true;
-    setSelectedIndex((i) => Math.min(lastCardIndex, Math.max(0, i + dir)));
+  // Arrows scroll the strip by roughly a screenful of cards.
+  const scrollRow = (dir: 1 | -1) => {
+    const el = rowRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: "smooth" });
   };
 
   const FADE = 56;
@@ -331,8 +264,8 @@ export function HeroV76({
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
-                      onClick={() => stepSelection(-1)}
-                      disabled={selectedIndex === 0}
+                      onClick={() => scrollRow(-1)}
+                      disabled={!canLeft}
                       aria-label="Previous templates"
                       className={`flex size-9 items-center justify-center rounded-lg ring-1 transition-colors disabled:pointer-events-none disabled:opacity-30 ${chevronCls}`}
                     >
@@ -340,8 +273,8 @@ export function HeroV76({
                     </button>
                     <button
                       type="button"
-                      onClick={() => stepSelection(1)}
-                      disabled={selectedIndex === lastCardIndex}
+                      onClick={() => scrollRow(1)}
+                      disabled={!canRight}
                       aria-label="More templates"
                       className={`flex size-9 items-center justify-center rounded-lg ring-1 transition-colors disabled:pointer-events-none disabled:opacity-30 ${chevronCls}`}
                     >
@@ -355,47 +288,13 @@ export function HeroV76({
                 ref={rowRef}
                 onScroll={updateArrows}
                 style={{ maskImage: rowMask, WebkitMaskImage: rowMask, ...rowTokens } as React.CSSProperties}
-                // pl is px-6 (24px) + FRAME_PAD (6px) so the selected card's
-                // selector frame — which hugs 6px outside the card — lines its
-                // left edge up with the hero title, prompt box, and logo. Top
-                // padding only needs to clear the frame now the tab is gone,
-                // which pulls the row up close to the arrows.
-                className="v76-card-row relative -mx-6 mt-3 flex gap-4 overflow-x-auto pb-10 pl-[30px] pr-6 pt-3 md:pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                // Card left edge lines up with the hero title/prompt box:
+                // -mx-6 bleeds the row to the screen edge for scrolling, pl-6
+                // brings the first card back to the title's left edge.
+                className="v76-card-row relative -mx-6 mt-3 flex gap-4 overflow-x-auto pb-10 pl-6 pr-6 pt-3 md:pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               >
-                {/* Selector frame — glides to the selected card. */}
-                {isDesktop && (
-                <div
-                  aria-hidden
-                  // Apple-style glide: a longer settle with no overshoot
-                  // (0.32,0.72,0,1), kept on the compositor via will-change
-                  // so the ring never stutters mid-flight.
-                  className={`pointer-events-none absolute left-0 top-0 z-20 [will-change:transform] ${frameReady ? "transition-transform duration-[500ms] ease-[cubic-bezier(0.32,0.72,0,1)]" : ""}`}
-                  style={{ transform: `translateX(${frame.x}px)`, top: frame.top, width: frame.w, height: frame.h }}
-                >
-                  {/* A plain bordered div, not an SVG path: CSS border-radius
-                      renders true circular corners identical to the card's,
-                      where the old Bézier approximation read slightly flat.
-                      Radius stays concentric: card radius (20) + gap. */}
-                  <div
-                    className="absolute inset-0 border"
-                    style={{
-                      borderRadius: 20 + FRAME_PAD,
-                      // Dark ring sits a notch above the cards' white/15 ring
-                      // — present but quiet, not a bright halo.
-                      borderColor: dark ? "rgba(255,255,255,0.3)" : "#e5e6ea",
-                    }}
-                  />
-                </div>
-                )}
-
                 {CAROUSEL.map((t, i) => (
-                  <TemplateCard
-                    key={t.slug}
-                    template={t}
-                    index={i}
-                    onSelect={setSelectedIndex}
-                    dark={dark}
-                  />
+                  <TemplateCard key={t.slug} template={t} index={i} dark={dark} />
                 ))}
 
                 <a

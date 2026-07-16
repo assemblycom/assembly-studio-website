@@ -43,7 +43,7 @@ export default function RootLayout({
             of the wrong theme; defaults to light. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body className="min-h-full font-sans">
+      <body className="min-h-full overflow-x-clip font-sans">
         <ThemeProvider>
           <RootShell>{children}</RootShell>
         </ThemeProvider>

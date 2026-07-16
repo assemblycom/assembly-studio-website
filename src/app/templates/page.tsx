@@ -6,9 +6,9 @@ import { TEMPLATES } from "@/lib/templates";
 import { SIGNUP_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Templates",
+  title: "App templates",
   description:
-    "Start from a prebuilt Assembly template and ship client-facing workflows in days, not months.",
+    "Start from a prebuilt Assembly app template and ship client-facing workflows in days, not months.",
 };
 
 export default function TemplatesPage() {
@@ -17,11 +17,11 @@ export default function TemplatesPage() {
       <section className="px-6 pb-10 pt-24 text-center md:pt-32">
         <div className="mx-auto max-w-3xl">
           <h1 className="type-display text-balance">
-            Start from a template
+            Start from an app template
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-pretty text-lg text-muted-foreground">
-            Prebuilt workflows you can deploy and customize to launch in days,
-            not months.
+            Prebuilt app templates you can deploy and customize to launch in
+            days, not months.
           </p>
           <a
             href={SIGNUP_URL}

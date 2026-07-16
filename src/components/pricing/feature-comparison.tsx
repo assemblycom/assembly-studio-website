@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useState } from "react";
+import { useAuthState } from "@/lib/use-auth";
 
 const PLAN_NAMES = ["Free", "Starter", "Professional", "Advanced"] as const;
 
@@ -117,7 +118,14 @@ const GROUPS: FeatureGroup[] = [
   },
 ];
 
-const GRID = "grid grid-cols-[1.6fr_repeat(4,1fr)]";
+// Column index of the Free plan — hidden for signed-in visitors, mirroring the
+// pricing cards.
+const FREE_INDEX = 0;
+
+// Static grid classes (Tailwind can't see runtime-built arbitrary values, so
+// both column counts must appear literally).
+const GRID_4 = "grid grid-cols-[1.6fr_repeat(4,1fr)]";
+const GRID_3 = "grid grid-cols-[1.6fr_repeat(3,1fr)]";
 
 function CheckIcon() {
   return (
@@ -201,6 +209,14 @@ export function FeatureComparison() {
   // Mobile can't fit five columns, so it shows one plan at a time (Shopify-style
   // tabs); desktop keeps the full side-by-side table.
   const [plan, setPlan] = useState(0);
+  // Signed-in visitors don't see the Free column (matches the pricing cards).
+  const { authed } = useAuthState();
+  const columns = PLAN_NAMES.map((name, i) => ({ name, i })).filter(
+    ({ i }) => !authed || i !== FREE_INDEX,
+  );
+  const grid = columns.length === 3 ? GRID_3 : GRID_4;
+  // Keep the mobile tab selection valid when Free is hidden.
+  const activePlan = columns.some((c) => c.i === plan) ? plan : columns[0].i;
 
   return (
     <div>
@@ -216,14 +232,14 @@ export function FeatureComparison() {
             scroll container, and the -mb-px underline trick let it scroll up
             by a pixel-high strip. */}
         <div className="sticky top-12 z-20 -mx-6 flex gap-6 overflow-x-auto overflow-y-hidden border-b border-border bg-background px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {PLAN_NAMES.map((name, i) => (
+          {columns.map(({ name, i }) => (
             <button
               key={name}
               type="button"
-              aria-pressed={plan === i}
+              aria-pressed={activePlan === i}
               onClick={() => setPlan(i)}
               className={`-mb-px shrink-0 border-b pb-3 pt-6 text-base font-medium transition-colors ${
-                plan === i
+                activePlan === i
                   ? "border-foreground text-foreground"
                   : "border-transparent text-muted-foreground"
               }`}
@@ -245,7 +261,7 @@ export function FeatureComparison() {
               >
                 <RowLabel label={row.label} tooltip={row.tooltip} />
                 <div className="shrink-0">
-                  <CellContent value={row.values[plan]} />
+                  <CellContent value={row.values[activePlan]} />
                 </div>
               </div>
             ))}
@@ -254,14 +270,21 @@ export function FeatureComparison() {
       </div>
 
       {/* Desktop: full side-by-side table. */}
-      <div className="mt-10 hidden md:block">
+      <div className="hidden md:block">
         <div className="min-w-0">
-          {/* Sticky plan header — sits flush under the nav pill. */}
+          {/* Sticky plan header. Pinned to the very top and padded down to clear
+              the nav; the transparent nav has no solid backdrop of its own, so
+              a full-bleed opaque layer sits behind this header to stop table
+              rows ghosting through the strip under the nav. */}
           <div
-            className={`${GRID} sticky top-14 z-20 items-end border-b border-border bg-background py-4`}
+            className={`${grid} sticky top-0 z-20 items-end border-b border-border pb-4 pt-16`}
           >
+            <div
+              aria-hidden
+              className="pointer-events-none absolute left-1/2 top-0 -z-10 h-full w-screen -translate-x-1/2 bg-background"
+            />
             <div className="text-lg font-normal">Features</div>
-            {PLAN_NAMES.map((name) => (
+            {columns.map(({ name }) => (
               <div key={name} className="text-lg font-normal">
                 {name}
               </div>
@@ -277,12 +300,12 @@ export function FeatureComparison() {
               {group.rows.map((row) => (
                 <div
                   key={row.label}
-                  className={`${GRID} items-center border-t border-border py-3.5`}
+                  className={`${grid} items-center border-t border-border py-3.5`}
                 >
                   <RowLabel label={row.label} tooltip={row.tooltip} />
-                  {row.values.map((value, i) => (
+                  {columns.map(({ i }) => (
                     <div key={i}>
-                      <CellContent value={value} />
+                      <CellContent value={row.values[i]} />
                     </div>
                   ))}
                 </div>

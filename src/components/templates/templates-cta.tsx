@@ -1,26 +1,67 @@
 import { SIGNUP_URL } from "@/lib/constants";
+import { CtaChipField, type CtaChip } from "@/components/ui/cta-chip-field";
 
-// TEMPLATES CTA — a bottom call-to-action contained in a rounded panel.
+// Monochrome chip glyphs. Each keeps its own viewBox and inherits the chip's
+// text color via currentColor; a fixed 16px box with the default meet scaling
+// preserves each icon's aspect ratio.
+const iconClass = "size-4 shrink-0";
+
+function IconFile() {
+  return (
+    <svg viewBox="0 0 18 22" fill="currentColor" className={iconClass} aria-hidden>
+      <path d="M10 1.875V4.6875C10 6.24219 11.2578 7.5 12.8125 7.5H15.625V15C15.625 15.3438 15.3438 15.625 15 15.625H6.25C5.90625 15.625 5.625 15.3438 5.625 15V2.5C5.625 2.15625 5.90625 1.875 6.25 1.875H10ZM11.875 2.02734L15.4727 5.625H12.8125C12.293 5.625 11.875 5.20703 11.875 4.6875V2.02734ZM6.25 0C4.87109 0 3.75 1.12109 3.75 2.5V15C3.75 16.3789 4.87109 17.5 6.25 17.5H15C16.3789 17.5 17.5 16.3789 17.5 15V5.77734C17.5 5.28125 17.3008 4.80469 16.9492 4.45312L13.0508 0.550781C12.6992 0.199219 12.2227 0 11.7266 0H6.25ZM0.9375 3.75C0.417969 3.75 0 4.16797 0 4.6875V18.75C0 20.1289 1.12109 21.25 2.5 21.25H12.8125C13.332 21.25 13.75 20.832 13.75 20.3125C13.75 19.793 13.332 19.375 12.8125 19.375H2.5C2.15625 19.375 1.875 19.0938 1.875 18.75V4.6875C1.875 4.16797 1.45703 3.75 0.9375 3.75Z" />
+    </svg>
+  );
+}
+
+function IconFolderOpen() {
+  return (
+    <svg viewBox="0 0 22.5 20" fill="currentColor" className={iconClass} aria-hidden>
+      <path d="M3.80859 15.625L5.76172 9.375H20.582L18.6289 15.625H3.80859ZM11.2578 17.5H18.6328C19.4531 17.5 20.1797 16.9687 20.4219 16.1836L22.375 9.93359C22.7539 8.72656 21.8516 7.5 20.5859 7.5H5.76563C4.94531 7.5 4.21875 8.03125 3.97656 8.81641L3.13281 11.5V3.75C3.13281 3.40625 3.41406 3.125 3.75781 3.125H9.17578C9.3125 3.125 9.44141 3.16797 9.55078 3.25L11.0508 4.375C11.5898 4.78125 12.25 5 12.9258 5H17.5078C17.8516 5 18.1328 5.28125 18.1328 5.625H20.0078C20.0078 4.24609 18.8867 3.125 17.5078 3.125H12.9258C12.6562 3.125 12.3906 3.03906 12.1758 2.875L10.6758 1.75C10.2422 1.42578 9.71875 1.25 9.17578 1.25H3.75781C2.37891 1.25 1.25781 2.37109 1.25781 3.75V15C1.25781 16.3789 2.37891 17.5 3.75781 17.5H11.2578Z" />
+    </svg>
+  );
+}
+
+function IconPen() {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" className={iconClass} aria-hidden>
+      <path d="M1.42029 13.8203C1.58045 13.25 1.88123 12.7305 2.3031 12.3086L13.7875 0.824219C14.3109 0.296875 15.0297 0 15.7797 0C16.5297 0 17.2484 0.296875 17.7758 0.828125L19.1703 2.22266C19.7015 2.75 19.9984 3.46875 19.9984 4.21875C19.9984 4.96875 19.7015 5.6875 19.1703 6.21484L7.68591 17.6992C7.26795 18.1172 6.74451 18.4219 6.1742 18.582L1.18591 19.9648C0.861695 20.0547 0.510133 19.9648 0.271852 19.7227C0.0335704 19.4805 -0.0601796 19.1328 0.0296641 18.8086L1.42029 13.8203ZM15.1078 2.15234L13.0414 4.21875L15.7797 6.95703L17.8461 4.89062C18.0258 4.71094 18.1234 4.47266 18.1234 4.21875C18.1234 3.96484 18.0219 3.72656 17.8461 3.54687L16.4515 2.15234C16.2719 1.97656 16.0297 1.875 15.7797 1.875C15.5297 1.875 15.2875 1.97656 15.1078 2.15234ZM11.7172 5.54297L3.62732 13.6367C3.43591 13.8281 3.2992 14.0625 3.22498 14.3242L2.28357 17.7187L5.6781 16.7773C5.93591 16.707 6.1742 16.5664 6.3656 16.375L14.4554 8.28125L11.7172 5.54297Z" />
+    </svg>
+  );
+}
+
+function IconHand() {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" className={iconClass} aria-hidden>
+      <path d="M10.0176 0C9.0293 0 8.17383 0.574219 7.76758 1.40625C7.49414 1.30469 7.20117 1.25 6.89258 1.25C5.51367 1.25 4.39258 2.37109 4.39258 3.75V10.2148L4.28711 10.1094C3.31055 9.13281 1.72852 9.13281 0.751953 10.1094C-0.224609 11.0859 -0.224609 12.668 0.751953 13.6445L4.17773 17.0703C6.05273 18.9453 8.5957 20 11.248 20H11.8926C11.9512 20 12.0098 19.9961 12.0684 19.9844C15.6504 19.7422 18.5137 16.8828 18.752 13.3008C18.7637 13.2422 18.7676 13.1836 18.7676 13.125V6.25C18.7676 4.87109 17.6465 3.75 16.2676 3.75C16.0527 3.75 15.8418 3.77734 15.6426 3.82812V3.75C15.6426 2.37109 14.5215 1.25 13.1426 1.25C12.834 1.25 12.541 1.30469 12.2676 1.40625C11.8613 0.574219 11.0059 0 10.0176 0ZM9.39258 3.75391V3.75V2.5C9.39258 2.15625 9.67383 1.875 10.0176 1.875C10.3613 1.875 10.6426 2.15625 10.6426 2.5V9.0625C10.6426 9.58203 11.0605 10 11.5801 10C12.0996 10 12.5176 9.58203 12.5176 9.0625V3.75C12.5176 3.40625 12.7988 3.125 13.1426 3.125C13.4863 3.125 13.7676 3.40625 13.7676 3.75V9.0625C13.7676 9.58203 14.1855 10 14.7051 10C15.2246 10 15.6426 9.58203 15.6426 9.0625V6.25C15.6426 5.90625 15.9238 5.625 16.2676 5.625C16.6113 5.625 16.8926 5.90625 16.8926 6.25V13.0039C16.8887 13.0273 16.8887 13.0547 16.8848 13.0781C16.752 15.8008 14.5684 17.9844 11.8457 18.1172C11.8223 18.1172 11.7949 18.1211 11.7715 18.125H11.248C9.0957 18.125 7.0293 17.2695 5.50586 15.7461L2.07617 12.3164C1.83398 12.0742 1.83398 11.6758 2.07617 11.4336C2.31836 11.1914 2.7168 11.1914 2.95898 11.4336L4.66602 13.1406C4.93555 13.4102 5.33789 13.4883 5.68945 13.3438C6.04102 13.1992 6.26758 12.8555 6.26758 12.4766V3.75C6.26758 3.40625 6.54883 3.125 6.89258 3.125C7.23633 3.125 7.51758 3.40234 7.51758 3.74609V9.0625C7.51758 9.58203 7.93555 10 8.45508 10C8.97461 10 9.39258 9.58203 9.39258 9.0625V3.75391Z" />
+    </svg>
+  );
+}
+
+const CHIPS: CtaChip[] = [
+  { label: "Client onboarding", x: "10%", y: "22%", depth: 1, icon: <IconHand /> },
+  { label: "Document collection", x: "82%", y: "18%", depth: 0.9, icon: <IconFolderOpen /> },
+  { label: "Approval flow", x: "18%", y: "74%", depth: 0.85, icon: <IconPen /> },
+  { label: "Project tracker", x: "86%", y: "70%", depth: 1, icon: <IconFile /> },
+  { label: "Invoices", x: "44%", y: "12%", depth: 0.45, blur: 2 },
+  { label: "Support inbox", x: "60%", y: "88%", depth: 0.45, blur: 2 },
+];
+
 export function TemplatesCta() {
   return (
-    <section className="px-6 py-14 md:py-20">
-      <div className="relative mx-auto flex max-w-6xl items-center justify-center px-6 py-16 md:py-24">
-        <div className="relative z-10 text-center">
-          <h2 className="mx-auto max-w-2xl text-balance text-3xl font-medium tracking-tight md:text-5xl">
-            Ship your first client app this week
-          </h2>
-          <p className="mx-auto mt-5 max-w-xl text-pretty text-lg text-muted-foreground">
-            Start from a template and make it yours — no code, no
-            infrastructure.
-          </p>
-          <a
-            href={SIGNUP_URL}
-            className="mt-8 inline-block rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-[opacity,transform] hover:opacity-90 active:scale-[0.96]"
-          >
-            Start free trial
-          </a>
-        </div>
-      </div>
-    </section>
+    <CtaChipField chips={CHIPS}>
+      <h2 className="type-display mx-auto max-w-2xl text-balance text-foreground">
+        Ship your first client app this week
+      </h2>
+      <p className="type-lead mx-auto mt-5 max-w-xl text-pretty text-muted-foreground">
+        Start from a template and make it yours. No code, no infrastructure.
+      </p>
+      <a
+        href={SIGNUP_URL}
+        className="mt-8 inline-block rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-[opacity,transform] hover:opacity-90 active:scale-[0.96]"
+      >
+        Start free trial
+      </a>
+    </CtaChipField>
   );
 }

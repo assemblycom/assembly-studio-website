@@ -8,6 +8,7 @@ import {
   NavItem,
   SectionLabel,
 } from "@/components/home/build-app-visual";
+import { MockFrame } from "@/components/home/mock-frame";
 import {
   IconApp,
   IconArrowUpRight,
@@ -57,13 +58,10 @@ const TEMPLATES = [
 
 export function DescribeVisual() {
   return (
-    <div
-      aria-hidden
-      className="pointer-events-none flex select-none flex-col overflow-hidden rounded-lg bg-background ring-1 ring-border sm:aspect-[16/11]"
-    >
+    <MockFrame>
       <div className="flex min-h-0 flex-1">
         {/* Workspace sidebar — Add App is the active row here. */}
-        <div className="hidden w-[168px] shrink-0 flex-col border-r border-border bg-muted px-1.5 py-2 sm:flex md:w-[188px]">
+        <div className="hidden w-[168px] shrink-0 flex-col border-r border-border bg-muted px-1.5 py-2 lg:flex md:w-[188px]">
           <div className="flex items-center gap-1.5 px-1.5 pb-3 pt-0.5">
             <span className="flex size-[16px] items-center justify-center rounded bg-foreground text-[9px] leading-none text-background">
               B
@@ -133,7 +131,7 @@ export function DescribeVisual() {
             ))}
           </div>
 
-          <div className="mx-auto flex w-full max-w-[420px] min-h-0 flex-1 flex-col justify-center gap-3 overflow-hidden p-4">
+          <div className="mx-auto flex w-full max-w-[420px] min-h-0 flex-1 flex-col justify-start gap-3 overflow-hidden p-4 pt-9 lg:justify-center lg:pt-4">
             <p className="text-center text-[13px] leading-none text-foreground">
               Margot, what will you build?
             </p>
@@ -187,6 +185,6 @@ export function DescribeVisual() {
           </div>
         </div>
       </div>
-    </div>
+    </MockFrame>
   );
 }

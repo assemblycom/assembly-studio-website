@@ -28,6 +28,7 @@ import {
   IconSwitch,
   IconUsers,
 } from "@/components/home/mock-icons";
+import { MockFrame } from "@/components/home/mock-frame";
 
 type Entry = {
   description: string;
@@ -112,13 +113,10 @@ const MENU_ITEMS = [
 
 export function BuildStepVisual() {
   return (
-    <div
-      aria-hidden
-      className="pointer-events-none flex select-none flex-col overflow-hidden rounded-lg bg-background ring-1 ring-border sm:aspect-[16/11]"
-    >
+    <MockFrame>
       <div className="flex min-h-0 flex-1">
         {/* Team workspace sidebar — the deployed app sits among the others. */}
-        <div className="hidden w-[168px] shrink-0 flex-col overflow-hidden border-r border-border bg-muted px-1.5 py-2 sm:flex md:w-[188px]">
+        <div className="hidden w-[168px] shrink-0 flex-col overflow-hidden border-r border-border bg-muted px-1.5 py-2 lg:flex md:w-[188px]">
           <div className="flex items-center gap-1.5 px-1.5 pb-2.5 pt-0.5">
             <span className="flex size-[16px] items-center justify-center rounded bg-foreground text-[9px] leading-none text-background">
               B
@@ -214,7 +212,7 @@ export function BuildStepVisual() {
           <div className="mx-3 mb-3 min-h-0 flex-1 overflow-hidden rounded-md border border-border">
             <div className="flex items-center gap-2 border-b border-border bg-muted px-2.5 py-1.5 text-[10px] leading-none text-muted-foreground">
               <span className="min-w-0 flex-1">Description</span>
-              <span className="hidden w-[76px] sm:block">Client</span>
+              <span className="hidden w-[76px] lg:block">Client</span>
               <span className="w-[38px]">Date</span>
               <span className="w-[44px]">Duration</span>
               <span className="hidden w-[58px] md:block">Billable</span>
@@ -228,7 +226,7 @@ export function BuildStepVisual() {
                 <span className="min-w-0 flex-1 truncate text-foreground">
                   {entry.description}
                 </span>
-                <span className="hidden w-[76px] truncate text-muted-foreground sm:block">
+                <span className="hidden w-[76px] truncate text-muted-foreground lg:block">
                   {entry.client}
                 </span>
                 <span className="w-[38px] text-muted-foreground">
@@ -260,6 +258,6 @@ export function BuildStepVisual() {
           </div>
         </div>
       </div>
-    </div>
+    </MockFrame>
   );
 }

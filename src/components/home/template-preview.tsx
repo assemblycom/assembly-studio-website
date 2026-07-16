@@ -48,7 +48,7 @@ export function TemplateMock({ slug }: { slug: string }) {
         <div className="overflow-hidden rounded-lg border border-border">
           <div className="flex items-center gap-1.5 bg-muted/60 px-2.5 py-2">
             <span className="flex size-4 items-center justify-center rounded-full bg-emerald-100 text-[8px] text-emerald-700">A</span>
-            <span className="text-foreground">Acme rebrand</span>
+            <span className="text-foreground">Northwind rebrand</span>
           </div>
           {rows.map((r) => (
             <div key={r.label} className="flex items-center gap-1.5 border-t border-border px-2.5 py-2">
@@ -117,7 +117,7 @@ export function TemplateMock({ slug }: { slug: string }) {
       <div className="flex flex-col gap-2.5 p-3.5 text-[10px] leading-none">
         <span className="flex items-center gap-1.5">
           <span className="size-4 rounded-md bg-foreground" />
-          <span className="text-foreground">Proposal — Acme</span>
+          <span className="text-foreground">Proposal — Northwind</span>
         </span>
         <div className="flex flex-col gap-1.5 rounded-lg border border-border p-2.5">
           {items.map(([l, price]) => (

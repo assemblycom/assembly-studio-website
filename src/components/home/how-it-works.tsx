@@ -89,8 +89,8 @@ export function HowItWorks() {
     // list's left edge lines up with the nav logo above it.
     <section id="how-it-works" className="py-20 md:py-28">
       <div ref={rootRef} className="mx-auto max-w-[1600px] px-6 md:px-10">
-        <h2 className="type-h2 text-foreground">How it works</h2>
-        <div className="mt-10 md:mt-14 md:grid md:grid-cols-[minmax(0,340px)_minmax(0,1fr)] md:items-start md:gap-12 lg:gap-20">
+        <h2 className="type-h2 text-foreground">Idea to app, in four steps</h2>
+        <div className="mt-8 md:mt-14 lg:grid lg:grid-cols-[minmax(0,340px)_minmax(0,1fr)] lg:items-start lg:gap-16 xl:gap-20">
         {/* Left — step list. The active row expands to show its copy. */}
         <div role="tablist" aria-label="How it works steps">
           {STEPS.map((step, i) => (
@@ -100,7 +100,7 @@ export function HowItWorks() {
               role="tab"
               aria-selected={active === i}
               onClick={() => select(i)}
-              className="relative block w-full border-t border-border py-4 text-left"
+              className="relative block w-full border-t border-border py-6 text-left"
             >
               {/* The top hairline doubles as the step's progress bar. */}
               {active === i && (
@@ -114,14 +114,21 @@ export function HowItWorks() {
                   }}
                 />
               )}
-              <span
-                className={`block text-[17px] transition-colors ${
-                  active === i
-                    ? "text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {step.title}
+              {/* Title on the left, step index on the right (à la a numbered
+                  index) so each row has a steady two-column rhythm. */}
+              <span className="flex items-baseline justify-between gap-4">
+                <span
+                  className={`block text-[17px] transition-colors ${
+                    active === i
+                      ? "text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {step.title}
+                </span>
+                <span className="shrink-0 font-mono text-[12px] tabular-nums text-muted-foreground/60">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
               </span>
               {/* Copy reveals via the 0fr→1fr grid-rows trick so height
                   animates without measuring. */}
@@ -131,7 +138,7 @@ export function HowItWorks() {
               >
                 <span className="overflow-hidden">
                   <span
-                    className={`block pt-2 text-[15px] leading-relaxed text-muted-foreground transition-opacity duration-300 ${
+                    className={`block max-w-[44ch] pt-3 text-[15px] leading-relaxed text-muted-foreground transition-opacity duration-300 ${
                       active === i ? "opacity-100" : "opacity-0"
                     }`}
                   >
@@ -147,11 +154,14 @@ export function HowItWorks() {
             cell and crossfade, so their internal animations don't restart.
             Pulled up beside the section heading so the tall panel doesn't
             sit low against the step list. */}
-        <div className="mt-8 grid md:-mt-20 lg:-mt-24">
+        <div className="mx-auto mt-8 grid w-full max-w-[480px] grid-cols-1 justify-items-center lg:mt-0 lg:max-w-none lg:-mt-24 lg:justify-items-stretch">
           {STEPS.map((step, i) => (
             <div
               key={step.id}
-              className={`col-start-1 row-start-1 transition-opacity duration-500 ${
+              // Render the mockups in Inter so they read as real product UI
+              // rather than the marketing PP Mori face (matches the template
+              // preview cards and the v76 hero mock).
+              className={`col-start-1 row-start-1 [font-family:var(--font-inter),system-ui,sans-serif] transition-opacity duration-500 ${
                 active === i ? "opacity-100" : "pointer-events-none opacity-0"
               }`}
               aria-hidden={active !== i}

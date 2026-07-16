@@ -49,12 +49,24 @@ export function Testimonials() {
           />
         </div>
 
+        {/* Avatar on mobile — the desktop portrait is pinned top-right, but on
+            narrow screens it sits inline above the attribution instead. */}
+        <div className="relative mb-5 size-14 overflow-hidden rounded-xl md:hidden">
+          <Image
+            src={`/images/customers/${FEATURED.slug}.jpg`}
+            alt={FEATURED.name}
+            fill
+            sizes="56px"
+            className="object-cover"
+          />
+        </div>
+
         {/* Attribution leads the section — small caps in the mono face, the
             colour shift (not a divider glyph) separates name from role. */}
-        <p className="font-[family-name:var(--font-diatype-mono)] text-[12px] uppercase tracking-[0.08em] text-foreground md:pr-44">
+        <p className="type-eyebrow text-foreground md:pr-44">
           {FEATURED.name}
           <span className="ml-3 text-muted-foreground">
-            {FEATURED.title}, {FEATURED.firm}
+            {FEATURED.firm}
           </span>
         </p>
 
@@ -63,19 +75,22 @@ export function Testimonials() {
           &ldquo;{FEATURED.quote}&rdquo;
         </blockquote>
 
-        {/* Stats as a descending bar chart. */}
-        <div className="mt-12 flex items-end gap-3 md:mt-16 md:gap-5">
+        {/* Stats. On mobile they stack as full-width rows (value left, label
+            right) so the labels get room instead of wrapping in cramped
+            columns. At md+ they become the descending bar chart — tallest to
+            shortest — with the story link floating above the last bar. */}
+        <div className="mt-12 flex flex-col gap-3 md:mt-16 md:flex-row md:items-end md:gap-5">
           {FEATURED.stats.map((s, i) => (
             <div
               key={s.label}
-              className={`flex h-40 flex-1 flex-col justify-between rounded-lg bg-muted p-5 md:p-6 ${BAR_HEIGHTS[i]}`}
+              className={`flex items-center justify-between gap-4 rounded-lg bg-muted p-5 md:flex-1 md:flex-col md:items-start md:justify-between md:gap-0 md:p-6 ${BAR_HEIGHTS[i]}`}
             >
-              <p className="text-[24px] leading-none tracking-[-0.01em] text-foreground md:text-[34px]">
+              <p className="text-[26px] leading-none tracking-[-0.01em] text-foreground md:text-[34px]">
                 {s.value}
               </p>
               {/* Small caps label in the mono face — standing in for ABC
                   Diatype Caplock, which isn't in our bundled fonts yet. */}
-              <p className="font-[family-name:var(--font-diatype-mono)] text-[11px] uppercase leading-snug tracking-[0.06em] text-muted-foreground">
+              <p className="type-eyebrow max-w-[9rem] text-right text-[11px] leading-snug tracking-[0.06em] text-muted-foreground md:max-w-none md:text-left">
                 {s.label}
               </p>
             </div>

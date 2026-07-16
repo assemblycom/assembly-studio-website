@@ -33,6 +33,29 @@ src/
 - Use CSS variables from globals.css for colors (--accent, --muted, --border, etc).
 - Keep components responsive — mobile-first, max-w-7xl container.
 
+## Reuse patterns — do not reinvent
+**If an element already has an established pattern on this site, reuse that exact
+pattern. Do not invent a new variation unless explicitly asked to.** Consistency
+across the site is a hard requirement — a new one-off style for something we
+already solved (filters, tags, cards, buttons, toggles, etc.) is a bug, not a
+feature.
+
+Before building any UI element, check whether it already exists elsewhere and
+match it. Known shared patterns:
+- **Filter chips** — mono, uppercase, `rounded-md`, `bg-muted` (inactive) /
+  `bg-foreground/10` (active). See `templates-browser.tsx` and
+  `customers-hub.tsx`.
+- **Tags / stat chips** — mono, uppercase, `rounded-md bg-muted px-3 py-1.5`,
+  value in `text-foreground` + label in `text-muted-foreground`. See the
+  case-study detail page and the customers review strip.
+- **Segmented toggle** — sliding thumb, matches the pricing billing toggle. See
+  `pricing-plans.tsx` and `production-gap.tsx`.
+- **Primary/secondary buttons, cards, section spacing** — reuse the existing
+  component/classes rather than restyling per page.
+
+When a genuinely new element is needed, prefer extracting a shared component so
+the next page reuses it too.
+
 ## Branching Strategy
 - **`main`** — production. Deployed to the live site. Never push directly.
 - **`staging`** — default branch. PRs merge here first for review and preview deploys.

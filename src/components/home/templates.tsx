@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Section } from "@/components/ui/section";
 import { getFeaturedTemplates } from "@/lib/templates";
 import { APP_URL } from "@/lib/constants";
+import { TemplatePreviewFrame } from "@/components/templates/preview-frame";
 
 const featuredTemplates = getFeaturedTemplates(6);
 
@@ -11,11 +12,11 @@ export function Templates() {
       <div className="flex items-end justify-between">
         <div>
           <h2 className="type-h2">
-            Start with a template
+            Start with an app template
           </h2>
           <p className="mt-4 max-w-2xl text-muted-foreground">
-            Pre-built workflows for common use cases. Pick one, customize it,
-            ship it to your clients.
+            Pre-built app templates for common use cases. Pick one, customize
+            it, ship it to your clients.
           </p>
         </div>
         <Link
@@ -33,7 +34,9 @@ export function Templates() {
             href={APP_URL}
             className="group overflow-hidden rounded-xl border border-border transition-colors hover:border-foreground/20"
           >
-            <div className="aspect-[5/3] bg-muted" />
+            <div className="relative aspect-[5/3] overflow-hidden">
+              <TemplatePreviewFrame compact video={template.hasVideo} />
+            </div>
             <div className="p-4">
               <h3 className="text-sm font-medium">
                 {template.title}
@@ -41,7 +44,7 @@ export function Templates() {
               <p className="mt-1.5 text-sm text-muted-foreground">
                 {template.description}
               </p>
-              <span className="mt-3 inline-block rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
+              <span className="mt-3 inline-block rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground">
                 {template.category}
               </span>
             </div>

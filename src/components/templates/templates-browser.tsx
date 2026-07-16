@@ -9,6 +9,7 @@ import {
   TemplateModalBrowser,
   type ModalTemplate,
 } from "@/components/templates/template-modal";
+import { TemplatePreviewFrame } from "@/components/templates/preview-frame";
 
 interface Props {
   templates: Template[];
@@ -81,6 +82,10 @@ export function TemplatesBrowser({ templates }: Props) {
         longDescription: t.longDescription,
         category: t.category,
         industries: t.industries,
+        images: t.images,
+        videoUrl: t.videoUrl,
+        previewCount: t.previewCount,
+        hasVideo: t.hasVideo,
       })),
     [templates],
   );
@@ -137,7 +142,7 @@ export function TemplatesBrowser({ templates }: Props) {
                 type="button"
                 aria-pressed={active}
                 onClick={() => toggleCategory(cat)}
-                className={`rounded-md px-2.5 py-1 font-[family-name:var(--font-diatype-mono)] text-xs uppercase transition-colors ${
+                className={`rounded-md px-2.5 py-1 font-mono text-xs uppercase transition-colors ${
                   active
                     ? "bg-foreground/10 text-foreground"
                     : "bg-muted text-muted-foreground hover:text-foreground"
@@ -152,7 +157,7 @@ export function TemplatesBrowser({ templates }: Props) {
               type="button"
               onClick={() => setShowAllCats((v) => !v)}
               aria-expanded={showAllCats}
-              className="rounded-md px-2.5 py-1 font-[family-name:var(--font-diatype-mono)] text-xs uppercase text-muted-foreground transition-colors hover:text-foreground"
+              className="rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase text-muted-foreground transition-colors hover:text-foreground"
             >
               {showAllCats ? "Less" : `More (${hiddenCatCount})`}
             </button>
@@ -184,14 +189,16 @@ export function TemplatesBrowser({ templates }: Props) {
                     />
                   </div>
                 ) : (
-                  <div className="aspect-[2/1] rounded-lg bg-muted sm:aspect-[5/3]" />
+                  <div className="relative aspect-[2/1] overflow-hidden rounded-lg sm:aspect-[5/3]">
+                    <TemplatePreviewFrame compact video={template.hasVideo} />
+                  </div>
                 )}
                 <div className="p-3">
                   <h3 className="text-balance text-sm font-medium">{template.title}</h3>
                   <p className="mt-1.5 text-pretty text-sm text-muted-foreground">
                     {template.description}
                   </p>
-                  <span className="mt-3 inline-block rounded-md bg-muted px-2.5 py-1 font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-muted-foreground">
+                  <span className="mt-3 inline-block rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground">
                     {template.category}
                   </span>
                 </div>

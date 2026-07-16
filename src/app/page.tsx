@@ -1,9 +1,9 @@
 import { HeroV76 } from "@/components/home/hero-v76";
+import { HeroAurora } from "@/components/home/hero-aurora";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { Testimonials } from "@/components/home/testimonials";
 import { HomeFAQ } from "@/components/home/faq";
 import { CTA } from "@/components/home/cta";
-import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { ProductionGap } from "@/components/home/production-gap";
 import { WholeStack } from "@/components/home/whole-stack";
 import { Reveal } from "@/components/ui/reveal";
@@ -11,14 +11,14 @@ import { Reveal } from "@/components/ui/reveal";
 export default function HomePage() {
   return (
     <>
-      {/* The announcement bar lives with the landing content (not the shell), so
-          it only appears here — never on error/404 screens. */}
-      <AnnouncementBar />
       {/* Upper half shares the hero's surface — the walkthrough sits on the
           same color as the hero (see .section-follow), so they read as one
           canvas. How it works fades only (no transform) to keep its sticky
           scroll-spy nav working. */}
       <HeroV76 />
+      {/* Brand aurora spilling out of the hero into the walkthrough — the
+          footer aurora, flipped (see HeroAurora). */}
+      <HeroAurora />
       <div className="section-follow">
         <Reveal variant="fade">
           <HowItWorks />

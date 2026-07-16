@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TEMPLATES, getTemplateBySlug, type Template } from "@/lib/templates";
 import { TemplateGallery } from "@/components/templates/template-gallery";
-import { SIGNUP_URL } from "@/lib/constants";
+import { TemplateCta } from "@/components/templates/template-cta";
 
 // Customization points common to every Assembly template.
 const CUSTOMIZABLE = [
@@ -53,7 +53,7 @@ function TemplateHeader({
           href="/templates"
           className="transition-colors hover:text-foreground"
         >
-          Templates
+          App templates
         </Link>
         <span aria-hidden className="text-muted-foreground/50">
           /
@@ -73,7 +73,7 @@ function TemplateHeader({
           {template.industries.map((industry) => (
             <span
               key={industry}
-              className="rounded-md bg-muted px-2.5 py-1 font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-muted-foreground"
+              className="rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground"
             >
               {industry}
             </span>
@@ -82,12 +82,7 @@ function TemplateHeader({
       )}
 
       <div className="mt-6">
-        <a
-          href={SIGNUP_URL}
-          className="inline-block rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
-        >
-          Build off this template
-        </a>
+        <TemplateCta />
       </div>
     </div>
   );
@@ -109,7 +104,13 @@ export default async function TemplateDetailPage({ params }: Props) {
           <div className="mt-10 grid gap-10 lg:mt-0 lg:grid-cols-[1.6fr_1fr] lg:gap-14">
             {/* Left — gallery + about (keeps the sidebar sticky alongside) */}
             <div>
-              <TemplateGallery title={template.title} />
+              <TemplateGallery
+                title={template.title}
+                images={template.images}
+                videoUrl={template.videoUrl}
+                previewCount={template.previewCount}
+                hasVideo={template.hasVideo}
+              />
 
               <div className="mt-14 lg:mt-20">
                 <h2 className="type-h3">

@@ -16,6 +16,7 @@ import {
   IconHouse,
   IconPlus,
 } from "@/components/home/mock-icons";
+import { MockFrame } from "@/components/home/mock-frame";
 
 type Entry = {
   description: string;
@@ -112,13 +113,10 @@ function BrandNavItem({
 
 export function BrandPortalVisual() {
   return (
-    <div
-      aria-hidden
-      className="pointer-events-none flex select-none flex-col overflow-hidden rounded-lg bg-background ring-1 ring-border sm:aspect-[16/11]"
-    >
+    <MockFrame>
       <div className="flex min-h-0 flex-1">
         {/* Client-side portal sidebar — hidden on small screens. */}
-        <div className="hidden w-[148px] shrink-0 flex-col border-r border-border bg-muted px-1.5 py-2 sm:flex md:w-[168px]">
+        <div className="hidden w-[148px] shrink-0 flex-col border-r border-border bg-muted px-1.5 py-2 lg:flex md:w-[168px]">
           <div className="flex items-center gap-1.5 px-1.5 pb-3 pt-0.5 text-foreground">
             <span className="flex size-[16px] items-center justify-center rounded bg-foreground text-[9px] leading-none text-background">
               B
@@ -193,7 +191,7 @@ export function BrandPortalVisual() {
           <div className="mx-3 mb-3 min-h-0 flex-1 overflow-hidden rounded-md border border-border">
             <div className="flex items-center gap-2 border-b border-border bg-muted px-2.5 py-1.5 text-[10px] leading-none text-muted-foreground">
               <span className="min-w-0 flex-1">Description</span>
-              <span className="hidden w-[76px] sm:block">Client</span>
+              <span className="hidden w-[76px] lg:block">Client</span>
               <span className="hidden w-[80px] md:block">Project</span>
               <span className="w-[38px]">Date</span>
               <span className="w-[44px]">Duration</span>
@@ -207,7 +205,7 @@ export function BrandPortalVisual() {
                 <span className="min-w-0 flex-1 truncate text-foreground">
                   {entry.description}
                 </span>
-                <span className="hidden w-[76px] truncate text-muted-foreground sm:block">
+                <span className="hidden w-[76px] truncate text-muted-foreground lg:block">
                   {entry.client}
                 </span>
                 <span className="hidden w-[80px] truncate text-muted-foreground md:block">
@@ -231,6 +229,6 @@ export function BrandPortalVisual() {
           </div>
         </div>
       </div>
-    </div>
+    </MockFrame>
   );
 }

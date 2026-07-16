@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import { NAV_LINKS, APP_URL, DEMO_URL } from "@/lib/constants";
+import { NAV_LINKS, APP_URL, SIGNUP_URL, DEMO_URL } from "@/lib/constants";
+import { useAuthState } from "@/lib/use-auth";
 
-// The announcement bar's height — once we've scrolled past it the header is
-// pinned to the top, so it swaps from transparent to a frosted surface.
+// Past this scroll distance the sticky header swaps from transparent to a
+// frosted surface.
 const SCROLL_THRESHOLD = 40;
 
 export function StudioNav({
@@ -39,6 +40,9 @@ export function StudioNav({
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  // Signed-in visitors get a single "Open Assembly" action instead of the
+  // Log in / Get started pair — mirrors www.assembly.com's signed-in nav.
+  const { authed } = useAuthState();
   // The menu is portaled to <body>, so it needs the client to have mounted.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -82,12 +86,21 @@ export function StudioNav({
   // it lives at rest as a transparent hairline so scrolling only transitions its
   // COLOR (transparent → hairline) — never its width, and never from the
   // inherited currentColor, which flashed a bright line for a frame.
-  const scrolledSurface =
-    softGlass || !darkTop
-      ? "bg-white/80 backdrop-blur-xl"
-      : "bg-[#0e0e10]/85 backdrop-blur-xl";
-  const scrolledBorder =
-    softGlass || !darkTop ? "border-black/[0.07]" : "border-white/10";
+  // Progressive frosted blur (à la Nothing's nav): a masked backdrop-blur that
+  // fades out below the bar instead of ending on a hairline border. It extends
+  // past the bar height so the blur eases off gradually over the content below.
+  const darkSurface = !(softGlass || !darkTop);
+  const navBlurStyle: CSSProperties = {
+    backdropFilter: "blur(11px)",
+    WebkitBackdropFilter: "blur(11px)",
+    background: `linear-gradient(to bottom, ${
+      darkSurface ? "rgba(14,14,16,0.5)" : "rgba(255,255,255,0.62)"
+    } 0%, transparent 100%)`,
+    maskImage:
+      "linear-gradient(to bottom, #000 0%, #000 42%, transparent 100%)",
+    WebkitMaskImage:
+      "linear-gradient(to bottom, #000 0%, #000 42%, transparent 100%)",
+  };
 
   // One shared easing/duration for the rest→pill transition so every animated
   // property (chrome, geometry, logo tint) settles together on the same soft
@@ -165,8 +178,13 @@ export function StudioNav({
       {/* Mobile header — mirrors the desktop nav: transparent with light
           contents over the dark hero, settling into the same dark glass pill on
           scroll. Logo on the left, grid menu button on the right. */}
-      <header className={`${position} z-50 border-b transition-colors ${ease} lg:hidden ${scrolled ? `${scrolledSurface} ${scrolledBorder}` : "border-transparent"}`}>
-        <div className={`flex items-center justify-between px-5 transition-[height] ${ease} ${scrolled ? "h-12" : "h-14"}`}>
+      <header className={`${position} z-50 transition-colors ${ease} lg:hidden`}>
+        <div
+          aria-hidden
+          className={`pointer-events-none absolute inset-x-0 top-0 h-[135%] transition-opacity ${ease} ${scrolled ? "opacity-100" : "opacity-0"}`}
+          style={navBlurStyle}
+        />
+        <div className={`relative z-10 flex items-center justify-between px-5 transition-[height] ${ease} ${scrolled ? "h-12" : "h-14"}`}>
           <Link href="/" className="flex items-center">
             {logoMark}
           </Link>
@@ -192,8 +210,13 @@ export function StudioNav({
 
       {/* Desktop header — full-bleed bar: transparent at the top, frosted
           full-width surface with a hairline bottom border on scroll */}
-      <header className={`${position} z-50 hidden border-b transition-colors ${ease} lg:block ${scrolled ? `${scrolledSurface} ${scrolledBorder}` : "border-transparent"}`}>
-        <div className={`relative mx-auto flex items-center ${contentRail} transition-[height] ${ease} ${scrolled ? "h-14" : "h-16"}`}>
+      <header className={`${position} z-50 hidden transition-colors ${ease} lg:block`}>
+        <div
+          aria-hidden
+          className={`pointer-events-none absolute inset-x-0 top-0 h-[135%] transition-opacity ${ease} ${scrolled ? "opacity-100" : "opacity-0"}`}
+          style={navBlurStyle}
+        />
+        <div className={`relative z-10 mx-auto flex items-center ${contentRail} transition-[height] ${ease} ${scrolled ? "h-14" : "h-16"}`}>
           {/* Three balanced columns keep the nav truly centred while the equal
               side columns guarantee it never crowds the logo or the actions. */}
           <div className="flex flex-1 items-center">
@@ -254,7 +277,7 @@ export function StudioNav({
                   type="button"
                   onClick={themeToggle.onToggle}
                   aria-label={light ? "Switch to dark theme" : "Switch to light theme"}
-                  className={`mr-1.5 hidden size-8 items-center justify-center rounded-full transition-colors lg:flex ${ink}`}
+                  className={`mr-1.5 hidden size-8 items-center justify-center rounded-lg transition-colors lg:flex ${ink}`}
                 >
                   {light ? (
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -269,27 +292,31 @@ export function StudioNav({
                 </button>
               );
             })()}
-            {!hideDemo && (
-              <Link href={DEMO_URL} className={linkCls}>
-                Book a demo
-              </Link>
+            {authed ? (
+              <a href={APP_URL} className={ctaCls}>
+                Open Assembly
+              </a>
+            ) : (
+              <>
+                {!hideDemo && (
+                  <Link href={DEMO_URL} className={linkCls}>
+                    Book a demo
+                  </Link>
+                )}
+                <a href={APP_URL} className={linkCls}>
+                  Log in
+                </a>
+                <a href={SIGNUP_URL} className={ctaCls}>
+                  Get started
+                </a>
+              </>
             )}
-            <a
-              href={APP_URL}
-              className={linkCls}
-            >
-              Log in
-            </a>
-            <a href={APP_URL} className={ctaCls}>
-              Start building
-            </a>
           </div>
         </div>
       </header>
 
       {/* Mobile full-screen menu — portaled to <body> so it escapes the home
-          content wrapper's stacking context (z-10) and paints above the
-          announcement bar (z-40); otherwise the bar covers the overlay top. */}
+          content wrapper's stacking context (z-10) and paints above the nav. */}
       {mounted && mobileMenuOpen && createPortal(
         <div className={`fixed inset-0 z-[60] flex flex-col md:hidden ${menuSurface}`}>
           {/* Match the mobile header's padding (px-5) and height exactly so the
@@ -401,18 +428,29 @@ export function StudioNav({
 
           {/* Bottom actions — stacked full-width so both read the same size. */}
           <div className="flex flex-col gap-3 px-5 pb-8 pt-4">
-            <a
-              href={APP_URL}
-              className={`flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm ${menuCta}`}
-            >
-              Start building
-            </a>
-            <a
-              href={APP_URL}
-              className={`flex w-full items-center justify-center rounded-lg border px-4 py-3 text-sm ${menuDemo}`}
-            >
-              Log in
-            </a>
+            {authed ? (
+              <a
+                href={APP_URL}
+                className={`flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm ${menuCta}`}
+              >
+                Open Assembly
+              </a>
+            ) : (
+              <>
+                <a
+                  href={SIGNUP_URL}
+                  className={`flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm ${menuCta}`}
+                >
+                  Get started
+                </a>
+                <a
+                  href={APP_URL}
+                  className={`flex w-full items-center justify-center rounded-lg border px-4 py-3 text-sm ${menuDemo}`}
+                >
+                  Log in
+                </a>
+              </>
+            )}
           </div>
         </div>,
         document.body,

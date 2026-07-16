@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { APP_URL } from "@/lib/constants";
+import { useAuthState } from "@/lib/use-auth";
 
 interface PlanFeatureGroup {
   label: string;
@@ -212,6 +213,10 @@ function AnimatedPrice({ value }: { value: number }) {
 
 export function PricingPlans() {
   const [billing, setBilling] = useState<Billing>("monthly");
+  // Signed-in visitors already have a plan, so the Free tier is noise — drop it
+  // and show only the paid upgrade paths.
+  const { authed } = useAuthState();
+  const plans = authed ? PLANS.filter((plan) => plan.priceMonthly > 0) : PLANS;
 
   return (
     <div>
@@ -258,9 +263,15 @@ export function PricingPlans() {
         </div>
       </div>
 
-      {/* Plans — tucked closer under the toggle on mobile; roomier on desktop. */}
-      <div className="mt-5 grid gap-6 sm:grid-cols-2 md:mt-12 lg:grid-cols-4">
-        {PLANS.map((plan) => {
+      {/* Plans — tucked closer under the toggle on mobile; roomier on desktop.
+          Column count tracks the visible plans so hiding Free (signed-in)
+          reflows to three even columns rather than leaving a gap. */}
+      <div
+        className={`mt-5 grid gap-6 sm:grid-cols-2 md:mt-12 ${
+          plans.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"
+        }`}
+      >
+        {plans.map((plan) => {
           const price = billing === "yearly" ? plan.priceYearly : plan.priceMonthly;
           // Original structure kept: filled header panel (price pinned to the
           // bottom) → detached button → features. The only addition is an
@@ -269,13 +280,16 @@ export function PricingPlans() {
           return (
             <div
               key={plan.name}
-              // The highlighted (most popular) plan swaps its static border
-              // for the animated gradient ring — same 1px of layout either way.
-              className={`flex flex-col rounded-2xl border p-3 ${
-                plan.highlighted ? "plan-ring-popular relative border-transparent" : "border-border"
+              // Every card carries a subtle filled surface so the outline reads
+              // as an edge rather than the brightest thing on the card. The
+              // highlighted plan stands out with a brighter neutral border and a
+              // "Most popular" tag — in line with the neutral UI, no gradient.
+              className={`relative flex flex-col rounded-2xl border bg-card p-3 ${
+                plan.highlighted ? "border-foreground/30" : "border-border"
               }`}
             >
-              {/* Filled header panel — uniform light surface across all plans. */}
+              {/* Filled header panel — a touch lighter than the card body so the
+                  price block reads as an inset surface. */}
               <div className="flex min-h-[200px] flex-col justify-between rounded-xl bg-muted p-5">
                 <div>
                   <h3 className="text-lg font-medium">{plan.name}</h3>

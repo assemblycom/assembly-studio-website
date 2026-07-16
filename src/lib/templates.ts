@@ -12,6 +12,18 @@ export interface Template {
   featured?: boolean;
   /** Optional preview image shown on the card in place of the grey placeholder. */
   image?: string;
+  /** Detail-gallery media: up to 5 preview images. */
+  images?: string[];
+  /** Optional walkthrough video; when set it leads the detail gallery. */
+  videoUrl?: string;
+  /**
+   * TEMP — until real screenshots/videos exist. Lets a template demonstrate its
+   * gallery shape with designed placeholder frames: how many preview frames
+   * (1–5) and whether a video tile leads. Ignored once `images`/`videoUrl` are
+   * set.
+   */
+  previewCount?: number;
+  hasVideo?: boolean;
 }
 
 // Category order is intentional — it drives the order of the filter tabs.
@@ -295,10 +307,25 @@ const BASE_TEMPLATES: Template[] = [
   },
 ];
 
-// Merge industry tags onto each template from the slug map above.
+// TEMP demo of gallery media shapes until real screenshots/videos land, so
+// each state is reviewable: single preview (thumbnails hidden), a few images,
+// the full five, and video-led. Unlisted templates default to a single frame.
+const PREVIEW_BY_SLUG: Record<string, { previewCount?: number; hasVideo?: boolean }> = {
+  "onboarding-wizard": { previewCount: 4, hasVideo: true },
+  "client-engagement-dashboard": { previewCount: 5 },
+  "new-client-intake": { previewCount: 3 },
+  "proposal-builder": { previewCount: 3, hasVideo: true },
+  "data-visualization": { previewCount: 5 },
+  "client-project-tracker": { previewCount: 2 },
+  // Everything else falls back to a single preview (no thumbnail strip).
+};
+
+// Merge industry tags + preview shape onto each template from the maps above.
 export const TEMPLATES: Template[] = BASE_TEMPLATES.map((t) => ({
   ...t,
   industries: INDUSTRY_BY_SLUG[t.slug] ?? [],
+  previewCount: t.previewCount ?? PREVIEW_BY_SLUG[t.slug]?.previewCount ?? 1,
+  hasVideo: t.hasVideo ?? PREVIEW_BY_SLUG[t.slug]?.hasVideo ?? false,
 }));
 
 export function getTemplateBySlug(slug: string): Template | undefined {

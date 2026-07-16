@@ -12,6 +12,10 @@ export interface ModalTemplate {
   longDescription: string;
   category: string;
   industries?: string[];
+  images?: string[];
+  videoUrl?: string;
+  previewCount?: number;
+  hasVideo?: boolean;
 }
 
 // Customization points common to every Assembly template (mirrors the full
@@ -172,7 +176,13 @@ export function TemplateModalBrowser({
           <div className="grid gap-10 md:grid-cols-[1.5fr_1fr] md:gap-12">
             {/* Left — gallery + about; scrolls with the sheet. */}
             <div>
-              <TemplateGallery title={template.title} />
+              <TemplateGallery
+                title={template.title}
+                images={template.images}
+                videoUrl={template.videoUrl}
+                previewCount={template.previewCount}
+                hasVideo={template.hasVideo}
+              />
 
               <div className="mt-12">
                 <h2 className="type-h4">About this template</h2>
@@ -203,7 +213,7 @@ export function TemplateModalBrowser({
             {/* Right — sticky sidebar: category, title, description, tags, CTA.
                 On mobile it stacks FIRST so the title leads the sheet. */}
             <div className="order-first md:order-none md:sticky md:top-0 md:self-start">
-              <p className="font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-muted-foreground">
+              <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
                 {template.category}
               </p>
               <h2 className="type-h3 mt-4">{template.title}</h2>
@@ -216,7 +226,7 @@ export function TemplateModalBrowser({
                   {template.industries.map((industry) => (
                     <span
                       key={industry}
-                      className="rounded-md bg-muted px-2.5 py-1 font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-muted-foreground"
+                      className="rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground"
                     >
                       {industry}
                     </span>

@@ -10,9 +10,6 @@ import { useTheme } from "@/components/theme/theme-provider";
  * Home and the content pages share the reveal footer — a single black sheet
  * that ends in the brand aurora (the gradient lives inside the footer itself,
  * not a separate fixed layer). Other pages get the plain footer.
- *
- * The announcement bar scrolls away in normal flow; the header is sticky and
- * pins to the top of the viewport once the bar scrolls past.
  */
 export function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -27,8 +24,7 @@ export function RootShell({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/customers/") ||
     pathname === "/pricing" ||
     pathname === "/templates" ||
-    pathname.startsWith("/templates/") ||
-    pathname.startsWith("/blog/");
+    pathname.startsWith("/templates/");
 
   // Tell CSS which footer tone this page ends in, so the bottom overscroll /
   // iOS toolbar zone can match it (dark under the reveal footer, light under

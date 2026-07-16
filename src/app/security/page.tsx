@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Section } from "@/components/ui/section";
 import { FAQ, type FAQEntry } from "@/components/home/faq";
 import { SecurityBenchmark } from "@/components/security/security-benchmark";
+import { SecurityCta } from "@/components/security/security-cta";
 import { DEMO_URL, TRUST_CENTER_URL } from "@/lib/constants";
 
 // Curated customer spotlight for the social-proof band — teaser for the full
@@ -187,7 +188,7 @@ export default function SecurityPage() {
               {/* Text (left on desktop, below the photo on mobile). */}
               <div className="order-2 flex flex-col justify-between p-6 md:order-1 md:p-8">
                 <div>
-                  <p className="font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-muted-foreground">
+                  <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
                     Customer story
                   </p>
                   {/* font-normal — on this site 500 loads PP Mori SemiBold,
@@ -236,7 +237,7 @@ export default function SecurityPage() {
               className="group flex flex-col justify-between rounded-3xl bg-muted p-6 md:p-8"
             >
               <div>
-                <p className="font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-muted-foreground">
+                <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
                   {SPOTLIGHT_SECURITY.eyebrow}
                 </p>
                 <h3 className="mt-4 max-w-sm text-xl font-normal leading-snug">
@@ -268,32 +269,9 @@ export default function SecurityPage() {
       {/* Security FAQ */}
       <FAQ heading="Security FAQ" items={SECURITY_FAQS} />
 
-      {/* Final CTA — generous padding to match the templates page CTA. */}
-      <section className="px-6 py-14 md:py-20">
-        <div className="mx-auto flex max-w-6xl items-center justify-center px-6 py-16 md:py-24">
-          <div className="text-center">
-          <h2 className="type-h2 mx-auto max-w-2xl text-balance">
-            Build AI apps on a trusted platform
-          </h2>
-          <div className="mx-auto mt-8 flex w-full max-w-xs flex-col items-stretch gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:justify-center">
-            <a
-              href={DEMO_URL}
-              className="rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background transition-opacity hover:opacity-90"
-            >
-              Book demo
-            </a>
-            <a
-              href={TRUST_CENTER_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="rounded-lg border border-foreground/25 bg-background px-5 py-2.5 text-center text-sm text-foreground transition-colors hover:bg-muted"
-            >
-              Explore Trust Center
-            </a>
-          </div>
-          </div>
-        </div>
-      </section>
+      {/* Final CTA — parallax chip field naming the platform's baked-in
+          controls, mirroring the templates page CTA. */}
+      <SecurityCta />
     </>
   );
 }

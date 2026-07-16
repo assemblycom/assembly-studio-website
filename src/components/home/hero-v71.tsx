@@ -249,7 +249,7 @@ function CardProposal() {
       >
         <div className="flex items-center justify-between text-[8.5px] text-neutral-400">
           <span>Proposal</span>
-          <span>Acme Co</span>
+          <span>Northwind</span>
         </div>
         <div className="mt-4 text-[24px] font-medium leading-none tracking-tight tabular-nums text-neutral-900">$18,500</div>
       </div>
@@ -309,7 +309,7 @@ function CardOnboarding() {
   // is still empty so the step reads in-progress, not finished.
   const fields: [string, string][] = [
     ["Name", "Riley Chen"],
-    ["Email", "riley@acme.co"],
+    ["Email", "riley@northwind.co"],
     ["Phone", ""],
   ];
   return (
@@ -374,9 +374,8 @@ function CardApproval() {
     // its natural height. Tokens follow the sibling cards: well panels with
     // the checklist's inset ring, p-3.5 face padding, tracker-style header.
     <div className="flex h-full flex-col gap-2 bg-[var(--v69-card)] p-3.5">
-      <div className="flex items-center justify-between text-[9px] text-neutral-400">
+      <div className="flex items-center text-[9px] text-neutral-400">
         <span>Waiting on you</span>
-        <span>2</span>
       </div>
       {(
         [
@@ -404,7 +403,7 @@ function CardApproval() {
             it starts with. A transition (not keyframes) with a hover-only
             delay: it waits ~700ms, glides slowly, and returns immediately on
             mouse-out. */}
-        <span className="absolute bottom-[3px] left-[3px] top-[3px] flex w-12 items-center justify-center rounded-full bg-[var(--v69-chip)] text-neutral-800 shadow-[0_1px_2px_rgba(16,24,40,0.12)] transition-transform duration-[900ms] ease-[cubic-bezier(0.3,0.7,0.3,1)] group-hover:translate-x-[130px] group-hover:delay-[700ms] group-[.is-inview]:translate-x-[130px] group-[.is-inview]:delay-[700ms]">
+        <span className="absolute bottom-[3px] left-[3px] top-[3px] flex w-12 items-center justify-center rounded-full bg-[var(--v69-knob)] text-[var(--v69-knob-ink)] shadow-[0_1px_2px_rgba(16,24,40,0.12)] transition-transform duration-[900ms] ease-[cubic-bezier(0.3,0.7,0.3,1)] group-hover:translate-x-[130px] group-hover:delay-[700ms] group-[.is-inview]:translate-x-[130px] group-[.is-inview]:delay-[700ms]">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
             <path d="M5 12h14" />
             <path d="M13 6l6 6-6 6" />
@@ -428,16 +427,19 @@ function CardChecklist() {
       <div className="flex flex-col gap-2">
         {docs.map(([label, done], i) => (
           <div key={label} className="flex items-center gap-2 rounded-md bg-[var(--v69-well)] px-2.5 py-1.5 shadow-[inset_0_0_0_1px_rgba(16,24,40,0.04)]">
-            <span
-              className={`flex size-3.5 shrink-0 items-center justify-center rounded-[4px] ${
-                done ? "group-hover:[animation:v69Pop_0.8s_cubic-bezier(0.22,1,0.36,1)_both] group-[.is-inview]:[animation:v69Pop_0.8s_cubic-bezier(0.22,1,0.36,1)_both]" : "border border-black/10 bg-[var(--v69-chip)]"
-              }`}
-              style={done ? { animationDelay: `${0.28 + i * 0.26}s`, backgroundColor: INK_SOLID, color: "var(--color-white)" } : undefined}
-            >
+            {/* The empty checkbox is always present; only the filled check pops
+                IN (staggered) so the row reads as "getting checked" rather than
+                the whole box appearing from nothing. */}
+            <span className="relative flex size-3.5 shrink-0 items-center justify-center rounded-[4px] border border-black/10 bg-[var(--v69-chip)]">
               {done && (
-                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
+                <span
+                  className="absolute inset-[-1px] flex items-center justify-center rounded-[4px] opacity-0 group-hover:[animation:v69Pop_0.5s_cubic-bezier(0.22,1,0.36,1)_both] group-[.is-inview]:[animation:v69Pop_0.5s_cubic-bezier(0.22,1,0.36,1)_both]"
+                  style={{ animationDelay: `${0.28 + i * 0.26}s`, backgroundColor: INK_SOLID, color: "var(--color-white)" }}
+                >
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                </span>
               )}
             </span>
             <span className={`text-[10px] ${done ? "text-neutral-800" : "text-neutral-400"}`}>{label}</span>

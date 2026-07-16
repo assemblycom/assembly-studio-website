@@ -62,7 +62,7 @@ export function SecurityBenchmark() {
         <div className="grid grid-cols-[0.96fr_1fr_1fr]">
           <div aria-hidden />
           <div aria-hidden />
-          <div className="relative z-0 -mb-4 rounded-t-lg bg-foreground pb-5 pt-3 text-center font-[family-name:var(--font-diatype-mono)] text-xs uppercase tracking-wide text-background">
+          <div className="relative z-0 -mb-4 rounded-t-lg bg-foreground pb-5 pt-3 text-center font-mono text-xs uppercase tracking-wide text-background">
             {CAP_LABEL}
           </div>
         </div>

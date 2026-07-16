@@ -23,6 +23,7 @@ import {
   IconPlus,
   IconUsers,
 } from "@/components/home/mock-icons";
+import { MockFrame } from "@/components/home/mock-frame";
 
 // Sidebar rows share one shape; `active` marks the draft app being built.
 // Exported for the sibling mocks that share this sidebar scale.
@@ -66,14 +67,11 @@ export function SectionLabel({ children }: { children: React.ReactNode }) {
 
 export function BuildAppVisual() {
   return (
-    <div
-      aria-hidden
-      className="pointer-events-none flex select-none flex-col overflow-hidden rounded-lg bg-background ring-1 ring-border sm:aspect-[16/11]"
-    >
+    <MockFrame>
       <div className="flex min-h-0 flex-1">
         {/* Sidebar — workspace nav. Hidden on small screens where the chat
             column alone tells the story. */}
-        <div className="hidden w-[168px] shrink-0 flex-col border-r border-border bg-muted px-1.5 py-2 sm:flex md:w-[188px]">
+        <div className="hidden w-[168px] shrink-0 flex-col border-r border-border bg-muted px-1.5 py-2 lg:flex md:w-[188px]">
           <div className="flex items-center gap-1.5 px-1.5 pb-3 pt-0.5">
             <span className="flex size-[16px] items-center justify-center rounded bg-foreground text-[9px] leading-none text-background">
               B
@@ -194,6 +192,6 @@ export function BuildAppVisual() {
           </div>
         </div>
       </div>
-    </div>
+    </MockFrame>
   );
 }
