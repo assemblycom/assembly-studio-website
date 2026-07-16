@@ -60,27 +60,30 @@ const CELL_BORDER = "border-b border-r border-border";
 
 function FeaturedCell({ study }: { study: CaseStudy }) {
   const stat = study.stats[0];
+  const sector = getIndustryGroup(study.industry) ?? study.industry;
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className={`group flex flex-col overflow-hidden transition-colors hover:bg-muted/40 sm:col-span-2 md:flex-row ${CELL_BORDER}`}
+      className={`group flex flex-col gap-4 overflow-hidden p-3 transition-colors hover:bg-muted/40 sm:col-span-2 md:min-h-[340px] md:flex-row md:gap-6 ${CELL_BORDER}`}
     >
       {study.image && (
-        <div className="relative aspect-[16/10] overflow-hidden md:aspect-auto md:min-h-[300px] md:w-[42%] md:shrink-0">
+        // Inset + rounded, framed by the card's padding rather than bleeding to
+        // the edges.
+        <div className="relative aspect-[16/10] overflow-hidden rounded-xl md:aspect-auto md:w-2/5 md:shrink-0 md:self-stretch">
           <Image
             src={study.image}
             alt={study.company}
             fill
-            sizes="(min-width: 768px) 640px, 100vw"
+            sizes="(min-width: 768px) 520px, 100vw"
             priority
             className="object-cover object-[50%_30%] transition-transform duration-500 group-hover:scale-[1.02]"
           />
         </div>
       )}
       {/* Same top-anchored structure as every grid cell — company + arrow on
-          top, tag pinned to the bottom — so the flagship reads as the biggest
+          top, tags pinned to the bottom — so the flagship reads as the biggest
           member of one family, not a differently-composed card. */}
-      <div className="flex flex-1 flex-col p-6 md:p-8">
+      <div className="flex flex-1 flex-col py-3 pr-3 md:py-5 md:pr-5">
         <div className="flex items-start justify-between gap-4">
           <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
             {study.company}
@@ -90,14 +93,20 @@ function FeaturedCell({ study }: { study: CaseStudy }) {
         <h3 className="mt-3 text-pretty text-xl leading-snug tracking-tight text-foreground md:text-2xl">
           {study.headline}
         </h3>
-        {stat && (
-          <span className="mt-auto inline-flex w-fit items-center gap-1.5 rounded-md bg-muted px-2.5 py-1 text-xs text-muted-foreground">
-            <span className="font-medium tabular-nums text-foreground">
-              {stat.value}
-            </span>
-            {stat.label}
+        <div className="mt-auto flex flex-wrap items-center gap-2 pt-6">
+          {/* Industry tag — same mono chip as every other card. */}
+          <span className="inline-flex items-center rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground">
+            {sector}
           </span>
-        )}
+          {stat && (
+            <span className="inline-flex items-center gap-1.5 rounded-md bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+              <span className="font-medium tabular-nums text-foreground">
+                {stat.value}
+              </span>
+              {stat.label}
+            </span>
+          )}
+        </div>
       </div>
     </Link>
   );
