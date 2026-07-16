@@ -297,9 +297,8 @@ export function ProductionGap() {
           Generation is the easy part
         </h2>
         <p className="type-lead mx-auto mt-5 max-w-lg text-center text-muted-foreground">
-          The hard part comes after: deployment, authentication, permissions,
-          notifications, branding. Assembly Studio handles all of it inside your
-          unified client experience.
+          The hard part comes after: deployment, auth, permissions, branding.
+          Assembly Studio handles all of it.
         </p>
 
         <div className="mx-auto mt-12 flex max-w-[1200px] flex-col md:mt-16">

@@ -9,7 +9,6 @@ import {
   TemplateModalBrowser,
   type ModalTemplate,
 } from "@/components/templates/template-modal";
-import { TemplatePreviewFrame } from "@/components/templates/preview-frame";
 
 interface Props {
   templates: Template[];
@@ -178,8 +177,10 @@ export function TemplatesBrowser({ templates }: Props) {
                 className="block"
                 onClick={(e) => openModal(e, template.slug)}
               >
-                {template.image ? (
-                  <div className="relative aspect-[2/1] overflow-hidden rounded-lg bg-muted sm:aspect-[5/3]">
+                {/* Real preview image when set; otherwise a clean neutral
+                    placeholder, ready for uploaded imagery (no mock frame). */}
+                <div className="relative aspect-[2/1] overflow-hidden rounded-lg bg-muted sm:aspect-[5/3]">
+                  {template.image && (
                     <Image
                       src={template.image}
                       alt=""
@@ -187,12 +188,8 @@ export function TemplatesBrowser({ templates }: Props) {
                       sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw"
                       className="object-cover object-top"
                     />
-                  </div>
-                ) : (
-                  <div className="relative aspect-[2/1] overflow-hidden rounded-lg sm:aspect-[5/3]">
-                    <TemplatePreviewFrame compact video={template.hasVideo} />
-                  </div>
-                )}
+                  )}
+                </div>
                 <div className="p-3">
                   <h3 className="text-balance text-sm font-medium">{template.title}</h3>
                   <p className="mt-1.5 text-pretty text-sm text-muted-foreground">
