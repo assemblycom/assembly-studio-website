@@ -68,7 +68,7 @@ function FeaturedCell({ study }: { study: CaseStudy }) {
     >
       {study.image && (
         // Inset + rounded, framed by the card's padding rather than bleeding to
-        // the edges.
+        // the edges. The brand label rides on the photo itself.
         <div className="relative aspect-[16/10] overflow-hidden rounded-xl md:aspect-auto md:w-2/5 md:shrink-0 md:self-stretch">
           <Image
             src={study.image}
@@ -78,28 +78,28 @@ function FeaturedCell({ study }: { study: CaseStudy }) {
             priority
             className="object-cover object-[50%_30%] transition-transform duration-500 group-hover:scale-[1.02]"
           />
+          <span className="absolute left-3 top-3 inline-flex items-center rounded-md bg-background/85 px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground shadow-sm backdrop-blur">
+            {study.company}
+          </span>
         </div>
       )}
-      {/* Same top-anchored structure as every grid cell — company + arrow on
-          top, tags pinned to the bottom — and the same p-5 inset, so the label
-          lines up with the neighbouring card's title rather than sitting low. */}
+      {/* Title + arrow on top, tags pinned to the bottom — the same shape as
+          every grid cell, so the headline reads as the card title (no separate
+          eyebrow) and lines up with the neighbouring card. */}
       <div className="flex flex-1 flex-col">
         <div className="flex items-start justify-between gap-4">
-          <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
-            {study.company}
-          </p>
+          <h3 className="text-pretty text-xl leading-snug tracking-tight text-foreground md:text-2xl">
+            {study.headline}
+          </h3>
           <CardArrow />
         </div>
-        <h3 className="mt-3 text-pretty text-xl leading-snug tracking-tight text-foreground md:text-2xl">
-          {study.headline}
-        </h3>
         <div className="mt-auto flex flex-wrap items-center gap-2 pt-6">
-          {/* Industry tag — same mono chip as every other card. */}
+          {/* Both chips share the site's mono (ABC Diatype) face. */}
           <span className="inline-flex items-center rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground">
             {sector}
           </span>
           {stat && (
-            <span className="inline-flex items-center gap-1.5 rounded-md bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5 rounded-md bg-muted px-2.5 py-1 font-mono text-xs text-muted-foreground">
               <span className="font-medium tabular-nums text-foreground">
                 {stat.value}
               </span>
