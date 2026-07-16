@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   IconCard,
   IconChecks,
   IconChevronDown,
   IconFolder,
+  IconGrid,
   IconList,
+  IconPen,
 } from "@/components/home/mock-icons";
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -271,6 +273,23 @@ export function ProductionGap() {
   const [active, setActive] = useState(1);
   const current = CARDS[active];
 
+  // The note's timestamp, à la Apple Notes. Computed on the client after mount
+  // so it stays current without a server/client hydration mismatch.
+  const [noteDate, setNoteDate] = useState("");
+  useEffect(() => {
+    const now = new Date();
+    const day = now.toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    });
+    const time = now.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+    });
+    setNoteDate(`${day} at ${time}`);
+  }, []);
+
   return (
     <section id="production-gap" className="py-20 md:py-28">
       <div className="mx-auto max-w-[1600px] px-6 md:px-10">
@@ -315,32 +334,49 @@ export function ProductionGap() {
               {/* Fixed height so the window is the same size on either toggle
                   state (Elsewhere / On Assembly), independent of how the lines
                   wrap. The surface follows the theme (bg-card). */}
-              <div className="flex h-[300px] w-[320px] flex-col overflow-hidden rounded-2xl border border-black/[0.07] bg-card/85 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_28px_-10px_rgba(16,24,40,0.14),0_40px_72px_-28px_rgba(16,24,40,0.30)] backdrop-blur-xl dark:border-white/[0.08]">
-                {/* Title bar — macOS traffic lights on the left, window title
-                    centered, à la a real window / Notes popover. */}
-                <div className="relative flex items-center border-b border-border/60 px-4 py-3">
+              <div className="flex h-[300px] w-[320px] flex-col overflow-hidden rounded-2xl border border-black/[0.07] bg-card/90 shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_28px_-10px_rgba(16,24,40,0.14),0_40px_72px_-28px_rgba(16,24,40,0.30)] backdrop-blur-xl dark:border-white/[0.08]">
+                {/* Notes-style toolbar — macOS traffic lights on the left, a
+                    faint cluster of Notes editing glyphs on the right. */}
+                <div className="flex items-center border-b border-border/60 px-4 py-2.5">
                   <span className="flex gap-[7px]">
                     <span className="size-3 rounded-full bg-foreground/[0.13]" />
                     <span className="size-3 rounded-full bg-foreground/[0.13]" />
                     <span className="size-3 rounded-full bg-foreground/[0.13]" />
                   </span>
-                  <span className="type-caption pointer-events-none absolute inset-x-0 text-center text-muted-foreground">
-                    {current.labelShort}
+                  <span className="ml-auto flex items-center gap-3 text-muted-foreground/40">
+                    <IconPen className="size-4" />
+                    <span className="text-[13px] font-medium leading-none">Aa</span>
+                    <IconChecks className="size-4" />
+                    <IconGrid className="size-4" />
                   </span>
                 </div>
-                <ul className={`flex flex-1 flex-col justify-center gap-3.5 px-5 ${current.listClassName}`}>
-                  {current.items.map((item) => {
-                    const { Icon } = current;
-                    return (
-                      <li key={item} className="type-body flex items-start gap-2.5">
-                        <span className={`mt-0.5 shrink-0 ${current.iconClassName}`}>
-                          <Icon />
-                        </span>
-                        {item}
-                      </li>
-                    );
-                  })}
-                </ul>
+                {/* Note body — centered timestamp, a bold first-line title with
+                    the signature yellow Notes caret, then the checklist. */}
+                <div className="flex flex-1 flex-col px-6 py-4">
+                  <p className="type-caption min-h-[1.2em] text-center text-muted-foreground/70">
+                    {noteDate}
+                  </p>
+                  <p className="mt-3 flex items-center text-[15px] font-medium text-foreground">
+                    {current.labelShort}
+                    <span
+                      aria-hidden
+                      className="ml-px inline-block h-[18px] w-[2px] animate-pulse rounded-full bg-[#e8b923]"
+                    />
+                  </p>
+                  <ul className={`mt-3 flex flex-col gap-2.5 ${current.listClassName}`}>
+                    {current.items.map((item) => {
+                      const { Icon } = current;
+                      return (
+                        <li key={item} className="type-body flex items-start gap-2.5">
+                          <span className={`mt-0.5 shrink-0 ${current.iconClassName}`}>
+                            <Icon />
+                          </span>
+                          {item}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
