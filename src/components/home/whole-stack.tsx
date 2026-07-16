@@ -62,25 +62,16 @@ const ROWS: { title: string; body: string; href?: string; linkLabel?: string }[]
 
 // Up-right arrow — signals "opens a page" (these rows link out to docs),
 // unlike a right chevron which reads like an accordion that expands in place.
+// Uses the PP Mori glyph so it matches every other link arrow on the site.
 // Nudges up-and-out on hover.
 function ArrowUpRight() {
   return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
+    <span
       aria-hidden
-      className="shrink-0 text-muted-foreground/70 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground"
+      className="shrink-0 select-none text-[15px] leading-none text-muted-foreground/70 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground"
     >
-      <path
-        d="M5 11L11 5M11 5H7M11 5V9"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+      &#8599;
+    </span>
   );
 }
 

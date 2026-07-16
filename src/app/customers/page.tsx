@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import Image from "next/image";
 import { Section } from "@/components/ui/section";
 import { CustomersHub } from "@/components/customers/customers-hub";
-import { getCaseStudyBySlug, type CaseStudy } from "@/lib/case-studies";
 import { CAPTERRA_URL, G2_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -11,10 +8,6 @@ export const metadata: Metadata = {
   description:
     "Trusted by consulting, accounting, real estate, law, marketing, and tech firms with 1M+ clients and counting.",
 };
-
-// The one flagship story shown full-width up top; excluded from the grid below
-// so it isn't repeated.
-const FEATURED_SLUG = "capital-one-luxury-travel";
 
 // Capterra mark, monochrome (inherits currentColor).
 function CapterraLogo({ className = "" }: { className?: string }) {
@@ -40,66 +33,7 @@ function G2Logo({ className = "" }: { className?: string }) {
   );
 }
 
-// Full-width featured story — a large photo on top with a compact footer
-// (headline metric + a circular "open" affordance) below, à la the Rootly
-// customer lead. Links to the full case study.
-function FeaturedStory({ study }: { study: CaseStudy }) {
-  const stat = study.stats[0];
-  return (
-    // Card carries the p-3 frame; the photo sits inset with rounded corners,
-    // matching the grid cards (not full-bleed).
-    <Link
-      href={`/customers/${study.slug}`}
-      className="group mt-10 block rounded-3xl border border-border bg-card p-3 transition-colors hover:border-foreground/20 md:mt-14"
-    >
-      {study.image && (
-        <div className="relative aspect-[16/10] overflow-hidden rounded-2xl md:aspect-[21/9]">
-          <Image
-            src={study.image}
-            alt={study.company}
-            fill
-            sizes="(min-width: 1024px) 1200px, 100vw"
-            priority
-            className="object-cover object-[50%_30%] transition-transform duration-500 group-hover:scale-[1.02]"
-          />
-        </div>
-      )}
-      <div className="flex items-center justify-between gap-4 px-2 py-4 md:px-3">
-        <div className="min-w-0">
-          <p className="truncate font-mono text-xs uppercase tracking-wide text-muted-foreground">
-            {study.company}
-          </p>
-          {stat && (
-            <p className="mt-1.5 truncate text-lg tracking-tight md:text-xl">
-              <span className="font-medium tabular-nums text-foreground">
-                {stat.value}
-              </span>{" "}
-              <span className="text-muted-foreground">{stat.label}</span>
-            </p>
-          )}
-        </div>
-        <span
-          aria-hidden
-          className="flex size-10 shrink-0 items-center justify-center rounded-full border border-border text-foreground transition-colors group-hover:bg-foreground group-hover:text-background"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path
-              d="M3.5 8h9M9 4.5L12.5 8 9 11.5"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </span>
-      </div>
-    </Link>
-  );
-}
-
 export default function CustomersPage() {
-  const featured = getCaseStudyBySlug(FEATURED_SLUG);
-
   return (
     <Section className="pt-24 md:pt-36">
       {/* Lede — no hero; sign-up lives in the nav. */}
@@ -139,12 +73,9 @@ export default function CustomersPage() {
         </div>
       </div>
 
-      {/* Full-width flagship story. */}
-      {featured && <FeaturedStory study={featured} />}
-
-      {/* Browse the rest. */}
-      <div className="mt-16 md:mt-20">
-        <CustomersHub excludeSlug={FEATURED_SLUG} />
+      {/* Flagship + the full grid of stories. */}
+      <div className="mt-14 md:mt-16">
+        <CustomersHub />
       </div>
     </Section>
   );
