@@ -77,20 +77,21 @@ function FeaturedCell({ study }: { study: CaseStudy }) {
           />
         </div>
       )}
-      <div className="flex flex-1 flex-col justify-center gap-3 p-6 md:p-8">
-        {/* Company + arrow share the top row, matching every grid cell so the
-            flagship uses the same link arrow rather than a stray circle. */}
+      {/* Same top-anchored structure as every grid cell — company + arrow on
+          top, tag pinned to the bottom — so the flagship reads as the biggest
+          member of one family, not a differently-composed card. */}
+      <div className="flex flex-1 flex-col p-6 md:p-8">
         <div className="flex items-start justify-between gap-4">
           <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
             {study.company}
           </p>
           <CardArrow />
         </div>
-        <h3 className="text-pretty text-xl leading-snug tracking-tight text-foreground md:text-2xl">
+        <h3 className="mt-3 text-pretty text-xl leading-snug tracking-tight text-foreground md:text-2xl">
           {study.headline}
         </h3>
         {stat && (
-          <span className="mt-1 inline-flex w-fit items-center gap-1.5 rounded-md bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+          <span className="mt-auto inline-flex w-fit items-center gap-1.5 rounded-md bg-muted px-2.5 py-1 text-xs text-muted-foreground">
             <span className="font-medium tabular-nums text-foreground">
               {stat.value}
             </span>
