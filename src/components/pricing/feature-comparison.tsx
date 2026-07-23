@@ -3,18 +3,28 @@
 import { Fragment, useState } from "react";
 import { useAuthState } from "@/lib/use-auth";
 
-const PLAN_NAMES = ["Free", "Starter", "Professional", "Advanced"] as const;
+const PLAN_NAMES = [
+  "Free",
+  "Starter",
+  "Professional",
+  "Advanced",
+  "Enterprise",
+] as const;
 
 // A cell is either:
 //   true  -> included (check)
 //   false -> not included (dash)
-//   string -> included with a specific value (check + text)
+//   string -> included with a specific value (check + text), or, when the row
+//             is `plain`, a bare value with no check (used for fees / costs
+//             where a checkmark would read as "included" rather than a rate).
 type Cell = boolean | string;
 
 interface FeatureRow {
   label: string;
   tooltip?: string;
-  values: [Cell, Cell, Cell, Cell];
+  // Render string values without a leading check — for rates and costs.
+  plain?: boolean;
+  values: [Cell, Cell, Cell, Cell, Cell];
 }
 
 interface FeatureGroup {
@@ -24,82 +34,156 @@ interface FeatureGroup {
 
 const GROUPS: FeatureGroup[] = [
   {
-    label: "Usage",
+    label: "Internal users and contacts",
     rows: [
       {
         label: "Active contacts",
-        tooltip: "The people you serve through your client portals.",
-        values: ["5", "50", "500", "Unlimited"],
+        tooltip: "The client records in your CRM — the people who can sign into your client experience.",
+        values: ["5", "50", "500", "Unlimited", "Custom"],
       },
       {
-        label: "Internal users",
+        label: "Internal users included",
         tooltip: "Teammates with access to your workspace.",
-        values: ["1", "1", "3", "5"],
+        values: ["1", "1", "3", "5", "Custom"],
       },
+      {
+        label: "Cost per additional internal user",
+        plain: true,
+        values: [false, false, "+$29 yr / $39 mo", "+$59 yr / $79 mo", "Custom"],
+      },
+    ],
+  },
+  {
+    label: "App Builder",
+    rows: [
       {
         label: "Build credits / month",
-        tooltip: "Credits used when building and running your apps.",
-        values: ["30", "100", "300", "1,000"],
+        tooltip: "Credits used when the builder creates or edits an app. Using your live apps never consumes credits.",
+        values: ["50", "200", "200", "200", "Custom"],
       },
       {
-        label: "File storage",
-        values: ["1 GB", "10 GB", "100 GB", "Unlimited"],
+        label: "Apps included",
+        values: ["5", "5", "5", "5", "Unlimited"],
+      },
+      {
+        label: "Extra apps",
+        plain: true,
+        values: [false, "$5/mo each", "$5/mo each", "$5/mo each", "Unlimited"],
+      },
+      {
+        label: "Add-on build credits",
+        values: [false, true, true, true, "Custom"],
+      },
+      {
+        label: "AI model selection",
+        values: [false, false, true, true, true],
       },
     ],
   },
   {
-    label: "Core",
+    label: "Core Features",
     rows: [
-      { label: "CRM", values: [true, true, true, true] },
-      { label: "App builder", values: [true, true, true, true] },
-      { label: "Client experience", values: [true, true, true, true] },
-      { label: "Messaging & team inbox", values: [true, true, true, true] },
-      { label: "Billing & payments", values: [true, true, true, true] },
+      { label: "CRM", values: [true, true, true, true, true] },
+      { label: "Client experience", values: [true, true, true, true, true] },
+      { label: "API & MCP connector", values: [true, true, true, true, true] },
       {
-        label: "Contracts, forms, files & tasks",
-        values: [true, true, true, true],
+        label: "Install apps from app library",
+        values: [true, true, true, true, true],
       },
-    ],
-  },
-  {
-    label: "Build & integrate",
-    rows: [
-      { label: "API access", values: [false, true, true, true] },
-      { label: "Zapier & Make", values: [false, true, true, true] },
+      { label: "Embeds and links", values: [true, true, true, true, true] },
       {
-        label: "Custom domain",
+        label: "Messaging and team inbox",
+        values: [true, true, true, true, true],
+      },
+      {
+        label: "Billing and payments",
+        values: [true, true, true, true, true],
+      },
+      {
+        label: "Contracts and e-signature",
+        values: [true, true, true, true, true],
+      },
+      {
+        label: "File-sharing, intake forms, and tasks",
+        values: [true, true, true, true, true],
+      },
+      {
+        label: "Custom domain for client experience",
         tooltip: "Serve the client experience from your own domain.",
-        values: [false, true, true, true],
+        values: [false, true, true, true, true],
       },
-      { label: "Custom email domain", values: [false, true, true, true] },
-      { label: "Automations", values: [false, false, true, true] },
-    ],
-  },
-  {
-    label: "Branding & clients",
-    rows: [
       {
-        label: "Full white-labeling",
-        tooltip: "Remove all Assembly branding from the client experience.",
-        values: [false, false, true, true],
+        label: "Custom email domain for notifications",
+        values: [false, true, true, true, true],
       },
-      { label: "App visibility controls", values: [false, false, true, true] },
-      { label: "Multi-company clients", values: [false, false, true, true] },
-    ],
-  },
-  {
-    label: "Security & compliance",
-    rows: [
-      { label: "Audit log", values: [false, false, false, true] },
+      { label: "API, Zapier & Make", values: [false, true, true, true, true] },
+      {
+        label: "Remove Assembly badge",
+        values: [false, false, true, true, true],
+      },
+      {
+        label: "App visibility settings",
+        values: [false, false, true, true, true],
+      },
+      {
+        label: "Automation builder",
+        values: [false, false, true, true, true],
+      },
+      {
+        label: "Multi-company contacts",
+        values: [false, false, true, true, true],
+      },
+      { label: "Audit log", values: [false, false, false, true, true] },
       {
         label: "Client access permissions",
-        values: [false, false, false, true],
+        values: [false, false, false, true, true],
       },
-      { label: "Advanced security", values: [false, false, false, true] },
+      { label: "Enforce MFA", values: [false, false, false, true, true] },
       {
-        label: "HIPAA compliance",
+        label: "HIPAA compliance with BAA",
         tooltip: "BAA available for handling protected health information.",
-        values: [false, false, false, true],
+        values: [false, false, false, true, true],
+      },
+      { label: "Custom SSO", values: [false, false, false, false, true] },
+      {
+        label: "Sandbox workspace",
+        values: [false, false, false, false, true],
+      },
+    ],
+  },
+  {
+    label: "Payment Processing Fees",
+    rows: [
+      {
+        label: "Credit card fee",
+        plain: true,
+        values: [
+          "2.9% + $0.30",
+          "2.9% + $0.30",
+          "2.9% + $0.30",
+          "2.9% + $0.30",
+          "2.9% + $0.30",
+        ],
+      },
+      {
+        label: "ACH direct debit fee",
+        plain: true,
+        values: ["1%", "1%", "1% ($10 max)", "1% ($10 max)", "1% ($10 max)"],
+      },
+      {
+        label: "Store fees",
+        plain: true,
+        values: ["2.0%", "1.5%", "1%", "0.7%", "0.7%"],
+      },
+      {
+        label: "Invoices",
+        plain: true,
+        values: ["+0.7%", "+0.5%", "+0.4%", "+0.3%", "+0.3%"],
+      },
+      {
+        label: "Recurring subscriptions",
+        plain: true,
+        values: ["+1.1%", "+0.9%", "+0.7%", "+0.5%", "+0.5%"],
       },
     ],
   },
@@ -107,12 +191,37 @@ const GROUPS: FeatureGroup[] = [
     label: "Support",
     rows: [
       {
-        label: "Support",
-        values: ["Community", "Email", "Priority email", "Priority + call"],
+        label: "Community support",
+        values: [true, true, true, true, true],
+      },
+      { label: "Email support", values: [false, true, true, true, true] },
+      {
+        label: "Priority email support",
+        values: [false, false, true, true, true],
+      },
+      {
+        label: "Priority call support",
+        values: [false, false, false, true, true],
       },
       {
         label: "Personalized onboarding",
-        values: [false, false, false, true],
+        values: [false, false, false, true, true],
+      },
+      {
+        label: "Custom onboarding",
+        values: [false, false, false, false, true],
+      },
+      {
+        label: "Shared Slack channel",
+        values: [false, false, false, false, true],
+      },
+      {
+        label: "Dedicated success manager",
+        values: [false, false, false, false, true],
+      },
+      {
+        label: "Technical advisor",
+        values: [false, false, false, false, true],
       },
     ],
   },
@@ -123,9 +232,10 @@ const GROUPS: FeatureGroup[] = [
 const FREE_INDEX = 0;
 
 // Static grid classes (Tailwind can't see runtime-built arbitrary values, so
-// both column counts must appear literally).
+// both column counts must appear literally). Five plan columns by default; four
+// when the Free column is hidden for signed-in visitors.
+const GRID_5 = "grid grid-cols-[1.6fr_repeat(5,1fr)]";
 const GRID_4 = "grid grid-cols-[1.6fr_repeat(4,1fr)]";
-const GRID_3 = "grid grid-cols-[1.6fr_repeat(3,1fr)]";
 
 function CheckIcon() {
   return (
@@ -137,11 +247,11 @@ function CheckIcon() {
       className="shrink-0 text-foreground"
       aria-hidden
     >
-      <circle cx="10" cy="10" r="9" className="fill-foreground/10" />
+      <circle cx="10" cy="10" r="9" className="fill-foreground/20" />
       <path
         d="M6 10l2.5 2.5L14 7.5"
         stroke="currentColor"
-        strokeWidth="1.5"
+        strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -191,9 +301,17 @@ function RowLabel({ label, tooltip }: { label: string; tooltip?: string }) {
   );
 }
 
-function CellContent({ value }: { value: Cell }) {
+function CellContent({ value, plain }: { value: Cell; plain?: boolean }) {
   if (value === false) {
     return <span className="text-muted-foreground/40">—</span>;
+  }
+  // Rates and costs render as bare values so a check doesn't read as "included".
+  if (plain && typeof value === "string") {
+    return (
+      <span className="whitespace-nowrap text-sm text-muted-foreground">
+        {value}
+      </span>
+    );
   }
   return (
     <span className="flex items-center gap-2 text-sm">
@@ -214,7 +332,7 @@ export function FeatureComparison() {
   const columns = PLAN_NAMES.map((name, i) => ({ name, i })).filter(
     ({ i }) => !authed || i !== FREE_INDEX,
   );
-  const grid = columns.length === 3 ? GRID_3 : GRID_4;
+  const grid = columns.length === 4 ? GRID_4 : GRID_5;
   // Keep the mobile tab selection valid when Free is hidden.
   const activePlan = columns.some((c) => c.i === plan) ? plan : columns[0].i;
 
@@ -260,8 +378,8 @@ export function FeatureComparison() {
                 className="flex items-center justify-between gap-4 border-t border-border py-3.5"
               >
                 <RowLabel label={row.label} tooltip={row.tooltip} />
-                <div className="shrink-0">
-                  <CellContent value={row.values[activePlan]} />
+                <div className="shrink-0 text-right">
+                  <CellContent value={row.values[activePlan]} plain={row.plain} />
                 </div>
               </div>
             ))}
@@ -305,7 +423,7 @@ export function FeatureComparison() {
                   <RowLabel label={row.label} tooltip={row.tooltip} />
                   {columns.map(({ i }) => (
                     <div key={i}>
-                      <CellContent value={row.values[i]} />
+                      <CellContent value={row.values[i]} plain={row.plain} />
                     </div>
                   ))}
                 </div>
