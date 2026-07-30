@@ -6,8 +6,26 @@ export interface Template {
   category: string;
   longDescription: string;
   features: string[];
+  /** Industry tags — drives the secondary "Industry" filter. */
+  industries?: string[];
   /** Surfaced in the curated set on the homepage. */
   featured?: boolean;
+  /** Template relies on AI — drives the "AI" capability tag. */
+  usesAI?: boolean;
+  /** Optional preview image shown on the card in place of the grey placeholder. */
+  image?: string;
+  /** Detail-gallery media: up to 4 preview images. */
+  images?: string[];
+  /** Optional walkthrough video; when set it leads the detail gallery. */
+  videoUrl?: string;
+  /**
+   * TEMP — until real screenshots/videos exist. Lets a template demonstrate its
+   * gallery shape with designed placeholder frames: how many preview frames
+   * (1–4) and whether a video tile leads. Ignored once `images`/`videoUrl` are
+   * set.
+   */
+  previewCount?: number;
+  hasVideo?: boolean;
 }
 
 // Category order is intentional — it drives the order of the filter tabs.
@@ -24,12 +42,73 @@ export const TEMPLATE_CATEGORIES = [
   "Education",
 ] as const;
 
-export const TEMPLATES: Template[] = [
+// Industry tags for the secondary filter, alphabetical.
+export const TEMPLATE_INDUSTRIES = [
+  "Accounting",
+  "Consulting",
+  "Education",
+  "Financial services",
+  "Healthcare",
+  "Legal",
+  "Marketing",
+  "Real estate",
+  "Technology",
+] as const;
+
+// Industry tags kept out of the template objects to keep that list readable.
+// Each template carries 2–4 industries it most naturally serves.
+const INDUSTRY_BY_SLUG: Record<string, string[]> = {
+  "onboarding-wizard": ["Accounting", "Legal", "Consulting", "Marketing"],
+  "new-client-intake": ["Accounting", "Legal", "Consulting", "Marketing"],
+  "document-collection": ["Accounting", "Legal", "Real estate", "Financial services"],
+  "pdf-to-digital-intake": ["Legal", "Healthcare", "Accounting", "Real estate"],
+  "client-engagement-dashboard": ["Marketing", "Consulting", "Technology"],
+  "data-visualization": ["Financial services", "Consulting", "Technology", "Accounting"],
+  "client-project-tracker": ["Marketing", "Consulting", "Technology", "Real estate"],
+  "time-tracker": ["Legal", "Accounting", "Consulting"],
+  "content-approval-flow": ["Marketing", "Consulting"],
+  "client-support-requests": ["Technology", "Marketing", "Consulting"],
+  "proposal-builder": ["Marketing", "Consulting", "Accounting", "Legal"],
+  "client-ai-assistant": ["Technology", "Healthcare", "Financial services", "Education"],
+  "voice-ai-integration": ["Technology", "Healthcare", "Financial services"],
+  "client-discussion-forum": ["Education", "Technology", "Marketing"],
+  "community-qa": ["Education", "Technology"],
+  "internal-communications-app": ["Technology", "Consulting", "Healthcare"],
+  "client-resource-library": ["Education", "Consulting", "Healthcare", "Financial services"],
+  "data-room": ["Financial services", "Legal", "Real estate", "Accounting"],
+  // From the tracker.
+  "progress-tracker": ["Consulting", "Marketing", "Technology", "Real estate"],
+  "client-todo-list": ["Consulting", "Accounting", "Legal", "Marketing"],
+  "deliverable-progress": ["Marketing", "Consulting", "Technology"],
+  "case-status-page": ["Legal", "Healthcare", "Financial services"],
+  "retainer-usage-overview": ["Marketing", "Consulting", "Legal"],
+  "conditional-forms": ["Legal", "Healthcare", "Accounting", "Financial services"],
+  "service-request-intake": ["Technology", "Consulting", "Real estate"],
+  "internal-ticketing": ["Technology", "Consulting", "Marketing"],
+  "booking-meeting-request": ["Consulting", "Healthcare", "Real estate", "Legal"],
+  "client-calendar": ["Consulting", "Legal", "Real estate", "Healthcare"],
+  "markup-comments": ["Marketing", "Consulting", "Legal"],
+  "internal-ai-assistant": ["Technology", "Consulting", "Financial services"],
+  "course-player": ["Education", "Healthcare", "Consulting"],
+};
+
+const BASE_TEMPLATES: Template[] = [
   // Onboarding
+  {
+    slug: "onboarding-wizard",
+    title: "Onboarding wizard",
+    description: "Multi-step flow with saved progress",
+    icon: "🪄",
+    category: "Onboarding",
+    longDescription:
+      "Walk new clients through a multi-step onboarding flow — welcome, identity, goals, timelines, and file upload — with progress saved so they can return later.",
+    features: ["Multi-step flow", "Saved progress", "File upload", "Guided steps"],
+    featured: true,
+  },
   {
     slug: "new-client-intake",
     title: "New client intake",
-    description: "Scope, goals, stakeholders, budget, timeline",
+    description: "Scope, goals, budget, timeline",
     icon: "👤",
     category: "Onboarding",
     longDescription:
@@ -38,18 +117,8 @@ export const TEMPLATES: Template[] = [
     featured: true,
   },
   {
-    slug: "onboarding-wizard",
-    title: "Onboarding wizard",
-    description: "Multi-step flow with saved progress",
-    icon: "🧭",
-    category: "Onboarding",
-    longDescription:
-      "Walk clients through onboarding one step at a time, with progress saved so they can pick up right where they left off.",
-    features: ["Multi-step flow", "Saved progress", "Conditional steps", "Auto-folder setup"],
-  },
-  {
     slug: "document-collection",
-    title: "Document collection",
+    title: "Document collector",
     description: "Requested docs with upload checklist",
     icon: "📂",
     category: "Onboarding",
@@ -70,39 +139,9 @@ export const TEMPLATES: Template[] = [
 
   // Dashboards
   {
-    slug: "client-performance-dashboard",
-    title: "Client performance dashboard",
-    description: "Per-client key metrics, scoped views",
-    icon: "📈",
-    category: "Dashboards",
-    longDescription:
-      "Give each client a scoped dashboard of the metrics that matter to them, refreshed automatically from live data.",
-    features: ["Per-client metrics", "Scoped views", "Live data", "Custom KPIs"],
-  },
-  {
-    slug: "retainer-usage-overview",
-    title: "Retainer usage overview",
-    description: "Hours or credits used vs. remaining",
-    icon: "⏳",
-    category: "Dashboards",
-    longDescription:
-      "Show clients exactly how much of their retainer they've used and what's left, with a clear burn-down and low-balance alerts.",
-    features: ["Hours/credits used", "Remaining balance", "Burn-down", "Alerts"],
-  },
-  {
-    slug: "monthly-client-report",
-    title: "Monthly client report",
-    description: "Branded read-only report published monthly",
-    icon: "🗓️",
-    category: "Dashboards",
-    longDescription:
-      "Publish a polished, branded, read-only report to each client on a monthly cadence — no manual assembly required.",
-    features: ["Branded layout", "Read-only", "Scheduled publish", "Auto-refresh"],
-  },
-  {
     slug: "client-engagement-dashboard",
     title: "Client engagement dashboard",
-    description: "AI engagement analysis, flag clients who go quiet",
+    description: "AI flags clients who go quiet",
     icon: "📊",
     category: "Dashboards",
     longDescription:
@@ -124,7 +163,7 @@ export const TEMPLATES: Template[] = [
   // Trackers
   {
     slug: "client-project-tracker",
-    title: "Client project tracker",
+    title: "Project tracker",
     description: "Milestones and progress per engagement",
     icon: "✅",
     category: "Trackers",
@@ -132,26 +171,6 @@ export const TEMPLATES: Template[] = [
       "Keep clients in the loop with milestones and live progress for every engagement, updating as work moves through stages.",
     features: ["Milestones", "Progress per engagement", "Status stages", "Notifications"],
     featured: true,
-  },
-  {
-    slug: "case-status-page",
-    title: "Case status page",
-    description: "Current stage, last update, what to expect",
-    icon: "💼",
-    category: "Trackers",
-    longDescription:
-      "Give clients a simple status page showing the current stage, the last update, and what to expect next.",
-    features: ["Current stage", "Last update", "What to expect", "Client-facing"],
-  },
-  {
-    slug: "deliverable-progress",
-    title: "Deliverable progress",
-    description: "Drafting, in review, delivered statuses",
-    icon: "🌓",
-    category: "Trackers",
-    longDescription:
-      "Track each deliverable through drafting, in-review, and delivered statuses so everyone knows where things stand.",
-    features: ["Status labels", "Per-item view", "In review / delivered", "Notifications"],
   },
   {
     slug: "time-tracker",
@@ -162,16 +181,6 @@ export const TEMPLATES: Template[] = [
     longDescription:
       "Log billable hours against clients and projects, roll them up, and export clean timesheets ready for invoicing.",
     features: ["Billable hours", "Roll-ups", "Exportable", "Per-project"],
-  },
-  {
-    slug: "goal-tracker",
-    title: "Goal tracker",
-    description: "Set goals and track progress together",
-    icon: "🥅",
-    category: "Trackers",
-    longDescription:
-      "Define shared goals with clients and visualize progress toward each one, with check-in reminders to keep momentum.",
-    features: ["Goal milestones", "Progress meters", "Check-ins", "Shared visibility"],
   },
 
   // Approvals
@@ -186,57 +195,17 @@ export const TEMPLATES: Template[] = [
     features: ["Posts & campaigns", "Status history", "Comments", "Audit trail"],
     featured: true,
   },
-  {
-    slug: "design-approval",
-    title: "Design approval",
-    description: "Compare options, comment, pick a direction",
-    icon: "🎨",
-    category: "Approvals",
-    longDescription:
-      "Present design options side by side, gather comments, and let clients pick a direction — with version history.",
-    features: ["Compare options", "Comments", "Pick a direction", "Version history"],
-  },
-  {
-    slug: "markup-comments",
-    title: "Markup & comments",
-    description: "Pin comments to a design or PDF, with status tracking",
-    icon: "💬",
-    category: "Approvals",
-    longDescription:
-      "Let clients pin comments directly onto a design or PDF and track each one to resolution.",
-    features: ["Pin comments", "On design or PDF", "Status tracking", "Threads"],
-  },
 
-  // Requests
+  // Support
   {
     slug: "client-support-requests",
-    title: "Client support requests",
-    description: "Categorized requests with a shared triage queue",
+    title: "Client help desk",
+    description: "Categorized requests in a triage queue",
     icon: "📥",
-    category: "Requests",
+    category: "Support",
     longDescription:
       "Centralize incoming client requests into a categorized, shared triage queue so nothing gets lost.",
     features: ["Categorized requests", "Shared triage queue", "Priority", "Real-time updates"],
-  },
-  {
-    slug: "service-request-intake",
-    title: "Service request intake",
-    description: "Pick a service, scope it, submit",
-    icon: "📋",
-    category: "Requests",
-    longDescription:
-      "Let clients pick a service, scope what they need, and submit — routed automatically to the right person.",
-    features: ["Pick a service", "Scope it", "Submit", "Routing"],
-  },
-  {
-    slug: "internal-ticketing",
-    title: "Internal ticketing",
-    description: "IT, HR, ops tickets with triage and assign",
-    icon: "🎟️",
-    category: "Requests",
-    longDescription:
-      "Run IT, HR, and ops tickets through one queue with triage, assignment, and status tracking.",
-    features: ["IT/HR/ops tickets", "Triage", "Assignment", "Status tracking"],
   },
 
   // Proposals
@@ -264,6 +233,18 @@ export const TEMPLATES: Template[] = [
     features: ["Trained on your docs", "Instant answers", "Smart escalation", "Multi-channel"],
     featured: true,
   },
+  {
+    slug: "voice-ai-integration",
+    title: "Voice AI integration",
+    description: "AI voice calls with status and transcripts",
+    icon: "📞",
+    category: "AI assistants",
+    image: "/images/templates/voice-ai-integration.png",
+    images: ["/images/templates/voice-ai-integration.png"],
+    longDescription:
+      "Place and track AI voice calls to your clients — every call logged with live status (completed, voicemail), timestamps, and a transcript you can review.",
+    features: ["AI voice calls", "Call status", "Transcripts", "Searchable call log"],
+  },
 
   // Community
   {
@@ -289,7 +270,7 @@ export const TEMPLATES: Template[] = [
   {
     slug: "internal-communications-app",
     title: "Internal communications app",
-    description: "Announcements and team channels in one hub",
+    description: "Announcements and team channels",
     icon: "📨",
     category: "Community",
     longDescription:
@@ -309,16 +290,6 @@ export const TEMPLATES: Template[] = [
     features: ["Branded guides", "Search", "Access controls", "Usage insights"],
   },
   {
-    slug: "internal-resource-library",
-    title: "Internal resource library",
-    description: "Playbooks and assets for your team",
-    icon: "🗂️",
-    category: "Knowledge base",
-    longDescription:
-      "A team-only home for playbooks, brand assets, and SOPs — categorized, searchable, and version-controlled.",
-    features: ["Team-only access", "Playbooks & assets", "Search", "Version control"],
-  },
-  {
     slug: "data-room",
     title: "Data room",
     description: "Securely share sensitive documents",
@@ -329,28 +300,203 @@ export const TEMPLATES: Template[] = [
     features: ["Permissioned access", "Audit trail", "Watermarking", "Activity tracking"],
   },
 
-  // Education
+  // ── From the Studio template tracker (copy generated from each name) ──────
+  {
+    slug: "progress-tracker",
+    title: "Progress tracker",
+    description: "Track records through stages",
+    icon: "📊",
+    category: "Trackers",
+    image: "/images/templates/progress-tracker.png",
+    images: ["/images/templates/progress-tracker.png"],
+    longDescription:
+      "Track any set of records through your stages — from onboarding to complete — with live status, progress, and last-updated at a glance.",
+    features: ["Custom stages", "Live status", "Progress %", "Per-record updates"],
+  },
+  {
+    slug: "client-todo-list",
+    title: "Client to-do list",
+    description: "A clear checklist of next steps per client",
+    icon: "☑️",
+    category: "Trackers",
+    longDescription:
+      "Give each client a clear checklist of what to do next, with due dates and reminders, so nothing stalls on their side.",
+    features: ["Per-client checklist", "Due dates", "Reminders", "Completion tracking"],
+  },
+  {
+    slug: "deliverable-progress",
+    title: "Deliverable progress",
+    description: "Where every deliverable stands",
+    icon: "📦",
+    category: "Trackers",
+    longDescription:
+      "Give clients a live view of every deliverable — what's in progress, in review, and shipped — so status questions answer themselves.",
+    features: ["Deliverable stages", "Live status", "Owner & due date", "Client-visible"],
+  },
+  {
+    slug: "case-status-page",
+    title: "Case status page",
+    description: "A live status page for each client case",
+    icon: "📋",
+    category: "Trackers",
+    longDescription:
+      "A branded, always-current status page for each case or matter, so clients can see where things stand without emailing you.",
+    features: ["Live case status", "Timeline", "Next steps", "Client-visible"],
+  },
+  {
+    slug: "retainer-usage-overview",
+    title: "Retainer usage overview",
+    description: "Hours used against each client's retainer",
+    icon: "⏳",
+    category: "Dashboards",
+    longDescription:
+      "Show clients exactly how much of their retainer they've used and what's left, with a clear breakdown by work and period.",
+    features: ["Used vs. remaining", "Breakdown by work", "Per-period", "Client-visible"],
+  },
+  {
+    slug: "conditional-forms",
+    title: "Conditional forms",
+    description: "Smart forms that adapt to each answer",
+    icon: "📜",
+    category: "Onboarding",
+    longDescription:
+      "Build smart intake forms that show and hide questions based on earlier answers, so clients only see what's relevant to them.",
+    features: ["Conditional logic", "Branching questions", "Saved progress", "Auto data capture"],
+  },
+  {
+    slug: "service-request-intake",
+    title: "Service request intake",
+    description: "Capture and route service requests",
+    icon: "🛎️",
+    category: "Requests",
+    longDescription:
+      "Give clients one place to submit service requests, then route each to the right person with status they can follow.",
+    features: ["Structured intake", "Auto-routing", "Status tracking", "Reminders"],
+  },
+  {
+    slug: "internal-ticketing",
+    title: "Internal ticketing",
+    description: "Track internal requests in a shared queue",
+    icon: "🎫",
+    category: "Requests",
+    longDescription:
+      "Turn scattered internal asks into a shared, prioritized ticket queue with owners, status, and a clear audit trail.",
+    features: ["Shared queue", "Priorities", "Owners & status", "Audit trail"],
+  },
+  {
+    slug: "booking-meeting-request",
+    title: "Booking & meeting requests",
+    description: "Let clients request and schedule meetings",
+    icon: "📅",
+    category: "Requests",
+    longDescription:
+      "Let clients request time and book meetings straight from their portal, with the details you need captured up front.",
+    features: ["Meeting requests", "Scheduling", "Pre-meeting intake", "Reminders"],
+  },
+  {
+    slug: "client-calendar",
+    title: "Client calendar",
+    description: "A shared calendar of key dates",
+    icon: "🗓️",
+    category: "Trackers",
+    longDescription:
+      "Give clients a shared calendar of meetings, milestones, and deadlines so everyone sees what's coming up — kept in sync with the work in their portal.",
+    features: ["Shared calendar", "Event details", "Milestones & deadlines", "Reminders"],
+  },
+  {
+    slug: "markup-comments",
+    title: "Markup & comments",
+    description: "Annotate files and collect feedback",
+    icon: "✍️",
+    category: "Approvals",
+    longDescription:
+      "Collect precise feedback by letting clients comment and mark up files right where the change is needed, with threads and sign-off.",
+    features: ["In-context comments", "File markup", "Threads", "Sign-off"],
+  },
+  {
+    slug: "internal-ai-assistant",
+    title: "Internal AI assistant",
+    description: "AI trained on your internal docs",
+    icon: "🤖",
+    category: "AI assistants",
+    longDescription:
+      "An AI assistant trained on your internal playbooks, SOPs, and docs so your team gets instant, accurate answers in one place.",
+    features: ["Trained on your docs", "Instant answers", "Team-only", "Cited sources"],
+  },
   {
     slug: "course-player",
     title: "Course player",
-    description: "Self-paced lessons with progress tracking",
-    icon: "🎓",
+    description: "Deliver lessons and track completion",
+    icon: "📖",
     category: "Education",
     longDescription:
-      "Deliver self-paced lessons clients can work through at their own pace, with progress saved so they can resume anytime.",
-    features: ["Self-paced lessons", "Progress tracking", "Video & text", "Resume anytime"],
-  },
-  {
-    slug: "certification-flow",
-    title: "Certification flow",
-    description: "Lessons, final quiz, downloadable certificate",
-    icon: "🏅",
-    category: "Education",
-    longDescription:
-      "Guide learners through lessons and a final quiz, then issue a downloadable certificate on completion.",
-    features: ["Lessons", "Final quiz", "Downloadable certificate", "Progress tracking"],
+      "Deliver structured lessons to clients or your team, track progress through each module, and pick up where they left off.",
+    features: ["Lessons & modules", "Progress tracking", "Resume playback", "Completion"],
   },
 ];
+
+// Gallery media shape per template (TEMP placeholder frames until real
+// screenshots/videos land). Every template shows multiple media — a mix of
+// image-only sets and video-led sets. `previewCount` is the TOTAL tile count
+// (the video, when present, is the first tile); capped at MAX_FRAMES (4).
+// Video leads templates whose value is best shown in motion (flows, AI, live
+// dashboards, scheduling, markup).
+const PREVIEW_BY_SLUG: Record<string, { previewCount?: number; hasVideo?: boolean }> = {
+  "onboarding-wizard": { previewCount: 4, hasVideo: true },
+  "new-client-intake": { previewCount: 3 },
+  "document-collection": { previewCount: 2 },
+  "pdf-to-digital-intake": { previewCount: 3, hasVideo: true },
+  "client-engagement-dashboard": { previewCount: 4 },
+  "data-visualization": { previewCount: 4 },
+  "client-project-tracker": { previewCount: 3 },
+  "time-tracker": { previewCount: 3 },
+  "content-approval-flow": { previewCount: 3, hasVideo: true },
+  "client-support-requests": { previewCount: 2 },
+  "proposal-builder": { previewCount: 4, hasVideo: true },
+  "client-ai-assistant": { previewCount: 3, hasVideo: true },
+  "client-discussion-forum": { previewCount: 2 },
+  "community-qa": { previewCount: 2 },
+  "internal-communications-app": { previewCount: 3 },
+  "client-resource-library": { previewCount: 2 },
+  "data-room": { previewCount: 3 },
+  "progress-tracker": { previewCount: 2 },
+  "client-todo-list": { previewCount: 2 },
+  "deliverable-progress": { previewCount: 3 },
+  "case-status-page": { previewCount: 3 },
+  "retainer-usage-overview": { previewCount: 3 },
+  "conditional-forms": { previewCount: 3, hasVideo: true },
+  "service-request-intake": { previewCount: 2 },
+  "internal-ticketing": { previewCount: 3 },
+  "booking-meeting-request": { previewCount: 3, hasVideo: true },
+  "client-calendar": { previewCount: 2 },
+  "markup-comments": { previewCount: 3, hasVideo: true },
+  "internal-ai-assistant": { previewCount: 3, hasVideo: true },
+  "course-player": { previewCount: 4, hasVideo: true },
+};
+
+// Templates that are lower priority in the tracker (Medium/backlog) — these
+// sort AFTER the featured (High-priority) set on the index. Everything else is
+// High priority, so it counts as featured/popular and leads alphabetically.
+const LOWER_PRIORITY = new Set(["course-player"]);
+
+// Templates whose core value depends on AI — surfaced with an "AI" tag.
+const AI_SLUGS = new Set([
+  "client-ai-assistant",
+  "voice-ai-integration",
+  "internal-ai-assistant",
+  "client-engagement-dashboard",
+]);
+
+// Merge industry tags + preview shape onto each template from the maps above.
+// `featured` is derived from the tracker's priority column (High = featured).
+export const TEMPLATES: Template[] = BASE_TEMPLATES.map((t) => ({
+  ...t,
+  featured: !LOWER_PRIORITY.has(t.slug),
+  usesAI: AI_SLUGS.has(t.slug),
+  industries: INDUSTRY_BY_SLUG[t.slug] ?? [],
+  previewCount: t.previewCount ?? PREVIEW_BY_SLUG[t.slug]?.previewCount ?? 1,
+  hasVideo: t.hasVideo ?? PREVIEW_BY_SLUG[t.slug]?.hasVideo ?? false,
+}));
 
 export function getTemplateBySlug(slug: string): Template | undefined {
   return TEMPLATES.find((t) => t.slug === slug);

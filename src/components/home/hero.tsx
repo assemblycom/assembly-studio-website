@@ -1,280 +1,261 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { APP_URL } from "@/lib/constants";
-import { TEMPLATES, TEMPLATE_CATEGORIES } from "@/lib/templates";
+import { useRef, useState } from "react";
+import Link from "next/link";
+import { getFeaturedTemplates } from "@/lib/templates";
+import { IconArrow, IconPlay, IconX } from "./icons";
+import { PromptComposer } from "./prompt-composer";
 
-// Category chips + the templates shown for the selected category.
-const CATEGORIES = TEMPLATE_CATEGORIES.map((label) => ({
-  label,
-  items: TEMPLATES.filter((t) => t.category === label).map((t) => ({
-    title: t.title,
-    desc: t.description,
-  })),
-})).filter((c) => c.items.length > 0);
+// ─────────────────────────────────────────────────────────────────────────
+// HERO — a "watch how it works" pill, the title, then one panel grouping the
+// prompt composer with three template quick-starts. The composer (with its
+// ghost-text autocomplete and file attachments) is shared with the CTA.
+// ─────────────────────────────────────────────────────────────────────────
 
-// Rotating example prompts for the entry box.
-const PROMPTS = [
-  "a client onboarding portal",
-  "an approvals workflow",
-  "a billing dashboard",
-  "a project tracker",
-  "a document collection flow",
-];
+// Featured templates shown in the hero as a compact text list (v60 style).
+const FEATURED = getFeaturedTemplates(4);
 
-// Customer names shown in the logo marquee.
-const TRUSTED_BY = [
-  "Capital One",
-  "Collective",
-  "Ditto",
-  "Heritage Law",
-  "Waymaker",
-  "Aura",
-  "CoverPanda",
-];
+// Per-template tile icons (self-contained gray glyphs in public/), keyed by slug.
+const TEMPLATE_ICONS: Record<string, string> = {
+  "new-client-intake": "/images/template-icons/contact.svg",
+  "client-engagement-dashboard": "/images/template-icons/chat.svg",
+  "client-project-tracker": "/images/template-icons/folder.svg",
+  "content-approval-flow": "/images/template-icons/check.svg",
+};
+
+// Demo video — paste the YouTube video ID here (the part after `?v=` or
+// `youtu.be/`, e.g. "dQw4w9WgXcQ"). Leave empty to keep the grey placeholder.
+const DEMO_VIDEO_ID = "6ezvUi6UacA";
+// Start a couple seconds in (skips the cold open).
+const DEMO_VIDEO_START = 2;
+// youtube-nocookie keeps the embed privacy-friendly; rel=0 hides unrelated
+// videos at the end, modestbranding trims the YouTube chrome.
+const demoEmbedUrl = (autoplay: boolean) =>
+  `https://www.youtube-nocookie.com/embed/${DEMO_VIDEO_ID}?rel=0&modestbranding=1&playsinline=1&start=${DEMO_VIDEO_START}${autoplay ? "&autoplay=1" : ""}`;
+// Full-res poster frame (1280×720) so the preview stays crisp; if a video has
+// no maxres frame we fall back to the always-present hqdefault via onError.
+const demoThumbUrl = `https://img.youtube.com/vi/${DEMO_VIDEO_ID}/maxresdefault.jpg`;
+const demoThumbFallbackUrl = `https://img.youtube.com/vi/${DEMO_VIDEO_ID}/hqdefault.jpg`;
+const onThumbError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  if (e.currentTarget.src !== demoThumbFallbackUrl)
+    e.currentTarget.src = demoThumbFallbackUrl;
+};
 
 export function Hero() {
-  const [selected, setSelected] = useState<number | null>(0);
-  const [canLeft, setCanLeft] = useState(false);
-  const [canRight, setCanRight] = useState(false);
-  const [promptIdx, setPromptIdx] = useState(0);
-  const [userInput, setUserInput] = useState("");
-  const [boxFocused, setBoxFocused] = useState(false);
-  const chipsRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [hovered, setHovered] = useState<number | null>(null);
+  const [videoOpen, setVideoOpen] = useState(false);
+  const [videoExpanded, setVideoExpanded] = useState(false);
+  const previewRef = useRef<HTMLDivElement>(null);
 
-  const updateArrows = () => {
-    const el = chipsRef.current;
+  // Float the preview beside the cursor (right of it, vertically centred on it)
+  // while hovering the template list. The preview is 150px tall, so -75 centres.
+  const movePreview = (e: React.PointerEvent) => {
+    const el = previewRef.current;
     if (!el) return;
-    setCanLeft(el.scrollLeft > 1);
-    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+    el.style.transform = `translate(${e.clientX + 28}px, ${e.clientY - 75}px)`;
   };
-
-  useEffect(() => {
-    updateArrows();
-    const el = chipsRef.current;
-    el?.addEventListener("scroll", updateArrows, { passive: true });
-    window.addEventListener("resize", updateArrows);
-    return () => {
-      el?.removeEventListener("scroll", updateArrows);
-      window.removeEventListener("resize", updateArrows);
-    };
-  }, []);
-
-  useEffect(() => {
-    const id = setInterval(
-      () => setPromptIdx((i) => (i + 1) % PROMPTS.length),
-      2800,
-    );
-    return () => clearInterval(id);
-  }, []);
-
-  const scrollChips = (dir: number) => {
-    const el = chipsRef.current;
-    if (!el) return;
-    el.scrollLeft = Math.max(
-      0,
-      Math.min(el.scrollLeft + dir * 220, el.scrollWidth),
-    );
-    updateArrows();
-  };
-
-  // Only fade the edges that have more content to scroll toward, so the first
-  // and last chips are never dimmed.
-  const chipsMask =
-    canLeft && canRight
-      ? "linear-gradient(to right, transparent, #000 7%, #000 93%, transparent)"
-      : canRight
-        ? "linear-gradient(to right, #000 93%, transparent)"
-        : canLeft
-          ? "linear-gradient(to right, transparent, #000 7%)"
-          : "none";
 
   return (
-    <section className="px-6 pb-20 pt-24 md:pt-32">
-      <div className="mx-auto max-w-2xl text-center">
-        {/* Watch-the-demo pill */}
-        <div className="flex justify-center">
-          <a
-            href={APP_URL}
-            className="group inline-flex items-center gap-2.5 rounded-full bg-foreground py-1.5 pl-5 pr-1.5 text-sm text-background transition-opacity hover:opacity-90"
-          >
-            <span className="text-background/60">See what&apos;s new.</span>
-            <span className="font-medium">Watch the demo</span>
-            <span className="flex size-7 items-center justify-center rounded-full bg-background text-foreground">
-              <svg width="9" height="9" viewBox="0 0 10 10" fill="currentColor" aria-hidden>
-                <path d="M2 1l6 4-6 4z" />
-              </svg>
-            </span>
-          </a>
+    <section className="-mt-14 pb-24 md:-mt-16 md:px-4">
+      {/* A rounded dark panel on every breakpoint. On desktop the transparent
+          nav overlaps its top; on mobile it sits just below the header so the
+          rounded corners stay visible. */}
+      <div className="relative overflow-hidden bg-[#101010] pb-28 pt-20 md:rounded-[32px] md:pb-24 md:pt-28">
+        <div className="mx-auto max-w-7xl px-6">
+          {/* Watch-how-it-works pill — eyebrow above the title */}
+          <div className="flex justify-center">
+            {/* Frosted dark chip on the dark hero, with a white play disc as
+                the focal accent. */}
+            <button
+              type="button"
+              onClick={() => setVideoOpen(true)}
+              className="group inline-flex items-center gap-3 rounded-2xl border border-white/15 bg-white/10 py-1.5 pl-1.5 pr-4 text-left backdrop-blur-md transition-colors hover:bg-white/15"
+            >
+              <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl transition-transform group-hover:scale-105">
+                {/* Video thumbnail preview behind a small glass play badge. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={demoThumbUrl}
+                  alt=""
+                  onError={onThumbError}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <span className="relative flex size-5 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-sm">
+                  <IconPlay className="size-2.5" />
+                </span>
+              </span>
+              <span className="leading-tight">
+                <span className="block whitespace-nowrap text-sm font-medium text-white">
+                  Watch how it works
+                </span>
+                <span className="block whitespace-nowrap text-xs text-white/60">
+                  2-minute demo
+                </span>
+              </span>
+            </button>
+          </div>
+
+          <h1 className="mx-auto mt-6 max-w-3xl text-center text-4xl font-medium tracking-tight text-white md:text-6xl">
+            The AI app builder for client-facing experiences
+          </h1>
+
+          {/* One panel groups the composer with the template quick-starts */}
+          <div className="mx-auto mt-9 max-w-2xl rounded-3xl border border-border bg-background p-2.5 shadow-[0_20px_60px_-40px_rgba(20,20,40,0.35)]">
+            <PromptComposer />
+
+            {/* Start from a template — a compact text list; hovering a row
+                floats a preview that follows the cursor (v60 treatment) */}
+            <div className="px-2 pb-1 pt-3">
+              <p className="mb-1 text-sm text-muted-foreground">
+                Start from a template
+              </p>
+              <ul
+                onPointerMove={movePreview}
+                onPointerLeave={() => setHovered(null)}
+              >
+                {FEATURED.map((t, i) => (
+                  <li key={t.slug}>
+                    <Link
+                      href={`/templates/${t.slug}`}
+                      onPointerEnter={(e) => {
+                        setHovered(i);
+                        // Position immediately so it doesn't flash at the
+                        // previous hover's (stale) spot before the first move.
+                        movePreview(e);
+                      }}
+                      className="group flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-muted/60"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={TEMPLATE_ICONS[t.slug]}
+                        alt=""
+                        className="size-9 shrink-0 object-contain"
+                      />
+                      <span className="text-[15px] font-normal text-foreground">
+                        {t.title}
+                      </span>
+                      <IconArrow className="ml-auto size-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <h1 className="mt-6 text-4xl font-medium tracking-tight md:text-6xl">
-          The AI app builder for
-          <br />
-          client-facing experiences
-        </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-          Build apps for your client portal — no code, no infrastructure, no
-          developer required.
-        </p>
-
-        {/* Describe-to-build entry */}
-        <div
-          onClick={() => inputRef.current?.focus()}
-          className={`mt-8 flex min-h-[150px] cursor-text flex-col rounded-2xl border bg-muted p-6 text-left transition-colors ${
-            boxFocused ? "border-foreground/30" : "border-border hover:border-foreground/20"
-          }`}
+      {/* Logos carousel — centered, set apart from the hero */}
+      <div className="mx-auto mt-24 max-w-7xl px-6 md:mt-28">
+        <p
+          className="mb-8 text-center text-xs uppercase tracking-wider text-muted-foreground"
+          style={{
+            fontFamily:
+              '"ABC Diatype Mono", ui-monospace, SFMono-Regular, Menlo, monospace',
+          }}
         >
-          {/* The input is always full-width and left-aligned, so nothing reflows
-              on focus. The "Assembly Studio, build …" overlay simply crossfades
-              out (and the placeholder fades in) — no layout jump, no jitter. */}
-          <div className="relative text-base">
-            <input
-              ref={inputRef}
-              type="text"
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              onFocus={() => setBoxFocused(true)}
-              onBlur={() => setBoxFocused(false)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && userInput.trim()) window.open(APP_URL);
-              }}
-              className="w-full bg-transparent text-foreground/80 caret-foreground/70 outline-none"
-              aria-label="Describe what to build"
-              autoComplete="off"
-              spellCheck={false}
-            />
-            <div
-              aria-hidden="true"
-              className={`pointer-events-none absolute inset-0 flex items-baseline whitespace-nowrap transition-opacity duration-500 ${
-                boxFocused || userInput ? "opacity-0" : "opacity-100"
-              }`}
-            >
-              <span className="text-muted-foreground">
-                Assembly Studio, build&nbsp;
-              </span>
-              <span
-                key={promptIdx}
-                className="animate-prompt text-foreground/80"
-              >
-                {PROMPTS[promptIdx]}
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-auto flex items-center justify-end pt-10">
-            <a
-              href={APP_URL}
-              onClick={(e) => e.stopPropagation()}
-              className="rounded-full bg-foreground px-4 py-1.5 text-sm text-background transition-opacity hover:opacity-90"
-            >
-              Start building
-            </a>
-          </div>
-        </div>
-
-        {/* Category chips — left edge aligns with the entry box; scroll
-            controls grouped on the right. */}
-        <div className="mt-4 flex items-center gap-1.5">
-          <div
-            ref={chipsRef}
-            style={{ maskImage: chipsMask, WebkitMaskImage: chipsMask }}
-            className="flex flex-1 items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-          >
-            {CATEGORIES.map((cat, i) => (
-              <button
-                key={cat.label}
-                onClick={() => setSelected(selected === i ? null : i)}
-                className={`shrink-0 rounded-[4px] border px-3 py-1 text-xs transition-colors ${
-                  selected === i
-                    ? "sticky left-0 z-10 border-foreground bg-foreground text-background"
-                    : "border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground"
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => scrollChips(-1)}
-            aria-label="Scroll categories left"
-            className={`shrink-0 p-1 transition-colors ${
-              canLeft
-                ? "text-muted-foreground hover:text-foreground"
-                : "pointer-events-none text-transparent"
-            }`}
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
-              <path
-                d="M10 3l-5 5 5 5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollChips(1)}
-            aria-label="Scroll categories right"
-            className={`shrink-0 p-1 transition-colors ${
-              canRight
-                ? "text-muted-foreground hover:text-foreground"
-                : "pointer-events-none text-transparent"
-            }`}
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden>
-              <path
-                d="M6 3l5 5-5 5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        </div>
-
-        {/* Templates for the selected category — height reserved so the content
-            below never shifts when the panel is toggled. */}
-        <div className="mt-2 min-h-[204px]">
-          {selected !== null && (
-            <div className="rounded-xl border border-border bg-background p-1.5 text-left">
-              {CATEGORIES[selected].items.slice(0, 3).map((item) => (
-                <a
-                  key={item.title}
-                  href={APP_URL}
-                  className="flex items-center gap-4 rounded-lg px-4 py-3 transition-colors hover:bg-muted"
-                >
-                  <div className="size-10 shrink-0 rounded-lg bg-muted" />
-                  <div>
-                    <p className="text-sm font-medium">{item.title}</p>
-                    <p className="text-xs text-muted-foreground">{item.desc}</p>
-                  </div>
-                </a>
+          Trusted by teams at
+        </p>
+        <div className="mx-auto max-w-2xl overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]">
+          <div className="flex w-max animate-marquee items-center gap-12">
+            {["Capital One", "Collective", "Ditto", "Heritage Law", "Waymaker", "Aura", "CoverPanda", "Northwind"]
+              .concat(["Capital One", "Collective", "Ditto", "Heritage Law", "Waymaker", "Aura", "CoverPanda", "Northwind"])
+              .map((name, i) => (
+                <span key={i} className="shrink-0 text-base font-medium text-muted-foreground">
+                  {name}
+                </span>
               ))}
-            </div>
-          )}
+          </div>
         </div>
       </div>
 
-      {/* Logo marquee — narrow centered window (~3 at a time), auto-scroll */}
-      <div className="mx-auto mt-14 max-w-md overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_18%,black_82%,transparent)]">
-        <div className="flex w-max animate-marquee items-center gap-12">
-          {[...TRUSTED_BY, ...TRUSTED_BY].map((name, i) => (
-            <span
-              key={i}
-              className="shrink-0 text-base font-medium text-muted-foreground"
-            >
-              {name}
-            </span>
-          ))}
+      {/* Cursor-following template preview — grey placeholder for now */}
+      <div
+        ref={previewRef}
+        aria-hidden
+        className={`pointer-events-none fixed left-0 top-0 z-40 hidden h-[150px] w-[224px] overflow-hidden rounded-2xl border border-border bg-muted shadow-[0_30px_70px_-40px_rgba(20,20,40,0.5)] transition-[opacity,scale] duration-300 ease-out md:block ${
+          hovered !== null ? "scale-100 opacity-100" : "scale-95 opacity-0"
+        }`}
+      >
+        <div className="flex h-full w-full items-center justify-center px-4 text-center text-sm text-muted-foreground">
+          {hovered !== null ? FEATURED[hovered].title : ""}
         </div>
       </div>
+
+      {/* Floating demo video — small in the corner, click to enlarge. Stays
+          put on scroll (fixed). Placeholder — drop in a real <iframe>/<video>. */}
+      {videoOpen && !videoExpanded && (
+        <div className="fixed bottom-6 right-6 z-50 w-[280px] max-w-[calc(100vw-2rem)] animate-fade-in overflow-hidden rounded-2xl border border-border bg-background shadow-[0_16px_44px_-26px_rgba(20,20,40,0.3)]">
+          <button
+            type="button"
+            onClick={() => setVideoOpen(false)}
+            aria-label="Close video"
+            className="absolute right-2 top-2 z-10 flex size-6 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-md transition-colors hover:bg-black/50"
+          >
+            <IconX className="size-3.5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setVideoExpanded(true)}
+            aria-label="Enlarge video"
+            className="group/thumb relative flex aspect-video w-full cursor-zoom-in items-center justify-center overflow-hidden bg-muted text-sm text-muted-foreground transition-colors hover:bg-muted/80"
+          >
+            {DEMO_VIDEO_ID ? (
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={demoThumbUrl}
+                  alt=""
+                  onError={onThumbError}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <span className="relative flex size-9 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-md transition-transform group-hover/thumb:scale-105">
+                  <IconPlay className="size-3.5" />
+                </span>
+              </>
+            ) : (
+              "2-minute demo"
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* Enlarged view — click the backdrop to shrink back, ✕ to close */}
+      {videoOpen && videoExpanded && (
+        <div
+          className="fixed inset-0 z-[70] flex animate-fade-in items-center justify-center bg-foreground/40 p-6 backdrop-blur-sm"
+          onClick={() => setVideoExpanded(false)}
+        >
+          <div
+            className="relative w-full max-w-4xl overflow-hidden rounded-2xl border border-white/12 bg-background shadow-[0_40px_90px_-45px_rgba(20,20,40,0.4)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setVideoExpanded(false);
+                setVideoOpen(false);
+              }}
+              aria-label="Close video"
+              className="absolute right-3 top-3 z-10 flex size-7 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur-md transition-colors hover:bg-black/50"
+            >
+              <IconX className="size-3.5" />
+            </button>
+            {DEMO_VIDEO_ID ? (
+              <iframe
+                src={demoEmbedUrl(true)}
+                title="2-minute demo"
+                className="aspect-video w-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            ) : (
+              <div className="flex aspect-video w-full items-center justify-center bg-muted text-base text-muted-foreground">
+                2-minute demo
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </section>
   );
 }

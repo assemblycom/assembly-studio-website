@@ -52,10 +52,10 @@ export function Comparison() {
   return (
     <Section id="comparison">
       <div className="text-center">
-        <h2 className="text-3xl font-medium tracking-tight md:text-4xl">
+        <h2 className="type-h2">
           Why Assembly Studio
         </h2>
-        <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
+        <p className="type-lead mx-auto mt-4 max-w-2xl text-muted-foreground">
           See how Assembly Studio compares to other AI workflow platforms.
         </p>
       </div>

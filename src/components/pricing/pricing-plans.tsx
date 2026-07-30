@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { APP_URL } from "@/lib/constants";
+import { APP_URL, DEMO_URL } from "@/lib/constants";
+import { useAuthState } from "@/lib/use-auth";
 
 interface PlanFeatureGroup {
   label: string;
@@ -23,14 +24,14 @@ const PLANS: Plan[] = [
     name: "Free",
     priceMonthly: 0,
     priceYearly: 0,
-    description: "Try Studio with a live client.",
+    description: "Free forever for your first clients",
     featureGroups: [
       {
         label: "Fundamentals",
         items: [
           "5 active contacts",
           "1 internal user",
-          "30 build credits / month",
+          "50 build credits / month",
         ],
       },
       {
@@ -38,10 +39,10 @@ const PLANS: Plan[] = [
         items: [
           "CRM",
           "Client experience",
+          "30+ pre-made apps",
           "App builder",
           "Messaging and team inbox",
           "Billing and payments",
-          "Contracts, forms, file-sharing, and tasks",
         ],
       },
       {
@@ -54,24 +55,25 @@ const PLANS: Plan[] = [
   },
   {
     name: "Starter",
-    priceMonthly: 29,
-    priceYearly: 24,
-    description: "For solo firms getting set up.",
+    priceMonthly: 49,
+    priceYearly: 29,
+    description: "For solo entrepreneurs",
     featureGroups: [
       {
         label: "Fundamentals",
         items: [
           "50 active contacts",
           "1 internal user",
-          "100 build credits / month",
+          "200 build credits / month",
         ],
       },
       {
         label: "Everything in Free, plus",
         items: [
-          "API, Zapier & Make",
-          "Custom domain for client experience",
-          "Custom email domain for notifications",
+          "Custom domain",
+          "Custom email domain",
+          "API & MCP connector",
+          "Add-on build credits",
         ],
       },
       {
@@ -84,25 +86,26 @@ const PLANS: Plan[] = [
   },
   {
     name: "Professional",
-    priceMonthly: 99,
-    priceYearly: 82,
-    description: "For growing teams serving more clients.",
+    priceMonthly: 139,
+    priceYearly: 99,
+    description: "For small teams",
     featureGroups: [
       {
         label: "Fundamentals",
         items: [
           "500 active contacts",
-          "3 internal users (+$39/user)",
-          "300 build credits / month",
+          "3 internal users included",
+          "200 build credits / month",
         ],
       },
       {
         label: "Everything in Starter, plus",
         items: [
-          "Full white-labeling",
+          "Remove Assembly badge",
           "App visibility",
-          "Automations",
-          "Multi-company clients",
+          "Automation builder",
+          "AI model selection",
+          "Multi-company contacts",
         ],
       },
       {
@@ -115,16 +118,16 @@ const PLANS: Plan[] = [
   },
   {
     name: "Advanced",
-    priceMonthly: 299,
-    priceYearly: 249,
-    description: "For scaling firms with compliance needs.",
+    priceMonthly: 599,
+    priceYearly: 499,
+    description: "For scaling businesses",
     featureGroups: [
       {
         label: "Fundamentals",
         items: [
           "Unlimited active contacts",
-          "5 internal users (+$59/user)",
-          "1,000 build credits / month",
+          "5 internal users included",
+          "200 build credits / month",
         ],
       },
       {
@@ -132,8 +135,8 @@ const PLANS: Plan[] = [
         items: [
           "Audit log",
           "Client access permissions",
-          "Advanced security",
-          "HIPAA compliance",
+          "Enforced MFA",
+          "HIPAA compliance (BAA)",
         ],
       },
       {
@@ -145,12 +148,65 @@ const PLANS: Plan[] = [
         ],
       },
     ],
-    cta: "Get started",
+    cta: "Book demo",
     highlighted: false,
   },
 ];
 
 type Billing = "monthly" | "yearly";
+
+// Enterprise sits BELOW the tier columns as one wide card (so adding it never
+// pushes the grid to five columns). Minimal: a label + one-line pitch, with the
+// demo CTA on the right — no perk grid, so it reads as a quiet footnote to the
+// tiers rather than a fifth plan. It's a standalone outlined card detached from
+// the plans table above (gap, not a shared border) at every breakpoint.
+function EnterpriseCard() {
+  return (
+    // Same 4-column grid + dividers as the tiers so the heading, perks, and CTA
+    // line up under the columns above (heading | perks | perks | CTA).
+    <div className="mt-6 rounded-2xl border border-border bg-card px-6 py-5 md:px-8 lg:rounded-xl lg:p-0 lg:[[data-theme=dark]_&]:bg-transparent">
+      {/* Mobile stacks with tight spacing (the two perk groups read as one
+          list); desktop is the 4-column grid with inset dividers. */}
+      <div className="flex flex-col lg:grid lg:grid-cols-4 lg:gap-0">
+        <div className="lg:p-6">
+          <h3 className="text-base font-medium text-foreground">Enterprise</h3>
+        </div>
+        {[
+          ["Unlimited users, contacts, and apps", "Custom SSO"],
+          ["Volume-based build credits", "Dedicated architect & success manager"],
+        ].map((col, i) => (
+          <ul
+            key={i}
+            className={`relative flex cursor-default flex-col gap-2.5 lg:mt-0 lg:p-6 lg:before:absolute lg:before:inset-y-6 lg:before:left-0 lg:before:w-px lg:before:bg-border lg:before:content-[''] ${
+              i === 0 ? "mt-5" : "mt-2.5"
+            }`}
+          >
+            {col.map((item) => (
+              <li
+                key={item}
+                className="flex items-start gap-2 text-sm text-muted-foreground"
+              >
+                <span className="mt-0.5">
+                  <CheckIcon />
+                </span>
+                {item}
+              </li>
+            ))}
+          </ul>
+        ))}
+        {/* CTA column — solid dark fill, matching the tier buttons. */}
+        <div className="relative mt-5 lg:mt-0 lg:flex lg:items-center lg:p-6 lg:before:absolute lg:before:inset-y-6 lg:before:left-0 lg:before:w-px lg:before:bg-border lg:before:content-['']">
+          <a
+            href={DEMO_URL}
+            className="block w-full rounded-lg bg-foreground px-5 py-2 text-center text-sm text-background transition-opacity hover:opacity-90"
+          >
+            Contact sales
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function CheckIcon() {
   return (
@@ -184,12 +240,22 @@ function planSubtitle(plan: Plan, billing: Billing) {
 function RollingDigit({ value }: { value: number }) {
   return (
     <span className="relative inline-flex h-[1em] overflow-hidden tabular-nums">
+      {/* Invisible copy of the target digit sizes the column to THAT digit's
+          natural width — otherwise a narrow "1" sat in a box as wide as the
+          widest digit, leaving a gap before the next digit. The animated strip
+          is overlaid absolutely and clipped to this width. */}
+      <span aria-hidden className="invisible">
+        {value}
+      </span>
       <span
-        className="flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        className="absolute inset-0 flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
         style={{ transform: `translateY(-${value}em)` }}
       >
         {Array.from({ length: 10 }, (_, n) => (
-          <span key={n} className="flex h-[1em] items-center leading-none">
+          <span
+            key={n}
+            className="flex h-[1em] items-center justify-center leading-none"
+          >
             {n}
           </span>
         ))}
@@ -211,93 +277,154 @@ function AnimatedPrice({ value }: { value: number }) {
 }
 
 export function PricingPlans() {
-  const [billing, setBilling] = useState<Billing>("monthly");
+  const [billing, setBilling] = useState<Billing>("yearly");
+  // Signed-in visitors already have a plan, so the Free tier is noise — drop it
+  // and show only the paid upgrade paths.
+  const { authed } = useAuthState();
+  const plans = authed ? PLANS.filter((plan) => plan.priceMonthly > 0) : PLANS;
 
   return (
-    <div>
-      {/* Billing toggle */}
-      <div className="flex justify-center">
+    // Cap the width in the single-column band (~448–640px, small tablet /
+    // large phone landscape) so cards don't stretch too wide; real phones
+    // (<448px) stay full-width and the sm+ multi-column grid is unaffected.
+    <div className="mx-auto max-w-md sm:max-w-none">
+      {/* Billing toggle — enlarged on mobile (bigger tap targets, matches the
+          left-aligned hero); settles back to the compact size on desktop. */}
+      <div className="flex justify-start md:justify-center">
         <div
           role="radiogroup"
           aria-label="Billing period"
-          className="inline-flex items-center gap-1 rounded-full border border-border p-1 text-sm"
+          className="relative grid w-full grid-cols-2 rounded-lg border border-border p-1 text-base md:inline-grid md:w-auto md:text-sm"
         >
+          {/* Sliding thumb — carries the active-coloured labels inside a clipped
+              window, so the highlight is REVEALED as the thumb glides rather
+              than cross-fading the button text (which dipped through a
+              low-contrast state on switch — the "blink"). The inner label strip
+              counter-slides to stay aligned with the base labels below. */}
+          <span
+            aria-hidden
+            className={`pointer-events-none absolute inset-y-1 left-1 z-10 w-[calc(50%-0.25rem)] overflow-hidden rounded-md bg-foreground transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+              billing === "yearly" ? "translate-x-full" : ""
+            }`}
+          >
+            <span
+              className={`absolute inset-0 grid w-[200%] grid-cols-2 text-background transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                billing === "yearly" ? "-translate-x-1/2" : ""
+              }`}
+            >
+              <span className="flex items-center justify-center">
+                <span className="hidden md:inline">Pay&nbsp;</span>Monthly
+              </span>
+              <span className="flex items-center justify-center">
+                <span className="hidden md:inline">Pay&nbsp;</span>Yearly
+              </span>
+            </span>
+          </span>
           <button
             role="radio"
             aria-checked={billing === "monthly"}
             onClick={() => setBilling("monthly")}
-            className={`rounded-full px-4 py-1.5 transition-colors ${
-              billing === "monthly"
-                ? "bg-foreground text-background"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+            className="relative px-5 py-2 text-center text-muted-foreground transition-colors hover:text-foreground md:px-4 md:py-1.5"
           >
-            Monthly
+            <span className="hidden md:inline">Pay&nbsp;</span>Monthly
           </button>
           <button
             role="radio"
             aria-checked={billing === "yearly"}
             onClick={() => setBilling("yearly")}
-            className={`flex items-center gap-2 rounded-full px-4 py-1.5 transition-colors ${
-              billing === "yearly"
-                ? "bg-foreground text-background"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+            className="relative px-5 py-2 text-center text-muted-foreground transition-colors hover:text-foreground md:px-4 md:py-1.5"
           >
-            Yearly
-            <span
-              className={`rounded-full px-2 py-0.5 text-xs ${
-                billing === "yearly"
-                  ? "bg-background/20 text-background"
-                  : "bg-accent/10 text-accent"
-              }`}
-            >
-              Save 17%
-            </span>
+            <span className="hidden md:inline">Pay&nbsp;</span>Yearly
           </button>
         </div>
       </div>
 
-      {/* Plans */}
-      <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {PLANS.map((plan) => {
+      {/* Plans — tucked closer under the toggle on mobile; roomier on desktop.
+          Column count tracks the visible plans so hiding Free (signed-in)
+          reflows to three even columns rather than leaving a gap. */}
+      <div className="mt-5 md:mt-12 lg:overflow-hidden lg:rounded-xl">
+        <div
+          className={`grid gap-6 sm:grid-cols-2 lg:gap-0 lg:grid-rows-[auto_auto_auto_auto_auto] ${
+            plans.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"
+          }`}
+        >
+        {plans.map((plan, idx) => {
           const price = billing === "yearly" ? plan.priceYearly : plan.priceMonthly;
+          // The card AFTER the highlighted one drops its gray left divider, so
+          // it doesn't double the highlighted card's blue right edge.
+          const dropLeftDivider = plans[idx - 1]?.highlighted;
+          // Original structure kept: filled header panel (price pinned to the
+          // bottom) → detached button → features. The only addition is an
+          // outline around the WHOLE card (outer wrapper); the header panel no
+          // longer carries its own border so the outline reads once, around all.
           return (
             <div
               key={plan.name}
-              className={`flex flex-col rounded-xl border p-8 ${
-                plan.highlighted ? "border-foreground" : "border-border"
+              // Every card carries a subtle filled surface so the outline reads
+              // as an edge rather than the brightest thing on the card. The
+              // highlighted plan is marked only by its "Most popular" tag; its
+              // border matches every other card so no card outshouts the rest.
+              className={`relative flex min-w-0 flex-col rounded-2xl border border-border bg-card p-4 lg:grid lg:grid-rows-subgrid lg:row-span-5 lg:rounded-none lg:border-y lg:border-l lg:border-r-0 lg:border-solid lg:border-border lg:bg-transparent lg:p-6 lg:first:!rounded-l-xl lg:last:!rounded-r-xl lg:[&:last-child]:border-r ${
+                dropLeftDivider ? "lg:[[data-theme=dark]_&]:border-l-0" : ""
+              } ${
+                plan.highlighted
+                  ? "isolate overflow-hidden [[data-theme=dark]_&]:!border-[#7DA4FF]/40 lg:[[data-theme=dark]_&]:border-r lg:[[data-theme=dark]_&]:[border-image:linear-gradient(to_bottom,rgba(125,164,255,0.55),#383838_75%)_1]"
+                  : ""
               }`}
             >
-              <h3 className="text-lg font-medium">{plan.name}</h3>
-              <p className="mt-1 min-h-[40px] text-sm text-muted-foreground">
-                {plan.description}
-              </p>
+              {/* Subtle aurora wash on the highlighted plan — blooms up from the
+                  bottom, behind the content (-z-10 inside an isolated context). */}
+              {plan.highlighted && (
+                <div
+                  aria-hidden
+                  // Same brand-blue bloom as desktop; on mobile (light) the
+                  // bloom fades a touch sooner. Desktop light + all dark keep
+                  // their original lengths.
+                  className="pointer-events-none absolute inset-0 -z-10 [background:linear-gradient(to_bottom,#7DA4FF,transparent_180px)] lg:[background:linear-gradient(to_bottom,#7DA4FF,transparent_224px)] [[data-theme=dark]_&]:[background:linear-gradient(to_bottom,rgba(125,164,255,0.28),transparent_170px)]"
+                />
+              )}
 
-              <div className="mt-6 flex items-baseline">
-                <AnimatedPrice value={price} />
-                {plan.priceMonthly > 0 && (
-                  <span className="ml-1 text-muted-foreground">/mo</span>
-                )}
-              </div>
-              <p className="mt-1 min-h-[16px] text-xs text-muted-foreground">
-                {planSubtitle(plan, billing)}
-              </p>
-
-              <a
-                href={APP_URL}
-                className={`mt-6 rounded-lg px-6 py-3 text-center text-sm transition-opacity hover:opacity-90 ${
+              {/* Header panel holding the price block. Light mode reads as a
+                  clean outlined inset (no fill); dark mode keeps a subtle filled
+                  surface so it lifts off the near-black card. */}
+              <div
+                className={`flex min-h-[200px] flex-col justify-between rounded-xl border border-border p-5 ${
                   plan.highlighted
-                    ? "bg-foreground text-background"
-                    : "border border-border text-foreground hover:bg-muted"
+                    ? "rounded-b-none border-transparent bg-card lg:bg-background [[data-theme=dark]_&]:border-transparent"
+                    : ""
                 }`}
+              >
+                <div>
+                  <h3 className="text-lg font-medium">{plan.name}</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {plan.description}
+                  </p>
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-1.5">
+                    <AnimatedPrice value={price} />
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {planSubtitle(plan, billing)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Detached CTA — our standard rounded-lg button. "Book demo"
+                  plans route to the demo page; the rest to signup. */}
+              <a
+                href={plan.cta === "Book demo" ? DEMO_URL : APP_URL}
+                className="mt-3 rounded-lg bg-foreground px-5 py-2 text-center text-sm text-background transition-opacity hover:opacity-90"
               >
                 {plan.cta}
               </a>
 
-              <div className="mt-8 flex flex-1 flex-col gap-6">
+              <div className="mt-6 flex flex-1 cursor-default flex-col px-2 pb-2 lg:contents">
                 {plan.featureGroups.map((group) => (
-                  <div key={group.label}>
+                  <div
+                    key={group.label}
+                    className="border-t border-border pt-5 [&:not(:first-child)]:mt-5"
+                  >
                     <p className="text-sm font-medium">{group.label}</p>
                     <ul className="mt-3 flex flex-col gap-2.5">
                       {group.items.map((item) => (
@@ -318,7 +445,12 @@ export function PricingPlans() {
             </div>
           );
         })}
+        </div>
       </div>
+
+      {/* Enterprise — a standalone outlined card below the plans table, detached
+          by a gap rather than sharing the table's border. */}
+      <EnterpriseCard />
     </div>
   );
 }

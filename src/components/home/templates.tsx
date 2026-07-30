@@ -10,17 +10,17 @@ export function Templates() {
     <Section id="templates">
       <div className="flex items-end justify-between">
         <div>
-          <h2 className="text-3xl font-medium tracking-tight md:text-4xl">
-            Start with a template
+          <h2 className="type-h2">
+            Start with an app template
           </h2>
           <p className="mt-4 max-w-2xl text-muted-foreground">
-            Pre-built workflows for common use cases. Pick one, customize it,
-            ship it to your clients.
+            Pre-built app templates for common use cases. Pick one, customize
+            it, ship it to your clients.
           </p>
         </div>
         <Link
           href="/templates"
-          className="hidden shrink-0 rounded-full border border-border px-4 py-1.5 text-sm text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground md:inline-block"
+          className="hidden shrink-0 rounded-lg border border-border px-4 py-1.5 text-sm text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground md:inline-block"
         >
           See all
         </Link>
@@ -33,7 +33,7 @@ export function Templates() {
             href={APP_URL}
             className="group overflow-hidden rounded-xl border border-border transition-colors hover:border-foreground/20"
           >
-            <div className="aspect-[5/3] bg-muted" />
+            <div className="aspect-[5/3] overflow-hidden bg-muted" />
             <div className="p-4">
               <h3 className="text-sm font-medium">
                 {template.title}
@@ -41,7 +41,7 @@ export function Templates() {
               <p className="mt-1.5 text-sm text-muted-foreground">
                 {template.description}
               </p>
-              <span className="mt-3 inline-block rounded-full border border-border px-3 py-1 text-xs text-muted-foreground">
+              <span className="mt-3 inline-block rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground">
                 {template.category}
               </span>
             </div>

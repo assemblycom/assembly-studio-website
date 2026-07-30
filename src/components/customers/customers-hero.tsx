@@ -1,55 +1,51 @@
 import { APP_URL } from "@/lib/constants";
+import { CASE_STUDIES } from "@/lib/case-studies";
+import { ImageTunnelLazy as ImageTunnel } from "@/components/customers/image-tunnel-lazy";
+
+// Every customer image we have, to populate the tunnel frames. The tunnel
+// paints each photo into a tiny (~90×600px) slot, so it uses downscaled copies
+// (public/images/customers/tunnel/*) instead of the full-res originals — a
+// fraction of the bytes for identical on-screen quality.
+const TUNNEL_IMAGES = CASE_STUDIES.map((s) => s.image)
+  .filter((src): src is string => Boolean(src))
+  .map((src) => src.replace("/images/customers/", "/images/customers/tunnel/"));
 
 /**
- * Static customers hero — the headline framed by decorative placeholder tiles.
- * (No scroll animation.) Tiles are hidden on mobile to keep it clean.
+ * Customers hero — a clean, centered headline + subtitle + CTA, with a
+ * wide-angle 3D photo tunnel of customer imagery flying below the copy.
  */
-
-interface TileDef {
-  box: string; // size + aspect ratio
-  sx: number; // center, % of section
-  sy: number;
-}
-
-const TILES: TileDef[] = [
-  { box: "w-40 aspect-[3/4]", sx: 11, sy: 28 }, // upper-left
-  { box: "w-32 aspect-square", sx: 30, sy: 14 }, // above headline
-  { box: "w-40 aspect-[3/4]", sx: 89, sy: 28 }, // upper-right
-  { box: "w-44 aspect-square", sx: 11, sy: 74 }, // lower-left
-  { box: "w-52 aspect-[4/3]", sx: 44, sy: 88 }, // lower-center
-  { box: "w-40 aspect-[3/4]", sx: 89, sy: 74 }, // lower-right
-];
-
 export function CustomersHero() {
   return (
-    <section className="relative flex min-h-[82vh] items-center overflow-hidden px-6 py-24">
-      {/* Decorative framing tiles (desktop only) */}
-      <div className="pointer-events-none absolute inset-0 hidden md:block" aria-hidden>
-        {TILES.map((tile, i) => (
-          <div
-            key={i}
-            className={`${tile.box} absolute -translate-x-1/2 -translate-y-1/2`}
-            style={{ left: `${tile.sx}%`, top: `${tile.sy}%` }}
-          >
-            <div className="size-full rounded-2xl bg-muted" />
-          </div>
-        ))}
-      </div>
-
-      <div className="relative z-10 mx-auto max-w-2xl text-center">
-        <h1 className="text-4xl font-medium tracking-tight md:text-5xl">
-          Made for tech-enabled professional service firms
+    <section className="flex min-h-screen flex-col pt-24 text-center md:pt-32">
+      {/* Preload the tunnel photos during the initial page load so they're
+          already cached when the lazily-loaded 3D canvas starts painting — the
+          main lever against the hero reading as slow. Rendered by the server so
+          the fetch begins immediately, in parallel with the three.js chunk. */}
+      {TUNNEL_IMAGES.map((src) => (
+        <link key={src} rel="preload" as="image" href={src} />
+      ))}
+      <div className="mx-auto max-w-3xl px-6">
+        <h1 className="type-display text-balance">
+          {/* Keep the hyphenated compound intact so it never wraps mid-word to a
+              lonely "-enabled" line on narrow screens. */}
+          Made for <span className="whitespace-nowrap">tech-enabled</span>{" "}
+          service firms
         </h1>
-        <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground">
-          Trusted by consulting, accounting, real estate, law, marketing, and
-          tech firms with 1M+ clients and counting.
+        <p className="type-lead mx-auto mt-6 max-w-2xl text-muted-foreground">
+          Trusted by professional service firms with 1M+ clients and counting.
         </p>
         <a
           href={APP_URL}
-          className="mt-8 inline-block rounded-full bg-foreground px-6 py-3 text-sm text-background transition-opacity hover:opacity-90"
+          className="mt-8 block w-full max-w-xs rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background sm:inline-block sm:w-auto transition-opacity hover:opacity-90"
         >
           Start trial
         </a>
+      </div>
+
+      {/* Wide-angle 3D photo ribbon, below the copy. Pulled up a bit; transparent
+          + non-interactive so it never covers or blocks the CTA above it. */}
+      <div className="pointer-events-none -mt-[6vh] h-[60vh] w-full">
+        <ImageTunnel images={TUNNEL_IMAGES} />
       </div>
     </section>
   );

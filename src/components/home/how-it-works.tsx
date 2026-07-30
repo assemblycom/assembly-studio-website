@@ -1,122 +1,281 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Section } from "@/components/ui/section";
+import { memo, useEffect, useRef, useState } from "react";
+import {
+  DescribeVisual,
+  BuildAppVisual,
+  BrandPortalVisual,
+  BuildStepVisual,
+} from "@/components/home/abstract-step-visuals";
+
+// ─────────────────────────────────────────────────────────────────────────
+// HOW IT WORKS — four tabs across the top (title + description each), one full
+// width visual below that crossfades to the active tab. Each tab carries a
+// progress bar along its top edge that fills over the dwell time, so you can
+// anticipate when the visual is about to switch (Intercom-style). It auto
+// advances and loops; click a tab to jump, hover to pause. Progress is painted
+// imperatively (refs) so the loop never re-renders the visuals.
+//
+// Tabs are titles-only; the per-step `body` copy is kept in the data but not
+// rendered (drop it back under each title if the visuals ever need support).
+// ─────────────────────────────────────────────────────────────────────────
 
 interface Step {
   id: string;
-  label: string;
   title: string;
   body: string;
+  // Static visuals — each step renders a single settled frame (no inner
+  // animation). The top tab progress bar is what advances between steps.
+  Visual: React.ComponentType;
+  // Optional per-step dwell — the Plan and Build steps carry richer sequences
+  // (question pick, modal fill) that need longer than the default to read.
+  dwellMs?: number;
 }
+
+// Memoized so a step switch (setActive) never re-renders these heavy visual
+// trees — the crossfade stays a pure GPU opacity transition with no frame drop.
+const DescribeStep = memo(DescribeVisual);
+const PlanStep = memo(BuildAppVisual);
+const BuildStep = memo(BrandPortalVisual);
+const IterateStep = memo(BuildStepVisual);
 
 const STEPS: Step[] = [
   {
+    id: "describe",
+    title: "Describe",
+    body: "Say what you want in plain language, or start with an app template.",
+    Visual: DescribeStep,
+  },
+  {
+    id: "plan",
+    title: "Plan",
+    body: "A few product questions, then a plan you approve before anything's built.",
+    Visual: PlanStep,
+    dwellMs: 9000,
+  },
+  {
     id: "build",
-    label: "Build",
-    title: "Describe an app, ship it in minutes",
-    body: "Start from a template or describe your app in plain English. Assembly generates a secure app you can publish to your client portal in one click — no code, no infrastructure, no developer required.",
+    title: "Build",
+    body: "A real app deploys to your workspace, ready for your clients.",
+    Visual: BuildStep,
+    dwellMs: 9500,
   },
   {
-    id: "brand",
-    label: "Brand",
-    title: "A branded portal your clients actually want to use",
-    body: "Native Assembly apps and the ones you build live side by side in a portal branded as your firm. Organize apps into sidebar folders and set permissions so every client sees only what's meant for them.",
-  },
-  {
-    id: "team",
-    label: "Team",
-    title: "Your team's command center",
-    body: "Manage contacts and companies in a built-in CRM, stay on top of activity with a unified notification center, and get an internal team view with every app you build — automatically.",
+    id: "iterate",
+    title: "Iterate",
+    body: "Keep chatting to change anything, before or after launch.",
+    Visual: IterateStep,
+    dwellMs: 9000,
   },
 ];
 
+// How long each step holds before auto-advancing. Long and unhurried so the
+// bar and the visual's own animation read as one slow, deliberate beat rather
+// than two things racing.
+const DWELL_MS = 7_000;
+
 export function HowItWorks() {
-  const [active, setActive] = useState(STEPS[0].id);
+  const [active, setActive] = useState(0);
+
+  // Kept in refs so the rAF loop reads them without re-subscribing, and so the
+  // progress bars can be painted directly (no per-frame React render).
+  const activeRef = useRef(0);
+  const progressRef = useRef(0);
+  const fillRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const sectionRef = useRef<HTMLElement>(null);
+  // The loop only advances while the section is actually on screen (see the rAF
+  // effect) — kept in a ref so the loop reads it without re-subscribing.
+  const onScreenRef = useRef(true);
 
   useEffect(() => {
-    const onScroll = () => {
-      // The active step is the last one whose top has scrolled past the
-      // marker line (~35% down the viewport).
-      const marker = window.innerHeight * 0.35;
-      let current = STEPS[0].id;
-      for (const step of STEPS) {
-        const el = document.getElementById(step.id);
-        if (el && el.getBoundingClientRect().top <= marker) current = step.id;
-      }
-      setActive(current);
-    };
+    activeRef.current = active;
+  }, [active]);
 
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
+  const paint = () => {
+    fillRefs.current.forEach((el, idx) => {
+      if (!el) return;
+      const w = idx === activeRef.current ? progressRef.current : 0;
+      el.style.transform = `scaleX(${w})`;
     });
   };
 
+  // Jump to a step and restart its dwell.
+  const activate = (i: number) => {
+    activeRef.current = i;
+    progressRef.current = 0;
+    paint();
+    setActive(i);
+  };
+
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return; // no auto-advance; tabs still switch on click
+
+    // Only run the clock while the section is on screen. Browsers throttle rAF
+    // for offscreen/backgrounded frames, so a loop that assumes ~16ms frames
+    // desynced after you scrolled away and back — the bar would stall or jump.
+    const sectionEl = sectionRef.current;
+    let io: IntersectionObserver | undefined;
+    if (sectionEl && "IntersectionObserver" in window) {
+      io = new IntersectionObserver(
+        ([entry]) => {
+          onScreenRef.current = entry.isIntersecting;
+        },
+        { threshold: 0 },
+      );
+      io.observe(sectionEl);
+    }
+
+    let raf = 0;
+    let last = 0;
+    const tick = (ts: number) => {
+      // Runs continuously while on screen — never pauses on hover. Off-screen /
+      // background frames are skipped so the bar can't desync (the scroll bug).
+      const running = onScreenRef.current && !document.hidden;
+      if (!running) {
+        // Drop the clock so we resume with a fresh delta instead of counting the
+        // whole time we were paused/offscreen in a single leap.
+        last = 0;
+      } else {
+        if (!last) last = ts;
+        // Clamp the delta so one long throttled gap can never jump the bar.
+        const dt = Math.min(ts - last, 64);
+        last = ts;
+        progressRef.current += dt / (STEPS[activeRef.current].dwellMs ?? DWELL_MS);
+        if (progressRef.current >= 1) {
+          progressRef.current = 0;
+          // Advance activeRef in the same frame as setActive. The [active] effect
+          // that syncs activeRef only runs after React commits, so painting with
+          // the stale ref would flash the just-finished tab's bar refilling for a
+          // frame before the next tab takes over.
+          const next = (activeRef.current + 1) % STEPS.length;
+          activeRef.current = next;
+          setActive(next);
+        }
+      }
+      paint();
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      io?.disconnect();
+    };
+  }, []);
+
   return (
-    <Section id="how-it-works">
-      <h2 className="text-3xl font-medium tracking-tight md:text-4xl">
-        How it works
-      </h2>
+    <section
+      ref={sectionRef}
+      id="how-it-works"
+      className="pb-16 pt-16 md:pb-24 md:pt-24"
+    >
+      <div className="mx-auto max-w-[1600px] px-6 md:px-10">
+        {/* Header, aligned to the block below: eyebrow on top, then heading
+            (left) and supporting copy (right) sharing a row so the copy lines
+            up with the heading, not the eyebrow. */}
+        <div className="mx-auto max-w-[1100px]">
+          <p className="type-eyebrow text-muted-foreground">How it works</p>
+          <div className="mt-4 grid gap-y-5 md:grid-cols-2 md:items-start md:gap-x-12">
+            <h2 className="type-h2 max-w-lg text-balance text-foreground">
+              Go from idea to a working app in four steps
+            </h2>
+            <p className="type-lead max-w-lg text-pretty text-muted-foreground">
+              Describe what you want in plain language, approve the plan, and get
+              a real app live in your workspace, then keep refining it by chat.
+            </p>
+          </div>
+        </div>
 
-      <div className="mt-12 grid gap-12 md:grid-cols-[180px_1fr] md:gap-16">
-        {/* Side nav (scroll-spy) */}
-        <nav
-          aria-label="How it works steps"
-          className="hidden h-fit md:sticky md:top-24 md:block"
-        >
-          <ul className="flex flex-col gap-4">
-            {STEPS.map((step) => {
-              const isActive = active === step.id;
-              return (
-                <li key={step.id}>
-                  <button
-                    onClick={() => scrollTo(step.id)}
-                    aria-current={isActive ? "true" : undefined}
-                    className="flex items-center gap-3 text-left text-sm transition-colors"
+        {/* Outlined frame: a tab bar divided into steps, then the visual.
+            The active step reads from its top progress fill (which also lets
+            you anticipate the switch) plus its darker label — no filled pill.
+            Capped so the landscape visual keeps a good height. */}
+        {/* Flex column so mobile can lead with the visual: stacked, the four tab
+            rows are a tall list to scroll past before you see anything, so the
+            visual comes first (right under the intro) and the steps read as its
+            legend. sm+ keeps tabs-then-visual, where they're one 4-across row. */}
+        <div className="mx-auto mt-10 flex max-w-[1100px] flex-col overflow-hidden rounded-2xl border border-border [[data-theme=dark]_&]:border-white/15 [[data-theme=dark]_&]:bg-white/[0.04] md:mt-12">
+          {/* Tabs — divided by hairlines; each carries a progress track on its
+              top edge that fills over the dwell on the active tab. */}
+          <div
+            role="tablist"
+            aria-label="How it works steps"
+            className="order-3 grid grid-cols-1 divide-y divide-border [[data-theme=dark]_&]:divide-white/15 sm:order-none sm:grid-cols-4 sm:divide-x sm:divide-y-0"
+          >
+            {STEPS.map((step, i) => (
+              <button
+                key={step.id}
+                type="button"
+                role="tab"
+                aria-selected={active === i}
+                onClick={() => activate(i)}
+                className="group relative cursor-pointer px-5 py-4 text-center transition-colors hover:bg-foreground/[0.03] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-foreground/25"
+              >
+                {/* Progress track (fills over the dwell on the active tab). */}
+                <span
+                  aria-hidden
+                  className="absolute inset-x-0 -bottom-px z-10 h-px overflow-hidden"
+                >
+                  <span
+                    ref={(el) => {
+                      fillRefs.current[i] = el;
+                    }}
+                    className="block h-full origin-left bg-foreground"
+                    style={{ transform: "scaleX(0)" }}
+                  />
+                </span>
+
+                <span className="flex items-center justify-center gap-2">
+                  <span
+                    className={`text-[15px] transition-colors ${
+                      active === i
+                        ? "text-foreground"
+                        : "text-muted-foreground group-hover:text-foreground"
+                    }`}
                   >
-                    <span
-                      className={`h-px transition-all ${
-                        isActive
-                          ? "w-8 bg-foreground"
-                          : "w-4 bg-muted-foreground/40"
-                      }`}
-                    />
-                    <span
-                      className={
-                        isActive ? "text-foreground" : "text-muted-foreground"
-                      }
-                    >
-                      {step.label}
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+                    {step.title}
+                  </span>
+                  <span
+                    className={`text-[11px] tabular-nums [font-family:var(--font-diatype-mono)] ${
+                      active === i
+                        ? "text-muted-foreground"
+                        : "text-muted-foreground/50"
+                    }`}
+                  >
+                    [{i + 1}]
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
 
-        {/* Content */}
-        <div className="flex flex-col gap-16 md:gap-28">
-          {STEPS.map((step) => (
-            <div key={step.id} id={step.id} className="scroll-mt-24">
-              <h3 className="text-2xl font-medium tracking-tight md:text-3xl">
-                {step.title}
-              </h3>
-              <p className="mt-4 max-w-xl text-lg text-muted-foreground">
-                {step.body}
-              </p>
-              <div className="mt-8 aspect-[16/9] w-full rounded-xl border border-border bg-muted" />
-            </div>
-          ))}
+          {/* Divider between the tabs and the visual. */}
+          <div className="order-2 border-t border-border [[data-theme=dark]_&]:border-white/15 sm:order-none" />
+
+          {/* Visual — crossfades to the active step. Fixed height so the panel
+              never resizes between tabs (each step's card fills or centers). */}
+          {/* Phone height is capped: unbounded, the cell grew to the tallest
+              step's card (~1.8x the panel's own width) and the section became a
+              long scroll past a decorative frame. The cards crop themselves at
+              the cut instead (max-h-full on .mock-ui). */}
+          {/* grid-rows-1 (1fr, not auto): with an auto row the cell still sized
+              to the tallest card, so h-full/max-h-full below resolved against
+              that instead of the capped panel. */}
+          <div className="relative order-1 grid h-[420px] grid-cols-1 grid-rows-1 overflow-hidden sm:order-none sm:h-auto md:h-[560px] [font-family:var(--font-inter),system-ui,sans-serif]">
+            {STEPS.map((step, i) => (
+              <div
+                key={step.id}
+                aria-hidden={active !== i}
+                className={`col-start-1 row-start-1 h-full w-full min-w-0 transform-gpu transition-opacity duration-700 ease-out [will-change:opacity] motion-reduce:transition-none ${
+                  active === i ? "opacity-100" : "pointer-events-none opacity-0"
+                }`}
+              >
+                <step.Visual />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-    </Section>
+    </section>
   );
 }

@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Section } from "@/components/ui/section";
-import { FAQ } from "@/components/home/faq";
+import { FAQ, type FAQEntry } from "@/components/home/faq";
+import { SecurityTestimonials } from "@/components/security/security-testimonials";
+import { SecurityCompliance } from "@/components/security/security-compliance";
+import { SecurityCta } from "@/components/security/security-cta";
+import { DEMO_URL, SIGNUP_URL, TRUST_CENTER_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Security",
@@ -8,307 +12,227 @@ export const metadata: Metadata = {
     "Enterprise-grade security for your client portals. SOC 2 Type II, HIPAA-ready, end-to-end encrypted, and built for regulated industries.",
 };
 
-type IconName =
-  | "shield"
-  | "lock"
-  | "users"
-  | "key"
-  | "globe"
-  | "doc"
-  | "cross"
-  | "target"
-  | "clock"
-  | "download"
-  | "trash"
-  | "eye";
-
-interface Feature {
-  icon: IconName;
-  title: string;
-  description: string;
-}
-
-const GROUPS: { label: string; lead: string; features: Feature[] }[] = [
+const DIFFERENTIATORS: { title: string; description: string }[] = [
   {
-    label: "Encryption & access",
-    lead: "Only the right people ever reach your clients' data — and it's encrypted the entire way.",
-    features: [
-      {
-        icon: "lock",
-        title: "End-to-end encryption",
-        description:
-          "Encrypted in transit (TLS 1.3) and at rest (AES-256), always.",
-      },
-      {
-        icon: "users",
-        title: "Role-based access",
-        description:
-          "Fine-grained permissions so people only ever see what they should.",
-      },
-      {
-        icon: "key",
-        title: "SSO & SAML",
-        description:
-          "Enterprise single sign-on with SAML 2.0 for secure access.",
-      },
-      {
-        icon: "doc",
-        title: "Audit logging",
-        description:
-          "A complete, exportable trail of every action for compliance.",
-      },
-    ],
+    title: "Authentication, managed by the platform",
+    description:
+      "Clients sign in with magic links, Google, or a password. You control which methods are allowed, and MFA can be enforced on top. Login is platform infrastructure, so no app generates its own.",
   },
   {
-    label: "Built for regulated industries",
-    lead: "The controls accounting, legal, healthcare, and financial teams are required to have.",
-    features: [
-      {
-        icon: "shield",
-        title: "SOC 2 Type II",
-        description:
-          "Audited controls for security, availability, and confidentiality.",
-      },
-      {
-        icon: "cross",
-        title: "HIPAA ready",
-        description:
-          "A BAA is available for teams handling protected health information.",
-      },
-      {
-        icon: "globe",
-        title: "Data residency",
-        description:
-          "Choose where your data lives to meet regional requirements.",
-      },
-      {
-        icon: "target",
-        title: "Penetration tested",
-        description:
-          "Regular third-party pen testing with published advisories.",
-      },
-    ],
+    title: "Access, defined by the Assembly CRM",
+    description:
+      "Who sees what is decided by Assembly's contact and company model. Clients see only their own data, and apps can be limited to specific clients.",
   },
   {
-    label: "Your data, your control",
-    lead: "You decide how long data lives, where the keys are, and when it's gone.",
-    features: [
-      {
-        icon: "clock",
-        title: "Retention controls",
-        description: "Set how long data is kept — and when it's purged.",
-      },
-      {
-        icon: "key",
-        title: "Bring your own keys",
-        description: "Manage your own encryption keys (BYOK) on enterprise.",
-      },
-      {
-        icon: "download",
-        title: "Export anytime",
-        description: "Your data is yours — export it in full whenever you need.",
-      },
-      {
-        icon: "trash",
-        title: "Delete on request",
-        description: "Full deletion when a contract ends, verified and logged.",
-      },
-    ],
+    title: "Isolated by design",
+    description:
+      "Each app runs in its own sandboxed environment with its own database, scoped to your workspace. An issue in one app can't reach another, or anyone else's data.",
+  },
+  {
+    title: "Secrets are handled securely",
+    description:
+      "When an app needs a third-party service, you provide the key through a secure form and the platform stores it. Credentials are injected at runtime, never hardcoded into what the AI generates.",
   },
 ];
 
-function Glyph({ name }: { name: IconName }) {
-  const common = {
-    width: 20,
-    height: 20,
-    viewBox: "0 0 20 20",
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: 1.5,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-    "aria-hidden": true,
-  };
-  switch (name) {
-    case "shield":
-      return (
-        <svg {...common}>
-          <path d="M10 2.5l6 2.2v4.4c0 3.7-2.5 6.2-6 7.4-3.5-1.2-6-3.7-6-7.4V4.7l6-2.2z" />
-          <path d="M7.5 10l1.8 1.8L13 8" />
-        </svg>
-      );
-    case "lock":
-      return (
-        <svg {...common}>
-          <rect x="4" y="8.5" width="12" height="8" rx="2" />
-          <path d="M6.5 8.5V6.5a3.5 3.5 0 017 0v2" />
-        </svg>
-      );
-    case "users":
-      return (
-        <svg {...common}>
-          <circle cx="7.5" cy="7" r="2.5" />
-          <path d="M3 16c0-2.5 2-4 4.5-4S12 13.5 12 16" />
-          <path d="M13 5.2a2.5 2.5 0 010 4.6M14.5 16c0-1.8-.7-3.1-1.8-3.8" />
-        </svg>
-      );
-    case "key":
-      return (
-        <svg {...common}>
-          <circle cx="7" cy="13" r="3" />
-          <path d="M9 11l6-6M13 5l2 2M11 7l1.5 1.5" />
-        </svg>
-      );
-    case "globe":
-      return (
-        <svg {...common}>
-          <circle cx="10" cy="10" r="7" />
-          <path d="M3 10h14M10 3c2 2.2 2 11.8 0 14M10 3c-2 2.2-2 11.8 0 14" />
-        </svg>
-      );
-    case "doc":
-      return (
-        <svg {...common}>
-          <path d="M5 3h6l4 4v10a1 1 0 01-1 1H5a1 1 0 01-1-1V4a1 1 0 011-1z" />
-          <path d="M11 3v4h4M7 11h6M7 14h6" />
-        </svg>
-      );
-    case "cross":
-      return (
-        <svg {...common}>
-          <path d="M10 2.5l6 2.2v4.4c0 3.7-2.5 6.2-6 7.4-3.5-1.2-6-3.7-6-7.4V4.7l6-2.2z" />
-          <path d="M10 7v5M7.5 9.5h5" />
-        </svg>
-      );
-    case "target":
-      return (
-        <svg {...common}>
-          <circle cx="10" cy="10" r="7" />
-          <circle cx="10" cy="10" r="3.5" />
-          <circle cx="10" cy="10" r="0.5" fill="currentColor" />
-        </svg>
-      );
-    case "clock":
-      return (
-        <svg {...common}>
-          <circle cx="10" cy="10" r="7" />
-          <path d="M10 6v4l2.5 2.5" />
-        </svg>
-      );
-    case "download":
-      return (
-        <svg {...common}>
-          <path d="M10 3v9m0 0l-3.5-3.5M10 12l3.5-3.5M4 15h12" />
-        </svg>
-      );
-    case "trash":
-      return (
-        <svg {...common}>
-          <path d="M4 6h12M8 6V4.5a1 1 0 011-1h2a1 1 0 011 1V6M6.5 6l.5 9a1 1 0 001 1h4a1 1 0 001-1l.5-9" />
-        </svg>
-      );
-    case "eye":
-      return (
-        <svg {...common}>
-          <path d="M2 10s3-5 8-5 8 5 8 5-3 5-8 5-8-5-8-5z" />
-          <circle cx="10" cy="10" r="2.5" />
-        </svg>
-      );
-  }
-}
+const SECURITY_FAQS: FAQEntry[] = [
+  {
+    question: "How secure are the apps that I build?",
+    answer:
+      "The security-critical parts of every app aren't written by AI — they're built into Assembly's maintained foundation and enforced at build time. Apps never implement their own authentication: every request runs on short-lived, cryptographically signed tokens scoped to that specific app, and a token minted for one app is rejected by every other. Each app gets its own dedicated database, and access to workspace data is validated server-side on every request — isolation is enforced at the storage layer, not by generated code remembering to filter.\n\nSecrets and API credentials are server-only by construction: injected as environment variables at deploy, encrypted at rest, and never returned through any API. If generated code tries to pull a secret into the browser, the build fails — the app won't ship.",
+  },
+  {
+    question: "Where is my customer data stored?",
+    answer:
+      "Your customer data is stored on enterprise cloud infrastructure in the United States, encrypted in transit (TLS) and at rest (AES-256). Each app you build gets its own dedicated database, scoped to your workspace. Details on hosting providers and regions are in the Assembly Trust Center.",
+    links: [{ label: "Assembly Trust Center", href: TRUST_CENTER_URL }],
+  },
+  {
+    question: "Is my data used for AI training?",
+    answer:
+      "No, Assembly never uses your workspace data or your clients' data to train any AI models, whether by Assembly or by our AI providers. Builds run in isolated environments, and the AI's access ends when the build does.",
+  },
+  {
+    question: "How are apps isolated from one another?",
+    answer:
+      "Every app is born with its own boundaries: a dedicated codebase, its own database, and its own deployment, all scoped to your workspace. Apps render in sandboxed environments inside the platform and reach data only through Assembly's permission-checked APIs. An issue in one app can't reach another, and can never reach another customer's data.",
+  },
+  {
+    question: "Which subprocessors does Assembly use?",
+    answer:
+      "Assembly uses a small set of vetted subprocessors for cloud hosting, app deployment, AI model inference, payments, and analytics — each bound by data processing agreements. The current, complete list is maintained in the Trust Center and updated whenever it changes.",
+    links: [
+      { label: "vetted subprocessors", href: TRUST_CENTER_URL },
+      { label: "Trust Center", href: TRUST_CENTER_URL },
+    ],
+  },
+  {
+    question: "How are secrets and API credentials managed?",
+    answer:
+      "Secrets and API credentials are never written into generated code. When an app needs a third-party service, you provide the credential through a secure form; the platform stores it encrypted and injects it at runtime as an environment variable. The AI never holds your keys, and they never appear in your app's codebase.",
+  },
+  {
+    question: "Is Assembly SOC2 compliant?",
+    answer:
+      "Yes. The Assembly platform is SOC 2 Type II certified and monitored continuously via Secureframe. Because Assembly apps run entirely on this infrastructure — auth, permissions, hosting, and data included — they never leave the audited environment. Reports are available in the Trust Center.",
+    links: [{ label: "Trust Center", href: TRUST_CENTER_URL }],
+  },
+  {
+    question: "Is Assembly HIPAA compliant?",
+    answer:
+      "Yes. Assembly supports HIPAA compliance, with a BAA available on the Advanced plan. One boundary applies: AI features aren't covered.\n\nIn practice, ready-made apps like secure messaging, file sharing, and contracts can all handle PHI — as long as the app doesn't use AI itself (these are clearly labeled). Building new apps with the app builder isn't covered, since the build process uses AI.\n\nIf you're a covered entity, talk to us and we'll map what fits where.",
+    links: [{ label: "talk to us", href: DEMO_URL }],
+  },
+  {
+    question: "What happens if there's a security incident?",
+    answer:
+      "Assembly maintains a documented incident response process: incidents are triaged by severity, contained, and remediated, and affected customers are notified in line with contractual and legal requirements. Because security is engineered at the platform level, a fix ships platform-wide — every workspace and every app at once, with nothing for you to patch.",
+    links: [
+      { label: "documented incident response process", href: TRUST_CENTER_URL },
+    ],
+  },
+  {
+    question: "How is Assembly different from vibe coding tools?",
+    answer:
+      "Other tools generate your app's security along with your app, then hand you scanners to find what the AI got wrong. On Assembly, apps don't generate that layer at all. Authentication, permissions, data scoping, and hosting are platform infrastructure, engineered once and inherited by every app you build. And your apps ship into the client experience your customers already log into, not to a standalone app you have to secure yourself.",
+  },
+];
 
 export default function SecurityPage() {
   return (
     <>
-      {/* Hero */}
-      <section className="px-6 pb-10 pt-24 text-center md:pt-32">
+      {/* Hero — a light, centered lede matching the Templates page (no dark
+          card); the plain light nav sits above it on the white page. */}
+      <section className="px-6 pb-16 pt-24 text-center md:pb-24 md:pt-32">
         <div className="mx-auto max-w-3xl">
-          <h1 className="text-4xl font-medium tracking-tight md:text-5xl">
-            Your clients&apos; data is in safe hands
-          </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-            Assembly is built from the ground up with the encryption, access
-            controls, and certifications that regulated industries require — on
-            by default, for every plan.
+          <h1 className="type-display text-balance">Secure by design</h1>
+          <p className="type-lead mx-auto mt-6 max-w-2xl text-pretty text-muted-foreground">
+            Build as fast as you want. Authentication, permissions, and
+            encryption are platform infrastructure, engineered, audited, and on
+            by default.
           </p>
-          <a
-            href="mailto:security@assembly.com"
-            className="mt-8 inline-block rounded-full border border-border px-6 py-3 text-sm transition-colors hover:bg-muted"
-          >
-            Visit our Trust Center
-          </a>
+          <div className="mx-auto mt-8 flex w-full max-w-xs flex-col items-stretch gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:justify-center">
+            <a
+              href={SIGNUP_URL}
+              className="rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background transition-opacity hover:opacity-90"
+            >
+              Get started
+            </a>
+            <a
+              href={TRUST_CENTER_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-lg border border-foreground/20 bg-transparent px-5 py-2.5 text-center text-sm text-foreground transition-colors hover:bg-foreground/5"
+            >
+              Trust center
+            </a>
+          </div>
         </div>
-
-        {/* Placeholder for a future hero visual */}
-        <div className="mx-auto mt-12 aspect-[16/7] max-w-5xl rounded-2xl bg-muted" />
       </section>
 
-      {/* Grouped principles */}
-      {GROUPS.map((group, gi) => (
-        <Section key={group.label} className={gi === 0 ? "pt-16 md:pt-24" : "pt-0"}>
-          <div className="grid gap-8 md:grid-cols-[1fr_2fr] md:gap-12">
-            <div className="md:sticky md:top-24 md:self-start">
-              <h2 className="text-2xl font-medium tracking-tight md:text-3xl">
-                {group.label}
-              </h2>
-              <p className="mt-3 text-muted-foreground">{group.lead}</p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              {group.features.map((feature) => (
-                <div
-                  key={feature.title}
-                  className="rounded-2xl border border-border p-6"
-                >
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-muted">
-                    <Glyph name={feature.icon} />
-                  </div>
-                  <h3 className="mt-4 text-base font-medium">
-                    {feature.title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {feature.description}
+      {/* Compliance seals — surfaced right after the hero so the credibility
+          lands first, framed by a full-bleed rule and the vertical guide rails. */}
+      <div className="border-t border-border [[data-theme=dark]_&]:border-[#383838]" />
+      <div className="relative">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-30 hidden justify-center min-[1200px]:flex"
+        >
+          <div className="h-full w-full max-w-[1200px] border-x border-border [[data-theme=dark]_&]:border-[#383838]" />
+        </div>
+        <SecurityCompliance />
+      </div>
+
+      {/* Guide-rail content region — the vertical rails start at the "different"
+          section and run down through the customer story below. */}
+      <div className="relative">
+        {/* Vertical guide rails — shown once the viewport reaches the 1200px
+            content rail. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-30 hidden justify-center min-[1200px]:flex"
+        >
+          <div className="h-full w-full max-w-[1200px] border-x border-border [[data-theme=dark]_&]:border-[#383838]" />
+        </div>
+
+        {/* Full-bleed line above the first section. */}
+        <div className="border-t border-border [[data-theme=dark]_&]:border-[#383838]" />
+
+      {/* What makes Assembly Studio different — uses the site content rail
+          (mx-auto max-w-[1600px], px-6 md:px-10) rather than the narrower
+          Section default, so the left column lines up with the nav logo. */}
+      <section className="mx-auto max-w-[1200px] px-6 pb-20 pt-16 md:px-10 md:pb-28 md:pt-24">
+        <div className="grid gap-12 md:grid-cols-2 md:gap-16">
+          {/* Left — heading sits with its column (no sticky follow; the page
+              stays still). */}
+          <div className="md:self-start">
+            <h2 className="type-h2">
+              What makes Assembly Studio different
+            </h2>
+            <p className="mt-6 max-w-md text-muted-foreground">
+              Apps you build inherit our platform&apos;s security model, so you
+              don&apos;t wire it up yourself.
+            </p>
+          </div>
+
+          {/* Right — numbered primitives, divided rows */}
+          <ul>
+            {DIFFERENTIATORS.map((card, i) => (
+              <li
+                key={card.title}
+                className="border-t border-border py-8 first:border-t-0 first:pt-0 md:grid md:grid-cols-[auto_1fr] md:gap-x-6"
+              >
+                <span className="mb-3 block font-mono text-sm tabular-nums text-muted-foreground md:mb-0 md:pt-0.5">
+                  [{i + 1}]
+                </span>
+                <div>
+                  <h3 className="text-base font-medium">{card.title}</h3>
+                  <p className="mt-2 leading-relaxed text-muted-foreground">
+                    {card.description}
                   </p>
                 </div>
-              ))}
-            </div>
-          </div>
-        </Section>
-      ))}
-
-      {/* Testimonial */}
-      <Section className="pt-0">
-        <figure className="mx-auto max-w-3xl text-center">
-          <blockquote className="text-xl font-normal leading-relaxed tracking-tight md:text-2xl">
-            &ldquo;Assembly cleared every box our compliance team had — SOC 2,
-            HIPAA, SSO, audit logs — without slowing the rollout down.&rdquo;
-          </blockquote>
-          <figcaption className="mt-6 text-sm text-muted-foreground">
-            Phillip LaRue · Capital One
-          </figcaption>
-        </figure>
-      </Section>
-
-      {/* Responsible disclosure */}
-      <Section className="pt-0">
-        <div className="mx-auto max-w-3xl rounded-2xl border border-border bg-muted p-8 text-center md:p-12">
-          <h2 className="text-2xl font-medium tracking-tight">
-            Found a vulnerability?
-          </h2>
-          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-            We partner with the security research community. Report an issue and
-            our team will respond quickly.
-          </p>
-          <a
-            href="mailto:security@assembly.com"
-            className="mt-6 inline-block rounded-full bg-foreground px-6 py-3 text-sm text-background transition-opacity hover:opacity-90"
-          >
-            Report an issue
-          </a>
+              </li>
+            ))}
+          </ul>
         </div>
-      </Section>
+      </section>
 
-      {/* FAQ */}
-      <FAQ />
+        {/* Divider between the two sections — meets the guide rails. */}
+        <div className="mx-auto max-w-[1200px] border-t border-border [[data-theme=dark]_&]:border-[#383838]" />
+
+        {/* Customer story — Metta Health spotlight. */}
+        <section className="mx-auto max-w-[1200px] px-6 pb-20 pt-16 md:px-10 md:pb-28 md:pt-16">
+          <SecurityTestimonials />
+        </section>
+      </div>
+
+      {/* Divider into the compliance + FAQ region. */}
+      <div className="border-t border-border [[data-theme=dark]_&]:border-[#383838]" />
+
+      {/* Certifications + FAQ — the seal row sits right before the questions,
+          both sharing the same vertical guide rails. */}
+      <div className="relative">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-30 hidden justify-center min-[1200px]:flex"
+        >
+          <div className="h-full w-full max-w-[1200px] border-x border-border [[data-theme=dark]_&]:border-[#383838]" />
+        </div>
+
+        <FAQ
+          heading="Frequently asked questions"
+          items={SECURITY_FAQS}
+          twoColumn
+        />
+      </div>
+
+      {/* Final CTA — parallax chip field naming the platform's baked-in
+          controls, mirroring the templates page CTA. */}
+      {/* Divider before the CTA — full-bleed section rule (matches the other
+          full-width rules on this page, e.g. above SecurityCompliance). */}
+      <div className="border-t border-border [[data-theme=dark]_&]:border-[#383838]" />
+
+      <SecurityCta />
     </>
   );
 }
