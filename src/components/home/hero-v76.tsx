@@ -156,14 +156,19 @@ export function HeroV76({
 
   // Touch devices have no hover, so the card mocks would never play their
   // animations at all — the `group-[.is-inview]:` hooks in the mocks stay dead
-  // without something to add the class. This observer supplies it on hover-less
-  // pointers only, so desktop hover behaviour is untouched.
+  // without something to add the class. This supplies it on hover-less pointers
+  // only, so desktop hover behaviour is untouched.
   //
-  // Hysteresis is the important part, and what the earlier version got wrong: it
-  // toggled on a single 0.6 threshold, so jitter around that boundary restarted
-  // the animations over and over and read as a stuck loop. Here the class goes on
-  // once a card is 60% visible and only comes off when it has left the viewport
-  // entirely, so a card animates once per pass and can replay on the next one.
+  // Only the card in focus animates: on landing that's the first one, and the
+  // next card waits until the visitor scrolls it into view. An
+  // IntersectionObserver ratio can't express that on its own — it mixes both
+  // axes, so a card two-thirds scrolled in and a full card clipped by a short
+  // viewport look identical to it. Measuring the horizontal share separately is
+  // what keeps the second card still while the first one plays.
+  //
+  // Hysteresis matters just as much: the class only comes off once the card has
+  // left completely, so jitter around the boundary can't restart the animation
+  // in a loop, and a card animates once per pass.
   useEffect(() => {
     // Match either a hover-less pointer (real phones/tablets) OR the mobile
     // layout width. Width matters too: a narrow desktop window still reports
@@ -172,21 +177,37 @@ export function HeroV76({
     if (!mq.matches) return;
     const row = rowRef.current;
     if (!row) return;
-    const cards = row.querySelectorAll<HTMLElement>("[data-card]");
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.intersectionRatio >= 0.6) {
-            entry.target.classList.add("is-inview");
-          } else if (entry.intersectionRatio === 0) {
-            entry.target.classList.remove("is-inview");
-          }
-        }
-      },
-      { threshold: [0, 0.6] },
-    );
-    cards.forEach((c) => io.observe(c));
-    return () => io.disconnect();
+    const cards = [...row.querySelectorAll<HTMLElement>("[data-card]")];
+
+    // Near-full rather than exactly full, so a card that lands a pixel or two
+    // past the edge still counts as the one being looked at.
+    const FOCUSED = 0.9;
+    const update = () => {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      // Every rect is read before any class is written — interleaving the two
+      // would force a reflow per card on each scroll event.
+      const focused = cards.map((card) => {
+        const r = card.getBoundingClientRect();
+        const shown =
+          Math.max(0, Math.min(r.right, vw) - Math.max(r.left, 0)) / r.width;
+        const onScreen = r.bottom > 0 && r.top < vh;
+        return onScreen && shown >= FOCUSED ? true : !onScreen || shown === 0 ? false : null;
+      });
+      focused.forEach((state, i) => {
+        if (state !== null) cards[i].classList.toggle("is-inview", state);
+      });
+    };
+
+    update();
+    row.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      row.removeEventListener("scroll", update);
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
   }, []);
 
   // Arrows scroll the strip by roughly a screenful of cards.
@@ -377,7 +398,10 @@ export function HeroV76({
                     className={`gap-0 rounded-2xl py-0 pb-0! shadow-none ring-1 transition-transform duration-200 ease-out group-hover:-translate-y-0.5 ${dark ? "ring-white/15" : "ring-black/[0.07]"}`}
                   >
                     <div data-slot="card-media" className="flex h-[212px] w-full items-center justify-center bg-[var(--card)]">
-                      <span className={`flex size-11 items-center justify-center rounded-xl transition-colors ${dark ? "bg-white/[0.06] text-white/55 group-hover:bg-white/[0.09]" : "bg-black/[0.04] text-neutral-500 group-hover:bg-black/[0.06]"}`}>
+                      {/* Outlined, not filled — a tinted fill on a tile whose
+                          face is already a tint read as a muddy patch rather
+                          than a control. */}
+                      <span className={`flex size-11 items-center justify-center rounded-xl border transition-colors ${dark ? "border-white/20 text-white/55 group-hover:border-white/35" : "border-black/[0.12] text-neutral-500 group-hover:border-black/25"}`}>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden>
                           <path d="M12 5v14M5 12h14" />
                         </svg>

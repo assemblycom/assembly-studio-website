@@ -469,7 +469,12 @@ function ProductionGapExplorer() {
           blue box runs off the phone's right edge instead of ending at the
           section gutter. */}
       <div className="order-1 mb-8 flex min-w-0 self-stretch md:order-none md:mb-0">
-        <div className="h-[320px] w-full min-w-0 overflow-hidden rounded-xl bg-[#7DA4FF] py-4 pl-4 md:h-auto md:py-7 md:pl-7">
+        {/* Light mode, phone widths only: the box is height-capped here, so the
+            mock fills it and its white surface meets the white page with no
+            edge — the visual loses its bottom and right sides. A tight ambient
+            line plus a soft drop gives the box edges back, the same way the mock
+            itself is grounded on desktop. Dark mode already separates. */}
+        <div className="h-[320px] w-full min-w-0 overflow-hidden rounded-xl bg-[#7DA4FF] py-4 pl-4 max-md:[[data-theme=light]_&]:shadow-[0_1px_2px_rgba(16,24,40,0.06),0_18px_44px_-24px_rgba(16,24,40,0.45)] md:h-auto md:py-7 md:pl-7">
           {/* The mock is a desktop layout — the sidebar and the table are
               percentages of a wide viewport, so at phone width they collapse
               into each other. It's laid out at a desktop width and cropped by

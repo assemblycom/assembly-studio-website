@@ -823,6 +823,22 @@ html[data-theme="dark"] .v63-ring-solid::before {
   --color-red-500: #f87171;
 }
 
+/* Templates-page covers run the same mocks two to three times the size of the
+   hero rail's, and at that size the shared dark skin fell apart: --v69-card was
+   transparent (so every row, pill and tile that is a white card in light mode
+   had no fill at all) and the wells sat *above* the surfaces they belong to, so
+   what was left merged into its own background. This restores the light-mode
+   logic in dark values — surfaces lift off the ground, wells recess below them.
+   Scoped to .template-mock so the hero rail keeps its own tuned ladder. */
+[data-theme="dark"] .template-mock {
+  --v69-card: #262626;
+  --v69-box: #262626;
+  --v69-inner: #2e2e2e;
+  --v69-well: #1f1f1f;
+  --v69-well-2: #191919;
+  --v69-chip: #2e2e2e;
+}
+
 /* On-colour skin — reskins a light mock to sit on a full-bleed coloured card
    (the parent supplies the hue). Wells become translucent white, ink + all
    neutral text become white ladders, so a widget reads as light-on-colour in
@@ -1228,4 +1244,41 @@ html[data-theme="dark"] .v63-ring-solid::before {
 [data-theme="dark"] .production-cut-fade {
   -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 72px), transparent);
   mask-image: linear-gradient(to right, #000 calc(100% - 72px), transparent);
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Studio signup glow — the rotating conic-gradient page frame the product's
+   own Studio sign-in uses (same palette, same 9s rotation), so /get-started and
+   the sign-in it hands off to read as one flow rather than two designs. Kept
+   a touch wider here (12px vs the app's 8px) so the gradient reads as a band
+   rather than a hairline.
+   The angle needs @property to be animatable, which Tailwind can't express.
+   ─────────────────────────────────────────────────────────────────────────── */
+@property --asm-glow-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes asmGlowRot {
+  to {
+    --asm-glow-angle: 360deg;
+  }
+}
+.studio-glow-frame {
+  background: conic-gradient(
+    from var(--asm-glow-angle),
+    #d9ed92,
+    #b3bde3,
+    #8b99c8,
+    #cddda6,
+    #d9ed92,
+    #b3bde3,
+    #d9ed92
+  );
+  animation: asmGlowRot 9s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio-glow-frame {
+    animation: none;
+  }
 }

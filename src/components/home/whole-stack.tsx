@@ -217,6 +217,17 @@ const PILLARS: Pillar[] = [
   },
 ];
 
+// Panel rhythm. A heading sits close to the copy it introduces and far from the
+// next section — roughly a 1:5 ratio — so the groups read as groups before a
+// word is read. The measure cap matters as much as the sizes: full-bleed lines
+// in a 672px panel ran long enough that every paragraph looked like the same
+// slab of text.
+const SECTION_GAP = "mt-12 md:mt-14";
+// 32rem lands around 68 characters a line at the body step. A ch-based cap read
+// as the obvious choice but doesn't bite here — PP Mori's zero is wide enough
+// that 64ch overshot the column, leaving the lines at ~79 characters.
+const BODY = "type-body mt-2.5 max-w-[32rem] text-muted-foreground";
+
 // Right-hand detail panel — mirrors Linear's spec-panel structure.
 function DetailPanel({
   pillar,
@@ -275,9 +286,21 @@ function DetailPanel({
         {/* Header — the title travels WITH the close control. Split apart (an
             otherwise empty bar holding only the X, the title below it) the bar
             read as dead chrome, worst on a phone where it ate the first screen.
-            Sticky, so the panel's identity stays put while the body scrolls. */}
+            Sticky, so the panel's identity stays put while the body scrolls.
+            Deliberately small: the bar is a locator, and at display size it was
+            the loudest thing in the panel while sitting outside the reading
+            column, which pulled the eye away from where the content starts. */}
         <div className="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-border bg-background px-6 py-4 md:px-10 [[data-theme=dark]_&]:border-[#383838]">
-          <h3 className="type-h3 min-w-0 text-balance text-foreground">{pillar.short}</h3>
+          {/* Index and name share one size and one face — set a step apart they
+              read as two different labels rather than one line. `.type-eyebrow`
+              is the scale's existing small-mono step, so the bar matches the
+              kickers elsewhere on the site instead of inventing a label style. */}
+          <div className="type-eyebrow flex min-w-0 items-baseline gap-2.5">
+            <span aria-hidden className="shrink-0 tabular-nums text-muted-foreground/60">
+              {pillar.num}
+            </span>
+            <h3 className="truncate font-normal text-muted-foreground">{pillar.short}</h3>
+          </div>
           <button
             type="button"
             onClick={onClose}
@@ -295,30 +318,28 @@ function DetailPanel({
           </button>
         </div>
 
-        <div className="px-6 pb-16 pt-7 md:px-10">
-          {/* Deck — the title's other half, now that the title lives in the bar. */}
-          <p className="type-lead text-muted-foreground">{pillar.tagline}</p>
+        <div className="px-6 pb-16 pt-8 md:px-10 md:pt-10">
+          {/* Opening statement — the panel's one display step, and the biggest
+              size jump in it, so the eye starts on the promise instead of
+              landing in the middle of evenly-weighted copy. */}
+          <p className="type-h3 max-w-[22ch] text-balance text-foreground">
+            {pillar.tagline}
+          </p>
 
           {/* Overview */}
-          <div className="mt-9">
-            <h4 className="text-base font-medium text-foreground">Overview</h4>
-            <p className="mt-3 leading-relaxed text-muted-foreground">
-              {pillar.overview}
-            </p>
+          <div className={SECTION_GAP}>
+            <h4 className="type-h4 text-foreground">Overview</h4>
+            <p className={BODY}>{pillar.overview}</p>
           </div>
 
           {/* Sub-sections — heading + copy + a supporting visual placeholder. */}
           {pillar.sections.map((s) => (
-            <div key={s.heading} className="mt-10">
-              <h4 className="text-base font-medium text-foreground">
-                {s.heading}
-              </h4>
-              <p className="mt-3 leading-relaxed text-muted-foreground">
-                {s.body}
-              </p>
+            <div key={s.heading} className={SECTION_GAP}>
+              <h4 className="type-h4 text-foreground">{s.heading}</h4>
+              <p className={BODY}>{s.body}</p>
               <div
                 aria-hidden
-                className="mt-5 aspect-[16/9] w-full rounded-xl border border-border bg-muted [[data-theme=dark]_&]:border-[#383838] [[data-theme=dark]_&]:bg-white/[0.04]"
+                className="mt-6 aspect-[16/9] w-full rounded-xl border border-border bg-muted [[data-theme=dark]_&]:border-[#383838] [[data-theme=dark]_&]:bg-white/[0.04]"
               />
             </div>
           ))}
@@ -326,7 +347,7 @@ function DetailPanel({
           {/* Docs link */}
           <a
             href={pillar.href}
-            className="mt-10 inline-flex items-center gap-1.5 text-sm text-foreground transition-colors hover:text-muted-foreground"
+            className="type-body mt-14 inline-flex items-center gap-1.5 text-foreground transition-colors hover:text-muted-foreground"
           >
             Read the docs
             <span aria-hidden>→</span>
