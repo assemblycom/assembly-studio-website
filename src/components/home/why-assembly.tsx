@@ -181,7 +181,7 @@ const BLOCKS: Block[] = [
   },
   {
     title: "A platform, not just a builder",
-    body: "Messaging, billing, e-signatures, files, and a CRM are built in — so every app you generate plugs into a complete client experience.",
+    body: "An app builder is only as good as the platform it plugs into. Assembly comes with a CRM, a client experience, workflows, and more built in, so you never rebuild the basics.",
     visual: <PlatformVisual />,
     wide: true,
   },

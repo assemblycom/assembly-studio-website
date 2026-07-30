@@ -84,7 +84,7 @@ function PlanCard({
 
       <a
         href={APP_URL}
-        className="mt-auto block rounded-xl bg-foreground px-5 py-3 pt-3 text-center text-sm text-background transition-opacity hover:opacity-90"
+        className="mt-auto block rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background transition-opacity hover:opacity-90"
       >
         {cta}
       </a>

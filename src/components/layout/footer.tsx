@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { DOCS_URL, type NavLink } from "@/lib/constants";
 import { DiaGradient } from "@/components/ui/dia-gradient";
+import type { ThemePreference } from "@/components/theme/theme-provider";
 
 // V71's brand aurora (from hero-iterations) — green + blue on a near-black
 // base, rising into blue → mint → lime and fading to transparent. Lives at the
@@ -19,8 +21,46 @@ export const BRAND_AURORA = [
   { offset: 1, color: "#d9ed9200" },
 ];
 
-// Two-column link set for the reveal footer (IntegratedBio-style composition):
-// site pages under "Navigate", socials under "Connect".
+// Always-visible brand aurora at the bottom of the footer — a mobile band (fills
+// more of its container) and a desktop band, each rising on mount.
+function FooterAurora() {
+  return (
+    <>
+      <div
+        aria-hidden
+        className="pointer-events-none relative -mt-44 h-[42vh] md:hidden"
+        style={{
+          maskImage: "linear-gradient(to bottom, transparent 0%, #000 18%)",
+          WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, #000 18%)",
+        }}
+      >
+        <div className="footer-aurora absolute inset-x-0 bottom-0 h-full">
+          {/* Half the bars of the desktop band, because the viewBox is squashed to
+              a quarter of its width here: at 14 the striations landed ~27px apart
+              on screen (vs ~100px on a desktop) and read as grain rather than as
+              aurora texture. Fewer, wider bars keep the pitch closer to desktop's,
+              and the extra horizontal blur softens what's left. */}
+          <DiaGradient stops={BRAND_AURORA} bars={9} blur={30} blurX={40} peak={0.96} valley={0.7} riseMs={1300} />
+        </div>
+      </div>
+      <div
+        aria-hidden
+        className="pointer-events-none relative -mt-40 hidden h-[38vh] md:block"
+        style={{
+          maskImage: "linear-gradient(to bottom, transparent 0%, #000 8%)",
+          WebkitMaskImage: "linear-gradient(to bottom, transparent 0%, #000 8%)",
+        }}
+      >
+        <div className="footer-aurora absolute inset-x-0 bottom-0 h-full">
+          <DiaGradient stops={BRAND_AURORA} bars={14} blur={30} peak={0.98} valley={0.45} riseMs={1300} />
+        </div>
+      </div>
+    </>
+  );
+}
+
+// Two-column link set for the reveal footer: site pages under "Navigate",
+// socials under "Connect".
 const NAVIGATE: NavLink[] = [
   { label: "Customers", href: "/customers" },
   { label: "Templates", href: "/templates" },
@@ -29,15 +69,17 @@ const NAVIGATE: NavLink[] = [
   { label: "Docs", href: DOCS_URL, external: true },
 ];
 
+// Social links point off-site, so they keep opening in a new tab (newTab).
 const CONNECT: NavLink[] = [
-  { label: "X", href: "https://x.com/assemblycom", external: true },
+  { label: "X", href: "https://x.com/assemblycom", external: true, newTab: true },
   {
     label: "LinkedIn",
     href: "https://www.linkedin.com/company/assemblycom",
     external: true,
+    newTab: true,
   },
-  { label: "Instagram", href: "https://instagram.com/assembly", external: true },
-  { label: "YouTube", href: "https://www.youtube.com/@assembly", external: true },
+  { label: "Instagram", href: "https://instagram.com/assembly", external: true, newTab: true },
+  { label: "YouTube", href: "https://www.youtube.com/@assembly", external: true, newTab: true },
 ];
 
 function FooterLink({
@@ -50,8 +92,8 @@ function FooterLink({
   return link.external ? (
     <a
       href={link.href}
-      target="_blank"
-      rel="noopener noreferrer"
+      target={link.newTab ? "_blank" : undefined}
+      rel={link.newTab ? "noopener noreferrer" : undefined}
       className={className}
     >
       {link.label}
@@ -63,119 +105,184 @@ function FooterLink({
   );
 }
 
-export function Footer({ reveal = false }: { reveal?: boolean }) {
-  // The reveal variant (landing + content pages) is a dark sheet that lifts to
-  // reveal the gradient panel below. Composition: mission statement on the
-  // left, Navigate/Connect columns + back-to-top on the right, and the brand
-  // word set huge across the bottom.
+// Theme control (moved out of the nav into the footer). A three-way segmented
+// switch — system / light / dark, like Cursor — reflecting the stored
+// preference rather than just the resolved theme.
+type ThemeToggle = {
+  preference: ThemePreference;
+  onSelect: (preference: ThemePreference) => void;
+};
+
+const THEME_OPTIONS: {
+  value: ThemePreference;
+  label: string;
+  icon: ReactNode;
+}[] = [
+  {
+    value: "system",
+    label: "System theme",
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <rect x="2" y="3" width="20" height="14" rx="2" />
+        <path d="M8 21h8M12 17v4" />
+      </svg>
+    ),
+  },
+  {
+    value: "light",
+    label: "Light theme",
+    icon: (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <circle cx="12" cy="12" r="4" />
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+      </svg>
+    ),
+  },
+  {
+    value: "dark",
+    label: "Dark theme",
+    icon: (
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+      </svg>
+    ),
+  },
+];
+
+function ThemeSwitch({
+  toggle,
+  onDark,
+  frosted = false,
+}: {
+  toggle: ThemeToggle;
+  onDark: boolean;
+  // Frosted surface for when the switch sits over the footer aurora — a
+  // translucent, blurred chip so it stays legible on the gradient.
+  frosted?: boolean;
+}) {
+  // Light mode reads as a raised white thumb on a frosted bed, matching the
+  // pricing billing toggle's solid-thumb pattern. The old 6% wash was almost
+  // invisible over the aurora. Dark mode is untouched.
+  const seg = (active: boolean) =>
+    `flex size-7 items-center justify-center rounded-md transition-colors ${
+      active
+        ? onDark
+          ? "bg-white/20 text-white"
+          : "bg-background text-foreground shadow-[0_1px_2px_rgba(16,24,40,0.10)]"
+        : onDark
+          ? "text-white/65 hover:text-white"
+          : "text-muted-foreground hover:text-foreground"
+    }`;
+  return (
+    <div
+      role="group"
+      aria-label="Appearance"
+      // Light mode drops the flat gray border: a hard outline over the colourful
+      // aurora read as a pasted-on box. A soft ring plus a lift shadow makes it
+      // sit on the gradient instead, and the higher white opacity stops the
+      // aurora tinting the chip green.
+      className={`inline-flex items-center gap-0.5 rounded-lg p-0.5 ${
+        onDark ? "border border-white/25" : "ring-1 ring-black/[0.05]"
+      } ${
+        frosted
+          ? onDark
+            ? "bg-black/30 backdrop-blur-md"
+            : "bg-white/85 shadow-[0_4px_16px_-8px_rgba(16,24,40,0.25)] backdrop-blur-md"
+          : ""
+      }`}
+    >
+      {THEME_OPTIONS.map((opt) => (
+        <button
+          key={opt.value}
+          type="button"
+          onClick={() => toggle.onSelect(opt.value)}
+          aria-pressed={toggle.preference === opt.value}
+          aria-label={opt.label}
+          title={opt.label}
+          className={seg(toggle.preference === opt.value)}
+        >
+          {opt.icon}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function Footer({
+  reveal = false,
+  light = false,
+  themeToggle,
+}: {
+  reveal?: boolean;
+  // Light-toned reveal footer for content pages in light mode — the dark aurora
+  // sheet stays reserved for the landing page (and dark mode). Composition is
+  // identical, just re-toned.
+  light?: boolean;
+  themeToggle?: ThemeToggle;
+}) {
+  // The reveal variant (landing + content pages) is a dark sheet that ends in
+  // the brand aurora. Composition (koto): the logo mark anchors the left; the
+  // labelled link rows stack on the right, split by hairlines, over a slim
+  // bottom bar carrying the copyright + theme switch.
   if (reveal) {
     // inline-block + vertical padding keeps each row a comfortable tap target
     // on touch screens — the bare 15px text line was easy to miss-tap.
-    const linkCls =
-      "inline-block py-1 text-[15px] text-white/60 transition-colors hover:text-white";
-    // leading-none pins the label glyphs to the top of their line box, so the
-    // three column labels can't drift apart across font/engine differences.
-    const monoLabel =
-      "font-mono text-xs uppercase leading-none tracking-wide text-white/40";
+    const linkCls = light
+      ? "inline-block py-1 text-[15px] text-muted-foreground transition-colors hover:text-foreground"
+      : "inline-block py-1 text-[15px] text-white/60 transition-colors hover:text-white";
     return (
-      <footer className="footer-reveal overflow-hidden bg-[#101010] text-white">
-        <div className="mx-auto max-w-7xl px-6 pt-16 md:pt-20">
-          <div className="flex flex-col gap-12 md:flex-row md:items-start md:justify-between md:gap-8">
-            {/* Left cluster — mark, then Navigate + Connect beside it. */}
-            <div className="flex flex-col items-start gap-10 md:flex-row md:gap-14">
-              <Image
-                src="/images/logo-mark.svg"
-                alt="Assembly Studio"
-                width={28}
-                height={28}
-                className="invert"
-              />
-              {/* Navigate */}
-              <div>
-                <p className={monoLabel}>Navigate</p>
-                <ul className="mt-4 flex flex-col gap-1">
-                  {NAVIGATE.map((link) => (
-                    <li key={link.label}>
-                      <FooterLink link={link} className={linkCls} />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              {/* Connect */}
-              <div>
-                <p className={monoLabel}>Connect</p>
-                <ul className="mt-4 flex flex-col gap-1">
-                  {CONNECT.map((link) => (
-                    <li key={link.label}>
-                      <FooterLink link={link} className={linkCls} />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+      <footer
+        className={`footer-reveal relative overflow-hidden ${
+          light ? "bg-background text-foreground" : "bg-[#101010] text-white"
+        }`}
+      >
+        {/* Container matches the nav rail (max-w-[1600px] px-6 md:px-10) so the
+            first column's left edge lines up with the nav logo. */}
+        {/* Container matches the nav rail (max-w-[1600px] px-6 md:px-10) so the
+            first column's left edge lines up with the nav logo. */}
+        {/* Full-bleed hairline divider at the footer's top edge — spans the
+            full page width, and the home content rails connect into it with no
+            gap. */}
+        <div className={`border-t ${light ? "border-border" : "border-[#383838]"}`} />
 
-            {/* Right cluster — back-to-top. self-start pins it to the top of
-                the row. */}
-            <div className="flex items-start gap-10 self-start md:gap-14">
-              {/* Back to top — desktop only; on mobile the footer is compact
-                  enough that the control is just clutter. */}
-              <button
-                type="button"
-                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                aria-label="Back to top"
-                className="hidden size-10 shrink-0 items-center justify-center rounded-xl border border-white/15 text-white/70 transition-colors hover:border-white/40 hover:text-white md:flex"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  aria-hidden
-                >
-                  <path
-                    d="M8 13V3M8 3L3.5 7.5M8 3l4.5 4.5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </button>
+        <div className="mx-auto max-w-[1600px] px-6 pb-12 md:px-10 md:pb-16">
+          <div className="relative z-10 mt-10 md:mt-12">
+            {/* Link columns (left) + theme/back-to-top controls (top-right). */}
+            <div className="flex flex-col gap-10 sm:flex-row sm:items-start sm:justify-between sm:gap-20">
+              <div className="flex flex-col gap-10 sm:flex-row sm:gap-20">
+                {(
+                  [
+                    { label: "Navigate", links: NAVIGATE },
+                    { label: "Connect", links: CONNECT },
+                  ] as const
+                ).map((col) => (
+                  <div key={col.label} className="sm:min-w-32">
+                    <p className={`font-mono text-xs uppercase tracking-wide ${light ? "text-muted-foreground" : "text-white/50"}`}>
+                      {col.label}
+                    </p>
+                    <ul className="mt-4 flex flex-col gap-1.5">
+                      {col.links.map((link) => (
+                        <li key={link.label}>
+                          <FooterLink link={link} className={linkCls} />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+              <div className="flex shrink-0 items-center gap-4">
+                {themeToggle && (
+                  <ThemeSwitch toggle={themeToggle} onDark={!light} frosted />
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Brand word — PP Mori Regular, slightly oversized past the viewport
-              so the footer's overflow-hidden crops just the left and right
-              edges. w-max + translate centers the word on the viewport exactly
-              (text-align centering drifts with the font's side bearings), and
-              it sits fully above the bottom edge — no vertical crop. */}
-          <p
-            aria-hidden
-            className="relative left-1/2 mt-14 hidden w-max -translate-x-1/2 select-none whitespace-nowrap pb-4 text-[26vw] font-normal leading-[0.8] tracking-[-0.04em] text-white md:mt-16 md:block"
-          >
-            Assembly
-          </p>
         </div>
 
-        {/* Aurora — bottom of the same sheet (replaces the old fixed
-            overscroll panel; same visible height as the reveal gap had).
-            Shorter on mobile, where the wordmark is hidden and the footer
-            should stay compact. */}
-        <div
-          aria-hidden
-          className="pointer-events-none relative mt-10 h-[48vh] md:mt-0 md:h-[42vh]"
-        >
-          <div className="footer-aurora absolute inset-x-0 bottom-0 h-full">
-            <DiaGradient
-              stops={BRAND_AURORA}
-              bars={14}
-              blur={30}
-              peak={0.72}
-              valley={0.45}
-              riseMs={1300}
-            />
-          </div>
-        </div>
+        {/* Brand aurora, always visible — carries the lower half of the footer
+            now that the wordmark is gone (the footer keeps its generous height). */}
+        <FooterAurora />
       </footer>
     );
   }
@@ -192,6 +299,14 @@ export function Footer({ reveal = false }: { reveal?: boolean }) {
               width={28}
               height={28}
             />
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
+              The platform firms run on and build on.
+            </p>
+            {themeToggle && (
+              <div className="mt-5">
+                <ThemeSwitch toggle={themeToggle} onDark={!light} />
+              </div>
+            )}
           </div>
           {[
             { title: "Navigate", links: NAVIGATE },

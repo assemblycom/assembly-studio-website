@@ -2,10 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import { NAV_LINKS, APP_URL, SIGNUP_URL, DEMO_URL } from "@/lib/constants";
+import { NAV_LINKS, APP_URL, SIGNUP_URL, LOGIN_URL, DEMO_URL } from "@/lib/constants";
 import { useAuthState } from "@/lib/use-auth";
+import { useTheme } from "@/components/theme/theme-provider";
 
 // Past this scroll distance the sticky header swaps from transparent to a
 // frosted surface.
@@ -17,6 +19,7 @@ export function StudioNav({
   softGlass = false,
   maxWidthClass,
   restPaddingClass,
+  narrowOnScroll = false,
   hideDemo = false,
   themeToggle,
 }: {
@@ -32,6 +35,9 @@ export function StudioNav({
   // Override the at-rest horizontal padding so the nav clears a rounded hero
   // panel's edge on narrower layouts (V63).
   restPaddingClass?: string;
+  // Narrow the nav to the content rail once scrolled past the hero (home only);
+  // other pages keep a constant width.
+  narrowOnScroll?: boolean;
   // Hide the "Book a demo" CTA (both desktop and the mobile menu) — dropped for
   // launch on some heroes.
   hideDemo?: boolean;
@@ -46,6 +52,52 @@ export function StudioNav({
   // The menu is portaled to <body>, so it needs the client to have mounted.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+
+  // Honour prefers-reduced-motion for the nav's width/height easing, which we
+  // drive with an inline transition (see rowTransition) rather than a Tailwind
+  // class — so the class-based motion-reduce guard doesn't reach it.
+  const [reducedMotion, setReducedMotion] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  // Home nav only: the nav narrows through the content, then widens back out
+  // once the (wide) footer scrolls into view so it matches the footer width.
+  const [atFooter, setAtFooter] = useState(false);
+  useEffect(() => {
+    if (!narrowOnScroll) return;
+    const footer = document.querySelector("footer");
+    if (!footer) return;
+    // Fire only once the footer is clearly in view (30% up from the bottom),
+    // not the instant its top grazes the viewport edge — otherwise tiny scroll
+    // moves toggle it on/off and the width transition jitters.
+    const io = new IntersectionObserver(
+      ([entry]) => setAtFooter(entry.isIntersecting),
+      { threshold: 0, rootMargin: "0px 0px -30% 0px" },
+    );
+    io.observe(footer);
+    return () => io.disconnect();
+  }, [narrowOnScroll]);
+
+  // Close the mobile menu once the route actually changes, rather than on the
+  // link's click. Keeping the overlay up until the new page is active means it
+  // covers the navigation instead of vanishing to flash the old page first.
+  const pathname = usePathname();
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  // On the page the logo already points at, clicking it would be a no-op route
+  // change, so scroll back to the top instead.
+  const onLogoClick = (e: React.MouseEvent) => {
+    if (pathname !== "/") return;
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   // Lock page scroll while the full-screen menu is open. The lock must not
   // move or freeze the scroll position (a fixed-body freeze made page
@@ -71,6 +123,8 @@ export function StudioNav({
   // contexts, a dark one over a dark hero/theme (darkTop). So contents are light
   // only in a dark context — dark otherwise, whether at rest or scrolled.
   const lightContent = softGlass ? false : darkTop;
+  // Resolved site theme — the nav CTA turns lime in light mode only.
+  const { theme } = useTheme();
 
   // Sticky so the nav follows you down. At the top it's a transparent, dark-on-
   // light bar; once scrolled it settles into a floating capsule ("pill") with
@@ -94,7 +148,7 @@ export function StudioNav({
     backdropFilter: "blur(11px)",
     WebkitBackdropFilter: "blur(11px)",
     background: `linear-gradient(to bottom, ${
-      darkSurface ? "rgba(14,14,16,0.5)" : "rgba(255,255,255,0.62)"
+      darkSurface ? "rgba(14,14,16,0.5)" : "rgba(255,255,255,0.88)"
     } 0%, transparent 100%)`,
     maskImage:
       "linear-gradient(to bottom, #000 0%, #000 42%, transparent 100%)",
@@ -108,13 +162,27 @@ export function StudioNav({
   const ease =
     "duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none";
 
-  // Keep the same rail width at rest and when scrolled so the capsule doesn't
-  // visibly shrink. The scrolled outer gutter (px-6) sits just inside the hero
-  // box gutter (px-4) so the pill doesn't touch the box edges.
+  // The desktop nav's rail width changes by a large amount (320px) as it narrows
+  // through the content and widens back out over the footer. The shared ease-out
+  // curve front-loads that motion — most of the travel lands in the first ~100ms,
+  // then it creeps to a stop, which reads as an aggressive lurch on a change this
+  // big. So width gets its own gentle ease-in-out over a longer duration (it eases
+  // in AND out, no lurch), while height keeps the snappy shared curve — the height
+  // delta is only 8px, so it can settle quickly without drawing the eye.
+  const rowTransition = reducedMotion
+    ? "none"
+    : "max-width 620ms cubic-bezier(0.65, 0, 0.35, 1), height 450ms cubic-bezier(0.22, 1, 0.36, 1)";
+
+  // Wide at rest (matching the hero), then narrowing to the content rail
+  // (1100px) once scrolled past the hero, so the nav settles in line with the
+  // page content below.
   const maxWidth = fullWidth ? "max-w-none" : (maxWidthClass ?? "max-w-7xl");
-  // Inner content rail — same width/padding at rest and scrolled so nothing
-  // shifts horizontally; only the bar height eases down a touch on scroll.
-  const contentRail = `${maxWidth} ${fullWidth ? "px-8" : (restPaddingClass ?? "px-6")}`;
+  // On home, the nav narrows while scrolled through the content, then widens
+  // back out over the (wide) footer. 1280 (not 1200) so the nav's own px-10
+  // gutter lands its content exactly on the 1200px rail lines, aligning the
+  // logo with the rails. Other pages keep maxWidth throughout.
+  const narrowed = narrowOnScroll && !fullWidth && scrolled && !atFooter;
+  const contentRail = `${narrowed ? "max-w-[1280px]" : maxWidth} ${fullWidth ? "px-8" : (restPaddingClass ?? "px-6")}`;
 
   // Content colors flip when the bar is on a dark surface. Light content always
   // sits over a dark surface (the scrolled dark pill or a dark hero/theme), so
@@ -126,7 +194,13 @@ export function StudioNav({
   const darkDisabled = softGlass ? "text-foreground/90" : "text-muted-foreground";
   const linkCls = `whitespace-nowrap rounded-full px-2 py-1.5 text-sm transition-colors lg:px-3 ${lightContent ? "text-white/70 hover:text-white" : darkLink}`;
   const disabledCls = `cursor-default whitespace-nowrap rounded-full px-2 py-1.5 text-sm lg:px-3 ${lightContent ? "text-white/50" : darkDisabled}`;
-  const ctaCls = `whitespace-nowrap rounded-lg px-4 py-1.5 text-sm transition-[background-color,color,opacity] hover:opacity-90 ${lightContent ? "bg-white text-neutral-900" : "bg-foreground text-background"}`;
+  const ctaCls = `whitespace-nowrap rounded-lg px-4 py-1.5 text-sm transition-[background-color,color,opacity] hover:opacity-90 ${
+    theme === "light"
+      ? "bg-neutral-900 text-white"
+      : lightContent
+        ? "bg-white text-neutral-900"
+        : "bg-foreground text-background"
+  }`;
   const logoInvert = lightContent ? "brightness-0 invert" : "";
 
   // Over a dark surface the full-screen mobile menu stays dark rather than
@@ -157,21 +231,22 @@ export function StudioNav({
   );
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > SCROLL_THRESHOLD);
+    // Hysteresis (dead-zone around the threshold): the nav shrinks a touch on
+    // scroll, which nudges layout right at the cutoff. With a single threshold
+    // that nudge can re-cross it and flip the state back and forth — a visible
+    // jitter/vibration. Requiring the scroll to move past a margin before
+    // toggling in each direction stops the oscillation.
+    const MARGIN = 24;
+    const onScroll = () =>
+      setScrolled((prev) =>
+        prev
+          ? window.scrollY > SCROLL_THRESHOLD - MARGIN
+          : window.scrollY > SCROLL_THRESHOLD + MARGIN,
+      );
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  // Lock background scroll while the mobile menu overlay is open.
-  useEffect(() => {
-    if (!mobileMenuOpen) return;
-    const original = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = original;
-    };
-  }, [mobileMenuOpen]);
 
   return (
     <>
@@ -185,7 +260,7 @@ export function StudioNav({
           style={navBlurStyle}
         />
         <div className={`relative z-10 flex items-center justify-between px-5 transition-[height] ${ease} ${scrolled ? "h-12" : "h-14"}`}>
-          <Link href="/" className="flex items-center">
+          <Link href="/" onClick={onLogoClick} className="flex items-center">
             {logoMark}
           </Link>
           <button
@@ -216,11 +291,14 @@ export function StudioNav({
           className={`pointer-events-none absolute inset-x-0 top-0 h-[135%] transition-opacity ${ease} ${scrolled ? "opacity-100" : "opacity-0"}`}
           style={navBlurStyle}
         />
-        <div className={`relative z-10 mx-auto flex items-center ${contentRail} transition-[height] ${ease} ${scrolled ? "h-14" : "h-16"}`}>
+        <div
+          className={`relative z-10 mx-auto flex items-center ${contentRail} ${scrolled ? "h-14" : "h-16"}`}
+          style={{ transition: rowTransition }}
+        >
           {/* Three balanced columns keep the nav truly centred while the equal
               side columns guarantee it never crowds the logo or the actions. */}
           <div className="flex flex-1 items-center">
-          <Link href="/" className="flex items-center">
+          <Link href="/" onClick={onLogoClick} className="flex items-center">
             {logoMark}
           </Link>
           </div>
@@ -240,8 +318,8 @@ export function StudioNav({
                   ) : link.external ? (
                     <a
                       href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      target={link.newTab ? "_blank" : undefined}
+                      rel={link.newTab ? "noopener noreferrer" : undefined}
                       className={linkCls}
                     >
                       {link.label}
@@ -303,7 +381,7 @@ export function StudioNav({
                     Book a demo
                   </Link>
                 )}
-                <a href={APP_URL} className={linkCls}>
+                <a href={LOGIN_URL} className={linkCls}>
                   Log in
                 </a>
                 <a href={SIGNUP_URL} className={ctaCls}>
@@ -318,13 +396,16 @@ export function StudioNav({
       {/* Mobile full-screen menu — portaled to <body> so it escapes the home
           content wrapper's stacking context (z-10) and paints above the nav. */}
       {mounted && mobileMenuOpen && createPortal(
-        <div className={`fixed inset-0 z-[60] flex flex-col md:hidden ${menuSurface}`}>
+        <div className={`fixed inset-0 z-[60] flex flex-col lg:hidden ${menuSurface}`}>
           {/* Match the mobile header's padding (px-5) and height exactly so the
               logo stays put when the menu opens — it must not shift. */}
           <div className={`flex items-center justify-between border-b px-5 ${scrolled ? "h-12" : "h-14"} ${menuBorder}`}>
             <Link
               href="/"
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={(e) => {
+                setMobileMenuOpen(false);
+                onLogoClick(e);
+              }}
               className="flex items-center"
             >
               <Image
@@ -369,8 +450,8 @@ export function StudioNav({
                   ) : link.external ? (
                     <a
                       href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      target={link.newTab ? "_blank" : undefined}
+                      rel={link.newTab ? "noopener noreferrer" : undefined}
                       className={`block py-3 text-lg ${menuInk}`}
                     >
                       {link.label}
@@ -379,7 +460,6 @@ export function StudioNav({
                     <Link
                       href={link.href}
                       className={`block py-3 text-lg ${menuInk}`}
-                      onClick={() => setMobileMenuOpen(false)}
                     >
                       {link.label}
                     </Link>
@@ -444,7 +524,7 @@ export function StudioNav({
                   Get started
                 </a>
                 <a
-                  href={APP_URL}
+                  href={LOGIN_URL}
                   className={`flex w-full items-center justify-center rounded-lg border px-4 py-3 text-sm ${menuDemo}`}
                 >
                   Log in

@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Section } from "@/components/ui/section";
 import { getFeaturedTemplates } from "@/lib/templates";
 import { APP_URL } from "@/lib/constants";
-import { TemplatePreviewFrame } from "@/components/templates/preview-frame";
 
 const featuredTemplates = getFeaturedTemplates(6);
 
@@ -34,9 +33,7 @@ export function Templates() {
             href={APP_URL}
             className="group overflow-hidden rounded-xl border border-border transition-colors hover:border-foreground/20"
           >
-            <div className="relative aspect-[5/3] overflow-hidden">
-              <TemplatePreviewFrame compact video={template.hasVideo} />
-            </div>
+            <div className="aspect-[5/3] overflow-hidden bg-muted" />
             <div className="p-4">
               <h3 className="text-sm font-medium">
                 {template.title}

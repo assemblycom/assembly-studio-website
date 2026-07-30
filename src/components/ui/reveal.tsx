@@ -8,15 +8,26 @@ import { useEffect, useRef, useState } from "react";
  * opacity-only for sections that contain a `position: sticky` child (a transform
  * ancestor — even translateY(0) — would break the sticky), e.g. How it works.
  * Reduced-motion shows content immediately. Reveals once, then disconnects.
+ * Fixed trigger point (~90% of viewport height); no per-instance override.
  */
 export function Reveal({
   children,
   variant = "rise",
   className = "",
+  delayMs = 0,
+  durationMs,
 }: {
   children: React.ReactNode;
-  variant?: "rise" | "fade";
+  // "rise-scale" also eases in a slight zoom — a more cinematic hand-off for
+  // full-height feature sections (still native scroll, reveal-once).
+  variant?: "rise" | "fade" | "rise-scale";
   className?: string;
+  // Delays the entrance so sibling reveals can stagger (e.g. a title settling
+  // before its image eases into focus just after).
+  delayMs?: number;
+  // Overrides the fade length — a longer value makes the entrance softer/slower
+  // (e.g. the customers rail text, which should drift in, not snap).
+  durationMs?: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [shown, setShown] = useState(false);
@@ -65,13 +76,30 @@ export function Reveal({
     };
   }, []);
 
-  const hidden = variant === "fade" ? "opacity-0" : "translate-y-8 opacity-0";
-  const visible = variant === "fade" ? "opacity-100" : "translate-y-0 opacity-100";
+  const hidden =
+    variant === "fade"
+      ? "opacity-0"
+      : variant === "rise-scale"
+        ? "translate-y-10 scale-[0.98] opacity-0"
+        : "translate-y-8 opacity-0";
+  const visible =
+    variant === "fade"
+      ? "opacity-100"
+      : variant === "rise-scale"
+        ? "translate-y-0 scale-100 opacity-100"
+        : "translate-y-0 opacity-100";
+  // The cinematic variant eases a touch longer so the zoom reads. An explicit
+  // durationMs (inline) overrides either default.
+  const duration = variant === "rise-scale" ? "duration-[1000ms]" : "duration-[800ms]";
+  const style: React.CSSProperties = {};
+  if (delayMs) style.transitionDelay = `${delayMs}ms`;
+  if (durationMs) style.transitionDuration = `${durationMs}ms`;
 
   return (
     <div
       ref={ref}
-      className={`transition-all duration-[800ms] ease-[cubic-bezier(0.22,1,0.36,1)] ${shown ? visible : hidden} ${className}`}
+      style={Object.keys(style).length ? style : undefined}
+      className={`transition-all ${duration} ease-[cubic-bezier(0.22,1,0.36,1)] ${shown ? visible : hidden} ${className}`}
     >
       {children}
     </div>

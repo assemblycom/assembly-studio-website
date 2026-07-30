@@ -31,12 +31,12 @@ export function CustomersHero() {
           Made for <span className="whitespace-nowrap">tech-enabled</span>{" "}
           service firms
         </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
+        <p className="type-lead mx-auto mt-6 max-w-2xl text-muted-foreground">
           Trusted by professional service firms with 1M+ clients and counting.
         </p>
         <a
           href={APP_URL}
-          className="mt-8 inline-block rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
+          className="mt-8 block w-full max-w-xs rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background sm:inline-block sm:w-auto transition-opacity hover:opacity-90"
         >
           Start trial
         </a>

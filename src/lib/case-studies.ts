@@ -20,6 +20,9 @@ export type ContentBlock =
 export interface CaseStudy {
   slug: string;
   company: string;
+  // Optional shorter label for compact placements (e.g. the customers-page card
+  // overlay) where the full company name is too long.
+  shortName?: string;
   industry: string;
   headline: string;
   summary: string;
@@ -73,10 +76,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     company: "Capital One Luxury Travel",
     industry: "Travel & Hospitality",
     featured: true,
-    // Placeholder sample clip — swap for the real customer video.
-    videoUrl:
-      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    image: "/images/customers/capital-one-luxury-travel.jpg",
+    image: "/images/customers/capital-one-hero.jpg",
     headline:
       "How Capital One Luxury Travel Balanced 'Build vs. Buy' with Assembly",
     summary:
@@ -298,7 +298,6 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "metta-health",
     company: "Metta Health",
     industry: "Healthcare",
-    featured: true,
     image: "/images/customers/metta-health.jpg",
     headline:
       "How Metta Health Scales HIPAA-Compliant Patient Authorizations with Assembly",
@@ -387,6 +386,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "orca-accounting",
     company: "Orca Accounting",
     industry: "Accounting",
+    image: "/images/customers/orca-hero.jpg",
     headline:
       "How Orca Accounting Scaled 4.5x in 7 Months with Professional Client Portal Software",
     summary:
@@ -580,7 +580,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "zen-aegis",
     company: "Zen Aegis",
     industry: "Professional Services",
-    image: "/images/customers/zen-aegis.jpg",
+    image: "/images/customers/zen-aegis-hero2.jpg",
     headline:
       "How Zen Aegis Saves Clients 40+ Hours a Week With Secure, Automated Portal Software",
     summary:
@@ -670,10 +670,6 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "ditto-by-dbc",
     company: "Ditto by DBC",
     industry: "Marketing & Design",
-    featured: true,
-    // Placeholder sample clip — swap for the real customer video.
-    videoUrl:
-      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
     image: "/images/customers/ditto-by-dbc.jpg",
     headline:
       "Scaling Secure, Data-Driven Campaigns with Assembly: How DBC Launched Ditto",
@@ -841,6 +837,7 @@ export const CASE_STUDIES: CaseStudy[] = [
   {
     slug: "collective-cpa",
     company: "Collective CPA & Advisors",
+    shortName: "Collective CPA",
     industry: "Accounting & Advisory",
     image: "/images/customers/collective-cpa.jpg",
     headline:
@@ -1097,8 +1094,140 @@ export const CASE_STUDIES: CaseStudy[] = [
       },
     ],
   },
+  {
+    // Placeholder story — copy and real assets pending. Carries a videoUrl so its
+    // detail page leads with the video player.
+    slug: "sargent-cpa",
+    company: "Sargent CPA",
+    industry: "Accounting & Advisory",
+    videoUrl:
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    headline: "How Sargent CPA modernized its client experience",
+    summary:
+      "Placeholder summary — real copy coming soon. Sargent CPA replaced a patchwork of tools with a single Assembly client portal.",
+    stats: [
+      { value: "3x", label: "faster client onboarding" },
+      { value: "100%", label: "of intake moved online" },
+    ],
+    challenge:
+      "Placeholder challenge copy — to be replaced with the real case-study content.",
+    solution:
+      "Placeholder solution copy — to be replaced with the real case-study content.",
+    results: ["Placeholder result one", "Placeholder result two", "Placeholder result three"],
+    glance: {
+      founded: "2016",
+      runningSince: "2025",
+      companyUrl: "https://example.com",
+      apps: ["Tasks", "Messages App", "Contracts App", "Google Drive"],
+    },
+    body: [
+      { type: "heading", text: "Placeholder section heading" },
+      {
+        type: "paragraph",
+        text: "Placeholder paragraph — real case-study copy coming soon. This section will cover the firm's background and what prompted the move to Assembly.",
+      },
+      {
+        type: "paragraph",
+        text: "Placeholder paragraph — additional context on the firm's previous tooling and where the friction was.",
+      },
+      {
+        type: "quote",
+        text: "Placeholder customer quote — the real testimonial will go here.",
+        attribution: "Placeholder Name, Founder, Sargent CPA",
+      },
+      { type: "heading", text: "Placeholder section heading" },
+      {
+        type: "paragraph",
+        text: "Placeholder paragraph — describing the solution, rollout, and the apps the firm now runs on Assembly.",
+      },
+    ],
+  },
+  {
+    // Placeholder story — copy and real assets pending. Carries a videoUrl so its
+    // detail page leads with the video player.
+    slug: "advertai-marketing",
+    company: "Advertai Marketing",
+    industry: "Marketing & Design",
+    videoUrl:
+      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    headline: "How Advertai Marketing scaled client delivery",
+    summary:
+      "Placeholder summary — real copy coming soon. Advertai Marketing runs client campaigns and deliverables through one Assembly workspace.",
+    stats: [
+      { value: "2x", label: "faster campaign delivery" },
+      { value: "40%", label: "less admin time" },
+    ],
+    challenge:
+      "Placeholder challenge copy — to be replaced with the real case-study content.",
+    solution:
+      "Placeholder solution copy — to be replaced with the real case-study content.",
+    results: ["Placeholder result one", "Placeholder result two", "Placeholder result three"],
+    glance: {
+      founded: "2019",
+      runningSince: "2025",
+      companyUrl: "https://example.com",
+      apps: ["Tasks", "Messages App", "Contracts App", "Intake Forms"],
+    },
+    body: [
+      { type: "heading", text: "Placeholder section heading" },
+      {
+        type: "paragraph",
+        text: "Placeholder paragraph — real case-study copy coming soon. This section will cover the agency's background and what prompted the move to Assembly.",
+      },
+      {
+        type: "paragraph",
+        text: "Placeholder paragraph — additional context on how the agency managed client work before Assembly.",
+      },
+      {
+        type: "quote",
+        text: "Placeholder customer quote — the real testimonial will go here.",
+        attribution: "Placeholder Name, Founder, Advertai Marketing",
+      },
+      { type: "heading", text: "Placeholder section heading" },
+      {
+        type: "paragraph",
+        text: "Placeholder paragraph — describing the solution, rollout, and the apps the agency now runs on Assembly.",
+      },
+    ],
+  },
 ];
 
 export function getCaseStudyBySlug(slug: string): CaseStudy | undefined {
   return CASE_STUDIES.find((cs) => cs.slug === slug);
+}
+
+// The three flagship stories featured as cards in the customers-page hero.
+// Everything else flows into the story table below. Single source of truth so
+// the hero and the table never double-list a study.
+export const HERO_STUDY_SLUGS = [
+  "capital-one-luxury-travel",
+  "ditto-by-dbc",
+  "jungle-luxe",
+  "collective-cpa",
+] as const;
+
+export const HERO_STUDIES: CaseStudy[] = HERO_STUDY_SLUGS.map(
+  (slug) => CASE_STUDIES.find((s) => s.slug === slug),
+).filter((s): s is CaseStudy => Boolean(s));
+
+// First testimonial quote from a study's body, split into speaker name + role
+// (attribution is "Name, Role at Company"). Used by the customers-page cards.
+export interface FeaturedQuote {
+  text: string;
+  name: string;
+  role: string;
+}
+
+export function firstQuote(study: CaseStudy): FeaturedQuote | null {
+  const block = study.body?.find(
+    (b): b is Extract<ContentBlock, { type: "quote" }> => b.type === "quote",
+  );
+  if (!block) return null;
+  const attribution = block.attribution ?? "";
+  const [name, ...rest] = attribution.split(",");
+  return {
+    text: block.text,
+    name: name.trim(),
+    role: rest.join(",").trim(),
+  };
 }

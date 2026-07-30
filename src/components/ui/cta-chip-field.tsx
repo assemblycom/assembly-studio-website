@@ -20,9 +20,13 @@ const MAX_DRIFT = 46; // px a depth-1 chip travels edge-to-edge
 export function CtaChipField({
   chips,
   children,
+  framed = true,
 }: {
   chips: CtaChip[];
   children: ReactNode;
+  // When false, the panel drops its border + muted background and sits open on
+  // the page instead of reading as a boxed card.
+  framed?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -55,7 +59,9 @@ export function CtaChipField({
         ref={ref}
         onMouseMove={handleMove}
         onMouseLeave={handleLeave}
-        className="relative mx-auto flex max-w-6xl items-center justify-center overflow-hidden rounded-3xl px-6 py-6 md:min-h-[440px] md:border md:border-border md:bg-muted/30 md:py-20"
+        className={`relative mx-auto flex max-w-6xl items-center justify-center overflow-hidden rounded-3xl px-6 py-6 md:min-h-[440px] md:py-20 ${
+          framed ? "md:border md:border-border md:bg-muted/30" : ""
+        }`}
       >
         {/* Floating chips (parallax layer). Hidden on narrow viewports, where
             the absolutely-positioned chips would collide with the centered

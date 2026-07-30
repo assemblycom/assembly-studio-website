@@ -24,9 +24,16 @@ const SETTINGS = {
   height: 3.4, // cylinder height (tall enough that the band stays even, not a
   // pinched bowtie)
   repeat: 3, // how many times the image set wraps around the cylinder
-  fov: 68, // lens angle (kept moderate: a flat perspective camera flares the
-  // band at the edges with very wide FOVs, pinching the center)
-  barrel: 0.3, // gentle fisheye / edge bulge
+  fov: 68, // base VERTICAL lens angle on portrait/normal screens (kept moderate:
+  // a flat perspective camera flares the band at the edges with very wide FOVs,
+  // pinching the center)
+  maxHFov: 100, // cap on the HORIZONTAL field of view. On wide screens three.js
+  // widens the horizontal FOV with the aspect ratio while holding `fov`
+  // (vertical) fixed; past ~120° the cylinder wall is seen at grazing angles and
+  // the band pinches into an hourglass "bowtie". We instead shrink the vertical
+  // FOV so the horizontal stays bounded here, keeping an even band on ultrawide.
+  barrel: 0.3, // fisheye / edge bulge — the band's curve (kept gentle: past
+  // ~0.35 the edges warp/smear and the band pinches into a broken hourglass)
   chroma: 0, // RGB edge split (0 = off)
   spin: 0.15, // cylinder rotation — the ribbon scrolls
   drift: 0.3, // camera sway
@@ -119,10 +126,25 @@ function CylinderWall({
   useFrame((state, delta) => {
     if (meshRef.current) meshRef.current.rotation.y += delta * SETTINGS.spin;
     const t = state.clock.elapsedTime;
-    state.camera.position.x = Math.sin(t * 0.16) * SETTINGS.drift;
-    state.camera.position.y = Math.cos(t * 0.11) * SETTINGS.drift * 0.25;
-    state.camera.position.z = SETTINGS.cameraZ;
-    state.camera.lookAt(0, 0, -SETTINGS.radius);
+
+    // Keep the horizontal field of view bounded so the band stays even instead
+    // of pinching into a bowtie on wide/ultrawide screens. As the aspect grows,
+    // derive the vertical FOV that holds the horizontal FOV at `maxHFov`, but
+    // never open wider than the base `fov` on tall/narrow screens.
+    const cam = state.camera as THREE.PerspectiveCamera;
+    const aspect = state.size.width / Math.max(1, state.size.height);
+    const maxH = THREE.MathUtils.degToRad(SETTINGS.maxHFov);
+    const vFromH = 2 * Math.atan(Math.tan(maxH / 2) / aspect);
+    const fovDeg = Math.min(SETTINGS.fov, THREE.MathUtils.radToDeg(vFromH));
+    if (Math.abs(cam.fov - fovDeg) > 0.01) {
+      cam.fov = fovDeg;
+      cam.updateProjectionMatrix();
+    }
+
+    cam.position.x = Math.sin(t * 0.16) * SETTINGS.drift;
+    cam.position.y = Math.cos(t * 0.11) * SETTINGS.drift * 0.25;
+    cam.position.z = SETTINGS.cameraZ;
+    cam.lookAt(0, 0, -SETTINGS.radius);
   });
 
   return (

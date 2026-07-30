@@ -8,18 +8,23 @@ export function MaskLogo({
   src,
   aspect,
   className,
+  fit = false,
 }: {
   src: string;
   // Intrinsic aspect ratio of the mask image, e.g. "398 / 174".
   aspect: string;
   className?: string;
+  // When true the span fills its parent and the mask contains within it, so any
+  // logo fits inside a fixed square tile regardless of its proportions. The
+  // parent supplies the size; the intrinsic aspect ratio is ignored.
+  fit?: boolean;
 }) {
   return (
     <span
       aria-hidden
       className={`block ${className ?? ""}`}
       style={{
-        aspectRatio: aspect,
+        ...(fit ? {} : { aspectRatio: aspect }),
         backgroundColor: "currentColor",
         WebkitMaskImage: `url(${src})`,
         maskImage: `url(${src})`,

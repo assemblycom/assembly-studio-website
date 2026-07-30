@@ -54,6 +54,7 @@ function bellHeights(n: number, peak: number, valley: number): number[] {
 export function DiaGradient({
   bars = 9,
   blur = 15,
+  blurX = blur,
   peak = 0.98,
   valley = 0.55,
   stops = DIA_STOPS,
@@ -61,6 +62,14 @@ export function DiaGradient({
 }: {
   bars?: number
   blur?: number
+  /**
+   * Horizontal blur, separate from the vertical one. `preserveAspectRatio="none"`
+   * squashes the viewBox to the container's width, and the filter is applied in
+   * user space, so on a narrow (phone-width) container the horizontal blur is
+   * compressed far more than the bar pitch and the per-bar halos survive as hard
+   * striations. Raise this to compensate for the squash.
+   */
+  blurX?: number
   peak?: number
   valley?: number
   stops?: Stop[]
@@ -68,7 +77,16 @@ export function DiaGradient({
 }) {
   const uid = useId()
   const [shown, setShown] = useState(false)
+  // Reduced motion skips the rise instead of playing it un-transitioned: the
+  // breathe is already switched off there, so the grow was the only motion left
+  // and it read as the field lurching up once per page load.
+  const [reduced, setReduced] = useState(false)
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setReduced(true)
+      setShown(true)
+      return
+    }
     const id = requestAnimationFrame(() => requestAnimationFrame(() => setShown(true)))
     return () => cancelAnimationFrame(id)
   }, [])
@@ -86,12 +104,12 @@ export function DiaGradient({
         width: "100%",
         transformOrigin: "bottom",
         transform: shown ? "scaleY(1)" : "scaleY(0)",
-        transition: `transform ${riseMs}ms cubic-bezier(0.16, 1, 0.3, 1)`,
+        transition: reduced ? undefined : `transform ${riseMs}ms cubic-bezier(0.16, 1, 0.3, 1)`,
         willChange: "transform",
       }}
     >
       <svg
-        style={{ height: "100%", width: "100%" }}
+        style={{ height: "100%", width: "100%", overflow: "visible" }}
         viewBox={`0 0 ${VBW} ${VBH}`}
         preserveAspectRatio="none"
         fill="none"
@@ -103,8 +121,11 @@ export function DiaGradient({
               <stop key={i} offset={s.offset} stopColor={s.color} />
             ))}
           </linearGradient>
+          {/* The region is deliberately tight: it clips each bar's blur halo, and
+              those clip edges ARE the vertical striations (see below). Widening it
+              dissolves the texture into one blob. */}
           <filter id={blurId} x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation={blur} />
+            <feGaussianBlur stdDeviation={blurX === blur ? blur : `${blurX} ${blur}`} />
           </filter>
         </defs>
         {/* Blur each bar in its OWN filter pass: the overlapping per-bar blur
@@ -152,6 +173,7 @@ export function FoldGradient({
   style?: CSSProperties
   bars?: number
   blur?: number
+  blurX?: number
   peak?: number
   valley?: number
   stops?: Stop[]

@@ -72,7 +72,7 @@ const GROUPS: FeatureGroup[] = [
       },
       {
         label: "Add-on build credits",
-        values: [false, true, true, true, "Custom"],
+        values: [false, true, true, true, true],
       },
       {
         label: "AI model selection",
@@ -208,10 +208,6 @@ const GROUPS: FeatureGroup[] = [
         values: [false, false, false, true, true],
       },
       {
-        label: "Custom onboarding",
-        values: [false, false, false, false, true],
-      },
-      {
         label: "Shared Slack channel",
         values: [false, false, false, false, true],
       },
@@ -247,7 +243,7 @@ function CheckIcon() {
       className="shrink-0 text-foreground"
       aria-hidden
     >
-      <circle cx="10" cy="10" r="9" className="fill-foreground/20" />
+      <circle cx="10" cy="10" r="9" className="fill-border" />
       <path
         d="M6 10l2.5 2.5L14 7.5"
         stroke="currentColor"
@@ -285,7 +281,7 @@ function RowLabel({ label, tooltip }: { label: string; tooltip?: string }) {
             type="button"
             tabIndex={0}
             aria-label={`About ${label}`}
-            className="text-muted-foreground/60 transition-colors hover:text-foreground"
+            className="cursor-pointer text-muted-foreground/60 transition-colors hover:text-foreground"
           >
             <InfoIcon />
           </button>
@@ -306,7 +302,14 @@ function CellContent({ value, plain }: { value: Cell; plain?: boolean }) {
     return <span className="text-muted-foreground/40">—</span>;
   }
   // Rates and costs render as bare values so a check doesn't read as "included".
-  if (plain && typeof value === "string") {
+  // "Unlimited" and "Custom" are inclusions, not rates, so they keep their check
+  // even in a plain row (matching the "Apps included → Unlimited" cell above).
+  if (
+    plain &&
+    typeof value === "string" &&
+    value !== "Unlimited" &&
+    value !== "Custom"
+  ) {
     return (
       <span className="whitespace-nowrap text-sm text-muted-foreground">
         {value}
@@ -327,6 +330,17 @@ export function FeatureComparison() {
   // Mobile can't fit five columns, so it shows one plan at a time (Shopify-style
   // tabs); desktop keeps the full side-by-side table.
   const [plan, setPlan] = useState(0);
+  // Collapsed by default so the long table doesn't overwhelm — a toggle reveals
+  // the full comparison (best-in-class progressive disclosure).
+  const [expanded, setExpanded] = useState(false);
+  // Collapsing from deep in the long table would strand the reader in empty
+  // space, so send them back to the top of the page on collapse.
+  const toggle = () => {
+    if (expanded) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    setExpanded((e) => !e);
+  };
   // Signed-in visitors don't see the Free column (matches the pricing cards).
   const { authed } = useAuthState();
   const columns = PLAN_NAMES.map((name, i) => ({ name, i })).filter(
@@ -337,11 +351,13 @@ export function FeatureComparison() {
   const activePlan = columns.some((c) => c.i === plan) ? plan : columns[0].i;
 
   return (
-    <div>
-      <h2 className="type-h3">
-        Compare plans
-      </h2>
-
+    // cursor-default so hovering the comparison text shows an arrow, not the
+    // text/I-beam cursor (this table is read-only, not editable).
+    <div className="cursor-default">
+      {expanded && (
+        <>
+          <h2 className="type-h3">Compare plans</h2>
+          <div className="mt-8 overflow-clip rounded-2xl border border-border px-6 pb-8 md:px-8 [[data-theme=dark]_&]:border-[#383838]">
       {/* Mobile: plan tabs + a single-column feature list for the chosen plan. */}
       <div className="md:hidden">
         {/* Scrollable plan tabs, pinned under the nav so they stay reachable as
@@ -349,7 +365,7 @@ export function FeatureComparison() {
         {/* overflow-y-hidden: overflow-x-auto alone also makes this a vertical
             scroll container, and the -mb-px underline trick let it scroll up
             by a pixel-high strip. */}
-        <div className="sticky top-12 z-20 -mx-6 flex gap-6 overflow-x-auto overflow-y-hidden border-b border-border bg-background px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-6 flex gap-6 overflow-x-auto overflow-y-hidden border-b border-border bg-background px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {columns.map(({ name, i }) => (
             <button
               key={name}
@@ -375,10 +391,10 @@ export function FeatureComparison() {
             {group.rows.map((row) => (
               <div
                 key={row.label}
-                className="flex items-center justify-between gap-4 border-t border-border py-3.5"
+                className="-mx-6 flex items-center justify-between gap-4 border-t border-border px-6 py-3.5"
               >
                 <RowLabel label={row.label} tooltip={row.tooltip} />
-                <div className="shrink-0 text-right">
+                <div className="w-36 shrink-0 text-left">
                   <CellContent value={row.values[activePlan]} plain={row.plain} />
                 </div>
               </div>
@@ -390,16 +406,21 @@ export function FeatureComparison() {
       {/* Desktop: full side-by-side table. */}
       <div className="hidden md:block">
         <div className="min-w-0">
-          {/* Sticky plan header. Pinned to the very top and padded down to clear
-              the nav; the transparent nav has no solid backdrop of its own, so
-              a full-bleed opaque layer sits behind this header to stop table
-              rows ghosting through the strip under the nav. */}
+          {/* Sticky plan header, inside the bordered card. Sticks just below the
+              floating nav; an opaque bg masks rows scrolling behind it. Negative
+              margins cancel the card's padding so the bottom divider runs
+              full-bleed to the card's side borders, while px re-insets the grid
+              content so the columns stay aligned with the rows below. */}
+          {/* Sticky header, compact. An opaque bar pinned directly above it
+              (bottom-full, connected — no gap) masks rows behind the
+              semi-transparent nav once stuck; overflow-clip on the card hides
+              that bar at rest. */}
           <div
-            className={`${grid} sticky top-0 z-20 items-end border-b border-border pb-4 pt-16`}
+            className={`${grid} sticky top-16 z-10 -mx-6 items-end border-b border-border bg-background px-6 pb-4 pt-6 md:-mx-8 md:px-8 [[data-theme=dark]_&]:border-[#383838]`}
           >
-            <div
+            <span
               aria-hidden
-              className="pointer-events-none absolute left-1/2 top-0 -z-10 h-full w-screen -translate-x-1/2 bg-background"
+              className="pointer-events-none absolute inset-x-0 bottom-full h-20 bg-background"
             />
             <div className="text-lg font-normal">Features</div>
             {columns.map(({ name }) => (
@@ -431,6 +452,40 @@ export function FeatureComparison() {
             </Fragment>
           ))}
         </div>
+      </div>
+          </div>
+        </>
+      )}
+
+      {/* Centered toggle — sits under the table when open (needs room), tucked
+          up under the plans above when collapsed. */}
+      <div className={`flex justify-center ${expanded ? "mt-10" : "mt-0"}`}>
+        <button
+          type="button"
+          onClick={toggle}
+          aria-expanded={expanded}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm text-foreground transition-colors hover:bg-muted sm:w-auto [[data-theme=dark]_&]:border-[#383838]"
+        >
+          {expanded ? "Hide comparison" : "Compare all features"}
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 20 20"
+            fill="none"
+            aria-hidden
+            className={`transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+              expanded ? "rotate-180" : ""
+            }`}
+          >
+            <path
+              d="M5 8l5 5 5-5"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
       </div>
     </div>
   );

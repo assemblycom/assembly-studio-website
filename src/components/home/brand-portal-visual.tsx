@@ -1,22 +1,22 @@
+"use client";
+
 // ─────────────────────────────────────────────────────────────────────────
-// BRAND-PORTAL VISUAL — the client's view of the portal, from Ana's
-// exploration file (node 872:42010): a sidebar washed in the client firm's
-// brand color (BrandMages blue) beside the generated Time Tracker app with
-// its approvals table. Decorative only.
+// BRAND-PORTAL VISUAL — the deployed "Build" step: the shared BrandMages
+// workspace sidebar (same as the Plan/Iterate mocks) beside the generated Time
+// Tracker app. It plays a short loop showing the app in use — the "Log Time"
+// button presses and a freshly-logged entry slides into the table — then
+// resets. Decorative only.
 // ─────────────────────────────────────────────────────────────────────────
 
+import { useEffect, useState } from "react";
 import {
-  IconChat,
   IconChevronDown,
-  IconClock,
   IconDots,
   IconFilter,
-  IconFolder,
-  IconGear,
-  IconHouse,
   IconPlus,
 } from "@/components/home/mock-icons";
 import { MockFrame } from "@/components/home/mock-frame";
+import { WorkspaceSidebar } from "@/components/home/build-app-visual";
 
 type Entry = {
   description: string;
@@ -86,81 +86,132 @@ const STATUS_STYLE: Record<Entry["status"], string> = {
   Logged: "bg-border/60 text-muted-foreground",
 };
 
-function BrandNavItem({
-  icon,
-  label,
-  active,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  active?: boolean;
-}) {
+// The entry that "gets logged" on each loop — it slides in at the top and the
+// oldest row drops off, so the table keeps its height.
+const NEW_ENTRY: Entry = {
+  description: "Discovery call",
+  client: "Meridian Corp",
+  project: "Advisory",
+  date: "Apr 11",
+  duration: "0h 45m",
+  status: "Pending",
+};
+
+// A little demo cursor that glides up to Log Time and clicks — copied from the
+// Iterate mock so the two read the same. White fill + dark outline reads on
+// either surface.
+function IconCursor({ className }: { className?: string }) {
   return (
-    <div
-      className={`flex h-[26px] items-center gap-2 rounded px-1.5 text-foreground ${
-        active ? "bg-border/70" : ""
-      }`}
-    >
-      <span className="[&>svg]:size-[12px] flex shrink-0 items-center justify-center">
-        {icon}
-      </span>
-      <span className="min-w-0 flex-1 truncate text-[11.5px] leading-none">
-        {label}
-      </span>
-    </div>
+    <svg viewBox="0 0 24 24" className={className} aria-hidden>
+      <path
+        d="M5.5 3.2 18.4 10.1 12.2 11.8 9.6 17.9 5.5 3.2Z"
+        fill="var(--background)"
+        stroke="var(--foreground)"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
+// Loop: the cursor glides to Log Time → presses → a freshly-logged entry slides
+// in → hold → reset. Reduced motion just shows the logged state.
+function useLogTimeLoop() {
+  const [pressing, setPressing] = useState(false);
+  const [logged, setLogged] = useState(false);
+  const [cursorVisible, setCursorVisible] = useState(false);
+  const [cursorNear, setCursorNear] = useState(false);
+  useEffect(() => {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      setLogged(true);
+      return;
+    }
+    let cancelled = false;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const wait = (ms: number) =>
+      new Promise<void>((r) => timers.push(setTimeout(r, ms)));
+    (async () => {
+      while (!cancelled) {
+        setLogged(false);
+        setPressing(false);
+        setCursorNear(false);
+        setCursorVisible(true);
+        await wait(900);
+        if (cancelled) return;
+        setCursorNear(true); // glide up to the Log Time button
+        await wait(650);
+        if (cancelled) return;
+        setPressing(true); // click
+        await wait(280);
+        if (cancelled) return;
+        setPressing(false);
+        setLogged(true); // the entry slides in
+        setCursorVisible(false);
+        await wait(3600);
+        if (cancelled) return;
+      }
+    })();
+    return () => {
+      cancelled = true;
+      timers.forEach(clearTimeout);
+    };
+  }, []);
+  return { pressing, logged, cursorVisible, cursorNear };
+}
+
 export function BrandPortalVisual() {
+  const { pressing, logged, cursorVisible, cursorNear } = useLogTimeLoop();
+  // Keep the row count steady: on log, prepend the new entry and drop the last.
+  const rows = logged ? [NEW_ENTRY, ...ENTRIES.slice(0, -1)] : ENTRIES;
   return (
     <MockFrame>
       <div className="flex min-h-0 flex-1">
-        {/* Client-side portal sidebar — hidden on small screens. */}
-        <div className="hidden w-[148px] shrink-0 flex-col border-r border-border bg-muted px-1.5 py-2 lg:flex md:w-[168px]">
-          <div className="flex items-center gap-1.5 px-1.5 pb-3 pt-0.5 text-foreground">
-            <span className="flex size-[16px] items-center justify-center rounded bg-foreground text-[9px] leading-none text-background">
-              B
-            </span>
-            <span className="text-[11.5px] leading-none">BrandMages</span>
-            <IconChevronDown className="size-[10px] text-muted-foreground" />
-          </div>
-
-          <BrandNavItem icon={<IconHouse />} label="Home" />
-          <BrandNavItem icon={<IconChat />} label="Messages" />
-          <BrandNavItem icon={<IconClock />} label="Time tracker" active />
-          <BrandNavItem icon={<IconFolder />} label="Folder" />
-
-          <div className="mt-auto pt-2">
-            <span className="flex size-[22px] items-center justify-center rounded-full border border-border text-foreground">
-              <IconGear className="size-[11px]" />
-            </span>
-          </div>
-        </div>
+        {/* Same internal workspace sidebar as the Plan/Iterate mocks, so all
+            three read as one BrandMages workspace. No Draft badge here — by the
+            Build step the app has deployed. */}
+        <WorkspaceSidebar showDraft={false} />
 
         {/* Main column — the generated Time Tracker app. */}
-        <div className="flex min-w-0 flex-1 flex-col">
-          <div className="flex h-[34px] shrink-0 items-center justify-between px-3">
+        <div className="relative flex min-w-0 flex-1 flex-col">
+          {/* Demo cursor — glides up to Log Time and clicks each loop. */}
+          <div
+            className={`pointer-events-none absolute z-20 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+              cursorVisible ? "opacity-100" : "opacity-0"
+            }`}
+            style={cursorNear ? { top: 26, right: 26 } : { top: "56%", right: "38%" }}
+          >
+            <IconCursor
+              className={`size-[15px] drop-shadow-sm transition-transform duration-150 ${
+                pressing ? "scale-90" : "scale-100"
+              }`}
+            />
+          </div>
+          <div className="flex h-[34px] shrink-0 items-center justify-between border-b border-border px-3">
             <span className="flex items-center gap-1 text-[11.5px] leading-none text-foreground">
               Time Tracker
               <IconChevronDown className="size-[10px] text-muted-foreground" />
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="flex size-[20px] items-center justify-center rounded border border-border">
+              <span className="flex size-[20px] items-center justify-center rounded-[3px] border border-border">
                 <IconDots className="size-[11px] text-foreground" />
               </span>
-              <span className="flex items-center gap-1 rounded bg-foreground px-2 py-1 text-[10px] leading-none text-background">
+              <span
+                className={`flex h-[20px] items-center gap-1 rounded-[3px] bg-foreground px-2 text-[10px] leading-none text-background transition-transform duration-150 ${
+                  pressing ? "scale-95" : "scale-100"
+                }`}
+              >
                 <IconPlus className="size-[9px]" />
                 Log Time
               </span>
             </span>
           </div>
 
-          {/* Tabs */}
-          <div className="flex shrink-0 gap-4 border-b border-border px-3">
+          {/* Tabs — same row height as the title bar above. */}
+          <div className="flex h-[34px] shrink-0 items-center gap-4 border-b border-border px-3">
             {["My time", "Team time", "All entries"].map((tab, i) => (
               <span
                 key={tab}
-                className={`-mb-px border-b pb-1.5 text-[11px] leading-none ${
+                className={`-mb-px flex h-[34px] items-center border-b text-[11px] leading-none ${
                   i === 0
                     ? "border-foreground text-foreground"
                     : "border-transparent text-muted-foreground"
@@ -174,11 +225,11 @@ export function BrandPortalVisual() {
           {/* Toolbar */}
           <div className="flex shrink-0 items-center justify-between px-3 py-2">
             <span className="flex items-center gap-1.5">
-              <span className="flex items-center gap-1 rounded border border-border px-1.5 py-1 text-[10px] leading-none text-foreground">
+              <span className="flex items-center gap-1 rounded-[3px] border border-border px-1.5 py-1 text-[10px] leading-none text-foreground">
                 <IconFilter className="size-[10px]" />
                 Filters
               </span>
-              <span className="rounded bg-muted px-1.5 py-1 text-[10px] leading-none text-foreground">
+              <span className="rounded-[3px] bg-muted px-1.5 py-1 text-[10px] leading-none text-foreground">
                 This week: Apr 7 – Apr 11
               </span>
             </span>
@@ -190,19 +241,21 @@ export function BrandPortalVisual() {
           {/* Entries table */}
           <div className="mx-3 mb-3 min-h-0 flex-1 overflow-hidden rounded-md border border-border">
             <div className="flex items-center gap-2 border-b border-border bg-muted px-2.5 py-1.5 text-[10px] leading-none text-muted-foreground">
-              <span className="min-w-0 flex-1">Description</span>
+              <span className="min-w-[64px] flex-1">Description</span>
               <span className="hidden w-[76px] lg:block">Client</span>
               <span className="hidden w-[80px] md:block">Project</span>
               <span className="w-[38px]">Date</span>
               <span className="w-[44px]">Duration</span>
               <span className="w-[58px]">Status</span>
             </div>
-            {ENTRIES.map((entry) => (
+            {rows.map((entry, i) => (
               <div
                 key={entry.description}
-                className="flex items-center gap-2 border-b border-border px-2.5 py-[7px] text-[10.5px] leading-none last:border-b-0"
+                className={`flex items-center gap-2 border-b border-border px-2.5 py-[7px] text-[10.5px] leading-none last:border-b-0 ${
+                  logged && i === 0 ? "animate-log-row" : ""
+                }`}
               >
-                <span className="min-w-0 flex-1 truncate text-foreground">
+                <span className="min-w-[64px] flex-1 truncate text-foreground">
                   {entry.description}
                 </span>
                 <span className="hidden w-[76px] truncate text-muted-foreground lg:block">

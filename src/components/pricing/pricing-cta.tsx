@@ -10,7 +10,7 @@ export function PricingCta() {
         Build the firm only you can build
       </h2>
       <p className="type-lead mx-auto mt-5 max-w-xl text-pretty text-muted-foreground">
-        Stop stitching together tools that were never meant to work together. Run everything and build anything in one place.
+        Stop stitching together tools that were never meant to fit. Run and build everything in one place.
       </p>
       <div className="mx-auto mt-8 flex w-full max-w-xs flex-col items-stretch gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:items-center sm:justify-center">
         <a

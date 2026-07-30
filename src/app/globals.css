@@ -83,14 +83,18 @@
      on OLED, à la Cursor's dark mode) stepping up from the ground in only two
      surface levels, with hairlines kept quiet. */
   --background: #0a0a0a;
-  --foreground: #f2f2f2;
+  /* Softened off-white (not pure white) — full-bright text/icons read harsh on
+     the neutral dark ground. */
+  --foreground: #d9d9d9;
   --muted: #1c1c1c;
-  --muted-foreground: #a1a1a1;
-  --border: #2a2a2a;
-  --accent: #f2f2f2;
-  --accent-foreground: #ffffff;
+  --muted-foreground: #8f8f8f;
+  /* Hairlines lifted off the near-black ground so dividers and card outlines
+     stay legible in dark mode (a lower value vanished against the surfaces). */
+  --border: #383838;
+  --accent: #d9d9d9;
+  --accent-foreground: #f2f2f2;
   --card: #151515;
-  --card-foreground: #f2f2f2;
+  --card-foreground: #d9d9d9;
 
   /* Mock status pills go translucent so they sit on dark surfaces without
      glowing; fg stays desaturated to match the neutral-gray dark scale. */
@@ -165,6 +169,22 @@
   }
 }
 
+/* Text-insertion caret for the "On Assembly" note title. Reads as a resting
+   cursor: solid for most of the cycle with a brief off-beat, hard on/off (no
+   fade) so it registers as a blink rather than a pulse. Kept as a plain global
+   keyframe (not a @theme token) so it's referenced by inline style and never
+   tree-shaken out. */
+@keyframes note-caret {
+  0%,
+  62% {
+    opacity: 1;
+  }
+  62.01%,
+  100% {
+    opacity: 0;
+  }
+}
+
 /* ── Landing surfaces that track the site theme ────────────────────────────
    Two home section groups react to the theme (data-theme on <html>) by
    redefining the design tokens, so every token-based component inside flips
@@ -179,17 +199,21 @@
   background-color: var(--background);
   color: var(--foreground);
 }
-/* .section-follow inherits the current theme tokens — no override needed. */
 
-/* Template detail sheet — in dark mode it reads as an ELEVATED surface
-   (lighter than the page, like a native dialog) so the modal and its preview
-   wells stay legible against the near-black backdrop. Light mode inherits. */
-[data-theme="dark"] .template-sheet {
-  --background: #1c1c1c;
-  --muted: #2c2c2c;
-  --border: #3a3a3a;
-  --card: #262626;
+/* Browser autofill otherwise paints inputs its own lavender/blue. Keep the
+   form's own surface + text colour instead (box-shadow trick — the only way
+   to override the UA autofill background). */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--background) inset;
+  -webkit-text-fill-color: var(--foreground);
+  caret-color: var(--foreground);
+  transition: background-color 9999s ease-in-out 0s;
 }
+/* .section-follow inherits the current theme tokens — no override needed. */
 
 /* Contrast = opposite of the current theme. In light it's a dark sheet; in
    dark it flips to a light sheet. */
@@ -275,9 +299,10 @@ html {
      reveal the fixed wordmark panel behind it. `clip` (not `hidden`) avoids
      creating a scroll container, so sticky headers keep working. */
   overflow-x: clip;
-  /* Also suppress the horizontal rubber-band on touch devices — the bounce
-     briefly exposed the canvas behind the page edges on iOS. */
-  overscroll-behavior-x: none;
+  /* Leave horizontal overscroll on `auto` so the browser's swipe-right-to-go-
+     back gesture keeps working (overscroll-behavior-x: none disabled it site-
+     wide). `overflow-x: clip` above already prevents any real sideways scroll. */
+  overscroll-behavior-x: auto;
   /* Slim page scrollbar — the default classic bar reads heavy against the
      page edge, especially on narrow viewports. */
   scrollbar-width: thin; /* Firefox */
@@ -470,6 +495,16 @@ html[data-theme="dark"] body {
     outline: 2px solid var(--foreground);
     outline-offset: 2px;
   }
+
+  /* Tailwind v4's Preflight gives buttons the default (arrow) cursor to match
+     native browsers, so every clickable control had to hand-add cursor-pointer
+     — which was applied inconsistently (tabs got it, homepage cards didn't).
+     Restore the pointer for all enabled buttons/role=button in one place;
+     disabled controls keep the default cursor. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -478,25 +513,31 @@ html[data-theme="dark"] body {
    at every breakpoint: the hero display outranks a section H2, which outranks a
    step H3, and so on. Change a size here, never per-component. Sizes are
    mobile-first with a md bump; weight stays 400/500 (never bold).
+
+   Display/H2/H3 sit at 400, not 500: PP Mori maps 500 to SemiBold, which at
+   display sizes reads as bold and makes the page feel heavy rather than fluid.
+   H4 keeps 500 — at 18px it needs the weight to register as a heading.
    ─────────────────────────────────────────────────────────────────────────── */
 @layer components {
   .type-display {
-    font-size: 2rem; /* 32px */
+    font-size: 2.25rem; /* 36px */
     line-height: 1.08;
     letter-spacing: -0.02em;
-    font-weight: 500;
+    font-weight: 400;
   }
   .type-h2 {
-    font-size: 1.625rem; /* 26px */
+    /* Mobile H2 was 26px against a 36px display — a 1.4 jump, where every other
+       breakpoint holds ~1.3. 28px keeps the ratio steady across breakpoints. */
+    font-size: 1.75rem; /* 28px */
     line-height: 1.18;
     letter-spacing: -0.02em;
-    font-weight: 500;
+    font-weight: 400;
   }
   .type-h3 {
     font-size: 1.375rem; /* 22px */
     line-height: 1.25;
     letter-spacing: -0.015em;
-    font-weight: 500;
+    font-weight: 400;
   }
   .type-h4 {
     font-size: 1.125rem; /* 18px */
@@ -554,6 +595,37 @@ html[data-theme="dark"] body {
    Ported from the hero-iterations prototype.
    ─────────────────────────────────────────────────────────────────────────── */
 
+/* A just-logged time entry sliding into the Build-step mock's table. */
+@keyframes logRowIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-log-row {
+  animation: logRowIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Loading-skeleton shimmer — a soft light band sweeps across placeholder blocks
+   while a mock "regenerates" (the Iterate step's live preview updating). */
+@keyframes skeletonSweep {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #ebedf0 25%, #f6f7f9 50%, #ebedf0 75%);
+  background-size: 200% 100%;
+  animation: skeletonSweep 1.5s ease-in-out infinite;
+}
+
 /* Animated conic-gradient border around the composer. The masked ::before
    paints only the 1.5px ring so the glass surface shows through. */
 @property --v63-angle {
@@ -571,16 +643,19 @@ html[data-theme="dark"] body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  padding: 1.5px;
+  /* Ring thickness via a transparent border (not padding) + a padding-box mask:
+     the padding + content-box variant clips the rounded corners into little
+     squares in Chrome; this variant renders identically but keeps corners clean. */
+  border: 1.5px solid transparent;
   background: conic-gradient(
     from var(--v63-angle),
     transparent 0deg,
     #b4bfe4 130deg,
     #d9ed92 230deg,
     transparent 360deg
-  );
+  ) border-box;
   -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0) padding-box,
     linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -591,7 +666,7 @@ html[data-theme="dark"] body {
      entry point. */
   opacity: 1;
   transition: opacity 0.3s ease,
-    padding 0.45s cubic-bezier(0.25, 1, 0.5, 1),
+    border-width 0.45s cubic-bezier(0.25, 1, 0.5, 1),
     filter 0.45s ease;
 }
 .v63-gradient-border {
@@ -605,19 +680,38 @@ html[data-theme="dark"] body {
   box-shadow: 0 12px 40px -16px rgba(111, 150, 240, 0.20);
 }
 .v63-gradient-border:hover::before {
-  padding: 2px;
-  filter: brightness(1.06);
-  animation-duration: 3.6s;
+  /* Subtle hover only — a faint brightness lift; the soft bloom below carries
+     it. Ring thickness is left unchanged: animating border-width doesn't
+     interpolate smoothly with the mask, which made the hover feel janky. */
+  filter: brightness(1.03);
 }
 /* Focus — while typing, the ring calms down: slow spin, dimmed, thin. */
 .v63-gradient-border:focus-within::before {
-  padding: 1.5px;
+  border-width: 1.5px;
   filter: none;
   opacity: 0.5;
   animation-duration: 20s;
 }
 .v63-gradient-border:focus-within {
   box-shadow: none;
+}
+/* Dark-mode hover lives entirely in the RING: the sweep speeds up and pumps
+   brightness + saturation. No bloom behind the box — a drop-shadow glow under
+   the composer reads as a stray gradient sitting on the ground, and the effect
+   is meant to be the gradient edge reacting, not the box lighting up its
+   surroundings. Ring thickness is deliberately not animated either: animating
+   the transparent border's width doesn't interpolate smoothly with the mask. */
+html[data-theme="dark"] .v63-gradient-border:hover {
+  box-shadow: none;
+}
+html[data-theme="dark"] .v63-gradient-border:hover::before {
+  filter: brightness(1.28) saturate(1.15);
+  animation-duration: 2.6s;
+}
+/* Typing still calms the ring all the way down, hover or not. */
+html[data-theme="dark"] .v63-gradient-border:focus-within:hover::before {
+  filter: none;
+  animation-duration: 20s;
 }
 @media (prefers-reduced-motion: reduce) {
   .v63-gradient-border::before {
@@ -627,7 +721,10 @@ html[data-theme="dark"] body {
 /* Light mode: the pale pastel ring washes out on white — and worse while
    typing, when it dims to 50%. Deepen to punchier on-brand blue→green so the
    live gradient edge stays visible, and keep it readable at focus. Only the
-   color/opacity are overridden so the rest/hover/focus thickness still apply. */
+   color/opacity are overridden so the rest/hover/focus thickness still apply.
+   Every override MUST repeat the `border-box` origin: without it the gradient
+   is sized to the padding box but still painted across the border box, so the
+   1.5px ring shows a misaligned, seam-y sweep instead of one clean loop. */
 html:not([data-theme="dark"]) .v63-gradient-border::before {
   background: conic-gradient(
     from var(--v63-angle),
@@ -635,10 +732,29 @@ html:not([data-theme="dark"]) .v63-gradient-border::before {
     #6f96f0 120deg,
     #93c53a 240deg,
     transparent 360deg
-  );
+  ) border-box;
 }
 html:not([data-theme="dark"]) .v63-gradient-border:focus-within::before {
   opacity: 0.8;
+}
+/* Describe-step mock ring: a continuous colour loop (no transparent arc) so the
+   small mock's border always reads as coloured and never washes out to white.
+   Scoped like the light override above so it wins on specificity + order. */
+html:not([data-theme="dark"]) .v63-ring-solid::before {
+  background: conic-gradient(
+    from var(--v63-angle),
+    #6f96f0 0deg,
+    #93c53a 180deg,
+    #6f96f0 360deg
+  ) border-box;
+}
+html[data-theme="dark"] .v63-ring-solid::before {
+  background: conic-gradient(
+    from var(--v63-angle),
+    #9fb0e4 0deg,
+    #cfe985 180deg,
+    #9fb0e4 360deg
+  ) border-box;
 }
 
 /* Hovering one hero template card dims the rest of the row so the hovered one
@@ -659,12 +775,21 @@ html:not([data-theme="dark"]) .v63-gradient-border:focus-within::before {
    their color from --color-* theme vars, so scoping these on the mock wrapper
    reskins the light mocks to dark WITHOUT editing the shared component. */
 .v72-mock-dark {
+  /* Dark cells can take a much bigger brightness lift than light ones. */
+  --v69-shimmer-peak: 1.5;
   --v69-card: transparent;
-  --v69-well: #262626;
-  --v69-well-2: #2e2e2e;
-  --v69-chip: #2a2a2a;
-  --v69-chip-border: rgba(255, 255, 255, 0.1);
-  --v69-ink: #ffffff;
+  /* Inner elements: a touch lighter than the dark face so they still lift. */
+  /* Inner surfaces are lifted well clear of the #151515 card so panels, rows and
+     tiles read as distinct layers in dark (they were merging into the card). */
+  --v69-inner: #303030;
+  /* A prominent "box" surface (light default #fff) — was left unset, so any
+     widget using it rendered a pure-white box in dark. */
+  --v69-box: #303030;
+  --v69-well: #2b2b2b;
+  --v69-well-2: #383838;
+  --v69-chip: #323232;
+  --v69-chip-border: rgba(255, 255, 255, 0.14);
+  --v69-ink: #f2f2f2;
   /* Keep the knob a light disc with a dark glyph so it stays visible on the
      dark slider track (the reskin would otherwise make it #2a2a2a on #2e2e2e). */
   --v69-knob: #e6e6e8;
@@ -673,9 +798,13 @@ html:not([data-theme="dark"]) .v63-gradient-border:focus-within::before {
   --color-white: #191b22;
   --color-black: #ffffff;
 
-  --color-neutral-300: #666a72;
-  --color-neutral-400: #80848c;
-  --color-neutral-500: #9a9ea6;
+  /* 100/200 were left unmapped, so widgets using them as fills/borders rendered
+     light patches on the dark card; map them to subtle dark surfaces. */
+  --color-neutral-100: #242424;
+  --color-neutral-200: #2f2f2f;
+  --color-neutral-300: #6b6f77;
+  --color-neutral-400: #8d9199;
+  --color-neutral-500: #a7abb3;
   --color-neutral-600: #b2b6bd;
   --color-neutral-700: #cbced4;
   --color-neutral-800: #e5e7ea;
@@ -776,13 +905,33 @@ html:not([data-theme="dark"]) .v63-gradient-border:focus-within::before {
 /* Sheen for the tracker heatmap: each cell briefly lightens and settles back,
    staggered per column, so a band of light sweeps across the grid. Cells never
    move or vanish — it's a surface highlight, not an entrance. */
+/* AI-style shimmer — a lime tint sweeps each tracker cell and settles back,
+   staggered diagonally so a wave of color rolls across the grid on hover.
+   Only the 45% peak is set, so each cell interpolates from its own resting
+   color to lime and back — no per-cell color needs to be hard-coded here. */
 @keyframes v69Shimmer {
-  0%,
-  100% {
-    filter: brightness(1);
-  }
   45% {
-    filter: brightness(1.6);
+    background-color: #d1e59a;
+  }
+}
+/* AI "thinking" text shimmer — a light band sweeps through the clipped text
+   while the card is hovered, reading like the assistant is processing. */
+@keyframes textShimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+/* Check line-draw — the checkmark strokes itself in (dasharray set on the path),
+   a calm, polished reveal rather than a pop/bounce. */
+@keyframes v69Draw {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
   }
 }
 @keyframes v69Pop {
@@ -797,6 +946,18 @@ html:not([data-theme="dark"]) .v63-gradient-border:focus-within::before {
   100% { opacity: 1; }
 }
 /* Staggered entrance for template-card mock content — replays on each hover. */
+/* Notification drop-in — items fall in from just above and settle, like a toast
+   arriving. Paired with a slight-overshoot spring easing for the settle. */
+@keyframes v69NotifIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 @keyframes cardRowIn {
   from {
     opacity: 0;
@@ -805,6 +966,53 @@ html:not([data-theme="dark"]) .v63-gradient-border:focus-within::before {
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* Engagement comparison bars — the fill grows up from the floor and the score
+   reveals just after, on card hover. Kept smooth (no overshoot) so it reads
+   polished rather than bouncy. */
+@keyframes tplBarGrow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+@keyframes tplBarReveal {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Voice-assistant mic — a slow, soft "listening" ring that expands and fades.
+   Calm (2.4s, low opacity) so it reads as an ambient indicator, not a blink. */
+@keyframes micPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+/* Thinking indicator: the wordmark's three stair-step bars light up in
+   sequence (bottom → top), like the mark filling itself in stage by stage. */
+@keyframes markStage {
+  0%,
+  100% {
+    opacity: 0.22;
+  }
+  35% {
+    opacity: 1;
   }
 }
 
@@ -822,9 +1030,31 @@ html:not([data-theme="dark"]) .v63-gradient-border:focus-within::before {
     opacity: 1;
   }
 }
+/* Mobile used to breathe on opacity alone, which read as static once the mount
+   rise finished. It now breathes vertically like sm+, on a shallower swing: a
+   smaller scale delta means less of the blurred SVG field is re-rasterised per
+   frame, which is what made the full-depth version judder on phone GPUs. */
+@keyframes footerAuroraBreatheShallow {
+  0%,
+  100% {
+    transform: scaleY(0.84);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
 .footer-aurora {
   transform-origin: bottom;
-  animation: footerAuroraBreathe 5.5s ease-in-out infinite;
+  animation: footerAuroraBreatheShallow 5.5s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+/* sm+ has the headroom for the full-depth vertical breathe. */
+@media (min-width: 640px) {
+  .footer-aurora {
+    animation: footerAuroraBreathe 5.5s ease-in-out infinite;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .footer-aurora {
@@ -884,4 +1114,118 @@ html:not([data-theme="dark"]) .v63-gradient-border:focus-within::before {
   .plan-ring-popular::before {
     animation: none;
   }
+}
+
+/* Template gallery (/templates): cards are static previews — no visible motion
+   on hover or scroll there, even though the same mocks animate in the home hero.
+   Zero the durations (rather than `animation: none`) so content that is REVEALED
+   by an animation still shows its final state — it just appears instantly. */
+.template-mock,
+.template-mock *,
+.template-mock *::before,
+.template-mock *::after {
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
+
+/* Templates gallery stays monochrome: the hero's green (activity tracker) and
+   blue hues resolve to ink here, while the home hero keeps its accent colors. */
+.template-mock {
+  --v69-tracker-hit: color-mix(in srgb, var(--v69-ink) 72%, transparent);
+}
+
+/* One dark across all template widgets: the neutral ink #262626 (matches the
+   onboarding avatar), not the hero's cooler navy ink. Light mode only so dark
+   mode's inverted (white) ink is left untouched. */
+[data-theme="light"] .template-mock {
+  --v69-ink: #262626;
+}
+
+/* Templates gallery type scale — the mocks carry many ad-hoc sizes; snap them
+   onto one small system so every widget reads consistently. Templates page
+   only (the hero keeps its own sizes). Text: 11 / 13 / 15. Numerals: 22 / 30 /
+   56. Tiny 7–8px glyph badges are left alone. */
+.template-mock .text-\[9px\],
+.template-mock .text-\[10px\],
+.template-mock .text-\[11px\] { font-size: 11px !important; }
+
+.template-mock .text-\[12px\],
+.template-mock .text-\[13px\] { font-size: 13px !important; }
+
+.template-mock .text-\[14px\],
+.template-mock .text-\[15px\],
+.template-mock .text-\[16px\] { font-size: 15px !important; }
+
+.template-mock .text-\[18px\],
+.template-mock .text-\[19px\],
+.template-mock .text-\[20px\],
+.template-mock .text-\[22px\] { font-size: 22px !important; }
+
+.template-mock .text-\[26px\],
+.template-mock .text-\[28px\],
+.template-mock .text-\[30px\],
+.template-mock .text-\[34px\] { font-size: 30px !important; }
+
+.template-mock .text-\[40px\],
+.template-mock .text-\[50px\],
+.template-mock .text-\[60px\],
+.template-mock .text-\[68px\] { font-size: 56px !important; }
+
+/* ============================================================
+   Product mock — "Generation is the easy part" (production-gap).
+   Tokenised so the whole mock re-themes for dark mode from one
+   place. Light values equal the original hardcoded colours, so
+   light mode is unchanged; only the dark override differs.
+   ============================================================ */
+.production-mock,
+.mock-ui {
+  --mk-surface: #ffffff;
+  --mk-elevated: #fafafa;   /* neutral-50 */
+  --mk-fill: #f5f5f5;       /* neutral-100 */
+  --mk-border: #e5e5e5;     /* neutral-200 */
+  --mk-hairline: #f5f5f5;   /* neutral-100 */
+  --mk-fg: #171717;         /* neutral-900 */
+  --mk-fg-2: #262626;       /* neutral-800 */
+  --mk-muted: #737373;      /* neutral-500 */
+  --mk-subtle: #a3a3a3;     /* neutral-400 */
+  --mk-dots: #e5e5e5;
+  --mk-invert-bg: #101114;
+  --mk-invert-fg: #ffffff;
+  --mk-icon-active: #101114;
+  --mk-icon-idle: #9ca3af;
+  --mk-icon-sb: #171717;
+  --spark-bar: #7da4ff; /* light: blue accent */
+}
+/* Dark values follow the house neutral scale (equal-RGB grays, softened
+   off-white text — matching --foreground #d9d9d9 / --card #151515). */
+[data-theme="dark"] .production-mock,
+[data-theme="dark"] .mock-ui {
+  --mk-surface: #151515;
+  --mk-elevated: #1c1c1c;
+  --mk-fill: #242424;
+  --mk-border: #383838;
+  --mk-hairline: #2a2a2a;
+  --mk-fg: #d9d9d9;
+  --mk-fg-2: #c4c4c4;
+  --mk-muted: #8f8f8f;
+  --mk-subtle: #6e6e6e;
+  --mk-dots: #3a3a3a;
+  --mk-invert-bg: #d9d9d9;
+  --mk-invert-fg: #101114;
+  --mk-icon-active: #d9d9d9;
+  --mk-icon-idle: #6e6e6e;
+  --mk-icon-sb: #b0b0b0;
+  /* Dark: monochrome gray, no blue. */
+  --spark-bar: #4a4a4a;
+}
+
+/* The production mock's cut-off edge softly fades ONLY in dark mode, where the
+   content dissolves into the dark surface and reads as depth. In light mode the
+   same fade just washes into the white surface (looks unfinished), so light
+   keeps a crisp cut — no mask. */
+[data-theme="dark"] .production-cut-fade {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 72px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 72px), transparent);
 }

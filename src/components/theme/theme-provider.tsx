@@ -9,66 +9,92 @@ import {
 } from "react";
 import { flushSync } from "react-dom";
 
+// The resolved theme actually applied to <html data-theme>.
 export type Theme = "light" | "dark";
+// The user's stored preference — "system" follows the OS (Cursor-style).
+export type ThemePreference = "system" | "light" | "dark";
 
-// The View Transitions API isn't in the DOM lib types everywhere yet.
-type DocumentWithViewTransition = Document & {
-  startViewTransition?: (callback: () => void) => unknown;
-};
-
-// The site defaults to light. The chosen theme is persisted so it survives
-// navigation and reloads, and applied as data-theme on <html> so the CSS
-// tokens (and every token-based surface) flip site-wide.
 const STORAGE_KEY = "studio-theme";
-const DEFAULT_THEME: Theme = "light";
+const DEFAULT_PREFERENCE: ThemePreference = "system";
 
-// Inline script run before paint (in the document head) so the stored theme is
-// applied to <html> before React hydrates — no flash of the wrong theme. Kept
-// in sync with STORAGE_KEY / DEFAULT_THEME above.
-export const THEME_INIT_SCRIPT = `try{var t=localStorage.getItem('${STORAGE_KEY}');if(t!=='dark'&&t!=='light')t='${DEFAULT_THEME}';document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='${DEFAULT_THEME}';}`;
+// Inline script run before paint (in the document head) so the right theme is
+// on <html> before React hydrates — no flash. Resolves "system" against the OS.
+// Kept in sync with STORAGE_KEY / DEFAULT_PREFERENCE below.
+export const THEME_INIT_SCRIPT = `try{var p=localStorage.getItem('${STORAGE_KEY}');if(p!=='dark'&&p!=='light'&&p!=='system')p='${DEFAULT_PREFERENCE}';var t=p==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p;document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='light';}`;
 
 type ThemeContextValue = {
+  // Resolved theme (light/dark) — what's actually shown.
   theme: Theme;
-  toggleTheme: () => void;
-  setTheme: (theme: Theme) => void;
+  // The user's preference (system/light/dark) — what the switch reflects.
+  preference: ThemePreference;
+  setPreference: (preference: ThemePreference) => void;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  // Start from the default for a stable first render, then adopt whatever the
-  // pre-paint script wrote to <html> (the persisted choice) after mount.
-  const [theme, setThemeState] = useState<Theme>(DEFAULT_THEME);
+type DocumentWithViewTransition = Document & {
+  startViewTransition?: (callback: () => void) => unknown;
+};
 
+function systemTheme(): Theme {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [preference, setPreferenceState] =
+    useState<ThemePreference>(DEFAULT_PREFERENCE);
+  const [theme, setThemeState] = useState<Theme>("light");
+
+  // Adopt the persisted preference + the theme the pre-paint script resolved.
   useEffect(() => {
-    // Adopt the persisted choice the pre-paint script wrote to <html>. This is
-    // the standard SSR-safe hydration pattern: default render, then sync once on
-    // mount — the DOM can't be read during render without a hydration mismatch.
+    let p: ThemePreference = DEFAULT_PREFERENCE;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored === "dark" || stored === "light" || stored === "system") {
+        p = stored;
+      }
+    } catch {
+      // storage unavailable
+    }
     const applied = document.documentElement.dataset.theme;
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (applied === "dark" || applied === "light") setThemeState(applied);
+    setPreferenceState(p);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setThemeState(
+      applied === "dark" ? "dark" : applied === "light" ? "light" : systemTheme(),
+    );
   }, []);
 
-  const applyTheme = useCallback((next: Theme) => {
-    const root = document.documentElement;
-    const commit = () => {
-      root.dataset.theme = next;
+  // While on "system", track OS changes live so the site follows the setting.
+  useEffect(() => {
+    if (preference !== "system") return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = () => {
+      const next = mq.matches ? "dark" : "light";
+      document.documentElement.dataset.theme = next;
       setThemeState(next);
     };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, [preference]);
 
+  const setPreference = useCallback((next: ThemePreference) => {
+    const resolved = next === "system" ? systemTheme() : next;
     try {
       localStorage.setItem(STORAGE_KEY, next);
     } catch {
-      // Storage can be unavailable (private mode); the in-memory state still
-      // drives the UI for the session.
+      // storage unavailable — in-memory still drives the session
     }
-
-    // A single GPU-composited crossfade of the whole page (View Transitions) is
-    // far smoother than the old approach of transitioning every element's colors
-    // at once — that repainted the entire DOM each frame, which is what made the
-    // switch stutter. flushSync lands React's theme-driven markup before the
-    // "after" snapshot so nothing flashes mid-fade. Fall back to an instant swap
-    // where the API is missing or the user prefers reduced motion.
+    const commit = () => {
+      document.documentElement.dataset.theme = resolved;
+      setPreferenceState(next);
+      setThemeState(resolved);
+    };
+    // A single GPU-composited crossfade (View Transitions) is smoother than
+    // repainting every element's colors at once. flushSync lands the markup
+    // before the "after" snapshot. Fall back to an instant swap otherwise.
     const doc = document as DocumentWithViewTransition;
     const prefersReduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
@@ -80,12 +106,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  const toggleTheme = useCallback(() => {
-    applyTheme(theme === "dark" ? "light" : "dark");
-  }, [theme, applyTheme]);
-
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme: applyTheme }}>
+    <ThemeContext.Provider value={{ theme, preference, setPreference }}>
       {children}
     </ThemeContext.Provider>
   );

@@ -8,6 +8,7 @@ import {
   IconBell,
   IconBolt,
   IconBook,
+  IconBrandMark,
   IconCard,
   IconChat,
   IconChecks,
@@ -157,8 +158,8 @@ export function TeamCrmVisual() {
         {/* Workspace sidebar — the whole team surface, hidden on mobile. */}
         <div className="hidden w-[148px] shrink-0 flex-col overflow-hidden border-r border-border bg-muted px-1.5 py-2 sm:flex md:w-[164px]">
           <div className="flex items-center gap-1.5 px-1.5 pb-2.5 pt-0.5">
-            <span className="flex size-[15px] items-center justify-center rounded bg-foreground text-[8.5px] leading-none text-background">
-              B
+            <span className="flex size-[15px] items-center justify-center rounded bg-foreground text-background">
+              <IconBrandMark className="size-[9px]" />
             </span>
             <span className="text-[11px] leading-none text-foreground">
               BrandMages

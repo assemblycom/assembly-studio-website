@@ -1,11 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Section } from "@/components/ui/section";
+
+export interface FAQLink {
+  label: string;
+  href: string;
+}
 
 export interface FAQEntry {
   question: string;
   answer: string;
+  // Substrings of the answer to turn into links (first match of each label).
+  // Answers stay plain strings; links live as data alongside them.
+  links?: FAQLink[];
+}
+
+// Split a paragraph into text + anchors by matching each link's label once.
+function renderAnswer(text: string, links?: FAQLink[]): ReactNode {
+  if (!links?.length) return text;
+  let nodes: ReactNode[] = [text];
+  links.forEach((link, li) => {
+    nodes = nodes.flatMap((node, ni) => {
+      if (typeof node !== "string") return [node];
+      const at = node.indexOf(link.label);
+      if (at === -1) return [node];
+      const external = link.href.startsWith("http");
+      return [
+        node.slice(0, at),
+        <a
+          key={`${li}-${ni}`}
+          href={link.href}
+          {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+          className="underline underline-offset-2 transition-colors hover:text-foreground"
+        >
+          {link.label}
+        </a>,
+        node.slice(at + link.label.length),
+      ];
+    });
+  });
+  return nodes;
 }
 
 const FAQS: FAQEntry[] = [
@@ -15,7 +50,7 @@ const FAQS: FAQEntry[] = [
       "Two kinds of apps: client-facing apps and internal tools. Think onboarding wizards, document collection, project trackers, approval workflows, client dashboards. Apps can use AI too — like an assistant that answers client questions from your firm's own docs.\n\nClient-facing apps are where Assembly Studio is strongest — every app has two sides, so your team works in your dashboard while each client gets their own view inside your branded client experience.",
   },
   {
-    question: "How is Assembly Studio different from other AI app builders?",
+    question: "How is Assembly Studio different?",
     answer:
       "Other AI builders spin up slick prototypes that are difficult to make production-ready — and often never make it in front of a client. Assembly Studio closes that gap.\n\nBecause Assembly has a CRM and client experience foundation built in, the apps you describe go live where your team and clients already are — hosting, authentication, permissions, payments, notifications, and branding all handled securely for you. You build the part that's distinctly yours; Assembly already runs the rest.",
   },
@@ -61,30 +96,97 @@ const FAQS: FAQEntry[] = [
   },
 ];
 
+// "cards" = soft muted-fill rounded rows (home). "divided" = a flat single-column
+// list separated by hairlines with a plus/minus toggle (a Vercel-style list, used
+// on /security).
+type FAQVariant = "cards" | "divided";
+
 function FAQItem({
   question,
   answer,
-}: {
-  question: string;
-  answer: string;
+  links,
+  open,
+  onToggle,
+  variant = "cards",
+}: FAQEntry & {
+  open: boolean;
+  onToggle: () => void;
+  variant?: FAQVariant;
 }) {
-  const [open, setOpen] = useState(false);
+  // Controlled by the parent so only one answer is open at a time (opening one
+  // closes the others). Toggles on click only — hover-to-open made rows pop open
+  // as the cursor passed over them while scrolling.
 
-  // Each question is its own card — the soft muted fill alone separates it from
-  // the page, no outline needed. Spacing between rows does the rest.
-  //
-  // Hover reveals the answer; the click toggle stays as a fallback for touch and
-  // keyboard, where there is no hover.
-  return (
+  // Smooth reveal via grid-rows 0fr → 1fr — animates without measuring.
+  const body = (
     <div
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
-      className="overflow-hidden rounded-lg bg-muted"
+      className={`grid transition-[grid-template-rows] duration-300 ease-out ${
+        open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+      }`}
     >
+      <div className="overflow-hidden">
+        <div
+          className={
+            variant === "divided" ? "space-y-4 pb-6 pr-10" : "space-y-4 px-5 pb-4"
+          }
+        >
+          {answer.split("\n\n").map((para, i) => (
+            <p
+              key={i}
+              className="type-body whitespace-pre-line text-muted-foreground"
+            >
+              {renderAnswer(para, links)}
+            </p>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  if (variant === "divided") {
+    return (
+      <div className="border-b border-border last:border-b-0">
+        <button
+          onClick={onToggle}
+          aria-expanded={open}
+          className="group flex w-full cursor-pointer items-center justify-between gap-6 py-5 text-left"
+        >
+          <span className="type-body text-foreground">{question}</span>
+          {/* Chevron that flips up when open. */}
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="none"
+            aria-hidden
+            className={`shrink-0 text-muted-foreground transition-[transform,color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:text-foreground ${
+              open ? "rotate-180" : ""
+            }`}
+          >
+            <path
+              d="M5 8l5 5 5-5"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+        {body}
+      </div>
+    );
+  }
+
+  // Each question is its own card: a subtle gray fill in both themes, no
+  // outline. The fill alone separates the row from the page, and 8px sits
+  // between the 4px control radius (too square at this size) and the 12px it
+  // used to carry (too rounded on a short row).
+  return (
+    <div className="overflow-hidden rounded-[8px] bg-muted">
       <button
-        onClick={() => setOpen(!open)}
+        onClick={onToggle}
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-4 px-6 py-3.5 text-left"
+        className="flex w-full cursor-pointer items-center justify-between gap-4 px-5 py-3 text-left"
       >
         <span className="type-body text-foreground">
           {question}
@@ -95,7 +197,9 @@ function FAQItem({
           viewBox="0 0 20 20"
           fill="none"
           aria-hidden
-          className={`shrink-0 text-muted-foreground transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+          className={`shrink-0 text-muted-foreground transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+            open ? "rotate-180" : ""
+          }`}
         >
           <path
             d="M5 8l5 5 5-5"
@@ -106,69 +210,121 @@ function FAQItem({
           />
         </svg>
       </button>
-      {/* Smooth reveal via grid-rows 0fr → 1fr — animates without measuring. */}
-      <div
-        className={`grid transition-[grid-template-rows] duration-300 ease-out ${
-          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-        }`}
-      >
-        <div className="overflow-hidden">
-          <p className="type-body whitespace-pre-line px-6 pb-4 text-muted-foreground">
-            {answer}
-          </p>
-        </div>
-      </div>
+      {body}
     </div>
   );
+}
+
+// Renders the FAQ items as a single-open accordion — opening one row closes any
+// other. Handles both the two-column and single-column layouts. The open row is
+// tracked here (by question text) so only one answer shows at a time.
+function Accordion({
+  items,
+  twoColumn,
+  variant = "cards",
+}: {
+  items: FAQEntry[];
+  twoColumn: boolean;
+  variant?: FAQVariant;
+}) {
+  const [openId, setOpenId] = useState<string | null>(null);
+  const renderItem = (faq: FAQEntry) => (
+    <FAQItem
+      key={faq.question}
+      {...faq}
+      variant={variant}
+      open={openId === faq.question}
+      onToggle={() =>
+        setOpenId((cur) => (cur === faq.question ? null : faq.question))
+      }
+    />
+  );
+
+  // Vercel-style: one flat column ruled top by a hairline. Laid out in the right
+  // column by the parent, so no top margin here.
+  if (variant === "divided") {
+    if (twoColumn) {
+      const mid = Math.ceil(items.length / 2);
+      return (
+        <div className="mt-10 grid gap-x-8 md:mt-12 md:grid-cols-2">
+          <div>{items.slice(0, mid).map(renderItem)}</div>
+          <div>{items.slice(mid).map(renderItem)}</div>
+        </div>
+      );
+    }
+    return (
+      <div className="[&>div:first-child>button]:pt-0">{items.map(renderItem)}</div>
+    );
+  }
+
+  if (twoColumn) {
+    const mid = Math.ceil(items.length / 2);
+    const columns = [items.slice(0, mid), items.slice(mid)];
+    return (
+      <div className="mt-10 grid items-start gap-6 md:mt-12 md:grid-cols-2">
+        {columns.map((column, i) => (
+          <div key={i} className="space-y-4">
+            {column.map(renderItem)}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return <div className="mt-12 space-y-3">{items.map(renderItem)}</div>;
 }
 
 export function FAQ({
   heading = "Frequently asked questions",
   items = FAQS,
+  twoColumn = false,
+  variant = "cards",
 }: {
   heading?: string;
   items?: FAQEntry[];
+  twoColumn?: boolean;
+  variant?: FAQVariant;
 } = {}) {
-  return (
-    <Section id="faq">
-      <div className="mx-auto max-w-2xl">
-        <h2 className="type-h2 text-center">
-          {heading}
-        </h2>
-
-        <div className="mt-12 space-y-3">
-          {items.map((faq) => (
-            <FAQItem key={faq.question} {...faq} />
-          ))}
+  // Vercel-style: heading sits in a left column, the divided question list runs
+  // down the right. The heading sticks so it stays with the list on long scrolls.
+  if (variant === "divided") {
+    // Two-column layout: heading on top, questions split across two columns.
+    if (twoColumn) {
+      return (
+        <Section id="faq" className="px-0 py-16 md:py-24">
+          <div className="mx-auto max-w-[1200px] px-6 md:px-10">
+            <h2 className="type-h2 text-center">{heading}</h2>
+            <Accordion items={items} twoColumn variant={variant} />
+          </div>
+        </Section>
+      );
+    }
+    return (
+      <Section id="faq" className="px-0 py-16 md:py-24">
+        <div className="mx-auto grid max-w-[1200px] gap-x-16 gap-y-10 px-6 md:grid-cols-[minmax(0,0.7fr)_minmax(0,1fr)] md:px-10">
+          <div className="md:sticky md:top-28 md:self-start">
+            <h2 className="type-h2">{heading}</h2>
+          </div>
+          <Accordion items={items} twoColumn={false} variant={variant} />
         </div>
+      </Section>
+    );
+  }
+
+  const widthClass = !twoColumn ? "max-w-2xl" : "max-w-4xl";
+  return (
+    <Section id="faq" className="py-16 md:py-24">
+      <div className={`mx-auto ${widthClass}`}>
+        <h2 className="type-h2 text-center">{heading}</h2>
+        <Accordion items={items} twoColumn={twoColumn} variant={variant} />
       </div>
     </Section>
   );
 }
 
-// Homepage FAQ — a single list, split into two columns on desktop so the ten
-// answers don't read as one long wall (each column is an independent stack, so
-// expanding a row only pushes the rows below it in its own column). Mobile
-// stacks to one column. /security keeps the plain single-column list.
+// Homepage FAQ — same treatment as /security: heading on the left, the divided
+// question list on the right. The home page's own content wrapper supplies the
+// vertical guide rails, so this just renders the divided FAQ inside them.
 export function HomeFAQ() {
-  const mid = Math.ceil(FAQS.length / 2);
-  const columns = [FAQS.slice(0, mid), FAQS.slice(mid)];
-
-  return (
-    <Section id="faq">
-      <div className="mx-auto max-w-4xl">
-        <h2 className="type-h2 text-center">Frequently asked questions</h2>
-
-        <div className="mt-10 grid items-start gap-3 md:mt-12 md:grid-cols-2">
-          {columns.map((column, i) => (
-            <div key={i} className="space-y-3">
-              {column.map((faq) => (
-                <FAQItem key={faq.question} {...faq} />
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-    </Section>
-  );
+  return <FAQ items={FAQS} twoColumn />;
 }

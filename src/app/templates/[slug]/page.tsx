@@ -68,9 +68,15 @@ function TemplateHeader({
         {template.description}
       </p>
 
-      {template.industries && template.industries.length > 0 && (
+      {(template.usesAI ||
+        (template.industries && template.industries.length > 0)) && (
         <div className="mt-5 flex flex-wrap gap-2">
-          {template.industries.map((industry) => (
+          {template.usesAI && (
+            <span className="rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground [[data-theme=dark]_&]:bg-white/[0.08]">
+              AI
+            </span>
+          )}
+          {template.industries?.map((industry) => (
             <span
               key={industry}
               className="rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground"
@@ -107,9 +113,7 @@ export default async function TemplateDetailPage({ params }: Props) {
               <TemplateGallery
                 title={template.title}
                 images={template.images}
-                videoUrl={template.videoUrl}
                 previewCount={template.previewCount}
-                hasVideo={template.hasVideo}
               />
 
               <div className="mt-14 lg:mt-20">

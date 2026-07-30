@@ -1,6 +1,7 @@
 "use client";
 
 import { ErrorScreen, primaryAction } from "@/components/ui/error-screen";
+import { THEME_INIT_SCRIPT } from "@/components/theme/theme-provider";
 import "./globals.css";
 
 /**
@@ -11,6 +12,11 @@ import "./globals.css";
 export default function GlobalError() {
   return (
     <html lang="en" className="h-full antialiased">
+      <head>
+        {/* Resolve the persisted theme before paint so this last-resort page
+            matches the user's light/dark choice like the rest of the site. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body className="min-h-full bg-background font-sans text-foreground">
         <ErrorScreen
           title="Something came loose"

@@ -49,7 +49,7 @@ export function VideoPlayer({
             <img
               src={poster}
               alt=""
-              className="img-outline absolute inset-0 h-full w-full object-cover object-center"
+              className="absolute inset-0 h-full w-full object-cover object-center"
             />
           )}
           {iconOnly ? (

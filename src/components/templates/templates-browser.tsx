@@ -2,13 +2,10 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import type { Template } from "@/lib/templates";
 import { TEMPLATE_CATEGORIES } from "@/lib/templates";
-import {
-  TemplateModalBrowser,
-  type ModalTemplate,
-} from "@/components/templates/template-modal";
+import { V69CardMock } from "@/components/home/hero-v71";
+import { useTheme } from "@/components/theme/theme-provider";
 
 interface Props {
   templates: Template[];
@@ -17,8 +14,9 @@ interface Props {
 const ALL = "All";
 
 export function TemplatesBrowser({ templates }: Props) {
-  // Search is mobile-only (see the toolbar); on desktop the chips do the work.
-  const [query, setQuery] = useState("");
+  // Widget covers (shared with the home hero) reskin to the dark surface.
+  const { theme } = useTheme();
+  const dark = theme === "dark";
   // Multi-select category filter. Empty = "All" (show everything). Clicking a
   // selected chip again removes it (toggle off); "All" clears the whole set.
   const [selected, setSelected] = useState<string[]>([]);
@@ -31,6 +29,9 @@ export function TemplatesBrowser({ templates }: Props) {
       prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
     );
   };
+  // Free-text search across title, description, category, and industries.
+  const [query, setQuery] = useState("");
+
   // Extra categories collapse under a "More" toggle — there are more here than
   // fit in a tidy couple of rows, on desktop and mobile alike.
   const [showAllCats, setShowAllCats] = useState(false);
@@ -50,177 +51,169 @@ export function TemplatesBrowser({ templates }: Props) {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return templates.filter((t) => {
-      // A template shows if it matches any selected category (union). No
-      // selection means every category is allowed.
+    // A template shows if it matches any selected category (union, empty = all)
+    // AND matches the search text across its title/description/category/industry.
+    const matched = templates.filter((t) => {
       if (selected.length > 0 && !selected.includes(t.category)) return false;
       if (!q) return true;
-      const haystack = [t.title, t.description, t.category, ...t.features, ...(t.industries ?? [])]
+      const haystack = [t.title, t.description, t.category, ...(t.industries ?? [])]
         .join(" ")
         .toLowerCase();
       return haystack.includes(q);
     });
-  }, [templates, query, selected]);
+    // Default order: featured (popular) first, then the rest alphabetically.
+    return [...matched].sort((a, b) => {
+      const byFeatured = Number(Boolean(b.featured)) - Number(Boolean(a.featured));
+      if (byFeatured !== 0) return byFeatured;
+      return a.title.localeCompare(b.title);
+    });
+  }, [templates, selected, query]);
 
-  const collapsedCats = showAllCats
-    ? categories
-    : categories.slice(0, COLLAPSED_CHIP_COUNT);
   const hiddenCatCount = categories.length - COLLAPSED_CHIP_COUNT;
-
-  // Detail modal — plain client state with a shallow pushState so the URL is
-  // shareable and the back button closes it (see TemplateModalBrowser for why
-  // this isn't an intercepting route). Modifier-clicks fall through to the
-  // Link so open-in-new-tab still gets the full page.
-  const [modalSlug, setModalSlug] = useState<string | null>(null);
-  const modalTemplates = useMemo<ModalTemplate[]>(
-    () =>
-      templates.map((t) => ({
-        slug: t.slug,
-        title: t.title,
-        description: t.description,
-        longDescription: t.longDescription,
-        category: t.category,
-        industries: t.industries,
-        images: t.images,
-        videoUrl: t.videoUrl,
-        previewCount: t.previewCount,
-        hasVideo: t.hasVideo,
-      })),
-    [templates],
-  );
-  const openModal = (e: React.MouseEvent, slug: string) => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-    e.preventDefault();
-    window.history.pushState(null, "", `/templates/${slug}`);
-    setModalSlug(slug);
-  };
 
   return (
     <div>
-      {/* Search — mobile only; on desktop the category chips carry the filtering
-          and a search field would just crowd the row. */}
-      <div className="relative mb-4 sm:hidden">
+      {/* Search + category filters — sticky together on mobile (tucked under the
+          shrunk sticky nav) so both stay reachable while scrolling the grid;
+          a static block on sm+. */}
+      <div className="sticky top-12 z-30 -mx-6 bg-background px-6 pb-3 pt-3 lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:pb-0 lg:pt-0">
+      {/* Search + filters share one row on desktop (filters left, search
+          right), à la Linear; they stack on mobile with search on top. */}
+      <div className="flex flex-col gap-3 lg:flex-row-reverse lg:items-center lg:gap-6">
+      {/* Search — filters the grid live across title/description/category/
+          industry. On top on mobile; right-aligned, fixed-width on desktop. */}
+      <div className="relative lg:w-64 lg:shrink-0">
         <svg
-          width="18"
-          height="18"
-          viewBox="0 0 20 20"
+          aria-hidden
+          viewBox="0 0 24 24"
+          className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.5"
-          className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+          strokeWidth="1.7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
         >
-          <circle cx="9" cy="9" r="6" />
-          <path d="M14 14l4 4" strokeLinecap="round" />
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.5-3.5" />
         </svg>
         <input
-          type="search"
+          type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search…"
+          placeholder="Search templates…"
           aria-label="Search templates"
-          autoComplete="off"
-          className="w-full rounded-lg border border-border bg-muted py-2.5 pl-11 pr-4 text-base outline-none sm:text-sm transition-colors focus:border-foreground/40"
+          className="w-full rounded-lg border border-border bg-transparent py-2.5 pl-9 pr-9 text-[15px] text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/30"
         />
+        {query && (
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            aria-label="Clear search"
+            className="absolute right-2 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
+              <path d="M6 6l12 12M6 18 18 6" />
+            </svg>
+          </button>
+        )}
       </div>
 
-      {/* Toolbar — mirrors the customers page. On phones a "Filter by category"
-          label sits above the chips; on desktop it's one inline row of chips.
-          Extras tuck behind a "More (N)" toggle either way. */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
-        {/* Label — mobile only; on desktop the chips speak for themselves. */}
-        <span className="text-sm text-muted-foreground sm:hidden">
-          Filter by category
-        </span>
-
-        <div className="flex flex-wrap gap-2.5 sm:min-w-0 sm:flex-1">
-          {collapsedCats.map((cat) => {
-            const active = cat === ALL ? selected.length === 0 : selected.includes(cat);
-            return (
-              <button
-                key={cat}
-                type="button"
-                aria-pressed={active}
-                onClick={() => toggleCategory(cat)}
-                className={`rounded-md px-2.5 py-1 font-mono text-xs uppercase transition-colors ${
-                  active
-                    ? "bg-foreground/10 text-foreground"
-                    : "bg-muted text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {cat}
-              </button>
-            );
-          })}
-          {hiddenCatCount > 0 && (
+      {/* Toolbar — Linear-style plain-text filters: the active word reads in
+          full ink, the rest muted; extras tuck behind "More (N)". A single
+          swipeable row on mobile, wraps from sm up. */}
+      <div className="flex flex-nowrap items-center gap-x-5 gap-y-2.5 overflow-x-auto text-[15px] [scrollbar-width:none] lg:min-w-0 lg:flex-1 lg:flex-wrap lg:overflow-visible [&::-webkit-scrollbar]:hidden">
+        {/* Mobile swipes through every category, so show them all and skip the
+            collapse; on desktop the row wraps, so extras past the cap stay
+            hidden behind "More" (below) until expanded. */}
+        {categories.map((cat, i) => {
+          const active = cat === ALL ? selected.length === 0 : selected.includes(cat);
+          const collapsedOnDesktop = i >= COLLAPSED_CHIP_COUNT && !showAllCats;
+          return (
             <button
+              key={cat}
               type="button"
-              onClick={() => setShowAllCats((v) => !v)}
-              aria-expanded={showAllCats}
-              className="rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase text-muted-foreground transition-colors hover:text-foreground"
+              aria-pressed={active}
+              onClick={() => toggleCategory(cat)}
+              className={`whitespace-nowrap transition-colors ${
+                collapsedOnDesktop ? "lg:hidden" : ""
+              } ${
+                active
+                  ? "text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             >
-              {showAllCats ? "Less" : `More (${hiddenCatCount})`}
+              {cat}
             </button>
-          )}
-        </div>
+          );
+        })}
+        {hiddenCatCount > 0 && (
+          <button
+            type="button"
+            onClick={() => setShowAllCats((v) => !v)}
+            aria-expanded={showAllCats}
+            className="hidden whitespace-nowrap text-muted-foreground/70 transition-colors hover:text-foreground lg:inline-block"
+          >
+            {showAllCats ? "Less" : `More (${hiddenCatCount})`}
+          </button>
+        )}
+      </div>
+      </div>
       </div>
 
-      {/* Grid */}
+      {/* Grid — Linear-style story cards: a preview image framed with a hairline
+          outline, the title beneath, then the category + industry tags. The card
+          itself stays borderless; only the image is framed. */}
       {filtered.length > 0 ? (
-        <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-x-6 gap-y-10 min-[560px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filtered.map((template) => (
-            <article
-              key={template.slug}
-              className="group relative rounded-xl border border-border p-2 transition-colors hover:border-foreground/20"
-            >
-              <Link
-                href={`/templates/${template.slug}`}
-                className="block"
-                onClick={(e) => openModal(e, template.slug)}
-              >
-                {/* Real preview image when set; otherwise a clean neutral
-                    placeholder, ready for uploaded imagery (no mock frame). */}
-                <div className="relative aspect-[2/1] overflow-hidden rounded-lg bg-muted sm:aspect-[5/3]">
-                  {template.image && (
-                    <Image
-                      src={template.image}
-                      alt=""
-                      fill
-                      sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw"
-                      className="object-cover object-top"
-                    />
-                  )}
+            <article key={template.slug} className="w-full">
+
+              <Link href={`/templates/${template.slug}`} className="block">
+                {/* Real preview image when set; otherwise the template's widget
+                    cover mock (shared with the home hero). */}
+                <div className="relative aspect-[5/4] overflow-hidden rounded-[20px] border border-border bg-background min-[560px]:aspect-square [[data-theme=dark]_&]:bg-[#151515]">
+                  <div
+                    className={`template-mock h-full w-full [font-family:var(--font-inter),system-ui,sans-serif] ${
+                      dark ? "v72-mock-dark" : ""
+                    }`}
+                  >
+                    <V69CardMock slug={template.slug} />
+                  </div>
                 </div>
-                <div className="p-3">
-                  <h3 className="text-balance text-sm font-medium">{template.title}</h3>
-                  <p className="mt-1.5 text-pretty text-sm text-muted-foreground">
-                    {template.description}
-                  </p>
-                  <span className="mt-3 inline-block rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground">
-                    {template.category}
-                  </span>
+                <h3 className="mt-4 text-[15px] font-medium text-foreground">
+                  {template.title}
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {template.description}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-1.5 overflow-hidden">
+                  {/* Just the category by default — one clean tag per card,
+                      no repetitive industry filler. */}
+                  {[...new Set([template.category, ...(template.industries ?? [])])]
+                    .slice(0, 1)
+                    .map((tag) => (
+                      <span
+                        key={tag}
+                        className="shrink-0 whitespace-nowrap rounded-md bg-muted px-1.5 py-[3px] font-mono text-[10px] uppercase tracking-wide text-muted-foreground"
+                      >
+                        {tag}
+                      </span>
+                    ))}
                 </div>
               </Link>
             </article>
           ))}
         </div>
       ) : (
-        <div className="mt-8 rounded-xl border border-dashed border-border py-20 text-center">
+        <div className="mt-10 rounded-xl border border-dashed border-border py-20 text-center">
           <p className="text-sm text-muted-foreground">
-            {query
+            {query.trim()
               ? `No templates match “${query.trim()}”.`
               : selected.length === 0
                 ? "No templates yet."
                 : "No templates in the selected categories yet."}
           </p>
         </div>
-      )}
-
-      {modalSlug && (
-        <TemplateModalBrowser
-          templates={modalTemplates}
-          initialSlug={modalSlug}
-          onClose={() => setModalSlug(null)}
-        />
       )}
     </div>
   );

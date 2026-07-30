@@ -1,3 +1,5 @@
+"use client";
+
 // ─────────────────────────────────────────────────────────────────────────
 // DESCRIBE VISUAL — the builder's Add App start screen from the Vibe Apps
 // spec (node 3242:57710): prompt box with category chips and the firm
@@ -8,63 +10,77 @@ import {
   NavItem,
   SectionLabel,
 } from "@/components/home/build-app-visual";
+import { useAssemblyTypewriter, TYPEWRITER_PREFIX } from "@/components/home/hero-v66";
 import { MockFrame } from "@/components/home/mock-frame";
 import {
-  IconApp,
   IconArrowUpRight,
   IconBell,
   IconBook,
+  IconBookOpen,
+  IconBrandMark,
   IconChat,
-  IconCheck,
   IconChevronDown,
-  IconChevronRight,
-  IconFile,
-  IconForm,
+  IconDocument,
+  IconFilePdf,
   IconGear,
   IconGlobe,
   IconGrid,
   IconHelp,
-  IconList,
-  IconMic,
   IconPalette,
   IconPlus,
+  IconUser,
   IconUsers,
 } from "@/components/home/mock-icons";
 
-const CHIPS = ["Tasks & Workflow", "CRM & Sales", "Content & Sites", "Finance"];
+const CHIPS = [
+  "Tasks & Workflow",
+  "CRM & Sales",
+  "Content & Sites",
+  "Finance",
+  "Booking",
+  "E-Commerce",
+];
 
 const TEMPLATES = [
   {
-    icon: <IconApp />,
+    icon: <IconUser />,
     title: "New client intake",
     description: "Company details, contacts, services, budget",
   },
   {
-    icon: <IconList />,
+    icon: <IconBookOpen />,
     title: "Onboarding wizard",
     description: "Multi-step flow with saved progress",
   },
   {
-    icon: <IconFile />,
+    icon: <IconDocument />,
     title: "Document collection",
     description: "Requested docs with upload checklist",
   },
   {
-    icon: <IconForm />,
+    icon: <IconFilePdf />,
     title: "PDF to digital intake",
     description: "Turn a PDF into a guided web form",
   },
 ];
 
+// Describe types the one prompt this whole flow is built around (kept shorter
+// than the hero's rotating examples), so it matches the plan step's prompt.
+const DESCRIBE_EXAMPLES = [
+  "a time tracking app to log hours across clients and projects, with timers, manual entries, and weekly summaries",
+];
+
 export function DescribeVisual() {
+  // "Build " prefix + the time-tracking prompt typing/erasing after it.
+  const typedExample = useAssemblyTypewriter(true, DESCRIBE_EXAMPLES);
   return (
     <MockFrame>
       <div className="flex min-h-0 flex-1">
         {/* Workspace sidebar — Add App is the active row here. */}
-        <div className="hidden w-[168px] shrink-0 flex-col border-r border-border bg-muted px-1.5 py-2 lg:flex md:w-[188px]">
+        <div className="hidden w-[144px] shrink-0 flex-col border-r border-border bg-muted px-1.5 py-2 lg:flex md:w-[160px]">
           <div className="flex items-center gap-1.5 px-1.5 pb-3 pt-0.5">
-            <span className="flex size-[16px] items-center justify-center rounded bg-foreground text-[9px] leading-none text-background">
-              B
+            <span className="flex size-[16px] items-center justify-center rounded bg-foreground text-background">
+              <IconBrandMark className="size-[9px]" />
             </span>
             <span className="text-[11.5px] leading-none text-foreground">
               BrandMages
@@ -111,16 +127,16 @@ export function DescribeVisual() {
 
         {/* Main column — the builder's blank-slate prompt. */}
         <div className="flex min-w-0 flex-1 flex-col">
-          <div className="flex h-[34px] shrink-0 items-center px-3">
+          <div className="flex h-[34px] shrink-0 items-center border-b border-border px-3">
             <span className="text-[11.5px] leading-none text-foreground">
               Add App
             </span>
           </div>
-          <div className="flex shrink-0 gap-4 border-b border-border px-3">
+          <div className="flex h-[34px] shrink-0 items-center gap-4 border-b border-border px-3">
             {["Build", "Browse"].map((tab, i) => (
               <span
                 key={tab}
-                className={`-mb-px border-b pb-1.5 text-[11px] leading-none ${
+                className={`-mb-px flex h-[34px] items-center border-b text-[11px] leading-none ${
                   i === 0
                     ? "border-foreground text-foreground"
                     : "border-transparent text-muted-foreground"
@@ -131,34 +147,65 @@ export function DescribeVisual() {
             ))}
           </div>
 
-          <div className="mx-auto flex w-full max-w-[420px] min-h-0 flex-1 flex-col justify-start gap-3 overflow-hidden p-4 pt-9 lg:justify-center lg:pt-4">
-            <p className="text-center text-[13px] leading-none text-foreground">
+          {/* Blank-slate content — sized to fill the window without dominating
+              it, and kept to a narrower column so the prompt box doesn't read
+              as stretched. */}
+          <div className="mx-auto flex w-full max-w-[410px] min-h-0 flex-1 flex-col justify-start gap-2.5 overflow-hidden p-4 pt-9 lg:justify-center lg:pt-4">
+            <p className="text-center text-[13.5px] leading-none text-foreground">
               Margot, what will you build?
             </p>
 
-            {/* Prompt box */}
-            <div className="flex h-[64px] flex-col justify-between rounded-lg border border-border p-2.5">
-              <p className="text-[11px] leading-none text-muted-foreground">
-                Build an onboarding wizard for my clients
+            {/* Prompt box — animated gradient ring marks it as the live entry
+                point, matching the hero composer. */}
+            <div className="v63-gradient-border relative flex h-[80px] flex-col justify-between rounded-lg border border-border p-2.5">
+              <p className="text-[11px] leading-relaxed text-foreground">
+                {TYPEWRITER_PREFIX}
+                {typedExample}
+                <span className="ml-px inline-block w-px animate-pulse align-[-0.1em]">
+                  |
+                </span>
               </p>
               <span className="flex items-center justify-between">
-                <IconPlus className="size-[11px] text-muted-foreground" />
-                <IconMic className="size-[11px] text-muted-foreground" />
+                <IconPlus className="size-[12px] text-muted-foreground" />
+                <span className="flex size-[20px] items-center justify-center rounded-md bg-foreground text-background">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden
+                    className="size-[11px]"
+                  >
+                    <path d="M12 19V5M6 11l6-6 6 6" />
+                  </svg>
+                </span>
               </span>
             </div>
 
-            {/* Category chips */}
-            <div className="flex items-center gap-1.5 overflow-hidden">
-              {CHIPS.map((chip, i) => (
-                <span
-                  key={chip}
-                  className="flex shrink-0 items-center gap-1 whitespace-nowrap rounded border border-border px-1.5 py-1 text-[10px] leading-none text-foreground"
-                >
-                  {i === 0 && <IconCheck className="size-[9px]" />}
-                  {chip}
-                </span>
-              ))}
-              <IconChevronRight className="size-[10px] shrink-0 text-muted-foreground" />
+            {/* Category chips — a single row that clips at the edge with a
+                trailing chevron, as if more categories sit off-screen. */}
+            <div className="flex items-center gap-1.5">
+              <div
+                className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden"
+                style={{
+                  maskImage:
+                    "linear-gradient(to right, #000 82%, transparent 100%)",
+                  WebkitMaskImage:
+                    "linear-gradient(to right, #000 82%, transparent 100%)",
+                }}
+              >
+                {CHIPS.map((chip) => (
+                  <span
+                    key={chip}
+                    className="flex shrink-0 items-center whitespace-nowrap rounded-[3px] border border-border px-1.5 py-1 text-[10px] leading-none text-foreground [[data-theme=dark]_&]:bg-white/[0.06]"
+                  >
+                    {chip}
+                  </span>
+                ))}
+              </div>
+              <IconChevronDown className="size-[10px] shrink-0 -rotate-90 text-muted-foreground" />
             </div>
 
             {/* Template list */}
@@ -168,14 +215,14 @@ export function DescribeVisual() {
                   key={template.title}
                   className="flex items-center gap-2 border-b border-border px-2.5 py-[7px] last:border-b-0"
                 >
-                  <span className="[&>svg]:size-[11px] flex size-[20px] shrink-0 items-center justify-center rounded bg-muted text-foreground">
+                  <span className="[&>svg]:size-[10px] flex size-[20px] shrink-0 items-center justify-center rounded bg-muted text-muted-foreground">
                     {template.icon}
                   </span>
                   <span className="min-w-0">
-                    <span className="block truncate text-[10.5px] leading-[1.35] text-foreground">
+                    <span className="block truncate text-[11px] leading-[1.35] text-foreground">
                       {template.title}
                     </span>
-                    <span className="block truncate text-[9.5px] leading-[1.35] text-muted-foreground">
+                    <span className="block truncate text-[10px] leading-[1.35] text-muted-foreground">
                       {template.description}
                     </span>
                   </span>

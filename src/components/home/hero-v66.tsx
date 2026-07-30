@@ -3,7 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { APP_URL } from "@/lib/constants";
+import {
+  APP_URL,
+  MAX_PROMPT_LENGTH,
+  buildSignupUrl,
+  getStartedUrl,
+} from "@/lib/constants";
 import { TEMPLATES } from "@/lib/templates";
 import { IconArrow, IconFile, IconPaperclip, IconPlay, IconX } from "./icons";
 import { TemplateMock } from "./template-preview";
@@ -43,11 +48,27 @@ const DELETE_MS = 22;
 const HOLD_FULL_MS = 1800;
 const HOLD_EMPTY_MS = 350;
 
+// A long prompt grows the box up to this height (a few lines past the empty
+// state), then scrolls — so text never clips mid-line. When it overflows, the
+// scrolled edges fade instead of hard-cutting.
+const MAX_TEXTAREA_H = 180;
+const EDGE_FADE = 22;
+
 // Shared typewriter driver so every hero's composer can show the same animated
 // "Assembly Studio build …" placeholder. Returns the currently-typed example;
 // pass `active=false` (e.g. once the user starts typing) to freeze it.
 export const TYPEWRITER_PREFIX = PH_PREFIX;
-export function useAssemblyTypewriter(active: boolean) {
+export function useAssemblyTypewriter(
+  active: boolean,
+  examples: string[] = PH_EXAMPLES,
+  // loop=false types the first example once and stops (no delete/cycle) — used
+  // by the How-it-works "Describe" step, which just needs one prompt to type in.
+  loop = true,
+  // Optional pacing overrides. Defaults reproduce the hero exactly; the
+  // How-it-works step passes a slower typeMs and a startDelayMs so its prompt
+  // eases in a beat after the visual, not the instant it appears.
+  opts?: { typeMs?: number; startDelayMs?: number },
+) {
   const [typedExample, setTypedExample] = useState("");
   useEffect(() => {
     if (!active) return;
@@ -56,32 +77,35 @@ export function useAssemblyTypewriter(active: boolean) {
       typeof window !== "undefined" &&
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
-      setTypedExample(PH_EXAMPLES[0]);
+      setTypedExample(examples[0]);
       return;
     }
 
+    const typeMs = opts?.typeMs ?? TYPE_MS;
+    const startDelayMs = opts?.startDelayMs ?? typeMs;
     let exampleIdx = 0;
     let charIdx = 0;
     let deleting = false;
     let timer: ReturnType<typeof setTimeout>;
 
     const tick = () => {
-      const full = PH_EXAMPLES[exampleIdx];
+      const full = examples[exampleIdx];
       if (!deleting) {
         charIdx += 1;
         setTypedExample(full.slice(0, charIdx));
         if (charIdx === full.length) {
+          if (!loop) return; // type once and hold
           deleting = true;
           timer = setTimeout(tick, HOLD_FULL_MS);
           return;
         }
-        timer = setTimeout(tick, TYPE_MS);
+        timer = setTimeout(tick, typeMs);
       } else {
         charIdx -= 1;
         setTypedExample(full.slice(0, charIdx));
         if (charIdx === 0) {
           deleting = false;
-          exampleIdx = (exampleIdx + 1) % PH_EXAMPLES.length;
+          exampleIdx = (exampleIdx + 1) % examples.length;
           timer = setTimeout(tick, HOLD_EMPTY_MS);
           return;
         }
@@ -89,9 +113,9 @@ export function useAssemblyTypewriter(active: boolean) {
       }
     };
 
-    timer = setTimeout(tick, TYPE_MS);
+    timer = setTimeout(tick, startDelayMs);
     return () => clearTimeout(timer);
-  }, [active]);
+  }, [active, examples]);
   return typedExample;
 }
 
@@ -157,7 +181,7 @@ function V66Nav() {
 // The prompt box. Kept top-level so its menu state doesn't remount. `tone`
 // flips the text + control colors so the same box can sit on a light panel or
 // on a dark/glass hero.
-export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 ring-black/[0.06]", surfaceRadiusClass = "rounded-[22px]", minHeightClass = "min-h-[188px]", tone = "light", typewriter = false, mutedControls = false, submitLabel, submitDark = false, accent = LIME, hidePlus = false, hideHowTo = false, howToLabel = "How it works", howToSide = "left", promptPicker = false, promptPickerLabel = "Select a prompt", promptPickerSide = "left", promptPickerUp = false, promptItems, plusItems, compact = false, minimalControls = false, plusAsAttach = false, footerLeading, showSubmit = true, submitDisabled, textDimmed = false, value: valueProp, onValueChange, textareaRef }: { glow?: boolean; surfaceClassName?: string; surfaceRadiusClass?: string; minHeightClass?: string; tone?: "light" | "dark"; typewriter?: boolean; mutedControls?: boolean; submitLabel?: string; submitDark?: boolean; accent?: string; hidePlus?: boolean; hideHowTo?: boolean; howToLabel?: string; howToSide?: "left" | "right"; promptPicker?: boolean; promptPickerLabel?: string; promptPickerSide?: "left" | "right"; promptPickerUp?: boolean; promptItems?: (string | { label: string; prompt: string })[]; plusItems?: { label: string; icon: "attach" | "transfer" }[]; compact?: boolean; minimalControls?: boolean; plusAsAttach?: boolean; footerLeading?: React.ReactNode; showSubmit?: boolean; submitDisabled?: boolean; textDimmed?: boolean; value?: string; onValueChange?: (v: string) => void; textareaRef?: React.Ref<HTMLTextAreaElement> } = {}) {
+export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 ring-black/[0.06]", surfaceRadiusClass = "rounded-[22px]", minHeightClass = "min-h-[188px]", tone = "light", typewriter = false, mutedControls = false, submitLabel, submitDark = false, accent = LIME, hidePlus = false, hideHowTo = false, howToLabel = "How it works", howToSide = "left", promptPicker = false, promptPickerLabel = "Select a prompt", promptPickerSide = "left", promptPickerUp = false, promptItems, plusItems, compact = false, minimalControls = false, plusAsAttach = false, footerLeading, showSubmit = true, submitDisabled, textDimmed = false, splitFooter = false, value: valueProp, onValueChange, textareaRef }: { glow?: boolean; surfaceClassName?: string; surfaceRadiusClass?: string; minHeightClass?: string; tone?: "light" | "dark"; typewriter?: boolean; mutedControls?: boolean; submitLabel?: string; submitDark?: boolean; accent?: string; hidePlus?: boolean; hideHowTo?: boolean; howToLabel?: string; howToSide?: "left" | "right"; promptPicker?: boolean; promptPickerLabel?: string; promptPickerSide?: "left" | "right"; promptPickerUp?: boolean; promptItems?: (string | { label: string; prompt: string })[]; plusItems?: { label: string; icon: "attach" | "transfer" }[]; compact?: boolean; minimalControls?: boolean; plusAsAttach?: boolean; footerLeading?: React.ReactNode; showSubmit?: boolean; submitDisabled?: boolean; textDimmed?: boolean; splitFooter?: boolean; value?: string; onValueChange?: (v: string) => void; textareaRef?: React.Ref<HTMLTextAreaElement> } = {}) {
   // Prompt-picker entries. Default: the shared "Build a …" examples. A hero can
   // pass `promptItems` as plain strings (shown and inserted verbatim) or as
   // {label, prompt} pairs — the menu shows the short label, picking inserts
@@ -184,6 +208,24 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
   const typedExample = useAssemblyTypewriter(typewriter && !value);
   const menuRef = useRef<HTMLDivElement>(null);
   const promptRef = useRef<HTMLDivElement>(null);
+
+  // Auto-grow the textarea to fit the prompt (up to MAX_TEXTAREA_H), then scroll.
+  // Keep our own ref while still honoring the forwarded one so both work.
+  const innerTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const setTextareaRef = (node: HTMLTextAreaElement | null) => {
+    innerTextareaRef.current = node;
+    if (typeof textareaRef === "function") textareaRef(node);
+    else if (textareaRef)
+      (textareaRef as React.MutableRefObject<HTMLTextAreaElement | null>).current = node;
+  };
+  // Which edges have hidden text — drives the soft fade so overflow reads as
+  // intentional, not a hard clip.
+  const [fadeTop, setFadeTop] = useState(false);
+  const [fadeBottom, setFadeBottom] = useState(false);
+  const syncFades = (el: HTMLTextAreaElement) => {
+    setFadeTop(el.scrollTop > 2);
+    setFadeBottom(el.scrollTop + el.clientHeight < el.scrollHeight - 2);
+  };
 
   // File attachments. Capped so the box can't overflow; images preview as
   // thumbnails, everything else as a compact file card. De-duped by name+size.
@@ -229,6 +271,21 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
   );
   useEffect(() => () => previews.forEach((u) => u && URL.revokeObjectURL(u)), [previews]);
 
+  // Resize to fit whenever the value changes (typing, or a picked Prompt Idea),
+  // and on viewport width change since that rewraps the text.
+  useEffect(() => {
+    const el = innerTextareaRef.current;
+    if (!el) return;
+    const fit = () => {
+      el.style.height = "auto";
+      el.style.height = `${Math.min(el.scrollHeight, MAX_TEXTAREA_H)}px`;
+      syncFades(el);
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [value]);
+
   const dark = tone === "dark";
   // mutedControls: softer off-white surface (no hard shadow) so the pills sit
   // naturally in a tinted composer instead of popping as bright white.
@@ -245,12 +302,21 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
     : dark
       ? "bg-white/10 hover:bg-white/[0.2]"
       : lightPill;
-  const pillTextCls = dark ? "text-white/65" : "text-neutral-700";
-  // The "+" carries a persistent gray fill (not hover-only) so it always reads
-  // as an actionable control.
-  const plusBgCls = dark ? "bg-white/10 hover:bg-white/[0.16]" : "bg-black/[0.05] hover:bg-black/[0.08]";
-  // Footer controls squish slightly on hover and a touch more on press.
-  const squishCls = "transition-all duration-150 ease-out hover:scale-[0.96] active:scale-[0.92]";
+  const pillTextCls = dark ? "text-white/65" : "text-neutral-800";
+  // The "+" reads as a bare glyph with only a faint hover shape when controls
+  // are minimal (v74+) — a persistent fill pulls the eye and reads like a hover
+  // state. Legacy composers keep the filled affordance.
+  const plusBgCls = minimalControls
+    ? dark
+      ? "hover:bg-white/[0.08]"
+      : "hover:bg-black/[0.04]"
+    : dark
+      ? "bg-white/10 hover:bg-white/[0.16]"
+      : "bg-black/[0.05] hover:bg-black/[0.08]";
+  // Footer controls give a restrained press cue — a small scale on click only.
+  // (No hover-scale: shrinking on hover reads playful; hover is carried by the
+  // subtle background change instead.)
+  const squishCls = "transition-transform duration-150 ease-out active:scale-[0.97]";
   // Compact scales the footer controls down (v73/v74) without touching the
   // default composer other heroes use. All controls (+, pills, submit) share
   // the same subtle pill styling so nothing pops.
@@ -308,7 +374,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
     : promptPickerSide === "right"
       ? "origin-top-right"
       : "origin-top-left";
-  const pickerVert = promptPickerUp ? "bottom-full mb-2" : "top-full mt-2";
+  const pickerVert = promptPickerUp ? "bottom-full mb-2" : "top-full mt-1";
   const pickerAlign = `${pickerSideCls} ${pickerOrigin}`;
   const promptPickerNode = promptPicker ? (
     <div ref={promptRef} className="relative">
@@ -320,12 +386,14 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
         className={`flex ${ctrlH} items-center rounded-lg ${pillPad} ${pillText} ${squishCls} ${pillCls} ${pillTextCls}`}
       >
         <span className="whitespace-nowrap">{promptPickerLabel}</span>
-        <IconChevronDown className={`size-3.5 shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${promptOpen ? "rotate-180" : ""}`} />
+        {/* Chevron stays put — flipping it on open is a micro-interaction that
+            draws attention without adding meaning. */}
+        <IconChevronDown className="size-3.5 shrink-0" />
       </button>
       {promptOpen && (
         <div
           role="menu"
-          className={`absolute ${pickerAlign} ${pickerVert} z-40 max-h-[min(60vh,20rem)] w-[min(19rem,calc(100vw-2.5rem))] animate-menu-in overflow-y-auto overflow-x-hidden overscroll-contain rounded-2xl border p-1.5 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.3)] ${menuSurfaceCls}`}
+          className={`absolute ${pickerAlign} ${pickerVert} z-40 max-h-[min(60vh,20rem)] w-[min(19rem,calc(100vw-6rem))] animate-menu-in overflow-y-auto overflow-x-hidden overscroll-contain rounded-2xl border p-1.5 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.3)] ${menuSurfaceCls}`}
         >
           {promptEntries.map((entry) => (
             <button
@@ -360,6 +428,16 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
     </button>
   ) : null;
 
+  // splitFooter: the text input reads as a filled field on the box surface, with
+  // the controls on the surface below — an editor look rather than one flat
+  // field. The outer surface takes the page background, so the field itself
+  // carries the fill; without it the whole box vanishes into the page.
+  // Radius is concentric with the outer box (outer − the p-2 frame) so the
+  // card's corners follow the gradient-border curve instead of sitting tighter.
+  const cardCls = dark
+    ? "rounded-[10px] md:rounded-[14px] bg-[#1b1b1b] p-3.5 ring-1 ring-white/[0.08]"
+    : "rounded-[10px] md:rounded-[14px] bg-white p-3.5 ring-1 ring-black/[0.06]";
+
   return (
     <div className="relative">
       {/* Lime focus glow behind the box. */}
@@ -370,14 +448,15 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
           style={{ background: `linear-gradient(180deg, ${accent}, transparent 60%)` }}
         />
       )}
-      <div className={`relative flex flex-col ${surfaceRadiusClass} p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)] ${minHeightClass} ${surfaceClassName}`}>
-        <div className="relative flex flex-1">
+      <div className={`relative flex flex-col ${surfaceRadiusClass} ${splitFooter ? "p-2" : "p-4"} shadow-[0_1px_2px_rgba(0,0,0,0.04)] ${minHeightClass} ${surfaceClassName}`}>
+        <div className={splitFooter ? `flex flex-1 flex-col ${cardCls}` : "contents"}>
+        <div className="relative flex-1">
           {/* Animated placeholder — static verb prefix + a typewritten example.
               Only while empty; the native placeholder is suppressed in this mode. */}
           {typewriter && !value && (
             <div
               aria-hidden
-              className={`pointer-events-none absolute inset-0 px-1 text-base leading-relaxed ${dark ? "text-white/40" : "text-neutral-400"}`}
+              className={`pointer-events-none absolute inset-0 px-1 text-base leading-loose ${dark ? "text-white/40" : "text-neutral-400"}`}
             >
               {PH_PREFIX}
               {typedExample}
@@ -385,17 +464,43 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
             </div>
           )}
           <textarea
-            ref={textareaRef}
+            ref={setTextareaRef}
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            rows={3}
+            onKeyDown={(e) => {
+              // Enter submits the prompt (matching the send button); Shift+Enter
+              // inserts a newline.
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                if (value.trim()) {
+                  window.location.href = getStartedUrl(value);
+                }
+              }
+            }}
+            onScroll={(e) => syncFades(e.currentTarget)}
+            rows={compact ? 2 : 3}
+            maxLength={MAX_PROMPT_LENGTH}
             aria-label="Describe what to build"
             placeholder={typewriter ? "" : "Describe the workflow you want to turn into an app…"}
+            // Grows to fit the prompt up to MAX_TEXTAREA_H, then scrolls; the
+            // mask fades whichever edge still hides text so nothing hard-clips.
+            style={{
+              maxHeight: MAX_TEXTAREA_H,
+              maskImage:
+                fadeTop || fadeBottom
+                  ? `linear-gradient(to bottom, ${fadeTop ? `transparent 0, #000 ${EDGE_FADE}px` : "#000 0"}, ${fadeBottom ? `#000 calc(100% - ${EDGE_FADE}px), transparent 100%` : "#000 100%"})`
+                  : undefined,
+              WebkitMaskImage:
+                fadeTop || fadeBottom
+                  ? `linear-gradient(to bottom, ${fadeTop ? `transparent 0, #000 ${EDGE_FADE}px` : "#000 0"}, ${fadeBottom ? `#000 calc(100% - ${EDGE_FADE}px), transparent 100%` : "#000 100%"})`
+                  : undefined,
+            }}
             // While the demo animation is playing (textDimmed), the text reads
             // as secondary/placeholder ink; it flips to full-strength once the
             // visitor takes over.
-            className={`w-full flex-1 resize-none bg-transparent px-1 text-base leading-relaxed outline-none ${textDimmed ? (dark ? "text-white/45" : "text-neutral-500") : textCls}`}
+            className={`block w-full resize-none overflow-y-auto bg-transparent px-1 text-base leading-relaxed outline-none md:leading-loose [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${textDimmed ? (dark ? "text-white/45" : "text-neutral-500") : textCls}`}
           />
+        </div>
         </div>
 
         {/* Attached files — image thumbnails or compact file cards, each with a
@@ -411,7 +516,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
                     type="button"
                     onClick={() => removeFile(i)}
                     aria-label={`Remove ${f.name}`}
-                    className={`absolute right-1 top-1 z-10 flex size-5 items-center justify-center rounded-full opacity-0 shadow-sm transition-opacity group-hover/att:opacity-100 ${dark ? "bg-[#1b1b1b] text-white ring-1 ring-white/15" : "bg-white text-neutral-900 ring-1 ring-black/10"}`}
+                    className={`absolute right-1 top-1 z-10 flex size-5 items-center justify-center rounded-md opacity-0 shadow-sm transition-opacity group-hover/att:opacity-100 ${dark ? "bg-[#1b1b1b] text-white ring-1 ring-white/15" : "bg-white text-neutral-900 ring-1 ring-black/10"}`}
                   >
                     <IconX className="size-3" />
                   </button>
@@ -439,27 +544,62 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
           </div>
         )}
 
-        <div className="mt-3 flex items-center justify-between gap-2">
+        <div
+          className={`flex items-center justify-between gap-2 ${
+            splitFooter ? "mt-2 px-1.5 pb-0.5" : "mt-3"
+          }`}
+        >
           {/* Left — creation controls: "+", the prompt picker, and/or video. */}
           <div className="flex items-center gap-2">
             {footerLeading}
-            {/* "+" — a plain file-attach button (no dropdown) when the only
-                action is attaching; otherwise a menu (attach / transfer / …). */}
+            {/* "+" — on the marketing site there's nothing to attach yet.
+                Instead of opening a file picker it reveals a small popover
+                explaining that uploads/themes/integrations unlock with an
+                account, then routes to signup. */}
             {!hidePlus && plusAsAttach && (
-              <button
-                type="button"
-                aria-label="Attach files"
-                onClick={() => {
-                  if (atLimit) {
-                    flashLimit();
-                    return;
-                  }
-                  fileInputRef.current?.click();
-                }}
-                className={`flex ${plusSize} items-center justify-center rounded-lg ${squishCls} ${plusBgCls} ${pillTextCls}`}
-              >
-                <IconPlus />
-              </button>
+              <div ref={menuRef} className="relative">
+                <button
+                  type="button"
+                  aria-label="More options"
+                  aria-expanded={menuOpen}
+                  onClick={() => setMenuOpen((o) => !o)}
+                  className={`flex ${plusSize} items-center justify-center rounded-lg ${squishCls} ${plusBgCls} ${pillTextCls}`}
+                >
+                  <IconPlus />
+                </button>
+                {menuOpen && (
+                  <div
+                    role="dialog"
+                    // mt-1 keeps this level with the prompt-picker menu, which
+                    // hangs off a same-height button in the same footer row.
+                    className={`absolute left-0 top-full z-40 mt-1 w-[288px] max-w-[calc(100vw-3rem)] animate-menu-in rounded-2xl border p-4 text-left shadow-[0_20px_50px_-24px_rgba(0,0,0,0.4)] ${menuSurfaceCls}`}
+                  >
+                    <p className={`text-sm font-medium ${dark ? "text-white" : "text-neutral-900"}`}>
+                      Unlock more features
+                    </p>
+                    <p className={`mt-1 text-sm leading-relaxed ${dark ? "text-white/60" : "text-neutral-500"}`}>
+                      Attach files and images, apply your brand, connect integrations, and more once you have an account.
+                    </p>
+                    <div className="mt-3.5 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          window.location.href = value.trim()
+                            ? getStartedUrl(value)
+                            : buildSignupUrl();
+                        }}
+                        // Site primary button: rounded-lg on the foreground/
+                        // background token pair, which inverts itself per theme.
+                        // Was a hard-coded white/near-black pill, off-system in
+                        // both radius and colour.
+                        className="rounded-lg bg-foreground px-4 py-2 text-sm text-background transition-opacity hover:opacity-90"
+                      >
+                        Get started
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
             <input
               ref={fileInputRef}
@@ -493,7 +633,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
                 <IconPlus />
               </button>
               {menuOpen && (
-                <div className={`absolute left-0 top-full z-30 mt-2 w-56 overflow-hidden rounded-2xl border p-1.5 shadow-[0_20px_50px_-24px_rgba(0,0,0,0.4)] ${menuSurfaceCls}`}>
+                <div className={`absolute left-0 top-full z-30 mt-1 w-56 overflow-hidden rounded-2xl border p-1.5 shadow-[0_20px_50px_-24px_rgba(0,0,0,0.4)] ${menuSurfaceCls}`}>
                   {plusMenuItems.map((item) => (
                     <button
                       key={item.label}
@@ -531,9 +671,15 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
               return (
             <button
               type="button"
-              onClick={() => window.open(APP_URL, "_blank", "noopener,noreferrer")}
+              onClick={() => {
+                // With a prompt, go via the continuation screen; an empty click
+                // skips it and goes straight to signup.
+                window.location.href = value.trim()
+                  ? getStartedUrl(value)
+                  : buildSignupUrl();
+              }}
               aria-label={submitLabel ?? "Build it"}
-              className={`flex ${submitH} items-center justify-center gap-1.5 rounded-lg ${pillText} font-normal transition-all duration-150 ease-out hover:scale-[0.96] active:scale-[0.92] ${
+              className={`flex ${submitH} items-center justify-center gap-1.5 rounded-lg ${pillText} font-normal transition-all duration-150 ease-out active:scale-[0.98] ${
                 submitActive
                   ? submitDark
                     ? "text-white hover:opacity-90"

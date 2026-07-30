@@ -86,7 +86,7 @@ const PROMPT_POOL = PROMPT_IDEAS.flatMap(({ head, topic, tail }) => {
 
 export function PromptComposer({
   ariaLabel = "Describe what to build",
-  // When set, the submit control is a labeled pill (e.g. "Start building");
+  // When set, the submit control is a labeled pill (e.g. "Get started");
   // otherwise it's the compact arrow-only circle used in the hero.
   submitLabel,
 }: {
@@ -245,7 +245,7 @@ export function PromptComposer({
   // labeled pill the moment there's a prompt to send — including the CTA, which
   // provides the label to use once typing begins.
   const hasInput = userInput.trim().length > 0;
-  const pillLabel = submitLabel ?? "Start building";
+  const pillLabel = submitLabel ?? "Get started";
   const showPill = hasInput;
 
   return (

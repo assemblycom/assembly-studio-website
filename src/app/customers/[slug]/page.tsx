@@ -10,94 +10,9 @@ import {
   type ContentBlock,
 } from "@/lib/case-studies";
 import { VideoPlayer } from "@/components/customers/video-player";
-import { CapitalOneLogo } from "@/components/customers/capital-one-logo";
-import { MaskLogo } from "@/components/customers/mask-logo";
+import { CustomerLogo, hasCustomerLogo } from "@/components/customers/customer-logos";
 import { IconArrow } from "@/components/home/icons";
 import { APP_URL } from "@/lib/constants";
-
-// Customers with a real wordmark; everyone else falls back to the monogram
-// circle. Each entry sets its own width so different wordmark proportions
-// sit optically balanced inside the same circle.
-const CUSTOMER_LOGOS: Record<
-  string,
-  React.ComponentType<{ surface?: string }>
-> = {
-  "capital-one-luxury-travel": ({ surface }) => (
-    <CapitalOneLogo className="w-16 text-foreground" surface={surface} />
-  ),
-  "ditto-by-dbc": () => (
-    <MaskLogo
-      src="/images/customers/ditto-logo-mask.png"
-      aspect="398 / 174"
-      className="w-14 text-foreground"
-    />
-  ),
-  "collective-cpa": () => (
-    <MaskLogo
-      src="/images/customers/collective-logo-mask.png"
-      aspect="1024 / 200"
-      className="w-[74px] text-foreground"
-    />
-  ),
-  // Portrait emblem — sized by what fits the circle's height.
-  "jungle-luxe": () => (
-    <MaskLogo
-      src="/images/customers/jungle-luxe-logo-mask.png"
-      aspect="181 / 285"
-      className="w-10 text-foreground"
-    />
-  ),
-  "orca-accounting": () => (
-    <MaskLogo
-      src="/images/customers/orca-logo-mask.png"
-      aspect="1126 / 566"
-      className="w-16 text-foreground"
-    />
-  ),
-  "valuenode-accounting": () => (
-    <MaskLogo
-      src="/images/customers/valuenode-logo-mask.png"
-      aspect="543 / 143"
-      className="w-16 text-foreground"
-    />
-  ),
-  // Portrait shield — sized by the circle's height.
-  "zen-aegis": () => (
-    <MaskLogo
-      src="/images/customers/zen-aegis-logo-mask.png"
-      aspect="842 / 988"
-      className="w-10 text-foreground"
-    />
-  ),
-  "metta-health": () => (
-    <MaskLogo
-      src="/images/customers/metta-logo-mask.png"
-      aspect="497 / 87"
-      className="w-[74px] text-foreground"
-    />
-  ),
-  "vacation-rental-license": () => (
-    <MaskLogo
-      src="/images/customers/vrl-logo-mask.png"
-      aspect="368 / 185"
-      className="w-14 text-foreground"
-    />
-  ),
-  "heritage-law-partners": () => (
-    <MaskLogo
-      src="/images/customers/heritage-logo-mask.png"
-      aspect="401 / 138"
-      className="w-16 text-foreground"
-    />
-  ),
-  "durrick-designs": () => (
-    <MaskLogo
-      src="/images/customers/durrick-logo-mask.png"
-      aspect="1 / 1"
-      className="w-12 text-foreground"
-    />
-  ),
-};
 
 // Matches the mono eyebrow treatment used across the site (e.g. the hero's
 // "Trusted by teams at"). ABC Diatype Mono isn't bundled, so the system mono
@@ -128,7 +43,6 @@ function MetaCard({ study }: { study: CaseStudy }) {
   const g = study.glance;
 
   // Real wordmark when we have one; monogram stand-in otherwise.
-  const Logo = CUSTOMER_LOGOS[study.slug];
   const monogram = study.company
     .split(/\s+/)
     .slice(0, 2)
@@ -164,8 +78,8 @@ function MetaCard({ study }: { study: CaseStudy }) {
       <div className="cursor-default overflow-hidden rounded-lg border border-border bg-card">
         <div className="flex flex-col items-center px-6 pb-6 pt-8">
           <div className="flex size-24 items-center justify-center rounded-full bg-background ring-1 ring-border">
-            {Logo ? (
-              <Logo surface="var(--background)" />
+            {hasCustomerLogo(study.slug) ? (
+              <CustomerLogo slug={study.slug} surface="var(--background)" />
             ) : (
               <span className="text-2xl font-medium tracking-tight">
                 {monogram}
@@ -292,6 +206,9 @@ export default async function CaseStudyPage({ params }: Props) {
   const study = getCaseStudyBySlug(slug);
   if (!study) notFound();
 
+  // Lead with the video player whenever the story has a real video URL.
+  const showMedia = Boolean(study.videoUrl);
+
   const hasRichBody = Boolean(study.body && study.glance);
 
   const index = CASE_STUDIES.findIndex((s) => s.slug === slug);
@@ -306,7 +223,7 @@ export default async function CaseStudyPage({ params }: Props) {
       {/* Hero — video stories get breathing room from the media below; stories
           without a video need extra padding under the stats instead. */}
       <section
-        className={`px-6 pt-10 md:pt-28 ${study.featured ? "" : "pb-10 md:pb-16"}`}
+        className={`px-6 pt-10 md:pt-28 ${showMedia ? "" : "pb-10 md:pb-16"}`}
       >
         <div className="mx-auto max-w-5xl text-left md:text-center">
           <nav
@@ -344,8 +261,8 @@ export default async function CaseStudyPage({ params }: Props) {
             ))}
           </div>
 
-          {/* Hero media — only the video (featured) stories lead with media */}
-          {study.featured && (
+          {/* Hero media — the video player leads the story when a video exists. */}
+          {showMedia && (
             <VideoPlayer
               videoUrl={study.videoUrl}
               poster={caseStudyImage(study)}
@@ -359,7 +276,7 @@ export default async function CaseStudyPage({ params }: Props) {
       {/* Mobile-only hairline: softens the otherwise-abrupt jump from the title
           block straight into the body copy. Desktop has the sidebar + wider
           rhythm for that separation, so it's only needed on narrow screens. */}
-      {!study.featured && (
+      {!showMedia && (
         <div aria-hidden className="px-6 md:hidden">
           <div className="mx-auto max-w-5xl border-t border-border" />
         </div>
@@ -379,9 +296,9 @@ export default async function CaseStudyPage({ params }: Props) {
 
               <a
                 href={APP_URL}
-                className="mt-14 inline-block rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
+                className="mt-14 block w-full max-w-xs rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background sm:inline-block sm:w-auto transition-opacity hover:opacity-90"
               >
-                Start building
+                Get started
               </a>
             </article>
 
@@ -434,9 +351,9 @@ export default async function CaseStudyPage({ params }: Props) {
 
               <a
                 href={APP_URL}
-                className="mt-12 inline-block rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
+                className="mt-12 block w-full max-w-xs rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background sm:inline-block sm:w-auto transition-opacity hover:opacity-90"
               >
-                Start building
+                Get started
               </a>
             </div>
           </Section>

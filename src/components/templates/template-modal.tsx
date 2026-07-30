@@ -1,8 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { TemplateGallery } from "@/components/templates/template-gallery";
-import { SIGNUP_URL } from "@/lib/constants";
+import {
+  IconArrowLeft,
+  IconArrowRight,
+  IconClose,
+  IconExpand,
+} from "@/components/templates/modal-icons";
+import { APP_URL } from "@/lib/constants";
+import { useAuthState } from "@/lib/use-auth";
 
 // Slim, serializable slice of a template the modal needs.
 export interface ModalTemplate {
@@ -12,6 +19,7 @@ export interface ModalTemplate {
   longDescription: string;
   category: string;
   industries?: string[];
+  usesAI?: boolean;
   images?: string[];
   videoUrl?: string;
   previewCount?: number;
@@ -57,6 +65,32 @@ export function TemplateModalBrowser({
   const template = templates[index];
   const close = useCallback(() => window.history.back(), []);
 
+  // Swipe-to-dismiss (mobile) — drag the sheet down from its grab handle; past a
+  // threshold it closes, otherwise it snaps back. Expected bottom-sheet gesture.
+  const dragStartY = useRef<number | null>(null);
+  const [dragY, setDragY] = useState(0);
+  const [dragging, setDragging] = useState(false);
+
+  // Signed-in visitors add the app straight to their workspace; signed-out
+  // visitors sign up starting from this template.
+  const { authed } = useAuthState();
+  const ctaHref = authed ? APP_URL : `/get-started?template=${template.slug}`;
+  const ctaLabel = authed ? "Add app to workspace" : "Get started";
+  const onDragStart = (e: React.TouchEvent) => {
+    dragStartY.current = e.touches[0].clientY;
+    setDragging(true);
+  };
+  const onDragMove = (e: React.TouchEvent) => {
+    if (dragStartY.current === null) return;
+    setDragY(Math.max(0, e.touches[0].clientY - dragStartY.current));
+  };
+  const onDragEnd = () => {
+    if (dragY > 120) close();
+    else setDragY(0);
+    dragStartY.current = null;
+    setDragging(false);
+  };
+
   // The grid pushed a history entry when it opened the modal, so the back
   // button (and close(), which is just history.back()) lands here.
   useEffect(() => {
@@ -100,25 +134,32 @@ export function TemplateModalBrowser({
       <div
         role="dialog"
         aria-modal="true"
-        className="template-sheet animate-fade-in relative flex h-dvh w-full flex-col overflow-hidden bg-background ring-1 ring-border shadow-[0_40px_120px_-24px_rgba(0,0,0,0.45)] md:h-auto md:max-h-[92vh] md:max-w-6xl md:rounded-2xl"
+        style={{
+          transform: dragY ? `translateY(${dragY}px)` : undefined,
+          transition: dragging ? "none" : "transform 0.3s cubic-bezier(0.22,1,0.36,1)",
+        }}
+        className="template-sheet animate-fade-in relative flex h-dvh w-full flex-col overflow-hidden bg-background ring-1 ring-border shadow-[0_40px_120px_-24px_rgba(0,0,0,0.45)] [[data-theme=dark]_&]:bg-[#1c1c1c] [[data-theme=dark]_&]:ring-white/[0.14] md:h-auto md:max-h-[92vh] md:max-w-6xl md:rounded-2xl"
       >
+        {/* Mobile grab handle — drag down to dismiss (native bottom-sheet feel).
+            Its touch target spans the top so the gesture is easy to start. */}
+        <div
+          className="flex shrink-0 items-center justify-center py-2.5 md:hidden"
+          onTouchStart={onDragStart}
+          onTouchMove={onDragMove}
+          onTouchEnd={onDragEnd}
+        >
+          <span className="h-1.5 w-10 rounded-full bg-foreground/20" />
+        </div>
+
         {/* Control bar — expand · prev/next … close. */}
-        <div className="flex items-center gap-1 border-b border-border px-4 py-3">
+        <div className="flex items-center gap-1 border-b border-border px-4 py-3 md:pt-3">
           {/* Expand is pointless on mobile — the sheet is already full-bleed. */}
           <a
             href={`/templates/${template.slug}`}
             aria-label="Open full page"
             className={`${iconBtn} hidden md:flex`}
           >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
-              <path
-                d="M8.5 1.5h4v4M5.5 12.5h-4v-4M12.5 1.5L8 6M1.5 12.5L6 8"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <IconExpand className="size-[15px]" />
           </a>
           <span aria-hidden className="mx-1.5 hidden h-5 w-px bg-border md:block" />
           <button
@@ -127,15 +168,7 @@ export function TemplateModalBrowser({
             onClick={() => step(-1)}
             className={iconBtn}
           >
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden>
-              <path
-                d="M9.5 2.5l-5 5 5 5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <IconArrowLeft className="size-[15px]" />
           </button>
           <button
             type="button"
@@ -143,15 +176,7 @@ export function TemplateModalBrowser({
             onClick={() => step(1)}
             className={iconBtn}
           >
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden>
-              <path
-                d="M5.5 2.5l5 5-5 5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <IconArrowRight className="size-[15px]" />
           </button>
           <button
             type="button"
@@ -159,14 +184,7 @@ export function TemplateModalBrowser({
             aria-label="Close template details"
             className={`${iconBtn} ml-auto`}
           >
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden>
-              <path
-                d="M3 3l8 8M11 3l-8 8"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </svg>
+            <IconClose className="size-[15px]" />
           </button>
         </div>
 
@@ -179,9 +197,7 @@ export function TemplateModalBrowser({
               <TemplateGallery
                 title={template.title}
                 images={template.images}
-                videoUrl={template.videoUrl}
                 previewCount={template.previewCount}
-                hasVideo={template.hasVideo}
               />
 
               <div className="mt-12">
@@ -213,20 +229,23 @@ export function TemplateModalBrowser({
             {/* Right — sticky sidebar: category, title, description, tags, CTA.
                 On mobile it stacks FIRST so the title leads the sheet. */}
             <div className="order-first md:order-none md:sticky md:top-0 md:self-start">
-              <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
-                {template.category}
-              </p>
-              <h2 className="type-h3 mt-4">{template.title}</h2>
+              <h2 className="type-h3">{template.title}</h2>
               <p className="mt-3 text-base text-muted-foreground">
                 {template.description}
               </p>
 
-              {template.industries && template.industries.length > 0 && (
+              {(template.usesAI ||
+                (template.industries && template.industries.length > 0)) && (
                 <div className="mt-5 flex flex-wrap gap-2">
-                  {template.industries.map((industry) => (
+                  {template.usesAI && (
+                    <span className="rounded-md bg-foreground px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-background">
+                      AI
+                    </span>
+                  )}
+                  {template.industries?.map((industry) => (
                     <span
                       key={industry}
-                      className="rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground"
+                      className="rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground [[data-theme=dark]_&]:bg-white/[0.08]"
                     >
                       {industry}
                     </span>
@@ -237,10 +256,10 @@ export function TemplateModalBrowser({
               {/* Desktop CTA — on mobile the floating action bar carries it. */}
               <div className="mt-6 hidden md:block">
                 <a
-                  href={SIGNUP_URL}
-                  className="inline-block rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
+                  href={ctaHref}
+                  className="block w-full max-w-xs rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background sm:inline-block sm:w-auto transition-opacity hover:opacity-90"
                 >
-                  Build off this template
+                  {ctaLabel}
                 </a>
               </div>
             </div>
@@ -252,10 +271,10 @@ export function TemplateModalBrowser({
         <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-background via-background/85 to-transparent pb-4 pt-12 md:hidden">
           <div className="pointer-events-auto flex justify-center px-4">
             <a
-              href={SIGNUP_URL}
+              href={ctaHref}
               className="w-full max-w-sm rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background"
             >
-              Build off this template
+              {ctaLabel}
             </a>
           </div>
         </div>

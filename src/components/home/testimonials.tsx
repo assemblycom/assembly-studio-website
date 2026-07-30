@@ -14,19 +14,23 @@ import { Section } from "@/components/ui/section";
 // outcome-shaped story we have. Swap FEATURED when the beta content lands.
 // ─────────────────────────────────────────────────────────────────────────
 
+// TODO: real attribution, portrait, and story link — this featured story must
+// come from an Assembly Studio beta firm (content pending). Name/Firm and the
+// portrait are placeholders for now; the quote + stats are the approved copy.
 const FEATURED = {
   quote:
-    "We've reduced owner inquiries by at least 50%. It probably saved the cost of a whole extra administrator.",
-  name: "Rachel Hugenschmidt",
-  title: "Founder",
-  firm: "Jungle Luxe",
-  vertical: "Property management",
+    "Everywhere else, we got stuck at the prototype. Assembly got it securely to our clients.",
+  name: "Name",
+  firm: "Firm",
+  // Stand-in only, so the layout can be judged with a real photo in place.
+  // Replace together with name/firm when the beta-firm content lands.
+  image: "/images/customers/jungle-luxe.jpg",
   stats: [
-    { value: "50%+", label: "fewer owner inquiries" },
-    { value: "110+", label: "owners on the portal" },
-    { value: "1 FTE", label: "cost saved" },
+    { value: "One week", label: "From idea to live client experience" },
+    { value: "250 clients", label: "Onboarded in the first month" },
+    { value: "$5,000/mo", label: "In vendor costs replaced by apps" },
   ],
-  slug: "jungle-luxe",
+  href: "/customers",
 };
 
 // Descending bar heights (md+) so the row reads as a small chart and leaves
@@ -35,26 +39,26 @@ const BAR_HEIGHTS = ["md:h-[280px]", "md:h-[228px]", "md:h-[186px]"];
 
 export function Testimonials() {
   return (
-    <Section id="testimonials">
-      <div className="relative">
-        {/* Portrait — pinned upper-right (desktop only, to avoid overlapping
-            the quote on narrow screens). */}
-        <div className="absolute right-0 top-0 hidden size-32 overflow-hidden rounded-xl md:block lg:size-36">
+    <Section id="testimonials" className="py-16 md:py-24">
+      <div className="relative mx-auto max-w-[1100px]">
+        {/* Portrait — pinned upper-right (desktop only). Stand-in photo so the
+            section can be judged with real content; swap with the beta firm's
+            own image alongside the attribution. */}
+        <div className="absolute right-0 top-0 hidden size-32 overflow-hidden rounded-xl bg-muted [[data-theme=dark]_&]:bg-white/[0.06] md:block lg:size-36">
           <Image
-            src={`/images/customers/${FEATURED.slug}.jpg`}
-            alt={FEATURED.name}
+            src={FEATURED.image}
+            alt=""
             fill
             sizes="144px"
             className="object-cover"
           />
         </div>
 
-        {/* Avatar on mobile — the desktop portrait is pinned top-right, but on
-            narrow screens it sits inline above the attribution instead. */}
-        <div className="relative mb-5 size-14 overflow-hidden rounded-xl md:hidden">
+        {/* Avatar on mobile — sits inline above the attribution. */}
+        <div className="relative mb-5 size-14 overflow-hidden rounded-xl bg-muted [[data-theme=dark]_&]:bg-white/[0.06] md:hidden">
           <Image
-            src={`/images/customers/${FEATURED.slug}.jpg`}
-            alt={FEATURED.name}
+            src={FEATURED.image}
+            alt=""
             fill
             sizes="56px"
             className="object-cover"
@@ -71,7 +75,9 @@ export function Testimonials() {
         </p>
 
         {/* Pull quote — the hero of the section. */}
-        <blockquote className="mt-5 max-w-3xl text-[27px] font-medium leading-[1.15] tracking-[-0.02em] text-foreground md:pr-44 md:text-[38px]">
+        {/* font-normal, not font-medium: PP Mori maps 500 to SemiBold, which at
+            this size reads bold. */}
+        <blockquote className="mt-5 max-w-3xl text-[27px] font-normal leading-[1.15] tracking-[-0.02em] text-foreground md:pr-44 md:text-[38px]">
           &ldquo;{FEATURED.quote}&rdquo;
         </blockquote>
 
@@ -83,14 +89,17 @@ export function Testimonials() {
           {FEATURED.stats.map((s, i) => (
             <div
               key={s.label}
-              className={`flex items-center justify-between gap-4 rounded-lg bg-muted p-5 md:flex-1 md:flex-col md:items-start md:justify-between md:gap-0 md:p-6 ${BAR_HEIGHTS[i]}`}
+              // bg-muted (the palette's light gray) rather than a warm off-white
+              // cream, which read as a different family from the rest of the page.
+              className={`flex flex-col items-start gap-2.5 rounded-lg bg-muted p-5 [[data-theme=dark]_&]:bg-[#262626] md:flex-1 md:justify-between md:gap-0 md:p-6 ${BAR_HEIGHTS[i]}`}
             >
               <p className="text-[26px] leading-none tracking-[-0.01em] text-foreground md:text-[34px]">
                 {s.value}
               </p>
               {/* Small caps label in the mono face — standing in for ABC
-                  Diatype Caplock, which isn't in our bundled fonts yet. */}
-              <p className="type-eyebrow max-w-[9rem] text-right text-[11px] leading-snug tracking-[0.06em] text-muted-foreground md:max-w-none md:text-left">
+                  Diatype Caplock, which isn't in our bundled fonts yet. On
+                  mobile it sits below the value with the full box width. */}
+              <p className="type-eyebrow text-[11px] leading-snug tracking-[0.06em] text-[#16181D] [[data-theme=dark]_&]:text-muted-foreground">
                 {s.label}
               </p>
             </div>
@@ -100,13 +109,13 @@ export function Testimonials() {
         {/* Story link — floats in the whitespace above the shortest bar on
             desktop; sits below the bars on mobile. */}
         <Link
-          href={`/customers/${FEATURED.slug}`}
+          href={FEATURED.href}
           className="group mt-6 inline-flex items-center gap-1.5 text-[15px] text-foreground md:absolute md:bottom-[210px] md:right-0 md:mt-0 lg:bottom-[218px]"
         >
           {/* Underline only the text — an underlined arrow that also nudges
               on hover reads as a rendering glitch. */}
           <span className="underline decoration-border underline-offset-4 transition-colors group-hover:decoration-foreground">
-            Read full story
+            Read firm&rsquo;s story
           </span>
           <span className="transition-transform duration-200 group-hover:translate-x-0.5">
             &rarr;
