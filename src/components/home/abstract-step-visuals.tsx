@@ -204,12 +204,12 @@ function DescribeComposer() {
         </p>
         <div className="mt-2.5 flex gap-3">
           {ADD_APP_CARDS.map(({ title, Thumb }) => (
-            <div key={title} className="w-[150px] shrink-0">
+            <div key={title} className="w-[164px] shrink-0">
               <div
                 className="h-[88px] overflow-hidden rounded-[8px]"
                 style={{ border: `1px solid ${MOCK_BORDER}` }}
               >
-                <Thumb />
+                <Thumb compact />
               </div>
               <p className="mt-2 truncate text-[11px] leading-none text-[var(--mk-fg)]">
                 {title}
@@ -336,23 +336,33 @@ function PhoneScreen({
 const ADD_APP_BARS = [
   60, 52, 43, 37, 33, 28, 26, 30, 35, 46, 54, 59, 67, 74, 91, 100, 100, 87,
 ];
+// Every other bar of the same series. At phone width the full 18 collapse into a
+// hatch of 2px slivers, so the rail thumbs plot half as many, twice as wide.
+const ADD_APP_BARS_COMPACT = ADD_APP_BARS.filter((_, i) => i % 2 === 0);
 
-
-function ThumbEngagement() {
+// `compact` is the phone rail: a 150px-wide thumb has room for one idea, so the
+// label and the read-out drop away and the chart alone carries the card. Its
+// title sits right below it either way.
+function ThumbEngagement({ compact = false }: { compact?: boolean }) {
+  const bars = compact ? ADD_APP_BARS_COMPACT : ADD_APP_BARS;
   return (
     <div className="flex h-full w-full flex-col px-3 py-2.5">
-      <p className="text-[10px] leading-none text-[var(--mk-muted)]">
-        Engagement score
-      </p>
-      <p className="mt-1.5 text-[15px] leading-none text-[var(--mk-fg)]">
-        82
-      </p>
-      <div className="mt-2 flex min-h-0 flex-1 items-end gap-[2px]">
-        {ADD_APP_BARS.map((h, i) => (
+      {!compact && (
+        <>
+          <p className="text-[10px] leading-none text-[var(--mk-muted)]">
+            Engagement score
+          </p>
+          <p className="mt-1.5 text-[15px] leading-none text-[var(--mk-fg)]">
+            82
+          </p>
+        </>
+      )}
+      <div className={`flex min-h-0 flex-1 items-end gap-[2px] ${compact ? "" : "mt-2"}`}>
+        {bars.map((h, i) => (
           <span
             key={i}
             className="flex-1 rounded-[2px]"
-            style={{ height: `${h}%`, backgroundColor: BLUE }}
+            style={{ height: `${h}%`, backgroundColor: "var(--mk-data)" }}
           />
         ))}
       </div>
@@ -360,7 +370,7 @@ function ThumbEngagement() {
   );
 }
 
-function ThumbIntake() {
+function ThumbIntake({ compact = false }: { compact?: boolean }) {
   // strokeDasharray/offset rather than an arc path: the ratio is the data, and
   // a dash offset states it directly instead of hiding it in path maths.
   const radius = 30;
@@ -383,7 +393,7 @@ function ThumbIntake() {
             cy="36"
             r={radius}
             fill="none"
-            stroke={BLUE}
+            stroke="var(--mk-data)"
             strokeWidth="7"
             strokeDasharray={circumference}
             strokeDashoffset={circumference * (1 - progress)}
@@ -393,9 +403,11 @@ function ThumbIntake() {
           <p className="text-[15px] leading-none text-[var(--mk-fg)]">
             2.4k
           </p>
-          <p className="mt-1 text-[10px] leading-none text-[var(--mk-muted)]">
-            of 3,000
-          </p>
+          {!compact && (
+            <p className="mt-1 text-[10px] leading-none text-[var(--mk-muted)]">
+              of 3,000
+            </p>
+          )}
         </div>
       </div>
     </div>
@@ -409,7 +421,7 @@ function ThumbCommunity() {
       <p className="max-w-[88%] rounded-[10px] rounded-tl-[2px] bg-[var(--mk-fill)] px-2.5 py-1.5 text-[10px] leading-[1.5] text-[var(--mk-fg)]">
         When does my project kick off?
       </p>
-      <p className="ml-auto rounded-[10px] rounded-tr-[2px] bg-[#D9ED92] px-2.5 py-1.5 text-[10px] leading-[1.5] text-[#212b36]">
+      <p className="ml-auto rounded-[10px] rounded-tr-[2px] bg-[var(--mk-data)] px-2.5 py-1.5 text-[10px] leading-[1.5] text-[var(--mk-data-fg)]">
         Kickoff is Mon, Apr 8.
       </p>
     </div>
@@ -446,11 +458,11 @@ function AddAppScreen() {
           same product. No action here — there's nothing to publish yet. */}
       <ScreenTopBar title="Add App" />
       <div className="flex min-h-0 flex-1 flex-col gap-5 p-5">
-      {/* Heading + composer share the screen's left margin with everything below
-          them, and the field is held to a measure — run the full 800 it reads as
-          a bar rather than something you type in. */}
-      <div className="flex w-full max-w-[440px] shrink-0 flex-col gap-3">
-        <p className="text-[16px] font-medium leading-[24px] text-[var(--mk-fg)]">
+      {/* Heading + composer centre in the screen, held to a measure — run the
+          full 800 and the field reads as a bar rather than something you type
+          in, and pinned left it left a dead half-screen beside it. */}
+      <div className="mx-auto flex w-full max-w-[440px] shrink-0 flex-col gap-3">
+        <p className="text-center text-[16px] leading-[24px] text-[var(--mk-fg)]">
           Margot, what will you build?
         </p>
         <div className="v63-gradient-border v63-ring-solid relative flex h-[88px] w-full flex-col justify-between rounded-[8px] p-3 [[data-theme=dark]_&]:bg-[var(--mk-elevated)]">
@@ -790,7 +802,7 @@ function BuildPhoneContent() {
             <span
               key={i}
               className="flex-1 rounded-[3px]"
-              style={{ height: `${h}%`, backgroundColor: "var(--spark-bar)" }}
+              style={{ height: `${h}%`, backgroundColor: "var(--mk-data)" }}
             />
           ))}
         </div>
@@ -882,7 +894,7 @@ export function BrandPortalVisual() {
                       height: `${h}%`,
                       // One flat colour across the series — highlighting the last
                       // bar read as a stray light block, not as "current".
-                      backgroundColor: "var(--spark-bar)",
+                      backgroundColor: "var(--mk-data)",
                     }}
                   />
                 ))}

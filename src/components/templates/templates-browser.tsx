@@ -73,10 +73,15 @@ export function TemplatesBrowser({ templates }: Props) {
 
   return (
     <div>
-      {/* Search + category filters — sticky together on mobile (tucked under the
-          shrunk sticky nav) so both stay reachable while scrolling the grid;
-          a static block on sm+. */}
-      <div className="sticky top-12 z-30 -mx-6 bg-background px-6 pb-3 pt-3 lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:pb-0 lg:pt-0">
+      {/* Search + category filters — sticky together on mobile so both stay
+          reachable while scrolling the grid; a static block at lg.
+          `top-0` with the nav's height as top padding, rather than an offset
+          under the nav: the nav is a translucent blur veil, so parking the bar
+          below it left a band of cards scrolling past in plain sight above the
+          search. Now the bar's own solid background runs to the top of the
+          viewport and fills that band, and the veil has nothing to show
+          through. */}
+      <div className="sticky top-0 z-30 -mx-6 bg-background px-6 pb-3 pt-16 lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:pb-0 lg:pt-0">
       {/* Search + filters share one row on desktop (filters left, search
           right), à la Linear; they stack on mobile with search on top. */}
       <div className="flex flex-col gap-3 lg:flex-row-reverse lg:items-center lg:gap-6">

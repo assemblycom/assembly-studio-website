@@ -1212,7 +1212,11 @@ html[data-theme="dark"] .v63-ring-solid::before {
   --mk-icon-active: #101114;
   --mk-icon-idle: #9ca3af;
   --mk-icon-sb: #171717;
-  --spark-bar: #7da4ff; /* light: blue accent */
+  /* Data marks — chart bars, gauge rings, the outgoing chat bubble. One muted
+     gray for all of them: the mocks are there to show shape and layout, and a
+     saturated accent pulled the eye to the sample data instead. */
+  --mk-data: #d4d4d4;
+  --mk-data-fg: #262626;
 }
 /* Dark values follow the house neutral scale (equal-RGB grays, softened
    off-white text — matching --foreground #d9d9d9 / --card #151515). */
@@ -1233,8 +1237,8 @@ html[data-theme="dark"] .v63-ring-solid::before {
   --mk-icon-active: #d9d9d9;
   --mk-icon-idle: #6e6e6e;
   --mk-icon-sb: #b0b0b0;
-  /* Dark: monochrome gray, no blue. */
-  --spark-bar: #4a4a4a;
+  --mk-data: #4a4a4a;
+  --mk-data-fg: #d9d9d9;
 }
 
 /* The production mock's cut-off edge softly fades ONLY in dark mode, where the

@@ -160,15 +160,15 @@ function ThemeSwitch({
   // translucent, blurred chip so it stays legible on the gradient.
   frosted?: boolean;
 }) {
-  // Light mode reads as a raised white thumb on a frosted bed, matching the
-  // pricing billing toggle's solid-thumb pattern. The old 6% wash was almost
-  // invisible over the aurora. Dark mode is untouched.
+  // Light mode fills the active thumb with a grey wash rather than white: on a
+  // near-white frosted bed a white thumb had only its shadow to separate it,
+  // and the selection was easy to miss. Dark mode is untouched.
   const seg = (active: boolean) =>
     `flex size-7 items-center justify-center rounded-md transition-colors ${
       active
         ? onDark
           ? "bg-white/20 text-white"
-          : "bg-background text-foreground shadow-[0_1px_2px_rgba(16,24,40,0.10)]"
+          : "bg-foreground/[0.10] text-foreground"
         : onDark
           ? "text-white/65 hover:text-white"
           : "text-muted-foreground hover:text-foreground"

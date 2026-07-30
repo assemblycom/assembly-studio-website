@@ -165,10 +165,12 @@ function EnterpriseCard() {
     // Same 4-column grid + dividers as the tiers so the heading, perks, and CTA
     // line up under the columns above (heading | perks | perks | CTA).
     <div className="mt-6 rounded-2xl border border-border bg-card px-6 py-5 md:px-8 lg:rounded-xl lg:p-0 lg:[[data-theme=dark]_&]:bg-transparent">
-      {/* Mobile stacks with tight spacing (the two perk groups read as one
-          list); desktop is the 4-column grid with inset dividers. */}
-      <div className="flex flex-col lg:grid lg:grid-cols-4 lg:gap-0">
-        <div className="lg:p-6">
+      {/* Phones stack with tight spacing (the two perk groups read as one
+          list); from 560 — where the tiers above go two up — the perks split
+          into their two columns and the CTA stops running the full width of the
+          card; desktop is the 4-column grid with inset dividers. */}
+      <div className="flex flex-col min-[560px]:grid min-[560px]:grid-cols-2 min-[560px]:gap-x-8 lg:grid-cols-4 lg:gap-0">
+        <div className="min-[560px]:col-span-2 lg:col-span-1 lg:p-6">
           <h3 className="text-base font-medium text-foreground">Enterprise</h3>
         </div>
         {[
@@ -177,7 +179,7 @@ function EnterpriseCard() {
         ].map((col, i) => (
           <ul
             key={i}
-            className={`relative flex cursor-default flex-col gap-2.5 lg:mt-0 lg:p-6 lg:before:absolute lg:before:inset-y-6 lg:before:left-0 lg:before:w-px lg:before:bg-border lg:before:content-[''] ${
+            className={`relative flex cursor-default flex-col gap-2.5 min-[560px]:mt-5 lg:mt-0 lg:p-6 lg:before:absolute lg:before:inset-y-6 lg:before:left-0 lg:before:w-px lg:before:bg-border lg:before:content-[''] ${
               i === 0 ? "mt-5" : "mt-2.5"
             }`}
           >
@@ -195,10 +197,12 @@ function EnterpriseCard() {
           </ul>
         ))}
         {/* CTA column — solid dark fill, matching the tier buttons. */}
-        <div className="relative mt-5 lg:mt-0 lg:flex lg:items-center lg:p-6 lg:before:absolute lg:before:inset-y-6 lg:before:left-0 lg:before:w-px lg:before:bg-border lg:before:content-['']">
+        <div className="relative mt-5 min-[560px]:col-span-2 lg:col-span-1 lg:mt-0 lg:flex lg:items-center lg:p-6 lg:before:absolute lg:before:inset-y-6 lg:before:left-0 lg:before:w-px lg:before:bg-border lg:before:content-['']">
+          {/* Full width only on a phone. Across a two-column card it became a
+              600px-wide button, which reads as a banner rather than a control. */}
           <a
             href={DEMO_URL}
-            className="block w-full rounded-lg bg-foreground px-5 py-2 text-center text-sm text-background transition-opacity hover:opacity-90"
+            className="block w-full rounded-lg bg-foreground px-5 py-2 text-center text-sm text-background transition-opacity hover:opacity-90 min-[560px]:inline-block min-[560px]:w-auto min-[560px]:px-8 lg:block lg:w-full lg:px-5"
           >
             Contact sales
           </a>
@@ -284,10 +288,11 @@ export function PricingPlans() {
   const plans = authed ? PLANS.filter((plan) => plan.priceMonthly > 0) : PLANS;
 
   return (
-    // Cap the width in the single-column band (~448–640px, small tablet /
-    // large phone landscape) so cards don't stretch too wide; real phones
-    // (<448px) stay full-width and the sm+ multi-column grid is unaffected.
-    <div className="mx-auto max-w-md sm:max-w-none">
+    // Cap the width only while the cards are in one column (<560px), so a lone
+    // card doesn't stretch across a small tablet. Past that the grid is two up
+    // and the cap has to lift, or the pair sits squeezed into 448px with the
+    // page's margins going to waste on either side.
+    <div className="mx-auto max-w-md min-[560px]:max-w-none">
       {/* Billing toggle — enlarged on mobile (bigger tap targets, matches the
           left-aligned hero); settles back to the compact size on desktop. */}
       <div className="flex justify-start md:justify-center">
@@ -344,7 +349,10 @@ export function PricingPlans() {
           reflows to three even columns rather than leaving a gap. */}
       <div className="mt-5 md:mt-12 lg:overflow-hidden lg:rounded-xl">
         <div
-          className={`grid gap-6 sm:grid-cols-2 lg:gap-0 lg:grid-rows-[auto_auto_auto_auto_auto] ${
+          // Two up from 560 rather than sm's 640: between those widths a single
+          // column left the cards running the full width of the page with the
+          // price stranded on one side of it.
+          className={`grid gap-6 min-[560px]:grid-cols-2 lg:gap-0 lg:grid-rows-[auto_auto_auto_auto_auto] ${
             plans.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"
           }`}
         >

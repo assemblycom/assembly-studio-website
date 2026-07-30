@@ -120,7 +120,10 @@ export function SecurityCompliance() {
     <section className="mx-auto max-w-[1200px] px-6 md:max-[1199px]:px-10 min-[1200px]:px-0">
       {/* gap-px over a border-colored bed draws a hairline between each cell;
           each cell repaints the page background over it. */}
-      <div className="grid grid-cols-2 gap-px bg-border sm:grid-cols-4 [[data-theme=dark]_&]:bg-[#383838]">
+      {/* Bleeds past the section's padding on a phone so the hairline between
+          the two rows runs the full width of the screen instead of stopping
+          short of both edges. */}
+      <div className="-mx-6 grid grid-cols-2 gap-px bg-border sm:mx-0 sm:grid-cols-4 [[data-theme=dark]_&]:bg-[#383838]">
         {STANDARDS.map((s) => (
           <div
             key={s.title}

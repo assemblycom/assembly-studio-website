@@ -145,10 +145,9 @@ function ProductionGapVisual({
   setActive: (id: RegionId) => void;
 }) {
   return (
-    // The window is what casts the shadow, so it lands on the blue frame rather
-    // than behind the whole block. The old value paired a 32px blur with a -22px
-    // spread, which cancelled to nothing — the frame read as flat at every width.
-    <div className="production-mock relative w-full select-none overflow-hidden rounded-l-2xl border-y border-l border-border bg-[var(--mk-surface)] shadow-[0_2px_4px_rgba(16,24,40,0.06),0_16px_40px_-12px_rgba(16,24,40,0.35)] [font-family:var(--font-inter),system-ui,sans-serif]">
+    // No shadow: the border alone separates the window from the blue frame, and
+    // the drop shadow read as a heavy smudge along the bottom of the panel.
+    <div className="production-mock relative w-full select-none overflow-hidden rounded-l-2xl border-y border-l border-border bg-[var(--mk-surface)] [font-family:var(--font-inter),system-ui,sans-serif]">
       {/* Browser top bar — same right-edge fade as the body (fades to the dark
           mock surface behind it, not the bezel), so the top bar cuts off too. */}
       <div className="production-cut-fade flex h-[44px] items-center gap-3 border-b border-[var(--mk-hairline)] px-4">
@@ -165,7 +164,10 @@ function ProductionGapVisual({
           style={active === "url" ? { backgroundColor: HL_PILL_BG } : undefined}
           className="relative flex items-center gap-1.5 rounded-[4px] border border-[var(--mk-border)] px-2.5 py-1 text-[10px] leading-none text-[var(--mk-muted)] outline-none transition-colors duration-200"
         >
-          brandmages.com
+          {/* A client-facing subdomain, not the root domain — a bare
+              brandmages.com reads as the firm's marketing site, which made this
+              step look like we build websites. */}
+          clients.brandmages.com
         </button>
       </div>
 
@@ -180,7 +182,11 @@ function ProductionGapVisual({
           onMouseEnter={() => setActive("sidebar")}
           onFocus={() => setActive("sidebar")}
           style={active === "sidebar" ? { backgroundColor: HL_SIDEBAR_BG } : undefined}
-          className="relative flex w-[22%] max-w-[156px] shrink-0 flex-col gap-0.5 border-r border-[var(--mk-hairline)] px-2 py-3 text-left outline-none transition-colors duration-200"
+          // A floor as well as a cap: at 22% of a narrow column the sidebar fell
+          // to ~90px, where "Time tracker" wrapped onto two lines and the longer
+          // labels ran out over the table beside them. overflow-hidden is the
+          // backstop — nothing in here may cross into the content.
+          className="relative flex w-[22%] min-w-[136px] max-w-[156px] shrink-0 flex-col gap-0.5 overflow-hidden border-r border-[var(--mk-hairline)] px-2 py-3 text-left outline-none transition-colors duration-200"
         >
           {/* px-2 matches the nav rows below, so the icon column shares one
               left edge down the whole sidebar. */}
@@ -188,7 +194,9 @@ function ProductionGapVisual({
             <span className="flex size-5 shrink-0 items-center justify-center rounded-[4px] bg-[var(--mk-invert-bg)]">
               <IconBrandMark className="w-[11px] text-[var(--mk-invert-fg)]" />
             </span>
-            <span className="text-[11px] text-[var(--mk-fg)]">Brandmages</span>
+            <span className="truncate text-[11px] text-[var(--mk-fg)]">
+              Brandmages
+            </span>
           </div>
           {APPS.map((app) => {
             const on = app === ACTIVE_APP;
@@ -203,7 +211,7 @@ function ProductionGapVisual({
                 className={`flex items-center gap-2.5 rounded-[4px] px-2 py-1.5 text-[11px] leading-none ${rowBg} ${labelCls}`}
               >
                 <AppIcon name={app} color={iconColor} />
-                {app}
+                <span className="truncate">{app}</span>
               </span>
             );
           })}
@@ -403,8 +411,11 @@ function ProductionGapExplorer() {
               type="button"
               role="tab"
               aria-selected={on}
+              // Click (or keyboard focus) only — on hover, the panel changed
+              // under the pointer on the way past it, which reads as the page
+              // twitching rather than as a control being used. The autoplay
+              // still advances it on its own.
               onClick={() => activate(i)}
-              onMouseEnter={() => activate(i)}
               onFocus={() => activate(i)}
               // No horizontal inset: with the frame gone the copy aligns to the
               // section heading above instead of sitting inside a phantom edge.

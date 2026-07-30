@@ -12,7 +12,10 @@ interface ErrorScreenProps {
  */
 export function ErrorScreen({ title, description, children }: ErrorScreenProps) {
   return (
-    <div className="flex min-h-[70vh] flex-col items-center justify-center px-6 py-24 text-center">
+    // Taller and with less padding on a phone: at 70vh the block centres inside
+    // its own box, which — with the nav above it — landed the words about a
+    // third of the way down the screen rather than in the middle of it.
+    <div className="flex min-h-[82dvh] flex-col items-center justify-center px-6 py-16 text-center lg:min-h-[70vh] lg:py-24">
       <h1 className="type-h2 max-w-xl">
         {title}
       </h1>

@@ -230,8 +230,10 @@ const FREE_INDEX = 0;
 // Static grid classes (Tailwind can't see runtime-built arbitrary values, so
 // both column counts must appear literally). Five plan columns by default; four
 // when the Free column is hidden for signed-in visitors.
-const GRID_5 = "grid grid-cols-[1.6fr_repeat(5,1fr)]";
-const GRID_4 = "grid grid-cols-[1.6fr_repeat(4,1fr)]";
+// gap-x: without it the columns share an edge, and a long rate ("+$29 yr /
+// $39 mo") ran straight into the value beside it with no space between them.
+const GRID_5 = "grid grid-cols-[1.6fr_repeat(5,1fr)] gap-x-4";
+const GRID_4 = "grid grid-cols-[1.6fr_repeat(4,1fr)] gap-x-4";
 
 function CheckIcon() {
   return (

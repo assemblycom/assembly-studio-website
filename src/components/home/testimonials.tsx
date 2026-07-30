@@ -55,12 +55,12 @@ export function Testimonials() {
         </div>
 
         {/* Avatar on mobile — sits inline above the attribution. */}
-        <div className="relative mb-5 size-14 overflow-hidden rounded-xl bg-muted [[data-theme=dark]_&]:bg-white/[0.06] md:hidden">
+        <div className="relative mb-5 size-32 overflow-hidden rounded-xl bg-muted [[data-theme=dark]_&]:bg-white/[0.06] md:hidden">
           <Image
             src={FEATURED.image}
             alt=""
             fill
-            sizes="56px"
+            sizes="128px"
             className="object-cover"
           />
         </div>
