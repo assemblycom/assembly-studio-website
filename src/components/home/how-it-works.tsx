@@ -209,7 +209,9 @@ export function HowItWorks() {
                 role="tab"
                 aria-selected={active === i}
                 onClick={() => activate(i)}
-                className="group relative cursor-pointer px-5 py-4 text-center transition-colors hover:bg-foreground/[0.03] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-foreground/25"
+                // Stacked on a phone the tabs are a list, and a list reads down
+                // its left edge; centring only makes sense once they're a row.
+                className="group relative cursor-pointer px-5 py-4 text-left transition-colors hover:bg-foreground/[0.03] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-foreground/25 sm:text-center"
               >
                 {/* Progress track (fills over the dwell on the active tab). */}
                 <span
@@ -225,7 +227,7 @@ export function HowItWorks() {
                   />
                 </span>
 
-                <span className="flex items-center justify-center gap-2">
+                <span className="flex items-center justify-start gap-2 sm:justify-center">
                   <span
                     className={`text-[15px] transition-colors ${
                       active === i
@@ -235,8 +237,10 @@ export function HowItWorks() {
                   >
                     {step.title}
                   </span>
+                  {/* Stacked, the list already reads in order, so the index is
+                      restating what the position says. */}
                   <span
-                    className={`text-[11px] tabular-nums [font-family:var(--font-diatype-mono)] ${
+                    className={`hidden text-[11px] tabular-nums [font-family:var(--font-diatype-mono)] sm:inline ${
                       active === i
                         ? "text-muted-foreground"
                         : "text-muted-foreground/50"

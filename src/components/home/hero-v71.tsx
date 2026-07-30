@@ -575,7 +575,9 @@ function CardApproval() {
     // A single item to approve fills the middle (title, meta, and a quiet
     // preview of the content), with the slide-to-approve control pinned below —
     // one well-composed column rather than a stacked list.
-    <div className="flex h-full flex-col bg-[var(--v69-well)] p-3.5">
+    // Card, not well: every other mock grounds on --v69-card, so a well base
+    // here read as one darker tile in the grid.
+    <div className="flex h-full flex-col bg-[var(--v69-card)] p-3.5">
       <div className="flex flex-1 flex-col gap-2 rounded-[12px] bg-[var(--v69-card)] p-3 ring-1 ring-black/[0.05] [[data-theme=dark]_&]:bg-[var(--v69-inner)] group-hover:[will-change:transform,opacity] group-hover:[animation:cardRowIn_0.4s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.4s_ease-out_both]">
         <div>
           <div className="text-[11px] font-normal leading-tight text-[var(--v69-ink)]">March newsletter</div>

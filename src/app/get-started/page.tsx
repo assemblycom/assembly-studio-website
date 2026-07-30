@@ -384,6 +384,12 @@ const SHEET_PEEK = 84;
 // A drag has to travel this far before it counts as a deliberate open/close
 // rather than a stray touch while scrolling the form above.
 const SHEET_DRAG_THRESHOLD = 40;
+// Open height as a fraction of the viewport. `dvh`, not `vh`: on iOS `vh` is the
+// large viewport (URL bar hidden), so while the bar is showing a `vh`-sized
+// sheet anchored to `bottom: 0` hangs below the visible area and loses its
+// bottom edge. The same number drives the drag maths, hence the constant.
+const SHEET_OPEN_RATIO = 0.86;
+const SHEET_OPEN_MAX = `${SHEET_OPEN_RATIO * 100}dvh`;
 
 // Phone treatment for the preview: a sheet resting at the bottom of the screen
 // that states what you're building in one line, and slides up to the full card
@@ -396,17 +402,39 @@ function PreviewSheet(props: PreviewProps) {
   const headerRef = useRef<HTMLButtonElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [peek, setPeek] = useState(SHEET_PEEK);
+  const [openMax, setOpenMax] = useState(0);
+  // Live height while a finger is down, so the sheet tracks the drag instead of
+  // sitting still until it's released — a handle that doesn't move under your
+  // thumb reads as "nothing is happening here" and you reach for a scroll.
+  const [dragMax, setDragMax] = useState<number | null>(null);
 
   // Measured, not guessed: the summary row's height depends on the type, and a
   // hardcoded peek leaves a sliver of the next line showing when it's wrong.
   useEffect(() => {
     const measure = () => {
       if (headerRef.current) setPeek(headerRef.current.offsetHeight);
+      setOpenMax(window.innerHeight * SHEET_OPEN_RATIO);
+      // Past lg the sheet is display:none and the desktop panel takes over. Fold
+      // it so a resize while it's up doesn't leave the page scroll locked by a
+      // sheet nobody can see to close.
+      if (headerRef.current?.offsetParent === null) setOpen(false);
     };
     measure();
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
   }, []);
+
+  // While the sheet is up it owns the screen, so the page behind it stops
+  // scrolling. Without this a drag or flick that misses the sheet runs the form
+  // underneath instead, which is what made the sheet feel unopenable.
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [open]);
 
   // Opening always starts at the top of the content — a sheet that reopens
   // mid-scroll looks like its first line has been cut off.
@@ -417,12 +445,21 @@ function PreviewSheet(props: PreviewProps) {
   const onTouchStart = (e: React.TouchEvent) => {
     startY.current = e.touches[0].clientY;
   };
+  // Dragging up is negative, and the sheet grows upward, hence the subtraction.
+  // Clamped at both ends so it can't be pulled past either resting state.
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (startY.current === null || !openMax) return;
+    const dy = e.touches[0].clientY - startY.current;
+    const from = open ? openMax : peek;
+    setDragMax(Math.min(Math.max(from - dy, peek), openMax));
+  };
   const onTouchEnd = (e: React.TouchEvent) => {
     if (startY.current === null) return;
     const dy = e.changedTouches[0].clientY - startY.current;
     if (dy < -SHEET_DRAG_THRESHOLD) setOpen(true);
     else if (dy > SHEET_DRAG_THRESHOLD) setOpen(false);
     startY.current = null;
+    setDragMax(null);
   };
 
   // One line that stands in for the whole card while the sheet is down.
@@ -437,10 +474,14 @@ function PreviewSheet(props: PreviewProps) {
     // a mistake against all that margin.
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20 sm:px-3 lg:hidden">
       <div
-        className={`pointer-events-auto mx-auto flex w-full max-w-2xl flex-col overflow-hidden rounded-t-[20px] bg-background ring-1 ring-black/[0.08] transition-[max-height] duration-300 ease-out [[data-theme=dark]_&]:bg-[#161616] [[data-theme=dark]_&]:ring-white/[0.12]`}
+        className={`pointer-events-auto mx-auto flex w-full max-w-2xl flex-col overflow-hidden rounded-t-[20px] bg-background ring-1 ring-black/[0.08] ease-out [[data-theme=dark]_&]:bg-[#161616] [[data-theme=dark]_&]:ring-white/[0.12] ${
+          // No easing mid-drag: a 300ms transition on a height that changes
+          // every touchmove lags the finger by a third of a second.
+          dragMax === null ? "transition-[max-height] duration-300" : ""
+        }`}
         // Both states set the same inline property, so the transition always
         // has two concrete heights to move between.
-        style={{ maxHeight: open ? "86vh" : peek }}
+        style={{ maxHeight: dragMax !== null ? dragMax : open ? SHEET_OPEN_MAX : peek }}
       >
         {/* The whole header is the control — drag it or tap it, since a handle
             that answers to only one of the two reads as broken to whichever
@@ -450,10 +491,14 @@ function PreviewSheet(props: PreviewProps) {
           type="button"
           onClick={() => setOpen((v) => !v)}
           onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
           aria-expanded={open}
           aria-label={open ? "Hide what you're building" : "Show what you're building"}
-          className="group flex w-full shrink-0 flex-col items-stretch"
+          // touch-none is the whole fix for "the page scrolls when I try to open
+          // it": without it the browser claims the vertical drag for the
+          // document before the handler ever sees it.
+          className="group flex w-full shrink-0 touch-none select-none flex-col items-stretch"
         >
           {/* iOS grabber proportions — 36×5 at a quarter opacity, sitting 8px
               off the top edge. The old 40×6 read as a bar rather than a hint. */}
@@ -482,7 +527,12 @@ function PreviewSheet(props: PreviewProps) {
         {/* Held to the card's own measure and centred: let loose across a
             tablet-width sheet the cover widget stretches to twice the size it
             was drawn at, which is what made this read as broken. */}
-        <div ref={scrollRef} className="scrollbar-slim min-h-0 flex-1 overflow-y-auto px-5">
+        {/* overscroll-contain so hitting the end of the sheet's own scroll
+            doesn't hand the gesture to the page behind it. */}
+        <div
+          ref={scrollRef}
+          className="scrollbar-slim min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pt-1"
+        >
           <div className="mx-auto w-full max-w-sm">
             {preparedFor && (
               <p className="type-caption pb-3 text-muted-foreground">

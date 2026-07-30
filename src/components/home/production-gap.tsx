@@ -145,7 +145,10 @@ function ProductionGapVisual({
   setActive: (id: RegionId) => void;
 }) {
   return (
-    <div className="production-mock relative w-full select-none overflow-hidden rounded-l-2xl border-y border-l border-border bg-[var(--mk-surface)] shadow-[0_12px_32px_-22px_rgba(16,24,40,0.18)] [font-family:var(--font-inter),system-ui,sans-serif]">
+    // The window is what casts the shadow, so it lands on the blue frame rather
+    // than behind the whole block. The old value paired a 32px blur with a -22px
+    // spread, which cancelled to nothing — the frame read as flat at every width.
+    <div className="production-mock relative w-full select-none overflow-hidden rounded-l-2xl border-y border-l border-border bg-[var(--mk-surface)] shadow-[0_2px_4px_rgba(16,24,40,0.06),0_16px_40px_-12px_rgba(16,24,40,0.35)] [font-family:var(--font-inter),system-ui,sans-serif]">
       {/* Browser top bar — same right-edge fade as the body (fades to the dark
           mock surface behind it, not the bezel), so the top bar cuts off too. */}
       <div className="production-cut-fade flex h-[44px] items-center gap-3 border-b border-[var(--mk-hairline)] px-4">
@@ -469,12 +472,11 @@ function ProductionGapExplorer() {
           blue box runs off the phone's right edge instead of ending at the
           section gutter. */}
       <div className="order-1 mb-8 flex min-w-0 self-stretch md:order-none md:mb-0">
-        {/* Light mode, phone widths only: the box is height-capped here, so the
-            mock fills it and its white surface meets the white page with no
-            edge — the visual loses its bottom and right sides. A tight ambient
-            line plus a soft drop gives the box edges back, the same way the mock
-            itself is grounded on desktop. Dark mode already separates. */}
-        <div className="h-[320px] w-full min-w-0 overflow-hidden rounded-xl bg-[#7DA4FF] py-4 pl-4 max-md:[[data-theme=light]_&]:shadow-[0_1px_2px_rgba(16,24,40,0.06),0_18px_44px_-24px_rgba(16,24,40,0.45)] md:h-auto md:py-7 md:pl-7">
+        {/* Hairline below md only: the mock is laid out at desktop width and
+            clipped by this box, so at phone widths its white surface reaches
+            the box's right edge and meets the white page with nothing between
+            them. From md up the box has room to show blue on every side. */}
+        <div className="h-[320px] w-full min-w-0 overflow-hidden rounded-xl bg-[#7DA4FF] py-4 pl-4 ring-1 ring-black/[0.08] md:h-auto md:py-7 md:pl-7 md:ring-0">
           {/* The mock is a desktop layout — the sidebar and the table are
               percentages of a wide viewport, so at phone width they collapse
               into each other. It's laid out at a desktop width and cropped by
