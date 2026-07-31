@@ -205,43 +205,25 @@ function DescribeComposer() {
           {TYPEWRITER_PREFIX}
           {FLOW_PROMPT}
         </p>
+        {/* Add and submit only. The desktop composer's "Ideas" affordance and
+            model name are the first things to go at this width — the Iterate
+            phone composer already carries just these two, and in a ~300px
+            column the labels crowded the field they belong to. */}
         <div className="flex items-center justify-between text-[var(--mk-muted)]">
-          {/* Left — add and an "Ideas" affordance. */}
-          <span className="flex items-center gap-3">
-            <IconPlus className="size-[16px]" />
-            <span className="flex items-center gap-1.5 text-[11px] leading-none">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden
-                className="size-[14px]"
-              >
-                <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.5.5 1 1.2 1 2V16h6v-.5c0-.8.5-1.5 1-2A6 6 0 0 0 12 3Z" />
-              </svg>
-              Ideas
-            </span>
-          </span>
-          {/* Right — model name + submit arrow on a dark square. */}
-          <span className="flex items-center gap-2.5 text-[11px] leading-none">
-            Sonnet 5
-            <span className="flex size-[24px] items-center justify-center rounded-[4px] bg-[var(--mk-invert-bg)] text-[var(--mk-invert-fg)]">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden
-                className="size-[13px]"
-              >
-                <path d="M12 19V5M6 11l6-6 6 6" />
-              </svg>
-            </span>
+          <IconPlus className="size-[16px]" />
+          <span className="flex size-[24px] items-center justify-center rounded-[4px] bg-[var(--mk-invert-bg)] text-[var(--mk-invert-fg)]">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+              className="size-[13px]"
+            >
+              <path d="M12 19V5M6 11l6-6 6 6" />
+            </svg>
           </span>
         </div>
       </div>
@@ -250,16 +232,16 @@ function DescribeComposer() {
           a phone column has, so they keep a card-sized width and run off the
           right edge the way a real carousel does, rather than shrinking to
           three unreadable slivers. No arrows: you swipe this, you don't click
-          it. */}
-      <div>
-        <p className="text-[12px] leading-none text-[var(--mk-fg)]">
-          Recommended for you
-        </p>
-        <div className="mt-2.5 flex gap-3">
+          it. No section head either — the cards are the only thing under the
+          composer, so a label just added a line to read. The tiles are close to
+          square: at 196×88 they were letterbox slots that squeezed their own
+          contents, wrapping the chat card's bubbles onto three lines. */}
+      <div className="mt-3">
+        <div className="flex gap-3">
           {ADD_APP_CARDS.map(({ title, Thumb }) => (
-            <div key={title} className="w-[164px] shrink-0">
+            <div key={title} className="w-[176px] shrink-0">
               <div
-                className="h-[88px] overflow-hidden rounded-[8px]"
+                className="h-[112px] overflow-hidden rounded-[8px]"
                 style={{ border: `1px solid ${MOCK_BORDER}` }}
               >
                 <Thumb compact />
@@ -285,8 +267,10 @@ const PHONE_CUT_SHADOW = "inset 0 -22px 18px -14px rgba(16,24,40,0.16)";
 // the bottom (the entry list, the conversation, the Recommended rail) hold back
 // nothing.
 const ITERATE_INSET = 10;
-// Plan rests its questions card near the cut rather than under the reply.
-const PLAN_INSET = 16;
+// Plan runs its questions card into the cut so its last row washes out under
+// the shadow — held clear of it, the card floated with dead space beneath and
+// the screen stopped looking like it continued past the frame.
+const PLAN_INSET = 0;
 
 // Phone-width screen: the app as it looks on a phone, title bar and all. A
 // desktop card shrunk into a phone column reads as a screenshot of something
@@ -347,7 +331,7 @@ function PhoneScreen({
             <path d="M4 7h16M4 12h16M4 17h16" />
           </svg>
         </span>
-        <span className="min-w-0 flex-1 truncate text-[14px] text-[var(--mk-fg)]">
+        <span className="min-w-0 flex-1 truncate text-[12px] text-[var(--mk-fg)]">
           {title}
         </span>
         <span
@@ -713,7 +697,11 @@ function PlanQuestionsCard() {
           <IconChevronRight className="size-[11px]" />
         </span>
       </div>
-      <p className="px-3 pb-1.5 pt-2.5 text-[12px] leading-none text-[var(--mk-fg)]">
+      {/* Even padding, and enough of it that the question band matches the
+          option rows below. At pt-2.5/pb-1.5 it was both lopsided and 13px
+          shorter than them, so the question read as a cramped caption on the
+          header rather than the first row of the card. */}
+      <p className="px-3 py-3.5 text-[12px] leading-none text-[var(--mk-fg)]">
         Will this app be visible to your clients?
       </p>
       {PLAN_OPTIONS.map((option, i) => {
@@ -886,18 +874,20 @@ const BUILD_ENTRIES: Entry[] = [
   },
 ];
 
-const BUILD_TABS = ["My time", "Team time", "All entries"];
-
 // Shared tracks so the header and every row line up on one set of edges. Fixed
 // widths on the trailing four rather than a flex row: as flex children they
 // shrank to their content and got shoved into the right corner while the
 // description soaked up ~470px for ~160px of text. Same approach the
 // "Generation is the easy part" table uses (see COLS in production-gap).
+// The trailing tracks are wider than their content needs on purpose. Sized to
+// fit, every spare pixel fell into the one flexible column, so Description sat
+// on a ~190px gutter while the other four had ~40 — one gaping hole and then a
+// cramped huddle. Padding them out spreads that slack so the gaps read even.
 const BUILD_COLS =
-  "grid grid-cols-[minmax(0,1fr)_120px_72px_80px_76px] items-center gap-3";
+  "grid grid-cols-[minmax(0,1fr)_150px_92px_100px_96px] items-center gap-3";
 // The preview column in Iterate is roughly half as wide and drops Client/Date.
 const ITERATE_COLS =
-  "grid grid-cols-[minmax(0,1fr)_64px_64px] items-center gap-2.5";
+  "grid grid-cols-[minmax(0,1fr)_84px_84px] items-center gap-2.5";
 
 // The table toolbar — filter affordances on the left, the running total on the
 // right. Shared by Build's full-width table and Iterate's preview column, which
@@ -948,21 +938,6 @@ function BuildPhoneContent() {
   const stat = BUILD_STATS[2];
   return (
     <>
-      <div className="flex shrink-0 items-center gap-1.5">
-        {BUILD_TABS.map((tab, i) => (
-          <span
-            key={tab}
-            className={`flex items-center rounded-[4px] px-2 py-1.5 text-[12px] leading-none ${
-              i === 0
-                ? "bg-[var(--mk-fill)] text-[var(--mk-fg)]"
-                : "text-[var(--mk-subtle)]"
-            }`}
-          >
-            {tab}
-          </span>
-        ))}
-      </div>
-
       <div className="shrink-0 rounded-[4px] border border-[var(--mk-border)] p-3">
         <div className="flex items-baseline justify-between">
           <p className="text-[11px] leading-none text-[var(--mk-muted)]">
@@ -986,15 +961,21 @@ function BuildPhoneContent() {
         </div>
       </div>
 
-      {/* Description leads and the meta sits under it, so nothing has to share
-          a line it can't fit on. Clipped rather than overflowing: the list is
-          longer than any phone screen, and it's meant to run into the
-          dissolve, not print past the bottom of the frame. */}
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      {/* Given the desktop table's frame and header bar rather than left as
+          loose rows: bare, it read as a list that happened to sit under the
+          tile. Extra top margin sets it off from the chart above. Description
+          leads and the meta sits under it, so nothing has to share a line it
+          can't fit on. Clipped rather than overflowing: the list is longer than
+          any phone screen, and it's meant to run into the dissolve. */}
+      <div className="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[4px] border border-[var(--mk-border)]">
+        <div className="flex shrink-0 items-center justify-between border-b border-[var(--mk-hairline)] bg-[var(--mk-elevated)] px-3 py-2 text-[10px] leading-none text-[var(--mk-muted)]">
+          <span>Description</span>
+          <span>Status</span>
+        </div>
         {BUILD_ENTRIES.map((entry, i) => (
           <div
             key={entry.description}
-            className="flex items-center gap-3 py-2.5"
+            className="flex shrink-0 items-center gap-3 px-3 py-2.5"
             style={i ? { borderTop: `1px solid ${HAIRLINE}` } : undefined}
           >
             <div className="min-w-0 flex-1">
@@ -1030,27 +1011,8 @@ export function BrandPortalVisual() {
             <DarkButton>Log time</DarkButton>
           </div>
 
-          {/* View chips — soft-fill, no border, matching the filter chips in the
-            "Generation is the easy part" time tracker below. No rule beneath
-            them: the active chip's own fill already marks the strip, and the
-            gap to the tiles separates the two without drawing a second line. */}
-          <div className="flex h-[42px] shrink-0 items-center gap-1.5 px-3.5">
-            {BUILD_TABS.map((tab, i) => (
-              <span
-                key={tab}
-                className={`flex items-center rounded-[4px] px-2 py-1.5 text-[11px] leading-none ${
-                  i === 0
-                    ? "bg-[var(--mk-fill)] text-[var(--mk-fg)]"
-                    : "text-[var(--mk-subtle)]"
-                }`}
-              >
-                {tab}
-              </span>
-            ))}
-          </div>
-
           {/* Summary tiles with sparklines — the dashboard read above the table. */}
-          <div className="flex shrink-0 gap-2 px-3.5 pt-2.5">
+          <div className="flex shrink-0 gap-2 px-3.5 pt-3.5">
             {BUILD_STATS.map((stat) => (
               <div
                 key={stat.label}
@@ -1230,21 +1192,7 @@ export function BuildStepVisual() {
 
             {/* Live app preview — the Build screen adapted to the narrow column.
               While a request sends, the rows shimmer as the app regenerates. */}
-            <div className="flex min-w-0 flex-1 flex-col">
-              <div className="flex h-[36px] shrink-0 items-center gap-1 px-2.5">
-                {BUILD_TABS.map((tab, i) => (
-                  <span
-                    key={tab}
-                    className={`flex items-center rounded-[4px] px-1.5 py-1 text-[10px] leading-none ${
-                      i === 0
-                        ? "bg-[var(--mk-fill)] text-[var(--mk-fg)]"
-                        : "text-[var(--mk-subtle)]"
-                    }`}
-                  >
-                    {tab}
-                  </span>
-                ))}
-              </div>
+            <div className="flex min-w-0 flex-1 flex-col pt-2.5">
               <TableToolbar compact />
               <div className="mx-3 mb-2.5 flex-1 overflow-hidden rounded-[4px] border border-[var(--mk-border)]">
                 <div
