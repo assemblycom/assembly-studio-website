@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   APP_URL,
@@ -182,6 +183,8 @@ function V66Nav() {
 // flips the text + control colors so the same box can sit on a light panel or
 // on a dark/glass hero.
 export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 ring-black/[0.06]", surfaceRadiusClass = "rounded-[22px]", minHeightClass = "min-h-[188px]", tone = "light", typewriter = false, mutedControls = false, submitLabel, submitDark = false, accent = LIME, hidePlus = false, hideHowTo = false, howToLabel = "How it works", howToSide = "left", promptPicker = false, promptPickerLabel = "Select a prompt", promptPickerSide = "left", promptPickerUp = false, promptItems, plusItems, compact = false, minimalControls = false, plusAsAttach = false, footerLeading, showSubmit = true, submitDisabled, textDimmed = false, splitFooter = false, value: valueProp, onValueChange, textareaRef }: { glow?: boolean; surfaceClassName?: string; surfaceRadiusClass?: string; minHeightClass?: string; tone?: "light" | "dark"; typewriter?: boolean; mutedControls?: boolean; submitLabel?: string; submitDark?: boolean; accent?: string; hidePlus?: boolean; hideHowTo?: boolean; howToLabel?: string; howToSide?: "left" | "right"; promptPicker?: boolean; promptPickerLabel?: string; promptPickerSide?: "left" | "right"; promptPickerUp?: boolean; promptItems?: (string | { label: string; prompt: string })[]; plusItems?: { label: string; icon: "attach" | "transfer" }[]; compact?: boolean; minimalControls?: boolean; plusAsAttach?: boolean; footerLeading?: React.ReactNode; showSubmit?: boolean; submitDisabled?: boolean; textDimmed?: boolean; splitFooter?: boolean; value?: string; onValueChange?: (v: string) => void; textareaRef?: React.Ref<HTMLTextAreaElement> } = {}) {
+  const router = useRouter();
+
   // Prompt-picker entries. Default: the shared "Build a …" examples. A hero can
   // pass `promptItems` as plain strings (shown and inserted verbatim) or as
   // {label, prompt} pairs — the menu shows the short label, picking inserts
@@ -456,7 +459,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
           {typewriter && !value && (
             <div
               aria-hidden
-              className={`pointer-events-none absolute inset-0 px-1 text-base leading-loose ${dark ? "text-white/40" : "text-neutral-400"}`}
+              className={`pointer-events-none absolute inset-0 px-1 text-base leading-[1.5] ${dark ? "text-white/40" : "text-neutral-400"}`}
             >
               {PH_PREFIX}
               {typedExample}
@@ -473,7 +476,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 if (value.trim()) {
-                  window.location.href = getStartedUrl(value);
+                  router.push(getStartedUrl(value));
                 }
               }
             }}
@@ -498,7 +501,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
             // While the demo animation is playing (textDimmed), the text reads
             // as secondary/placeholder ink; it flips to full-strength once the
             // visitor takes over.
-            className={`block w-full resize-none overflow-y-auto bg-transparent px-1 text-base leading-relaxed outline-none md:leading-loose [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${textDimmed ? (dark ? "text-white/45" : "text-neutral-500") : textCls}`}
+            className={`block w-full resize-none overflow-y-auto bg-transparent px-1 text-base leading-[1.5] outline-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${textDimmed ? (dark ? "text-white/45" : "text-neutral-500") : textCls}`}
           />
         </div>
         </div>
@@ -584,9 +587,11 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
                       <button
                         type="button"
                         onClick={() => {
-                          window.location.href = value.trim()
-                            ? getStartedUrl(value)
-                            : buildSignupUrl();
+                          if (value.trim()) {
+                            router.push(getStartedUrl(value));
+                            return;
+                          }
+                          window.location.href = buildSignupUrl();
                         }}
                         // Site primary button: rounded-lg on the foreground/
                         // background token pair, which inverts itself per theme.
@@ -672,11 +677,15 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
             <button
               type="button"
               onClick={() => {
-                // With a prompt, go via the continuation screen; an empty click
-                // skips it and goes straight to signup.
-                window.location.href = value.trim()
-                  ? getStartedUrl(value)
-                  : buildSignupUrl();
+                // With a prompt, go via the continuation screen — a client push,
+                // so the page stays up behind the sheet instead of blanking on a
+                // document load. An empty click skips it and goes straight to
+                // signup, which is a different origin and so a real navigation.
+                if (value.trim()) {
+                  router.push(getStartedUrl(value));
+                  return;
+                }
+                window.location.href = buildSignupUrl();
               }}
               aria-label={submitLabel ?? "Build it"}
               className={`flex ${submitH} items-center justify-center gap-1.5 rounded-lg ${pillText} font-normal transition-all duration-150 ease-out active:scale-[0.98] ${

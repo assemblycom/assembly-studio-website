@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { memo, useEffect, useRef, useState } from "react";
 import { APP_URL } from "@/lib/constants";
 import { TEMPLATES, type Template } from "@/lib/templates";
@@ -10,25 +11,6 @@ import { V69CardMock } from "./hero-v71";
 import { StudioNav } from "./studio-nav";
 import { Card } from "@/components/ui/card";
 import { useTheme } from "@/components/theme/theme-provider";
-import { TemplateFocusModal } from "@/components/templates/template-focus-modal";
-import type { ModalTemplate } from "@/components/templates/template-modal";
-
-// The slim slice of a template the focused quick-look modal needs.
-function toModalTemplate(t: Template): ModalTemplate {
-  return {
-    slug: t.slug,
-    title: t.title,
-    description: t.description,
-    longDescription: t.longDescription,
-    category: t.category,
-    industries: t.industries,
-    usesAI: t.usesAI,
-    images: t.images,
-    videoUrl: t.videoUrl,
-    previewCount: t.previewCount,
-    hasVideo: t.hasVideo,
-  };
-}
 
 // ─────────────────────────────────────────────────────────────────────────
 // HERO V76 — V75 as the base, adding a SELECTOR FRAME around the template
@@ -76,21 +58,27 @@ const TemplateCard = memo(function TemplateCard({
   template,
   index,
   dark,
-  onOpen,
+  href,
 }: {
   template: Template;
   index: number;
   dark: boolean;
-  onOpen: (slug: string) => void;
+  href: string;
 }) {
   return (
-    <button
-      type="button"
+    // next/link, not a bare <a>: the sign-up sheet renders this same page behind
+    // it, and a document load blanked the screen and rebuilt the hero from
+    // scratch on the way there. A client transition keeps the page up and the
+    // sheet just arrives on top of it. The quick-look modal that used to open
+    // here was a stop on the way to the same place, and it made the card feel
+    // like it opened a preview rather than starting the thing.
+    <Link
+      href={href}
+      prefetch
       data-card={index}
-      onClick={() => onOpen(template.slug)}
       // `group` drives the mock's hover animation on desktop; `data-card` lets
       // the mobile in-view observer replay the animation on scroll.
-      className="group w-[212px] shrink-0 origin-center text-left"
+      className="group block w-[212px] shrink-0 origin-center text-left"
     >
       <Card
         size="sm"
@@ -113,7 +101,7 @@ const TemplateCard = memo(function TemplateCard({
       </Card>
       <p className={`mt-3 line-clamp-2 text-[13px] font-normal leading-[1.3] ${dark ? "text-white" : "text-neutral-900"}`}>{template.title}</p>
       <p className="mt-1 text-[11px] text-muted-foreground">{template.category}</p>
-    </button>
+    </Link>
   );
 });
 
@@ -131,11 +119,18 @@ export function HeroV76({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [prompt, setPrompt] = useState("");
 
-  // Clicking a rail card opens a focused quick-look modal for that template.
-  const [focusSlug, setFocusSlug] = useState<string | null>(null);
-  const focusTemplate = focusSlug
-    ? CAROUSEL.find((t) => t.slug === focusSlug)
-    : undefined;
+  // Dismissing the sign-up sheet lands back here with ?prompt=… , so the composer
+  // is still holding what you typed rather than opening empty. Read on the client
+  // so the server-rendered markup and the first paint agree, and deferred with a
+  // timer rather than a frame — a frame never arrives in a backgrounded tab.
+  useEffect(() => {
+    const carried = new URLSearchParams(window.location.search)
+      .get("prompt")
+      ?.trim();
+    if (!carried) return;
+    const id = setTimeout(() => setPrompt(carried), 0);
+    return () => clearTimeout(id);
+  }, []);
 
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(true);
@@ -382,7 +377,7 @@ export function HeroV76({
                     template={t}
                     index={i}
                     dark={dark}
-                    onOpen={setFocusSlug}
+                    href={`/get-started?template=${t.slug}`}
                   />
                 ))}
 
@@ -436,13 +431,6 @@ export function HeroV76({
           </div>
         </div>
       </section>
-
-      {focusTemplate && (
-        <TemplateFocusModal
-          template={toModalTemplate(focusTemplate)}
-          onClose={() => setFocusSlug(null)}
-        />
-      )}
     </>
   );
 }

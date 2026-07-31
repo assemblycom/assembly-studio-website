@@ -69,61 +69,79 @@ export function Testimonials() {
             colour shift (not a divider glyph) separates name from role. */}
         <p className="type-eyebrow text-foreground md:pr-44">
           {FEATURED.name}
-          <span className="ml-3 text-muted-foreground">
-            {FEATURED.firm}
-          </span>
+          <span className="ml-3 text-muted-foreground">{FEATURED.firm}</span>
         </p>
 
-        {/* Pull quote — the hero of the section. */}
-        {/* font-normal, not font-medium: PP Mori maps 500 to SemiBold, which at
-            this size reads bold. */}
-        {/* 1.15 is a display leading — right at the 38px desktop size, too tight
-            at 27, where the same ratio gives ~4px less air between four wrapped
-            lines than they need. Loosened below md only. */}
-        <blockquote className="mt-5 max-w-3xl text-[27px] font-normal leading-[1.25] tracking-[-0.02em] text-foreground md:pr-44 md:text-[38px] md:leading-[1.15]">
-          &ldquo;{FEATURED.quote}&rdquo;
+        {/* Pull quote — the hero of the section. type-h2 (28 → 36px) rather
+            than the hand-set 27/38 it used to carry: those were a step off the
+            scale in both directions, and the desktop end was running larger
+            than the section needs. The class brings its own weight (400, so PP
+            Mori doesn't map to SemiBold), tracking and leading. */}
+        {/* Desktop only: the opening mark hangs in the margin (negative
+            first-line indent, so it applies to that line alone). Punctuation
+            carries almost no visual weight, and with it in the column the word
+            the quote opens on sat a glyph short of the name above it. On a
+            phone the marks come off entirely — the column is narrow enough that
+            a hanging glyph reads as a stray character and every wrapped line
+            looked indented against it. The blockquote already says it's a
+            quote. */}
+        <blockquote className="type-h2 mt-5 max-w-3xl text-foreground md:pr-44 md:[text-indent:-0.4em]">
+          <span className="hidden md:inline">&ldquo;</span>
+          {FEATURED.quote}
+          <span className="hidden md:inline">&rdquo;</span>
         </blockquote>
 
-        {/* Stats. On mobile they stack as full-width rows (value left, label
-            right) so the labels get room instead of wrapping in cramped
-            columns. At md+ they become the descending bar chart — tallest to
-            shortest — with the story link floating above the last bar. */}
-        <div className="mt-12 flex flex-col gap-3 md:mt-16 md:flex-row md:items-end md:gap-5">
-          {FEATURED.stats.map((s, i) => (
-            <div
-              key={s.label}
-              // bg-muted (the palette's light gray) rather than a warm off-white
-              // cream, which read as a different family from the rest of the page.
-              className={`flex flex-col items-start gap-2.5 rounded-lg bg-muted p-5 [[data-theme=dark]_&]:bg-[#262626] md:flex-1 md:justify-between md:gap-0 md:p-6 ${BAR_HEIGHTS[i]}`}
-            >
-              <p className="text-[26px] leading-none tracking-[-0.01em] text-foreground md:text-[34px]">
-                {s.value}
-              </p>
-              {/* Small caps label in the mono face — standing in for ABC
+        {/* On a phone the bars and the story link are ringed as one block, so
+            the link reads as the end of the proof rather than a stray line
+            under it. `md:contents` dissolves this wrapper at desktop, where the
+            bars are a chart and the link floats in the whitespace beside them —
+            so the grouping costs the desktop layout nothing. */}
+        <div className="mt-12 flex flex-col gap-3 rounded-lg border border-border p-3 md:contents">
+          {/* Stats. On mobile they stack as full-width rows (value left, label
+              right) so the labels get room instead of wrapping in cramped
+              columns. At md+ they become the descending bar chart — tallest to
+              shortest — with the story link floating above the last bar. */}
+          <div className="flex flex-col gap-3 md:mt-16 md:flex-row md:items-end md:gap-5">
+            {FEATURED.stats.map((s, i) => (
+              <div
+                key={s.label}
+                // bg-muted (the palette's light gray) rather than a warm off-white
+                // cream, which read as a different family from the rest of the page.
+                className={`flex flex-col items-start gap-2.5 rounded-lg bg-muted p-5 [[data-theme=dark]_&]:bg-[#262626] md:flex-1 md:justify-between md:gap-0 md:p-6 ${BAR_HEIGHTS[i]}`}
+              >
+                {/* A step down below md: at 22px over a 12px mono label the
+                    pair filled a phone-width block edge to edge and read as a
+                    headline rather than a figure. Desktop is untouched. */}
+                <p className="type-h3 leading-none text-foreground max-md:text-[18px]">
+                  {s.value}
+                </p>
+                {/* Small caps label in the mono face — standing in for ABC
                   Diatype Caplock, which isn't in our bundled fonts yet. On
                   mobile it sits below the value with the full box width. */}
-              <p className="type-eyebrow text-[11px] leading-snug tracking-[0.06em] text-[#16181D] [[data-theme=dark]_&]:text-muted-foreground">
-                {s.label}
-              </p>
-            </div>
-          ))}
-        </div>
+                <p className="type-eyebrow leading-snug text-[#16181D] max-md:text-[10px] [[data-theme=dark]_&]:text-muted-foreground">
+                  {s.label}
+                </p>
+              </div>
+            ))}
+          </div>
 
-        {/* Story link — floats in the whitespace above the shortest bar on
-            desktop; sits below the bars on mobile. */}
-        <Link
-          href={FEATURED.href}
-          className="group mt-6 inline-flex items-center gap-1.5 text-[15px] text-foreground md:absolute md:bottom-[210px] md:right-0 md:mt-0 lg:bottom-[218px]"
-        >
-          {/* Underline only the text — an underlined arrow that also nudges
-              on hover reads as a rendering glitch. */}
-          <span className="underline decoration-border underline-offset-4 transition-colors group-hover:decoration-foreground">
-            Read firm&rsquo;s story
-          </span>
-          <span className="transition-transform duration-200 group-hover:translate-x-0.5">
-            &rarr;
-          </span>
-        </Link>
+          {/* Story link — floats in the whitespace above the shortest bar on
+            desktop; the last line inside the ringed block on mobile. */}
+          <Link
+            href={FEATURED.href}
+            className="type-body group inline-flex items-center gap-1.5 px-2 pb-1 pt-2 text-foreground md:absolute md:bottom-[210px] md:right-0 md:mt-0 md:p-0 lg:bottom-[218px]"
+          >
+            {/* Underline only the text — an underlined arrow that also nudges
+              on hover reads as a rendering glitch. Desktop only: inside the
+              ring the rule was a second line under a line. */}
+            <span className="decoration-border underline-offset-4 transition-colors group-hover:decoration-foreground md:underline">
+              Read firm&rsquo;s story
+            </span>
+            <span className="transition-transform duration-200 group-hover:translate-x-0.5">
+              &rarr;
+            </span>
+          </Link>
+        </div>
       </div>
     </Section>
   );

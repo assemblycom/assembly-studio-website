@@ -25,7 +25,8 @@ const STANDARDS: Standard[] = [
 // a seal is sized proportionally (percentages, not fixed px) so the artwork holds
 // at every breakpoint.
 const SEAL_SIZE = "size-20 sm:size-24 md:size-28";
-const SEAL_LABEL = "font-mono text-[10px] uppercase tracking-wide sm:text-[11px]";
+const SEAL_LABEL =
+  "font-mono text-[10px] uppercase tracking-wide sm:text-[11px]";
 // GDPR ring: 8 stars at 36% of the seal box from centre (the old fixed -40px on a
 // 112px seal, expressed proportionally so it survives the smaller breakpoints).
 const STAR_COUNT = 8;
@@ -42,7 +43,9 @@ function Seal({ label }: { label: string }) {
     const topFill = label === "SOC 2" ? fill : "";
     const bottomFill = label === "CCPA" ? fill : "";
     return (
-      <span className={`relative flex ${SEAL_SIZE} flex-col items-center overflow-hidden rounded-full border border-border text-muted-foreground [[data-theme=dark]_&]:border-[#4d4d4d]`}>
+      <span
+        className={`relative flex ${SEAL_SIZE} flex-col items-center overflow-hidden rounded-full border border-border text-muted-foreground [[data-theme=dark]_&]:border-[#4d4d4d]`}
+      >
         <span
           className={`flex w-full flex-1 items-end justify-center pb-1 sm:pb-1.5 ${topFill}`}
         >
@@ -80,11 +83,13 @@ function Seal({ label }: { label: string }) {
       )}
       {label === "GDPR" && (
         // Eight larger stars rather than twelve small ones: at this seal size a
-        // denser ring read as speckle. Lighter tone so the ring stays quiet
-        // against the filled disc.
+        // denser ring read as speckle. Solid grey on the light disc rather than
+        // the reverse — knocking them out of a disc that's only 3% black left
+        // nothing to see, and outlining them to compensate turned each star
+        // into a drawing of a star.
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-0 text-[8px] text-muted-foreground/40 [[data-theme=dark]_&]:text-muted-foreground/70 sm:text-[9px] md:text-[10px]"
+          className="pointer-events-none absolute inset-0 text-[8px] text-muted-foreground/60 [[data-theme=dark]_&]:text-muted-foreground/70 sm:text-[9px] md:text-[10px]"
         >
           {Array.from({ length: STAR_COUNT }).map((_, i) => {
             // Each star is placed by percentage of the seal box rather than a

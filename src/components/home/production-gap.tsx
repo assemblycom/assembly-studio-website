@@ -48,19 +48,70 @@ const DWELL_MS = 6500;
 
 type RegionId = (typeof REGIONS)[number]["id"];
 
-const APPS = ["Onboarding", "Time tracker", "Invoices", "Documents", "Messages"];
+const APPS = [
+  "Onboarding",
+  "Time tracker",
+  "Invoices",
+  "Documents",
+  "Messages",
+];
 const ACTIVE_APP = "Time tracker";
 
 const ENTRIES = [
-  { desc: "Discovery call", client: "Novatech", dur: "0h 45m", status: "Pending" },
-  { desc: "Q1 financial review", client: "Meridian", dur: "3h 45m", status: "Approved" },
-  { desc: "Reconcile accounts", client: "Oakwood", dur: "2h 15m", status: "Approved" },
-  { desc: "Payroll processing", client: "Bloom", dur: "4h 00m", status: "Logged" },
-  { desc: "Client onboarding call", client: "Northwind", dur: "1h 15m", status: "Approved" },
-  { desc: "Contract review", client: "Vertex", dur: "0h 30m", status: "Pending" },
-  { desc: "Monthly bookkeeping", client: "Harbor", dur: "5h 30m", status: "Approved" },
-  { desc: "Invoice preparation", client: "Cedar & Co", dur: "1h 00m", status: "Pending" },
-  { desc: "Year-end tax filing", client: "Summit Group", dur: "6h 15m", status: "Approved" },
+  {
+    desc: "Discovery call",
+    client: "Novatech",
+    dur: "0h 45m",
+    status: "Pending",
+  },
+  {
+    desc: "Q1 financial review",
+    client: "Meridian",
+    dur: "3h 45m",
+    status: "Approved",
+  },
+  {
+    desc: "Reconcile accounts",
+    client: "Oakwood",
+    dur: "2h 15m",
+    status: "Approved",
+  },
+  {
+    desc: "Payroll processing",
+    client: "Bloom",
+    dur: "4h 00m",
+    status: "Logged",
+  },
+  {
+    desc: "Client onboarding call",
+    client: "Northwind",
+    dur: "1h 15m",
+    status: "Approved",
+  },
+  {
+    desc: "Contract review",
+    client: "Vertex",
+    dur: "0h 30m",
+    status: "Pending",
+  },
+  {
+    desc: "Monthly bookkeeping",
+    client: "Harbor",
+    dur: "5h 30m",
+    status: "Approved",
+  },
+  {
+    desc: "Invoice preparation",
+    client: "Cedar & Co",
+    dur: "1h 00m",
+    status: "Pending",
+  },
+  {
+    desc: "Year-end tax filing",
+    client: "Summit Group",
+    dur: "6h 15m",
+    status: "Approved",
+  },
 ] as const;
 
 // Reuse the site's theme-aware mock-pill tokens so pills adapt in dark mode
@@ -74,7 +125,8 @@ const STATUS_STYLES: Record<string, string> = {
 // Description is the only flexible column, so it soaks up every spare pixel and
 // pushes Client/Duration out toward the cut. Wider trailing columns shrink it and
 // pull those two back in.
-const COLS = "grid grid-cols-[minmax(0,1fr)_112px_88px_74px] items-center gap-3";
+const COLS =
+  "grid grid-cols-[minmax(0,1fr)_112px_88px_74px] items-center gap-3";
 
 // Real filled icons supplied as SVGs (clipboard, alarm-clock, pen, file,
 // comment), mapped to the sidebar apps. Coloured via `fill`.
@@ -153,7 +205,10 @@ function ProductionGapVisual({
       <div className="production-cut-fade flex h-[44px] items-center gap-3 border-b border-[var(--mk-hairline)] px-4">
         <div className="flex gap-1.5">
           {[0, 1, 2].map((i) => (
-            <span key={i} className="size-[9px] rounded-full bg-[var(--mk-dots)]" />
+            <span
+              key={i}
+              className="size-[9px] rounded-full bg-[var(--mk-dots)]"
+            />
           ))}
         </div>
         {/* Region: the branded client URL */}
@@ -174,14 +229,21 @@ function ProductionGapVisual({
       {/* Body: sidebar + app content. Height follows the content (the table),
           and the sidebar stretches to match. A soft right-edge mask fades the
           content into the cut so it reads as "continues off-frame" rather than a
-          hard chop (the top bar above is exempt, so the avatar stays crisp). */}
-      <div className="production-cut-fade flex items-stretch">
+          hard chop (the top bar above is exempt, so the avatar stays crisp).
+          `production-cut-bottom` adds the same treatment along the bottom on a
+          phone, where the crop lands mid-row — and only here, since on the
+          44px top bar a bottom fade would erase the bar itself. */}
+      <div className="production-cut-fade production-cut-bottom flex items-stretch">
         {/* Region: the app sidebar */}
         <button
           type="button"
           onMouseEnter={() => setActive("sidebar")}
           onFocus={() => setActive("sidebar")}
-          style={active === "sidebar" ? { backgroundColor: HL_SIDEBAR_BG } : undefined}
+          style={
+            active === "sidebar"
+              ? { backgroundColor: HL_SIDEBAR_BG }
+              : undefined
+          }
           // A floor as well as a cap: at 22% of a narrow column the sidebar fell
           // to ~90px, where "Time tracker" wrapped onto two lines and the longer
           // labels ran out over the table beside them. overflow-hidden is the
@@ -209,7 +271,9 @@ function ProductionGapVisual({
             const iconColor = on
               ? "var(--mk-icon-active)"
               : "var(--mk-icon-idle)";
-            const labelCls = on ? "text-[var(--mk-fg)]" : "text-[var(--mk-muted)]";
+            const labelCls = on
+              ? "text-[var(--mk-fg)]"
+              : "text-[var(--mk-muted)]";
             const rowBg = on ? "bg-[var(--mk-selected)]" : "";
             return (
               <span
@@ -267,7 +331,9 @@ function ProductionGapVisual({
           </div>
 
           <div className="mt-3 overflow-hidden rounded-[4px] border border-[var(--mk-border)]">
-            <div className={`${COLS} border-b border-[var(--mk-hairline)] bg-[var(--mk-elevated)] px-3 py-2 text-[9px] leading-none text-[var(--mk-subtle)]`}>
+            <div
+              className={`${COLS} border-b border-[var(--mk-hairline)] bg-[var(--mk-elevated)] px-3 py-2 text-[9px] leading-none text-[var(--mk-subtle)]`}
+            >
               <span>Description</span>
               <span>Client</span>
               <span>Duration</span>
@@ -277,14 +343,24 @@ function ProductionGapVisual({
               <div
                 key={e.desc}
                 className={`${COLS} px-3 py-2.5 text-[11px] leading-none ${
-                  i < ENTRIES.length - 1 ? "border-b border-[var(--mk-hairline)]" : ""
+                  i < ENTRIES.length - 1
+                    ? "border-b border-[var(--mk-hairline)]"
+                    : ""
                 }`}
               >
-                <span className="truncate pb-[3px] -mb-[3px] text-[var(--mk-fg-2)]">{e.desc}</span>
-                <span className="truncate pb-[3px] -mb-[3px] text-[var(--mk-muted)]">{e.client}</span>
-                <span className="tabular-nums text-[var(--mk-muted)]">{e.dur}</span>
+                <span className="truncate pb-[3px] -mb-[3px] text-[var(--mk-fg-2)]">
+                  {e.desc}
+                </span>
+                <span className="truncate pb-[3px] -mb-[3px] text-[var(--mk-muted)]">
+                  {e.client}
+                </span>
+                <span className="tabular-nums text-[var(--mk-muted)]">
+                  {e.dur}
+                </span>
                 <span>
-                  <span className={`inline-flex rounded-full px-2 py-1 text-[9px] leading-none ${STATUS_STYLES[e.status]}`}>
+                  <span
+                    className={`inline-flex rounded-full px-2 py-1 text-[9px] leading-none ${STATUS_STYLES[e.status]}`}
+                  >
                     {e.status}
                   </span>
                 </span>
@@ -359,7 +435,9 @@ function ProductionGapExplorer() {
     activate(REGIONS.findIndex((r) => r.id === id));
 
   useEffect(() => {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduce = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (reduce) return; // no auto-advance; tabs still switch on click
 
     // Only run the clock while the section is on screen — browsers throttle rAF
@@ -471,7 +549,9 @@ function ProductionGapExplorer() {
 
               <p
                 className={`mt-1.5 text-[17px] leading-snug transition-colors ${
-                  on ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"
+                  on
+                    ? "text-foreground"
+                    : "text-muted-foreground group-hover:text-foreground"
                 }`}
               >
                 {r.header}
@@ -480,7 +560,9 @@ function ProductionGapExplorer() {
               {/* Body — revealed only for the active step (smooth height). */}
               <div
                 className={`grid transition-all duration-300 ease-out ${
-                  on ? "mt-2 grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                  on
+                    ? "mt-2 grid-rows-[1fr] opacity-100"
+                    : "grid-rows-[0fr] opacity-0"
                 }`}
               >
                 <p className="overflow-hidden text-pretty text-sm leading-relaxed text-muted-foreground">
@@ -517,7 +599,10 @@ function ProductionGapExplorer() {
               on desktop, and the box is height-capped so it reads as a landscape
               window rather than a tall column. */}
           <div className="w-[760px] md:w-auto">
-            <ProductionGapVisual active={REGIONS[active].id} setActive={activateId} />
+            <ProductionGapVisual
+              active={REGIONS[active].id}
+              setActive={activateId}
+            />
           </div>
         </div>
       </div>
@@ -536,7 +621,9 @@ export function ProductionGap() {
           <div className="mt-4 grid gap-y-5 md:grid-cols-2 md:items-start md:gap-x-12">
             {/* Balanced: unbalanced, this heading left "part" alone on a second
                 line at phone widths. No effect on desktop, where it fits one. */}
-            <h2 className="type-h2 max-w-lg text-balance text-foreground">{HEADING}</h2>
+            <h2 className="type-h2 max-w-lg text-balance text-foreground">
+              {HEADING}
+            </h2>
             <p className="type-lead max-w-lg text-pretty text-muted-foreground">
               {BODY}
             </p>

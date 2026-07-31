@@ -46,8 +46,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [preference, setPreferenceState] =
     useState<ThemePreference>(DEFAULT_PREFERENCE);
   const [theme, setThemeState] = useState<Theme>("light");
+  // The one place <html data-theme> is kept in step with the state above.
+  // setPreference writes the attribute too, but only so the swap can be
+  // captured inside a view transition.
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
-  // Adopt the persisted preference + the theme the pre-paint script resolved.
+  // Adopt the persisted preference, and resolve the theme from it rather than
+  // from <html data-theme>. The attribute is not a safe source here: the sync
+  // effect above runs first and has already overwritten whatever the pre-paint
+  // script resolved with this component's initial "light" state, so reading it
+  // back handed every visitor light and dropped a saved dark preference on the
+  // first render.
   useEffect(() => {
     let p: ThemePreference = DEFAULT_PREFERENCE;
     try {
@@ -58,24 +69,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // storage unavailable
     }
-    const applied = document.documentElement.dataset.theme;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setPreferenceState(p);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setThemeState(
-      applied === "dark" ? "dark" : applied === "light" ? "light" : systemTheme(),
-    );
+
+    setThemeState(p === "system" ? systemTheme() : p);
   }, []);
 
   // While on "system", track OS changes live so the site follows the setting.
   useEffect(() => {
     if (preference !== "system") return;
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = () => {
-      const next = mq.matches ? "dark" : "light";
-      document.documentElement.dataset.theme = next;
-      setThemeState(next);
-    };
+    const onChange = () => setThemeState(mq.matches ? "dark" : "light");
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
   }, [preference]);

@@ -340,7 +340,7 @@ function EngagementBar({
       // a fixed black alpha it inverts with the theme.
       className={`relative flex-1 overflow-hidden border bg-[var(--v69-inner)] [.template-mock_&]:border-black/15 [.template-mock_&]:bg-[var(--v69-card)] [[data-theme=dark]_.template-mock_&]:border-white/20 ${
         compact
-          ? "rounded-[6px] border-[var(--mk-border)]"
+          ? "rounded-[6px] border-[0.5px] border-[var(--mk-border)]"
           : "rounded-2xl border-black/[0.05]"
       }`}
       style={{ height: `${hPct}%` }}

@@ -1219,10 +1219,15 @@ html[data-theme="dark"] .v63-ring-solid::before {
   /* Data marks — chart bars, gauge rings, the outgoing chat bubble. One muted
      gray for all of them: the mocks are there to show shape and layout, and a
      saturated accent pulled the eye to the sample data instead. */
-  /* A tint of the panel blue the mocks sit on, so the charts read as part of
-     the same picture rather than as grey filler. */
-  --mk-data: #b9cbf8;
+  /* The brand lime rather than a tint of the panel blue: on the blue field the
+     charts were a shade of their own background and disappeared into it, where
+     the lime is the one warm note in the set and reads as data. */
+  --mk-data: #d9ed92;
   --mk-data-fg: #262626;
+  /* A quieter data tone for marks that cover real area rather than a few thin
+     bars — the gauge ring is one continuous 7px band, and at the weights above
+     it became the darkest thing in a monotone rail. */
+  --mk-data-quiet: #eaeaea;
   /* A well and the surfaces that lift off it, for mocks that nest a panel
      inside a card. Not derived from the ramp above: "lifted" is whiter in light
      and lighter-grey in dark, and --mk-surface is the darkest value in dark, so
@@ -1261,6 +1266,7 @@ html[data-theme="dark"] .v63-ring-solid::before {
   --mk-icon-sb: #b0b0b0;
   --mk-data: #4a4a4a;
   --mk-data-fg: #d9d9d9;
+  --mk-data-quiet: #3d3d3d;
   --mk-well: #1c1c1c;
   --mk-riser: #2e2e2e;
   --mk-selected: #303030;
@@ -1275,6 +1281,28 @@ html[data-theme="dark"] .v63-ring-solid::before {
 [data-theme="dark"] .production-cut-fade {
   -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 72px), transparent);
   mask-image: linear-gradient(to right, #000 calc(100% - 72px), transparent);
+}
+
+/* On a phone the mock is cropped at the bottom as well, and that cut lands
+   mid-row — a hard chop there reads as a rendering error where a fade reads as
+   "continues past the frame". Body only: the top bar is shorter than the fade
+   itself, so the same mask would erase it. Dark keeps its right-edge fade too,
+   the two masks intersecting. */
+@media (max-width: 767px) {
+  .production-cut-bottom {
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 56px), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 56px), transparent);
+  }
+  [data-theme="dark"] .production-cut-bottom {
+    -webkit-mask-image:
+      linear-gradient(to right, #000 calc(100% - 72px), transparent),
+      linear-gradient(to bottom, #000 calc(100% - 56px), transparent);
+    mask-image:
+      linear-gradient(to right, #000 calc(100% - 72px), transparent),
+      linear-gradient(to bottom, #000 calc(100% - 56px), transparent);
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+  }
 }
 
 /* ───────────────────────────────────────────────────────────────────────────

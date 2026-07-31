@@ -180,22 +180,6 @@ function ChatComposer({
 // filled and lit per theme. Debossed rather than tinted: the shape is a shade
 // darker than the screen with a light lip beneath it, so it reads as pressed
 // into the surface instead of printed on it.
-function AssemblyWatermark() {
-  return (
-    <svg
-      aria-hidden
-      viewBox="0 0 139 139"
-      fill="var(--mk-emboss)"
-      style={{ filter: "drop-shadow(0 1px 0 var(--mk-emboss-lip))" }}
-      className="pointer-events-none w-[76px]"
-    >
-      <path d="M138.878 100.104V123.552C138.878 131.844 132.142 138.57 123.832 138.57H4.14569C0.460605 138.57 -1.38657 134.121 1.21984 131.521L29.2747 103.532C31.4737 101.338 34.4597 100.104 37.5707 100.104H138.888H138.878Z" />
-      <path d="M138.879 47.1379V70.5811C138.879 78.8728 132.143 85.5986 123.829 85.5986H47.2427L82.3575 50.5654C84.5565 48.3712 87.5379 47.1379 90.6489 47.1379H138.884H138.879Z" />
-      <path d="M138.879 4.1366V17.6205C138.879 25.9122 132.143 32.638 123.829 32.638H100.325L131.815 1.21717C134.421 -1.38353 138.879 0.459594 138.879 4.1366Z" />
-    </svg>
-  );
-}
-
 // ── 1. DESCRIBE — the Add App blank slate, prompt typing itself in. ──────────
 // The one prompt the how-it-works flow narrates end to end: it types in the
 // Describe step and is the request the Plan step then plans. Shared so the two
@@ -211,22 +195,46 @@ const FLOW_PROMPT =
 // step's point is the prompt, which the empty screen puts all the weight on.
 function DescribeComposer() {
   return (
-    <>
-      {/* No greeting at this width — the empty slate and the mark say it. */}
-      <div className="relative flex min-h-0 flex-1 items-center justify-center">
-        <AssemblyWatermark />
-      </div>
+    // Greeting and composer as one centred group, sitting above the middle
+    // rather than pinned to the bottom: the pair is the whole screen at this
+    // width, and against the bottom edge it read as a keyboard bar under an
+    // empty page. The extra bottom padding is what lifts it off centre.
+    <div className="relative isolate flex min-h-0 flex-1 flex-col justify-center gap-3 pb-12">
+      {/* Aurora — phone only, since this composer is the phone screen's whole
+          content. The blank slate under the field was a lot of empty white at
+          this width; three soft blooms in the site's own gradient hues (the
+          lime, periwinkle and blue the glow frame rotates through) give the
+          bottom of the screen something to be without putting an object there.
+          Behind the content via -z-10, so the greeting and the field stay
+          crisp on top of it. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-44 opacity-95 blur-2xl saturate-150"
+        style={{
+          background: [
+            "radial-gradient(62% 100% at 16% 100%, #d9ed92 0%, transparent 72%)",
+            "radial-gradient(58% 100% at 52% 100%, #9fb0e8 0%, transparent 72%)",
+            "radial-gradient(62% 100% at 90% 100%, #7da4ff 0%, transparent 72%)",
+          ].join(", "),
+        }}
+      />
+
+      {/* A step above the mock's body sizes and in the foreground ink, so it
+          reads as the screen's greeting rather than a caption on the field. */}
+      <p className="text-center text-[16px] leading-none text-[var(--mk-fg)]">
+        Let&apos;s build, Margot
+      </p>
 
       {/* Prompt box — the request types and re-types itself, ringed by the
           animated gradient border (same as the hero composer). Uses the
           solid-loop ring: the default sweep has a transparent arc, which at
           this small size reads as the ring breaking apart mid-rotation.
-          Dark mode fills the field so it lifts off the card face; light
-          already reads as a distinct white field. */}
+          Filled in both themes: the aurora sits behind this, and an unfilled
+          field let the glow run straight through the request. */}
       {/* 94, not 104: the field is justify-between, so the extra height landed
           as a 20px hole between the request and the controls under it. This
           leaves a 10px gap — the box now sizes to what it holds. */}
-      <div className="v63-gradient-border v63-ring-solid relative flex min-h-[94px] flex-col justify-between rounded-[12px] p-3 [[data-theme=dark]_&]:bg-[var(--mk-elevated)]">
+      <div className="v63-gradient-border v63-ring-solid relative flex min-h-[94px] flex-col justify-between rounded-[12px] bg-[var(--mk-surface)] p-3 [[data-theme=dark]_&]:bg-[var(--mk-elevated)]">
         <p className="text-[12px] leading-[1.5] text-[var(--mk-fg-2)]">
           {TYPEWRITER_PREFIX}
           {FLOW_PROMPT}
@@ -254,8 +262,7 @@ function DescribeComposer() {
           </span>
         </div>
       </div>
-
-    </>
+    </div>
   );
 }
 
@@ -485,8 +492,12 @@ function ThumbIntake({ compact = false }: { compact?: boolean }) {
   return (
     // Same surface language as the engagement card: a grey well with the mark
     // sitting on it. The donut's empty run is the riser white — what a bar is
-    // there — and the filled run is the shared chart grey, so the two cards
-    // read as one system without boxing the ring in a second card.
+    // there — and the filled run is grey, so the two cards read as one system
+    // without boxing the ring in a second card. Grey and not the shared
+    // --mk-data tint: at this size the ring is one continuous band rather than
+    // a row of thin bars, and the blue turned the whole tile into the coloured
+    // one in a monotone rail. The quiet grey, not the full one, for the same
+    // reason — a band that size carries far more weight than a bar does.
     <div className="flex h-full w-full items-center justify-center bg-[var(--mk-well)]">
       <div className="relative aspect-square h-[70%]">
         <svg viewBox="0 0 72 72" className="size-full -rotate-90" aria-hidden>
@@ -503,7 +514,7 @@ function ThumbIntake({ compact = false }: { compact?: boolean }) {
             cy="36"
             r={radius}
             fill="none"
-            stroke="var(--mk-data)"
+            stroke="var(--mk-data-quiet)"
             strokeWidth="7"
             strokeDasharray={circumference}
             strokeDashoffset={circumference * (1 - progress)}
@@ -517,7 +528,7 @@ function ThumbIntake({ compact = false }: { compact?: boolean }) {
             r={radius + 3.5}
             fill="none"
             stroke="var(--mk-border)"
-            strokeWidth="1"
+            strokeWidth="0.5"
           />
           <circle
             cx="36"
@@ -525,7 +536,7 @@ function ThumbIntake({ compact = false }: { compact?: boolean }) {
             r={radius - 3.5}
             fill="none"
             stroke="var(--mk-border)"
-            strokeWidth="1"
+            strokeWidth="0.5"
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -562,10 +573,10 @@ function ThumbCommunity({ compact = false }: { compact?: boolean }) {
     // squared corner already say who is speaking.
     <div className="flex h-full w-full flex-col justify-center gap-2 bg-[var(--mk-well)] p-2.5">
       {/* One squared corner on the sender's side, the design's bubble shape. */}
-      <p className="max-w-[88%] rounded-[8px] rounded-tl-[2px] border border-[var(--mk-border)] bg-[var(--mk-riser)] px-2.5 py-1.5 text-[10px] leading-[1.5] text-[var(--mk-fg)]">
+      <p className="max-w-[88%] rounded-[8px] rounded-tl-[2px] border-[0.5px] border-[var(--mk-border)] bg-[var(--mk-riser)] px-2.5 py-1.5 text-[10px] leading-[1.5] text-[var(--mk-fg)]">
         {ask}
       </p>
-      <p className="ml-auto rounded-[8px] rounded-tr-[2px] border border-[var(--mk-border)] bg-[var(--mk-riser)] px-2.5 py-1.5 text-[10px] leading-[1.5] text-[var(--mk-fg)]">
+      <p className="ml-auto rounded-[8px] rounded-tr-[2px] border-[0.5px] border-[var(--mk-border)] bg-[var(--mk-riser)] px-2.5 py-1.5 text-[10px] leading-[1.5] text-[var(--mk-fg)]">
         {reply}
       </p>
     </div>
@@ -843,6 +854,26 @@ function ScreenTopBar({
   );
 }
 
+// The workspace's own view switch: what the team sees against what the client
+// sees. It belongs in the title bar rather than over the table because it swaps
+// the whole screen, not a filter on the rows. One word a side — at this scale
+// the mock reads as a shape, and "Team View / Contact View" was two long runs
+// of 10px type where a label was wanted.
+function ViewToggle() {
+  const seg =
+    "flex h-full items-center rounded-[3px] px-2 text-[10px] leading-none";
+  return (
+    <div className="flex h-[22px] items-center gap-0.5 rounded-[5px] bg-[var(--mk-fill)] p-0.5">
+      <span
+        className={`${seg} bg-[var(--mk-surface)] text-[var(--mk-fg)] ring-1 ring-[var(--mk-border)]`}
+      >
+        Team
+      </span>
+      <span className={`${seg} text-[var(--mk-muted)]`}>Client</span>
+    </div>
+  );
+}
+
 // Inert, not dark: there's nothing to publish until the app is built.
 const INERT_PUBLISH = (
   <span className="flex h-[22px] items-center rounded-[4px] bg-[var(--mk-fill)] px-2.5 text-[11px] leading-none text-[var(--mk-subtle)]">
@@ -954,6 +985,49 @@ const BUILD_ENTRIES: Entry[] = [
   },
 ];
 
+// The Iterate preview column is taller than the Build screen's table and its
+// rows are tighter, so seven left the frame two-thirds empty. These five carry
+// it to the bottom edge; the Build table keeps its own seven, which is what
+// fills that one exactly.
+const ITERATE_ENTRIES: Entry[] = [
+  ...BUILD_ENTRIES,
+  {
+    description: "Review vendor invoices",
+    client: "Bloom Studios",
+    date: "Apr 7",
+    duration: "2h 00m",
+    status: "Approved",
+  },
+  {
+    description: "Bookkeeping cleanup",
+    client: "Oakwood LLC",
+    date: "Apr 7",
+    duration: "3h 30m",
+    status: "Approved",
+  },
+  {
+    description: "Quarterly forecast model",
+    client: "Meridian Corp",
+    date: "Apr 4",
+    duration: "2h 45m",
+    status: "Pending",
+  },
+  {
+    description: "Professional development",
+    client: "—",
+    date: "Apr 4",
+    duration: "2h 00m",
+    status: "Logged",
+  },
+  {
+    description: "Year-end filing prep",
+    client: "NovaTech Inc",
+    date: "Apr 3",
+    duration: "1h 30m",
+    status: "Approved",
+  },
+];
+
 // Shared tracks so the header and every row line up on one set of edges. Fixed
 // widths on the trailing four rather than a flex row: as flex children they
 // shrank to their content and got shoved into the right corner while the
@@ -1035,9 +1109,11 @@ function BuildPhoneContent() {
             bars are wide enough that a short chart reads as blocks, not a
             series. Each bar sits in a full-height track, so a short day reads
             as a part of something rather than a stub floating on white. The
-            last one is grey rather than a saturated blue: at full height a
-            solid accent dragged the whole tile to its right edge, where grey
-            reads as the period still filling in. */}
+            last one takes the track's own grey rather than a saturated blue:
+            at full height a solid accent dragged the whole tile to its right
+            edge. The same grey as every other track, not a darker one — a
+            heavier block there read as a value rather than as the period still
+            filling in. */}
         <div className="mt-2.5 flex h-[64px] items-end gap-[5px]">
           {stat.bars.map((h, i) => (
             <div
@@ -1050,7 +1126,7 @@ function BuildPhoneContent() {
                   height: `${h}%`,
                   backgroundColor:
                     i === stat.bars.length - 1
-                      ? "var(--mk-border)"
+                      ? "var(--mk-fill)"
                       : "var(--mk-data)",
                 }}
               />
@@ -1253,11 +1329,19 @@ export function BuildStepVisual() {
       </PhoneScreen>
       <div className="hidden sm:contents">
         <ScreenCard maxW={800} fill>
-          {/* App title bar with Publish (edit mode) */}
-          <div className="flex h-[36px] shrink-0 items-center justify-between border-b border-[var(--mk-hairline)] px-3.5">
+          {/* App title bar with Publish (edit mode). The view switch sits at
+              44% — where the chat column ends and the preview begins — because
+              it belongs to the app being previewed, not to the editor. Flush
+              to that edge, with no inset — the bar and the row below split at
+              the same 44% of the same box, so the switch starts exactly on the
+              rule. */}
+          <div className="relative flex h-[36px] shrink-0 items-center justify-between border-b border-[var(--mk-hairline)] px-3.5">
             <span className="text-[12px] leading-none text-[var(--mk-fg)]">
               Time tracker
             </span>
+            <div className="absolute left-[44%]">
+              <ViewToggle />
+            </div>
             <DarkButton>Publish</DarkButton>
           </div>
 
@@ -1289,53 +1373,60 @@ export function BuildStepVisual() {
             </div>
 
             {/* Live app preview — the Build screen adapted to the narrow column.
-              While a request sends, the rows shimmer as the app regenerates. */}
-            <div className="flex min-w-0 flex-1 flex-col pt-2.5">
-              <TableToolbar compact />
-              <div className="mx-3 mb-2.5 flex-1 overflow-hidden rounded-[8px] border border-[var(--mk-border)]">
-                <div
-                  className={`${ITERATE_COLS} border-b border-[var(--mk-hairline)] bg-[var(--mk-elevated)] px-2.5 py-1.5 text-[10px] leading-none text-[var(--mk-muted)]`}
-                >
-                  <span>Description</span>
-                  <span>Duration</span>
-                  <span>Status</span>
+              While a request sends, the rows shimmer as the app regenerates.
+              A grey field with the app on a white card, the way the workspace
+              frames a running app: the editor is the page, the app is an
+              object sitting on it. */}
+            <div className="flex min-w-0 flex-1 flex-col bg-[var(--mk-fill)] p-2.5">
+              <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[8px] border border-[var(--mk-border)] bg-[var(--mk-surface)] pt-2.5">
+                <TableToolbar compact />
+                <div className="mx-2.5 mb-2.5 flex-1 overflow-hidden rounded-[6px] border border-[var(--mk-border)]">
+                  <div
+                    className={`${ITERATE_COLS} border-b border-[var(--mk-hairline)] bg-[var(--mk-elevated)] px-2.5 py-1.5 text-[10px] leading-none text-[var(--mk-muted)]`}
+                  >
+                    <span>Description</span>
+                    <span>Duration</span>
+                    <span>Status</span>
+                  </div>
+                  {updating
+                    ? ITERATE_SKELETON.map((w, i) => (
+                        <div
+                          key={i}
+                          className={`${ITERATE_COLS} px-2.5 py-[7.5px] ${
+                            i < ITERATE_SKELETON.length - 1
+                              ? "border-b border-[var(--mk-hairline)]"
+                              : ""
+                          }`}
+                        >
+                          <span
+                            className="skeleton-shimmer h-[8px] min-w-0 rounded-full"
+                            style={{ maxWidth: w }}
+                          />
+                          <span className="skeleton-shimmer h-[8px] w-[38px] rounded-full" />
+                          <span className="skeleton-shimmer h-[8px] w-[46px] rounded-full" />
+                        </div>
+                      ))
+                    : ITERATE_ENTRIES.map((entry, i) => (
+                        <div
+                          key={entry.description}
+                          className={`${ITERATE_COLS} px-2.5 py-[7.5px] text-[10px] leading-none ${
+                            i < ITERATE_ENTRIES.length - 1
+                              ? "border-b border-[var(--mk-hairline)]"
+                              : ""
+                          }`}
+                        >
+                          <span className="min-w-0 truncate pb-[3px] -mb-[3px] text-[var(--mk-fg)]">
+                            {entry.description}
+                          </span>
+                          <span className="tabular-nums text-[var(--mk-muted)]">
+                            {entry.duration}
+                          </span>
+                          <span>
+                            <StatusPill status={entry.status} />
+                          </span>
+                        </div>
+                      ))}
                 </div>
-                {updating
-                  ? ITERATE_SKELETON.map((w, i) => (
-                      <div
-                        key={i}
-                        className={`${ITERATE_COLS} px-2.5 py-[7.5px] ${
-                          i < ITERATE_SKELETON.length - 1
-                            ? "border-b border-[var(--mk-hairline)]"
-                            : ""
-                        }`}
-                      >
-                        <span
-                          className="skeleton-shimmer h-[8px] min-w-0 rounded-full"
-                          style={{ maxWidth: w }}
-                        />
-                        <span className="skeleton-shimmer h-[8px] w-[38px] rounded-full" />
-                        <span className="skeleton-shimmer h-[8px] w-[46px] rounded-full" />
-                      </div>
-                    ))
-                  : BUILD_ENTRIES.slice(0, 5).map((entry, i) => (
-                      <div
-                        key={entry.description}
-                        className={`${ITERATE_COLS} px-2.5 py-[7.5px] text-[10px] leading-none ${
-                          i < 4 ? "border-b border-[var(--mk-hairline)]" : ""
-                        }`}
-                      >
-                        <span className="min-w-0 truncate pb-[3px] -mb-[3px] text-[var(--mk-fg)]">
-                          {entry.description}
-                        </span>
-                        <span className="tabular-nums text-[var(--mk-muted)]">
-                          {entry.duration}
-                        </span>
-                        <span>
-                          <StatusPill status={entry.status} />
-                        </span>
-                      </div>
-                    ))}
               </div>
             </div>
           </div>
