@@ -267,6 +267,7 @@ function EngagementBar({
   delayMs,
   play,
   pattern = false,
+  compact = false,
 }: {
   label: string;
   value: number;
@@ -276,6 +277,10 @@ function EngagementBar({
   // A faint diagonal hatch on the fill — reads as an "in progress / projected"
   // period next to the plain, settled bar.
   pattern?: boolean;
+  // Thumbnail scale, for the how-it-works Describe card: the gallery's 26px
+  // read-out needs a taller column than a 128px thumb gives, and at three bars
+  // the label and number collide. Smaller type, tighter insets, quieter.
+  compact?: boolean;
 }) {
   const MIN_H = 16;
   const [shown, setShown] = useState(value);
@@ -330,7 +335,14 @@ function EngagementBar({
 
   return (
     <div
-      className="relative flex-1 overflow-hidden rounded-2xl border border-black/[0.05] bg-[var(--v69-inner)] [.template-mock_&]:border-black/15 [.template-mock_&]:bg-[var(--v69-card)] [[data-theme=dark]_.template-mock_&]:border-white/20"
+      // Compact borrows the mock's own border token: at 5% black the outline
+      // vanished against the near-white well the thumbnail sits on, and unlike
+      // a fixed black alpha it inverts with the theme.
+      className={`relative flex-1 overflow-hidden border bg-[var(--v69-inner)] [.template-mock_&]:border-black/15 [.template-mock_&]:bg-[var(--v69-card)] [[data-theme=dark]_.template-mock_&]:border-white/20 ${
+        compact
+          ? "rounded-[6px] border-[var(--mk-border)]"
+          : "rounded-2xl border-black/[0.05]"
+      }`}
       style={{ height: `${hPct}%` }}
     >
       {pattern && (
@@ -343,17 +355,34 @@ function EngagementBar({
           className={`pointer-events-none absolute inset-0 ${HATCH} ${HATCH_DARK}`}
         />
       )}
-      <span className="absolute left-3 top-2.5 font-mono text-[10px] font-normal uppercase tracking-wide text-muted-foreground" style={{ opacity: op }}>
+      <span
+        className={`absolute font-mono font-normal uppercase tracking-wide text-muted-foreground ${
+          compact ? "left-1.5 top-1.5 text-[7px]" : "left-3 top-2.5 text-[10px]"
+        }`}
+        style={{ opacity: op }}
+      >
         {label}
       </span>
       <span
-        className="absolute bottom-4 left-3 flex items-end gap-0.5 leading-none"
+        className={`absolute flex items-end gap-0.5 leading-none ${
+          compact ? "bottom-1.5 left-1.5" : "bottom-4 left-3"
+        }`}
         style={{ opacity: op }}
       >
-        <span className="text-[26px] font-normal tracking-tight tabular-nums text-[var(--v69-ink)]">
+        <span
+          className={`font-normal tracking-tight tabular-nums text-[var(--v69-ink)] ${
+            compact ? "text-[13px]" : "text-[26px]"
+          }`}
+        >
           {shown}
         </span>
-        <span className="mb-0.5 text-[14px] font-normal leading-none text-muted-foreground">%</span>
+        <span
+          className={`font-normal leading-none text-muted-foreground ${
+            compact ? "text-[8px]" : "mb-0.5 text-[14px]"
+          }`}
+        >
+          %
+        </span>
       </span>
     </div>
   );
@@ -362,9 +391,23 @@ function EngagementBar({
 // Client engagement dashboard — two elevated columns that rest at their final
 // height, then re-grow (last, then this) with their scores counting up when the
 // card is hovered. Monochrome, on the rail's own greys.
-function CardDashboard() {
+// `compact` is the how-it-works Describe thumbnail: three slimmer columns at a
+// smaller scale, where the gallery's two big ones need more height than a 128px
+// thumb has. A third month also makes the rise read as a trend rather than a
+// single before/after jump.
+export function CardDashboard({ compact = false }: { compact?: boolean }) {
   const [play, setPlay] = useState(0);
   const inViewRef = useInViewReplay(() => setPlay((p) => p + 1));
+  const bars = compact
+    ? [
+        { label: "JUL", value: 64, maxHeightPct: 54, pattern: false },
+        { label: "AUG", value: 71, maxHeightPct: 74, pattern: false },
+        { label: "SEP", value: 88, maxHeightPct: 100, pattern: true },
+      ]
+    : [
+        { label: "JUL", value: 71, maxHeightPct: 62, pattern: false },
+        { label: "AUG", value: 88, maxHeightPct: 100, pattern: true },
+      ];
   return (
     <div
       ref={inViewRef}
@@ -374,12 +417,24 @@ function CardDashboard() {
         setPlay((p) => p + 1);
       }}
       onMouseLeave={() => setPlay(0)}
-      className="flex h-full flex-col bg-[var(--v69-card)] p-3.5 [.template-mock_&]:bg-[var(--v69-well)]"
+      className={`flex h-full flex-col bg-[var(--v69-card)] [.template-mock_&]:bg-[var(--v69-well)] ${
+        compact ? "p-2" : "p-3.5"
+      }`}
     >
       {/* No header — the bars fill the full card height and grow from the floor. */}
-      <div className="flex flex-1 items-end gap-2.5">
-        <EngagementBar label="JUL" value={71} maxHeightPct={62} delayMs={0} play={play} />
-        <EngagementBar label="AUG" value={88} maxHeightPct={100} delayMs={550} play={play} pattern />
+      <div className={`flex flex-1 items-end ${compact ? "gap-1.5" : "gap-2.5"}`}>
+        {bars.map((b, i) => (
+          <EngagementBar
+            key={b.label}
+            label={b.label}
+            value={b.value}
+            maxHeightPct={b.maxHeightPct}
+            delayMs={i * 550}
+            play={play}
+            pattern={b.pattern}
+            compact={compact}
+          />
+        ))}
       </div>
     </div>
   );

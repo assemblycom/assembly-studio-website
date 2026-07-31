@@ -211,7 +211,11 @@ export function HowItWorks() {
                 onClick={() => activate(i)}
                 // Stacked on a phone the tabs are a list, and a list reads down
                 // its left edge; centring only makes sense once they're a row.
-                className="group relative cursor-pointer px-5 py-4 text-left transition-colors hover:bg-foreground/[0.03] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-foreground/25 sm:text-center"
+                // Keyboard focus tints the tab rather than ringing it. Any box
+                // here read as a stray border: the tabs are square inside a
+                // rounded, overflow-hidden shell, so an outline either had its
+                // corner sliced by the shell or floated free of the segments.
+                className="group relative cursor-pointer px-5 py-4 text-left transition-colors hover:bg-foreground/[0.03] focus:outline-none focus-visible:bg-foreground/[0.07] sm:text-center"
               >
                 {/* Progress track (fills over the dwell on the active tab). */}
                 <span

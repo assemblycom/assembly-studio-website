@@ -164,10 +164,10 @@ function ProductionGapVisual({
           style={active === "url" ? { backgroundColor: HL_PILL_BG } : undefined}
           className="relative flex items-center gap-1.5 rounded-[4px] border border-[var(--mk-border)] px-2.5 py-1 text-[10px] leading-none text-[var(--mk-muted)] outline-none transition-colors duration-200"
         >
-          {/* A client-facing subdomain, not the root domain — a bare
-              brandmages.com reads as the firm's marketing site, which made this
-              step look like we build websites. */}
-          clients.brandmages.com
+          {/* A placeholder domain rather than the sample firm's: addressed to
+              the reader, it reads as "your domain goes here" instead of as a
+              marketing site we built for someone. */}
+          yourbrand.com
         </button>
       </div>
 
@@ -190,12 +190,18 @@ function ProductionGapVisual({
         >
           {/* px-2 matches the nav rows below, so the icon column shares one
               left edge down the whole sidebar. */}
-          <div className="mb-2 flex items-center gap-2.5 px-2">
-            <span className="flex size-5 shrink-0 items-center justify-center rounded-[4px] bg-[var(--mk-invert-bg)]">
-              <IconBrandMark className="w-[11px] text-[var(--mk-invert-fg)]" />
+          {/* 16px on an 8px gap, not 20 on 10: the mark sat well above the nav
+              icons' weight, and its wider column pushed the workspace name 6px
+              past where every label below it starts. These two numbers sum to
+              the nav rows' own 14 + 10, so one text edge runs down the side. */}
+          <div className="mb-2 flex items-center gap-2 px-2">
+            <span className="flex size-4 shrink-0 items-center justify-center rounded-[3px] bg-[var(--mk-invert-bg)]">
+              <IconBrandMark className="w-[9px] text-[var(--mk-invert-fg)]" />
             </span>
-            <span className="truncate text-[11px] text-[var(--mk-fg)]">
-              Brandmages
+            {/* Generic, to match the placeholder domain in the URL bar — a named
+                sample firm beside yourbrand.com read as two different tenants. */}
+            <span className="truncate pb-[3px] -mb-[3px] text-[11px] text-[var(--mk-fg)]">
+              Your brand
             </span>
           </div>
           {APPS.map((app) => {
@@ -204,14 +210,14 @@ function ProductionGapVisual({
               ? "var(--mk-icon-active)"
               : "var(--mk-icon-idle)";
             const labelCls = on ? "text-[var(--mk-fg)]" : "text-[var(--mk-muted)]";
-            const rowBg = on ? "bg-[var(--mk-fill)]" : "";
+            const rowBg = on ? "bg-[var(--mk-selected)]" : "";
             return (
               <span
                 key={app}
                 className={`flex items-center gap-2.5 rounded-[4px] px-2 py-1.5 text-[11px] leading-none ${rowBg} ${labelCls}`}
               >
                 <AppIcon name={app} color={iconColor} />
-                <span className="truncate">{app}</span>
+                <span className="truncate pb-[3px] -mb-[3px]">{app}</span>
               </span>
             );
           })}
@@ -274,8 +280,8 @@ function ProductionGapVisual({
                   i < ENTRIES.length - 1 ? "border-b border-[var(--mk-hairline)]" : ""
                 }`}
               >
-                <span className="truncate text-[var(--mk-fg-2)]">{e.desc}</span>
-                <span className="truncate text-[var(--mk-muted)]">{e.client}</span>
+                <span className="truncate pb-[3px] -mb-[3px] text-[var(--mk-fg-2)]">{e.desc}</span>
+                <span className="truncate pb-[3px] -mb-[3px] text-[var(--mk-muted)]">{e.client}</span>
                 <span className="tabular-nums text-[var(--mk-muted)]">{e.dur}</span>
                 <span>
                   <span className={`inline-flex rounded-full px-2 py-1 text-[9px] leading-none ${STATUS_STYLES[e.status]}`}>
