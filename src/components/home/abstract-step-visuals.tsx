@@ -246,9 +246,6 @@ function DescribeComposer() {
               >
                 <Thumb compact />
               </div>
-              <p className="mt-2 truncate pb-[3px] -mb-[3px] text-[11px] leading-none text-[var(--mk-fg)]">
-                {title}
-              </p>
             </div>
           ))}
         </div>
@@ -402,7 +399,8 @@ function ThumbEngagement({ compact = false }: { compact?: boolean }) {
     );
   }
   return (
-    <div className="flex h-full w-full flex-col px-3 py-2.5">
+    // The same well the other two cards sit on, so the rail reads as one set.
+    <div className="flex h-full w-full flex-col bg-[var(--mk-well)] px-3 py-2.5">
       {/* Bars round at the top only: rounded on all four corners they read as
           floating pills rather than a series. */}
       <div className="flex min-h-0 flex-1 items-end gap-[2px]">
@@ -605,16 +603,12 @@ function AddAppScreen() {
           </div>
           <div className="flex gap-4">
             {ADD_APP_CARDS.map(({ title, Thumb }) => (
-              <div key={title} className="flex min-w-0 flex-1 flex-col gap-2">
-                <div
-                  className="h-[128px] overflow-hidden rounded-[8px]"
-                  style={{ border: `1px solid ${MOCK_BORDER}` }}
-                >
-                  <Thumb />
-                </div>
-                <p className="truncate pb-[3px] -mb-[3px] text-[11px] leading-none text-[var(--mk-fg)]">
-                  {title}
-                </p>
+              <div
+                key={title}
+                className="h-[128px] min-w-0 flex-1 overflow-hidden rounded-[8px]"
+                style={{ border: `1px solid ${MOCK_BORDER}` }}
+              >
+                <Thumb />
               </div>
             ))}
           </div>
