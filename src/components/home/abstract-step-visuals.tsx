@@ -142,14 +142,14 @@ function ChatComposer({
   phone?: boolean;
 }) {
   return (
-    <div className="shrink-0 rounded-[4px] border border-[var(--mk-border)] p-2.5">
+    <div className="shrink-0 rounded-[8px] border border-[var(--mk-border)] p-2.5">
       <p
         className={`min-h-[15px] leading-[1.5] text-[var(--mk-fg-2)] ${
           phone ? "text-[12px]" : "text-[11px]"
         }`}
       >
         {text}
-        <span className="ml-px inline-block h-[1em] w-[1.5px] bg-[var(--mk-fg-2)] align-[-0.15em]" />
+        <span className="ml-px inline-block h-[1em] w-[1.5px] animate-caret bg-[var(--mk-fg-2)] align-[-0.15em]" />
       </p>
       <div className="mt-2 flex items-center justify-between text-[var(--mk-muted)]">
         <IconPlus className={phone ? "size-[14px]" : "size-[13px]"} />
@@ -176,6 +176,26 @@ function ChatComposer({
   );
 }
 
+// The Assembly mark from public/images/logo-mark.svg, inlined so it can be
+// filled and lit per theme. Debossed rather than tinted: the shape is a shade
+// darker than the screen with a light lip beneath it, so it reads as pressed
+// into the surface instead of printed on it.
+function AssemblyWatermark() {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 139 139"
+      fill="var(--mk-emboss)"
+      style={{ filter: "drop-shadow(0 1px 0 var(--mk-emboss-lip))" }}
+      className="pointer-events-none w-[76px]"
+    >
+      <path d="M138.878 100.104V123.552C138.878 131.844 132.142 138.57 123.832 138.57H4.14569C0.460605 138.57 -1.38657 134.121 1.21984 131.521L29.2747 103.532C31.4737 101.338 34.4597 100.104 37.5707 100.104H138.888H138.878Z" />
+      <path d="M138.879 47.1379V70.5811C138.879 78.8728 132.143 85.5986 123.829 85.5986H47.2427L82.3575 50.5654C84.5565 48.3712 87.5379 47.1379 90.6489 47.1379H138.884H138.879Z" />
+      <path d="M138.879 4.1366V17.6205C138.879 25.9122 132.143 32.638 123.829 32.638H100.325L131.815 1.21717C134.421 -1.38353 138.879 0.459594 138.879 4.1366Z" />
+    </svg>
+  );
+}
+
 // ── 1. DESCRIBE — the Add App blank slate, prompt typing itself in. ──────────
 // The one prompt the how-it-works flow narrates end to end: it types in the
 // Describe step and is the request the Plan step then plans. Shared so the two
@@ -184,15 +204,18 @@ function ChatComposer({
 const FLOW_PROMPT =
   "a time tracking app to log hours across clients and projects";
 
-// The step's content, shared by both containers below so the phone screen and
-// the desktop card can never drift. Padding belongs to the container — the
-// phone sets its own, since it has a title bar to sit under.
+// The phone Add App screen. Not a narrower copy of the desktop card: just the
+// greeting centred in the open space and the composer pinned to the bottom, the
+// shape every assistant app uses at this width. The desktop's three-card rail
+// was the wrong furniture here — chart tiles crowded a ~270px column, and the
+// step's point is the prompt, which the empty screen puts all the weight on.
 function DescribeComposer() {
   return (
     <>
-      <p className="text-[14px] font-medium text-[var(--mk-fg)]">
-        Margot, what will you build?
-      </p>
+      {/* No greeting at this width — the empty slate and the mark say it. */}
+      <div className="relative flex min-h-0 flex-1 items-center justify-center">
+        <AssemblyWatermark />
+      </div>
 
       {/* Prompt box — the request types and re-types itself, ringed by the
           animated gradient border (same as the hero composer). Uses the
@@ -200,10 +223,14 @@ function DescribeComposer() {
           this small size reads as the ring breaking apart mid-rotation.
           Dark mode fills the field so it lifts off the card face; light
           already reads as a distinct white field. */}
-      <div className="v63-gradient-border v63-ring-solid relative flex min-h-[104px] flex-col justify-between rounded-[12px] p-3 [[data-theme=dark]_&]:bg-[var(--mk-elevated)]">
+      {/* 94, not 104: the field is justify-between, so the extra height landed
+          as a 20px hole between the request and the controls under it. This
+          leaves a 10px gap — the box now sizes to what it holds. */}
+      <div className="v63-gradient-border v63-ring-solid relative flex min-h-[94px] flex-col justify-between rounded-[12px] p-3 [[data-theme=dark]_&]:bg-[var(--mk-elevated)]">
         <p className="text-[12px] leading-[1.5] text-[var(--mk-fg-2)]">
           {TYPEWRITER_PREFIX}
           {FLOW_PROMPT}
+          <span className="ml-px inline-block h-[1em] w-[1.5px] animate-caret bg-[var(--mk-fg-2)] align-[-0.15em]" />
         </p>
         {/* Add and submit only. The desktop composer's "Ideas" affordance and
             model name are the first things to go at this width — the Iterate
@@ -228,29 +255,66 @@ function DescribeComposer() {
         </div>
       </div>
 
-      {/* Recommended, as a rail. Three cards side by side need more width than
-          a phone column has, so they keep a card-sized width and run off the
-          right edge the way a real carousel does, rather than shrinking to
-          three unreadable slivers. No arrows: you swipe this, you don't click
-          it. No section head either — the cards are the only thing under the
-          composer, so a label just added a line to read. The tiles are close to
-          square: at 196×88 they were letterbox slots that squeezed their own
-          contents, wrapping the chat card's bubbles onto three lines. */}
-      <div className="mt-3">
-        <div className="flex gap-3">
-          {ADD_APP_CARDS.map(({ title, Thumb }) => (
-            <div key={title} className="w-[176px] shrink-0">
-              <div
-                className="h-[112px] overflow-hidden rounded-[8px]"
-                style={{ border: `1px solid ${MOCK_BORDER}` }}
-              >
-                <Thumb compact />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
     </>
+  );
+}
+
+// The handset's own status bar, above the app's chrome — the clock and the
+// signal/wi-fi/battery cluster are what make a rounded white rectangle read as
+// a phone rather than a narrow browser window. Traced from the supplied assets
+// (54×20 and 78×13) and re-pointed at currentColor, so they take the mock's
+// foreground instead of staying white on a light screen.
+function PhoneStatusBar() {
+  return (
+    <div
+      aria-hidden
+      className="flex h-[26px] shrink-0 items-center justify-between px-4 pt-1 text-[var(--mk-fg)]"
+    >
+      <svg width="35" height="13" viewBox="0 0 54 20" fill="none">
+        <path
+          d="M14.8786 4.72314C12.2805 4.72314 10.4294 6.49951 10.4294 8.93164V8.94824C10.4294 11.2227 12.0397 12.8994 14.3391 12.8994C15.9826 12.8994 17.0285 12.061 17.4684 11.1147H17.6345C17.6345 11.2061 17.6262 11.2974 17.6262 11.3887C17.5349 13.6797 16.7297 15.5391 14.8288 15.5391C13.7746 15.5391 13.0358 14.9912 12.7204 14.1528L12.6955 14.0698H10.5871L10.6037 14.1611C10.9855 15.9956 12.6291 17.2988 14.8288 17.2988C17.842 17.2988 19.6599 14.9082 19.6599 10.874V10.8574C19.6599 6.54102 17.4352 4.72314 14.8786 4.72314ZM14.8703 11.2559C13.509 11.2559 12.5212 10.2598 12.5212 8.87354V8.85693C12.5212 7.52051 13.5754 6.46631 14.8952 6.46631C16.2233 6.46631 17.2609 7.53711 17.2609 8.90674V8.92334C17.2609 10.2764 16.2233 11.2559 14.8703 11.2559ZM23.0204 9.23877C23.7841 9.23877 24.3402 8.65771 24.3402 7.92725C24.3402 7.18848 23.7841 6.61572 23.0204 6.61572C22.265 6.61572 21.7006 7.18848 21.7006 7.92725C21.7006 8.65771 22.265 9.23877 23.0204 9.23877ZM23.0204 15.3979C23.7841 15.3979 24.3402 14.8252 24.3402 14.0864C24.3402 13.3477 23.7841 12.7749 23.0204 12.7749C22.265 12.7749 21.7006 13.3477 21.7006 14.0864C21.7006 14.8252 22.265 15.3979 23.0204 15.3979ZM32.1915 17H34.2418V14.7007H35.8522V12.9326H34.2418V5.02197H31.212C29.5851 7.49561 27.8834 10.2515 26.3312 12.9492V14.7007H32.1915V17ZM28.3233 12.9824V12.8579C29.4855 10.8242 30.8717 8.60791 32.1002 6.73193H32.2247V12.9824H28.3233ZM40.408 17H42.5496V5.02197H40.4163L37.2869 7.22168V9.23877L40.2669 7.13037H40.408V17Z"
+          fill="currentColor"
+        />
+      </svg>
+      <svg width="54" height="9" viewBox="0 0 78 13" fill="none">
+        <path
+          opacity="0.35"
+          d="M54 0.5H71C72.933 0.5 74.5 2.067 74.5 4V9C74.5 10.933 72.933 12.5 71 12.5H54C52.067 12.5 50.5 10.933 50.5 9V4C50.5 2.067 52.067 0.5 54 0.5Z"
+          stroke="currentColor"
+        />
+        <path
+          opacity="0.4"
+          d="M76 5V9.22034C76.8491 8.86291 77.4012 8.0314 77.4012 7.11017C77.4012 6.18894 76.8491 5.35744 76 5Z"
+          fill="currentColor"
+        />
+        <path
+          d="M52 4C52 2.89543 52.8954 2 54 2H71C72.1046 2 73 2.89543 73 4V9C73 10.1046 72.1046 11 71 11H54C52.8954 11 52 10.1046 52 9V4Z"
+          fill="currentColor"
+        />
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M34.5005 3.58753C36.967 3.58764 39.3393 4.55505 41.1269 6.28982C41.2615 6.42375 41.4766 6.42206 41.6092 6.28603L42.896 4.96045C42.9631 4.89146 43.0006 4.798 43 4.70076C42.9994 4.60353 42.9609 4.51052 42.893 4.44234C38.2011 -0.147446 30.7991 -0.147446 26.1072 4.44234C26.0392 4.51047 26.0006 4.60345 26 4.70069C25.9994 4.79792 26.0367 4.89141 26.1038 4.96045L27.391 6.28603C27.5235 6.42226 27.7388 6.42396 27.8733 6.28982C29.6612 4.55494 32.0337 3.58752 34.5005 3.58753ZM34.5359 7.58938C35.8911 7.58929 37.198 8.10346 38.2025 9.03199C38.3384 9.16376 38.5524 9.16091 38.6849 9.02555L39.9702 7.69997C40.0379 7.63044 40.0754 7.53611 40.0744 7.4381C40.0735 7.34008 40.034 7.24656 39.965 7.17844C36.9059 4.27385 32.1685 4.27385 29.1094 7.17844C29.0403 7.24656 29.0009 7.34013 29 7.43817C28.9991 7.53622 29.0368 7.63054 29.1046 7.69997L30.3895 9.02555C30.522 9.16091 30.736 9.16376 30.8719 9.03199C31.8758 8.10408 33.1816 7.58995 34.5359 7.58938ZM37.1496 10.1767C37.1515 10.275 37.1137 10.3698 37.0449 10.4386L34.8217 12.7289C34.7565 12.7962 34.6676 12.834 34.5749 12.834C34.4822 12.834 34.3933 12.7962 34.3282 12.7289L32.1045 10.4386C32.0358 10.3697 31.998 10.2749 32.0001 10.1766C32.0021 10.0783 32.0438 9.98527 32.1153 9.91938C33.5351 8.69354 35.6147 8.69354 37.0345 9.91938C37.106 9.98532 37.1476 10.0784 37.1496 10.1767Z"
+          fill="currentColor"
+        />
+        <path
+          d="M10 4C10 3.44772 10.4477 3 11 3H12C12.5523 3 13 3.44772 13 4V12C13 12.5523 12.5523 13 12 13H11C10.4477 13 10 12.5523 10 12V4Z"
+          fill="currentColor"
+        />
+        <path
+          d="M15 2C15 1.44772 15.4477 1 16 1H17C17.5523 1 18 1.44772 18 2V12C18 12.5523 17.5523 13 17 13H16C15.4477 13 15 12.5523 15 12V2Z"
+          fill="currentColor"
+        />
+        <path
+          d="M5 7.5C5 6.94772 5.44772 6.5 6 6.5H7C7.55228 6.5 8 6.94772 8 7.5V12C8 12.5523 7.55228 13 7 13H6C5.44772 13 5 12.5523 5 12V7.5Z"
+          fill="currentColor"
+        />
+        <path
+          d="M0 10C0 9.44772 0.447715 9 1 9H2C2.55228 9 3 9.44772 3 10V12C3 12.5523 2.55228 13 2 13H1C0.447715 13 0 12.5523 0 12V10Z"
+          fill="currentColor"
+        />
+      </svg>
+    </div>
   );
 }
 
@@ -297,13 +361,13 @@ function PhoneScreen({
       // the screen keeps the panel's inset at the top and its cut lands on the
       // frame's inner edge at the bottom. A negative margin can't do this — it
       // changes what the layout reserves, not where the element's edge falls.
-      // Concentric corners want inner = outer − gap, and the frame is 12px with
-      // a 20px inset, so the arithmetic says square. 8px sits under the frame's
-      // 12px — enough softness to read as a screen, not so much that its arc
-      // competes with the frame's.
-      className="mock-ui flex h-[calc(100%+20px)] w-full shrink-0 flex-col overflow-hidden rounded-t-[8px] bg-[var(--mk-surface)] sm:hidden"
+      // Corners well past what concentricity with the 12px frame would ask for:
+      // this has to read as a handset, and a phone's radius is the first thing
+      // that says so. The status bar above the app's own chrome does the rest.
+      className="mock-ui flex h-[calc(100%+20px)] w-full shrink-0 flex-col overflow-hidden rounded-t-[22px] bg-[var(--mk-surface)] sm:hidden"
       style={{ boxShadow: PHONE_CUT_SHADOW }}
     >
+      <PhoneStatusBar />
       {/* Title bar — menu, the screen's name, and the panel toggle: the three
           controls the real app carries at this width. Bordered with --mk-border,
           not --mk-hairline: hairline is neutral-100, which on the neutral-0
@@ -313,39 +377,35 @@ function PhoneScreen({
         style={{ borderBottom: `1px solid ${MOCK_BORDER}` }}
       >
         <span
-          className="flex size-[30px] shrink-0 items-center justify-center rounded-[4px] text-[var(--mk-fg)]"
+          className="flex size-[26px] shrink-0 items-center justify-center rounded-[4px] text-[var(--mk-fg)]"
           style={{ border: `1px solid ${MOCK_BORDER}` }}
         >
+          {/* Supplied marks, re-pointed at currentColor from their #212B36. */}
           <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
+            viewBox="0 0 16 16"
+            fill="currentColor"
             aria-hidden
-            className="size-[15px]"
+            className="size-[13px]"
           >
-            <path d="M4 7h16M4 12h16M4 17h16" />
+            <path d="M0 2.29464C0 1.81964 0.382143 1.4375 0.857143 1.4375H15.1429C15.6179 1.4375 16 1.81964 16 2.29464C16 2.76964 15.6179 3.15179 15.1429 3.15179H0.857143C0.382143 3.15179 0 2.76964 0 2.29464ZM0 8.00893C0 7.53393 0.382143 7.15179 0.857143 7.15179H15.1429C15.6179 7.15179 16 7.53393 16 8.00893C16 8.48393 15.6179 8.86607 15.1429 8.86607H0.857143C0.382143 8.86607 0 8.48393 0 8.00893ZM16 13.7232C16 14.1982 15.6179 14.5804 15.1429 14.5804H0.857143C0.382143 14.5804 0 14.1982 0 13.7232C0 13.2482 0.382143 12.8661 0.857143 12.8661H15.1429C15.6179 12.8661 16 13.2482 16 13.7232Z" />
           </svg>
         </span>
         <span className="min-w-0 flex-1 truncate text-[12px] text-[var(--mk-fg)]">
           {title}
         </span>
         <span
-          className="flex size-[30px] shrink-0 items-center justify-center rounded-[4px] text-[var(--mk-fg)]"
+          className="flex size-[26px] shrink-0 items-center justify-center rounded-[4px] text-[var(--mk-fg)]"
           style={{ border: `1px solid ${MOCK_BORDER}` }}
         >
           <svg
-            viewBox="0 0 24 24"
+            viewBox="0 0 16 16"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinejoin="round"
+            strokeWidth="1.2"
             aria-hidden
-            className="size-[15px]"
+            className="size-[13px]"
           >
-            <rect x="3" y="4" width="18" height="16" rx="2.5" />
-            <path d="M15 4v16" />
+            <path d="M9.84245 1.80005V14.2M0.800781 4.90005C0.800781 3.18797 2.1887 1.80005 3.90078 1.80005H12.1674C13.8795 1.80005 15.2674 3.18797 15.2674 4.90005V11.1C15.2674 12.8121 13.8795 14.2 12.1674 14.2H3.90078C2.1887 14.2 0.800781 12.8121 0.800781 11.1V4.90005Z" />
           </svg>
         </span>
       </div>
@@ -394,7 +454,7 @@ function ThumbEngagement({ compact = false }: { compact?: boolean }) {
   if (!compact) {
     return (
       <div className="h-full w-full" style={V69_ON_MOCK}>
-        <CardDashboard compact />
+        <CardDashboard compact still />
       </div>
     );
   }
@@ -469,7 +529,15 @@ function ThumbIntake({ compact = false }: { compact?: boolean }) {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <p className="text-[15px] leading-none text-[var(--mk-fg)]">2.4k</p>
+          {/* Quieter on the phone rail: at the desktop's 15px it was the
+              loudest mark in a 148px tile, competing with the ring itself. */}
+          <p
+            className={`leading-none text-[var(--mk-fg)] ${
+              compact ? "text-[11px]" : "text-[15px]"
+            }`}
+          >
+            2.4k
+          </p>
           {!compact && (
             <p className="mt-1 text-[10px] leading-none text-[var(--mk-muted)]">
               of 3,000
@@ -481,7 +549,13 @@ function ThumbIntake({ compact = false }: { compact?: boolean }) {
   );
 }
 
-function ThumbCommunity() {
+function ThumbCommunity({ compact = false }: { compact?: boolean }) {
+  // Shorter copy on the phone rail. The desktop lines ran to three and two
+  // wrapped rows in a 148px tile, which is what made this card read as the
+  // dense one next to a bar chart and a gauge.
+  const [ask, reply] = compact
+    ? ["When do we kick off?", "Mon, Apr 8."]
+    : ["When does my project kick off?", "Kickoff is Mon, Apr 8."];
   return (
     // Well + bordered risers, matching the other two cards. Both bubbles get the
     // same treatment rather than one filled and one not: alignment and the
@@ -489,10 +563,10 @@ function ThumbCommunity() {
     <div className="flex h-full w-full flex-col justify-center gap-2 bg-[var(--mk-well)] p-2.5">
       {/* One squared corner on the sender's side, the design's bubble shape. */}
       <p className="max-w-[88%] rounded-[8px] rounded-tl-[2px] border border-[var(--mk-border)] bg-[var(--mk-riser)] px-2.5 py-1.5 text-[10px] leading-[1.5] text-[var(--mk-fg)]">
-        When does my project kick off?
+        {ask}
       </p>
       <p className="ml-auto rounded-[8px] rounded-tr-[2px] border border-[var(--mk-border)] bg-[var(--mk-riser)] px-2.5 py-1.5 text-[10px] leading-[1.5] text-[var(--mk-fg)]">
-        Kickoff is Mon, Apr 8.
+        {reply}
       </p>
     </div>
   );
@@ -545,6 +619,7 @@ function AddAppScreen() {
             <p className="px-1 text-[11px] leading-[1.5] text-[var(--mk-fg-2)]">
               {TYPEWRITER_PREFIX}
               {FLOW_PROMPT}
+              <span className="ml-px inline-block h-[1em] w-[1.5px] animate-caret bg-[var(--mk-fg-2)] align-[-0.15em]" />
             </p>
             <div className="flex items-center justify-between text-[var(--mk-muted)]">
               <span className="flex items-center gap-3">
@@ -621,7 +696,9 @@ function AddAppScreen() {
 export function DescribeVisual() {
   return (
     <BluePanel>
-      <PhoneScreen title="Add App">
+      {/* The composer is pinned to the bottom now, so it holds back from the
+          cut the way Iterate's does rather than washing out under the shadow. */}
+      <PhoneScreen title="Add App" contentInset={ITERATE_INSET}>
         <DescribeComposer />
       </PhoneScreen>
       {/* contents, not a plain wrapper: the card is BluePanel's flex child and
@@ -866,6 +943,15 @@ const BUILD_ENTRIES: Entry[] = [
     duration: "1h 45m",
     status: "Pending",
   },
+  // Seven fills the desktop table exactly — at six it ran out a third of the way
+  // up the frame, and an eighth is cut in half by the bottom edge.
+  {
+    description: "Client onboarding call",
+    client: "Northwind Group",
+    date: "Apr 7",
+    duration: "1h 15m",
+    status: "Approved",
+  },
 ];
 
 // Shared tracks so the header and every row line up on one set of edges. Fixed
@@ -920,7 +1006,9 @@ function TableToolbar({ compact = false }: { compact?: boolean }) {
 const BUILD_STATS = [
   { label: "Total hours", value: "534.50", bars: [22, 34, 45, 55, 68, 80, 94] },
   { label: "Billable", value: "418.24", bars: [38, 66, 92, 78, 54, 40, 30] },
-  { label: "This week", value: "32.25", bars: [64, 30, 88, 42, 72, 34, 96] },
+  // The last value tops out at 100 so the highlighted current bar fills its
+  // track — at 96 a sliver of the grey slot showed above it.
+  { label: "This week", value: "32.25", bars: [64, 30, 88, 42, 72, 34, 100] },
 ];
 
 // Phone composition for Build. The desktop screen is a three-tile dashboard
@@ -932,25 +1020,41 @@ function BuildPhoneContent() {
   const stat = BUILD_STATS[2];
   return (
     <>
-      <div className="shrink-0 rounded-[4px] border border-[var(--mk-border)] p-3">
+      <div className="shrink-0 rounded-[8px] border border-[var(--mk-border)] p-3">
         <div className="flex items-baseline justify-between">
           <p className="text-[11px] leading-none text-[var(--mk-muted)]">
             {stat.label}
           </p>
-          <p className="text-[15px] leading-none tabular-nums text-[var(--mk-fg)]">
+          {/* Diatype Mono, the face the site uses for figures and eyebrows.
+              Mono is tabular by construction, so no tabular-nums needed. */}
+          <p className="text-[11px] leading-none text-[var(--mk-muted)] [font-family:var(--font-diatype-mono)]">
             {stat.value}
           </p>
         </div>
         {/* Taller than the desktop tile's 30px: full width across a phone, seven
             bars are wide enough that a short chart reads as blocks, not a
-            series. */}
+            series. Each bar sits in a full-height track, so a short day reads
+            as a part of something rather than a stub floating on white. The
+            last one is grey rather than a saturated blue: at full height a
+            solid accent dragged the whole tile to its right edge, where grey
+            reads as the period still filling in. */}
         <div className="mt-2.5 flex h-[64px] items-end gap-[5px]">
           {stat.bars.map((h, i) => (
-            <span
+            <div
               key={i}
-              className="flex-1 rounded-[3px]"
-              style={{ height: `${h}%`, backgroundColor: "var(--mk-data)" }}
-            />
+              className="relative h-full flex-1 rounded-[6px] bg-[var(--mk-fill)]"
+            >
+              <span
+                className="absolute inset-x-0 bottom-0 rounded-[6px]"
+                style={{
+                  height: `${h}%`,
+                  backgroundColor:
+                    i === stat.bars.length - 1
+                      ? "var(--mk-border)"
+                      : "var(--mk-data)",
+                }}
+              />
+            </div>
           ))}
         </div>
       </div>
@@ -961,7 +1065,7 @@ function BuildPhoneContent() {
           leads and the meta sits under it, so nothing has to share a line it
           can't fit on. Clipped rather than overflowing: the list is longer than
           any phone screen, and it's meant to run into the dissolve. */}
-      <div className="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[4px] border border-[var(--mk-border)]">
+      <div className="mt-2 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[8px] border border-[var(--mk-border)]">
         <div className="flex shrink-0 items-center justify-between border-b border-[var(--mk-hairline)] bg-[var(--mk-elevated)] px-3 py-2 text-[10px] leading-none text-[var(--mk-muted)]">
           <span>Description</span>
           <span>Status</span>
@@ -1010,7 +1114,7 @@ export function BrandPortalVisual() {
             {BUILD_STATS.map((stat) => (
               <div
                 key={stat.label}
-                className="flex-1 rounded-[4px] border border-[var(--mk-border)] p-2.5"
+                className="flex-1 rounded-[8px] border border-[var(--mk-border)] p-2.5"
               >
                 <p className="text-[10px] leading-none text-[var(--mk-muted)]">
                   {stat.label}
@@ -1040,7 +1144,7 @@ export function BrandPortalVisual() {
 
           {/* Entries table — flex-1 so it fills the card, giving this step the
             same fixed height as the Iterate step. */}
-          <div className="mx-3.5 mb-3.5 flex-1 min-h-0 overflow-hidden rounded-[4px] border border-[var(--mk-border)]">
+          <div className="mx-3.5 mb-3.5 flex-1 min-h-0 overflow-hidden rounded-[8px] border border-[var(--mk-border)]">
             <div
               className={`${BUILD_COLS} border-b border-[var(--mk-hairline)] bg-[var(--mk-elevated)] px-3 py-2 text-[10px] leading-none text-[var(--mk-muted)]`}
             >
@@ -1188,7 +1292,7 @@ export function BuildStepVisual() {
               While a request sends, the rows shimmer as the app regenerates. */}
             <div className="flex min-w-0 flex-1 flex-col pt-2.5">
               <TableToolbar compact />
-              <div className="mx-3 mb-2.5 flex-1 overflow-hidden rounded-[4px] border border-[var(--mk-border)]">
+              <div className="mx-3 mb-2.5 flex-1 overflow-hidden rounded-[8px] border border-[var(--mk-border)]">
                 <div
                   className={`${ITERATE_COLS} border-b border-[var(--mk-hairline)] bg-[var(--mk-elevated)] px-2.5 py-1.5 text-[10px] leading-none text-[var(--mk-muted)]`}
                 >

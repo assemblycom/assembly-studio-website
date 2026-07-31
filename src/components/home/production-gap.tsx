@@ -300,11 +300,21 @@ function ProductionGapVisual({
           under an edge. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-y-0 right-0 w-20 [[data-theme=dark]_&]:hidden"
+        className="pointer-events-none absolute inset-y-0 right-0 hidden w-20 md:block [[data-theme=dark]_&]:hidden"
         style={{
           background:
             "linear-gradient(to right, transparent, color-mix(in srgb, var(--mk-fg) 5%, transparent))",
         }}
+      />
+      {/* On a phone the mock is stacked and its cut is the thing you notice, so
+          it gets the same weight the how-it-works phone screens give their
+          bottom cut — that inset shadow turned to the right edge, rather than
+          the 5% wash above. Both sections then read as content passing under an
+          edge instead of stopping at one. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 md:hidden [[data-theme=dark]_&]:hidden"
+        style={{ boxShadow: "inset -22px 0 18px -14px rgba(16,24,40,0.16)" }}
       />
     </div>
   );
@@ -436,11 +446,17 @@ function ProductionGapExplorer() {
                 aria-hidden
                 className="absolute inset-x-0 -top-px z-10 h-px overflow-hidden group-first:top-0"
               >
+                {/* Every other step rides on its own border-t, but the first has
+                    that removed, so its rail ran across nothing and the unfilled
+                    remainder simply wasn't there. Mobile only for now. */}
+                {i === 0 && (
+                  <span className="absolute inset-0 bg-border md:hidden [[data-theme=dark]_&]:bg-white/15" />
+                )}
                 <span
                   ref={(el) => {
                     fillRefs.current[i] = el;
                   }}
-                  className="block h-full w-full origin-left bg-foreground"
+                  className="relative block h-full w-full origin-left bg-foreground"
                   style={{ transform: "scaleX(0)" }}
                 />
               </span>

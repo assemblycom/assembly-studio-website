@@ -395,9 +395,21 @@ function EngagementBar({
 // smaller scale, where the gallery's two big ones need more height than a 128px
 // thumb has. A third month also makes the rise read as a trend rather than a
 // single before/after jump.
-export function CardDashboard({ compact = false }: { compact?: boolean }) {
+export function CardDashboard({
+  compact = false,
+  still = false,
+}: {
+  compact?: boolean;
+  // Never replay the grow/count-up. The in-view arming below is keyed off
+  // `(hover: none), (max-width: 767px)`, and this card also appears in the
+  // how-it-works mock, whose desktop screen shows from 640px — so between 640
+  // and 767, and on any touch device, it animated where it should be still art.
+  still?: boolean;
+}) {
   const [play, setPlay] = useState(0);
-  const inViewRef = useInViewReplay(() => setPlay((p) => p + 1));
+  const inViewRef = useInViewReplay(() => {
+    if (!still) setPlay((p) => p + 1);
+  });
   const bars = compact
     ? [
         { label: "JUL", value: 64, maxHeightPct: 54, pattern: false },
@@ -413,10 +425,12 @@ export function CardDashboard({ compact = false }: { compact?: boolean }) {
       ref={inViewRef}
       onMouseEnter={(e) => {
         // Templates gallery is static — don't replay the grow/count-up there.
-        if (e.currentTarget.closest(".template-mock")) return;
+        if (still || e.currentTarget.closest(".template-mock")) return;
         setPlay((p) => p + 1);
       }}
-      onMouseLeave={() => setPlay(0)}
+      onMouseLeave={() => {
+        if (!still) setPlay(0);
+      }}
       className={`flex h-full flex-col bg-[var(--v69-card)] [.template-mock_&]:bg-[var(--v69-well)] ${
         compact ? "p-2" : "p-3.5"
       }`}

@@ -516,7 +516,12 @@ function GetStartedContent() {
                 setEmail(e.target.value);
                 if (emailError) setEmailError("");
               }}
-              className="h-12 rounded-lg border border-border bg-background px-4 text-base text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40 aria-[invalid=true]:border-[var(--mock-negative-fg)] sm:text-sm [[data-theme=dark]_&]:border-[#383838] [[data-theme=dark]_&]:aria-[invalid=true]:border-[var(--mock-negative-fg)]"
+              // text-base below sm is not a type choice — iOS Safari zooms the
+              // page on focus for any input under 16px. But at rest the field
+              // shows its placeholder, and at 16 that sat a step above the two
+              // 14px buttons around it. So the placeholder drops to 14 and the
+              // value stays at 16, keeping the zoom guard.
+              className="h-12 rounded-lg border border-border bg-background px-4 text-base text-foreground outline-none transition-colors placeholder:text-sm placeholder:text-muted-foreground focus:border-foreground/40 aria-[invalid=true]:border-[var(--mock-negative-fg)] sm:text-sm [[data-theme=dark]_&]:border-[#383838] [[data-theme=dark]_&]:aria-[invalid=true]:border-[var(--mock-negative-fg)]"
             />
             {emailError && (
               <p

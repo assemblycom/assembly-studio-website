@@ -1219,7 +1219,9 @@ html[data-theme="dark"] .v63-ring-solid::before {
   /* Data marks — chart bars, gauge rings, the outgoing chat bubble. One muted
      gray for all of them: the mocks are there to show shape and layout, and a
      saturated accent pulled the eye to the sample data instead. */
-  --mk-data: #e3e3e3;
+  /* A tint of the panel blue the mocks sit on, so the charts read as part of
+     the same picture rather than as grey filler. */
+  --mk-data: #b9cbf8;
   --mk-data-fg: #262626;
   /* A well and the surfaces that lift off it, for mocks that nest a panel
      inside a card. Not derived from the ramp above: "lifted" is whiter in light
@@ -1227,10 +1229,16 @@ html[data-theme="dark"] .v63-ring-solid::before {
      one directional mapping cannot serve both themes. */
   --mk-well: #fbfbfb;
   --mk-riser: #ffffff;
-  /* Selected row. A step past --mk-fill because the sidebar it sits in is
-     itself lifted to --mk-elevated while its tour step is active, and at
-     neutral-100 the selection all but vanished against that. */
-  --mk-selected: #ebebeb;
+  /* Debossed watermark: a shape a shade darker than the surface with a light
+     lip under it, so the mark reads as pressed into the screen rather than
+     printed on top. Both values are alpha, not solid, so the pair keeps working
+     whatever surface it lands on. */
+  --mk-emboss: rgba(0, 0, 0, 0.05);
+  --mk-emboss-lip: rgba(255, 255, 255, 0.95);
+  /* Selected row. Sits between --mk-fill and --mk-hairline: the sidebar it
+     lives in lifts to --mk-elevated while its tour step is active, so at
+     neutral-100 the selection vanished, but a full step past that shouted. */
+  --mk-selected: #f0f0f0;
 }
 /* Dark values follow the house neutral scale (equal-RGB grays, softened
    off-white text — matching --foreground #d9d9d9 / --card #151515). */
@@ -1256,6 +1264,8 @@ html[data-theme="dark"] .v63-ring-solid::before {
   --mk-well: #1c1c1c;
   --mk-riser: #2e2e2e;
   --mk-selected: #303030;
+  --mk-emboss: rgba(0, 0, 0, 0.5);
+  --mk-emboss-lip: rgba(255, 255, 255, 0.07);
 }
 
 /* The production mock's cut-off edge softly fades ONLY in dark mode, where the

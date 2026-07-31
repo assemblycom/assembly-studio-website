@@ -244,18 +244,39 @@ function DetailPanel({
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  // Close on Escape and lock body scroll while the panel is open.
+  // Close on Escape and lock the page while the panel is open. `overflow:
+  // hidden` on <body> alone does not hold on iOS Safari — the page still pans
+  // behind the panel — so the body is also taken out of flow and pinned at its
+  // current offset, then restored (and scrolled back) on close. Without the
+  // pin, closing the panel would jump the reader to the top of the page.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const { body } = document;
+    const scrollY = window.scrollY;
+    const prev = {
+      overflow: body.style.overflow,
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+    };
+    body.style.overflow = "hidden";
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
+      body.style.overflow = prev.overflow;
+      body.style.position = prev.position;
+      body.style.top = prev.top;
+      body.style.left = prev.left;
+      body.style.right = prev.right;
+      window.scrollTo(0, scrollY);
     };
   }, [open, onClose]);
 
@@ -279,7 +300,9 @@ function DetailPanel({
         role="dialog"
         aria-modal="true"
         aria-label={pillar.short}
-        className={`absolute inset-y-0 right-0 flex w-full max-w-xl flex-col overflow-y-auto border-l border-border bg-background transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [[data-theme=dark]_&]:border-[#383838] md:max-w-2xl ${
+        // overscroll-contain: without it, a flick that reaches the end of the
+        // panel keeps going and scrolls the page underneath instead of stopping.
+        className={`absolute inset-y-0 right-0 flex w-full max-w-xl flex-col overflow-y-auto overscroll-contain border-l border-border bg-background transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [[data-theme=dark]_&]:border-[#383838] md:max-w-2xl ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >

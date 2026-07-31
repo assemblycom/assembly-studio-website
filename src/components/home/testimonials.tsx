@@ -77,7 +77,10 @@ export function Testimonials() {
         {/* Pull quote — the hero of the section. */}
         {/* font-normal, not font-medium: PP Mori maps 500 to SemiBold, which at
             this size reads bold. */}
-        <blockquote className="mt-5 max-w-3xl text-[27px] font-normal leading-[1.15] tracking-[-0.02em] text-foreground md:pr-44 md:text-[38px]">
+        {/* 1.15 is a display leading — right at the 38px desktop size, too tight
+            at 27, where the same ratio gives ~4px less air between four wrapped
+            lines than they need. Loosened below md only. */}
+        <blockquote className="mt-5 max-w-3xl text-[27px] font-normal leading-[1.25] tracking-[-0.02em] text-foreground md:pr-44 md:text-[38px] md:leading-[1.15]">
           &ldquo;{FEATURED.quote}&rdquo;
         </blockquote>
 
