@@ -84,8 +84,12 @@ const STRUCTURED_DATA = {
 
 export default function RootLayout({
   children,
+  modal,
 }: Readonly<{
   children: React.ReactNode;
+  // Parallel slot for routes that open over the page rather than replacing it —
+  // the sign-up sheet (see app/@modal). Empty on every other route.
+  modal: React.ReactNode;
 }>) {
   return (
     <html
@@ -132,6 +136,7 @@ export default function RootLayout({
       <body className="min-h-full overflow-x-clip font-sans">
         <ThemeProvider>
           <RootShell>{children}</RootShell>
+          {modal}
         </ThemeProvider>
       </body>
     </html>
