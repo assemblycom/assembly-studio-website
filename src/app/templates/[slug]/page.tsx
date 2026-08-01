@@ -72,24 +72,18 @@ function TemplateHeader({
         {template.description}
       </p>
 
-      {(template.usesAI ||
-        (template.industries && template.industries.length > 0)) && (
-        <div className="mt-5 flex flex-wrap gap-2">
-          {template.usesAI && (
-            <span className="rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground [[data-theme=dark]_&]:bg-white/[0.08]">
-              AI
-            </span>
-          )}
-          {template.industries?.map((industry) => (
-            <span
-              key={industry}
-              className="rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground"
-            >
-              {industry}
-            </span>
-          ))}
-        </div>
-      )}
+      {/* The template's category, not the industries it serves — the catalogue
+          browses by category, and industries aren't a facet we show anywhere. */}
+      <div className="mt-5 flex flex-wrap gap-2">
+        {template.usesAI && (
+          <span className="rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground [[data-theme=dark]_&]:bg-white/[0.08]">
+            AI
+          </span>
+        )}
+        <span className="rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground [[data-theme=dark]_&]:bg-white/[0.08]">
+          {template.category}
+        </span>
+      </div>
 
       <div className="mt-6">
         <TemplateCta />
