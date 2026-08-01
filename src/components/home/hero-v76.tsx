@@ -30,9 +30,9 @@ const STRIP_ORDER = [
   "client-project-tracker",
   "client-support-requests",
   "client-ai-assistant",
-  // Was the engagement dashboard, which left the gallery — this keeps a
-  // dashboard-shaped card in the strip and the count at eight.
-  "retainer-usage-overview",
+  // Retainer usage overview is deliberately not here — it stays a gallery-only
+  // card. This slot replaces the engagement dashboard, which left the gallery.
+  "time-tracker",
   "document-collection",
   "proposal-builder",
   "content-approval-flow",
