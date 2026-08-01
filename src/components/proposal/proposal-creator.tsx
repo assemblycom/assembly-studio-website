@@ -8,6 +8,8 @@ import {
 } from "@/lib/constants";
 import { TEMPLATES, TEMPLATE_CATEGORIES } from "@/lib/templates";
 import { FIELD_CLS, SelectMenu } from "@/components/ui/select-menu";
+import { StudioNav } from "@/components/home/studio-nav";
+import { useTheme } from "@/components/theme/theme-provider";
 
 // ─────────────────────────────────────────────────────────────────────────
 // PROPOSAL CREATOR — the internal side of the proposal flow. Someone on the
@@ -74,6 +76,7 @@ function Field({
 }
 
 export function ProposalCreator() {
+  const { theme } = useTheme();
   const [recipient, setRecipient] = useState("");
   const [from, setFrom] = useState("");
   const [note, setNote] = useState(DEFAULT_NOTE);
@@ -135,14 +138,15 @@ export function ProposalCreator() {
 
   // Same class strings as the rest of the site's buttons.
   const primary =
-    "flex h-11 items-center justify-center rounded-lg bg-foreground px-5 text-sm text-background transition-[opacity,background-color] hover:opacity-90 [[data-theme=dark]_&]:hover:bg-white [[data-theme=dark]_&]:hover:opacity-100";
+    "inline-flex items-center justify-center rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90";
   const outline =
-    "flex h-11 items-center justify-center rounded-lg border border-foreground/20 px-5 text-sm text-foreground transition-colors hover:bg-foreground/5";
+    "inline-flex items-center justify-center rounded-lg border border-foreground/20 bg-transparent px-5 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5";
 
   return (
-    <div className="mx-auto w-full max-w-xl px-6 py-16 md:py-24">
-      <p className="type-caption text-muted-foreground">Internal tool</p>
-      <h1 className="type-h2 mt-3">Proposal creator</h1>
+    <>
+      <StudioNav minimal hideDemo darkTop={theme === "dark"} maxWidthClass="max-w-[1600px]" restPaddingClass="px-6 md:px-10" />
+      <div className="mx-auto w-full max-w-xl px-6 pb-16 pt-10 md:pb-24 md:pt-14">
+      <h1 className="type-h2">Proposal creator</h1>
       <p className="type-lead mt-4 max-w-md text-muted-foreground">
         A page made for one person, and a link you can send them.
       </p>
@@ -278,7 +282,15 @@ export function ProposalCreator() {
         </Field>
 
         {error && (
-          <p role="alert" className="type-caption text-[var(--mock-negative-fg)]">
+          <p
+            role="alert"
+            className="flex items-start gap-2 text-sm text-foreground"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden className="mt-[0.15rem] shrink-0">
+              <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.25" />
+              <path d="M8 4.75v3.75" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+              <circle cx="8" cy="11" r="0.85" fill="currentColor" />
+            </svg>
             {error}
           </p>
         )}
@@ -314,6 +326,7 @@ export function ProposalCreator() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }

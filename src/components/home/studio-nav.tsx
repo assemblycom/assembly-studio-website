@@ -21,6 +21,7 @@ export function StudioNav({
   restPaddingClass,
   narrowOnScroll = false,
   hideDemo = false,
+  minimal = false,
   themeToggle,
 }: {
   fullWidth?: boolean;
@@ -41,6 +42,10 @@ export function StudioNav({
   // Hide the "Book a demo" CTA (both desktop and the mobile menu) — dropped for
   // launch on some heroes.
   hideDemo?: boolean;
+  // Internal pages (the proposal creator): the same bar, same scroll behaviour
+  // and same sizes, but the marketing links and account actions collapse to a
+  // single way back to the site. There's no menu to open, so no burger either.
+  minimal?: boolean;
   // Optional light/dark toggle rendered in the nav (used by themeable heroes).
   themeToggle?: { theme: "light" | "dark"; onToggle: () => void };
 }) {
@@ -210,6 +215,15 @@ export function StudioNav({
       "linear-gradient(to bottom, #000 0%, #000 42%, transparent 100%)",
   };
 
+  // The minimal bar's only action. The site's canonical outline button, with
+  // the border and ink following the same lightContent switch every other nav
+  // item uses so it reads correctly over a dark hero and a light page alike.
+  const backCls = `rounded-lg border px-5 py-2.5 text-sm transition-colors ${
+    lightContent
+      ? "border-white/25 text-white hover:bg-white/10"
+      : "border-foreground/20 text-foreground hover:bg-foreground/5"
+  }`;
+
   // One shared easing/duration for the rest→pill transition so every animated
   // property (chrome, geometry, logo tint) settles together on the same soft
   // ease-out curve — no property snapping ahead of the others.
@@ -333,6 +347,11 @@ export function StudioNav({
           <Link href="/" onClick={onLogoClick} className="flex items-center">
             {logoMark}
           </Link>
+          {minimal ? (
+            <Link href="/" className={backCls}>
+              Back to homepage
+            </Link>
+          ) : (
           <button
             ref={menuTriggerRef}
             onClick={() => setMobileMenuOpen(true)}
@@ -353,6 +372,7 @@ export function StudioNav({
               <circle cx="19" cy="19" r="1.6" />
             </svg>
           </button>
+          )}
         </div>
       </header>
 
@@ -377,7 +397,7 @@ export function StudioNav({
           </div>
 
           {/* Primary nav — centered between the two equal side columns */}
-          <nav className="flex shrink-0 justify-center">
+          <nav className={`flex shrink-0 justify-center ${minimal ? "hidden" : ""}`}>
             <ul className="flex items-center">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
@@ -444,7 +464,11 @@ export function StudioNav({
                 </button>
               );
             })()}
-            {authed ? (
+            {minimal ? (
+              <Link href="/" className={backCls}>
+                Back to homepage
+              </Link>
+            ) : authed ? (
               <a href={APP_URL} className={ctaCls}>
                 Open Assembly
               </a>
