@@ -701,8 +701,10 @@ function AddAppScreen() {
               // It's a veil laid over the card rather than a background on it:
               // each Thumb paints its own opaque well, so a background set here
               // sits underneath and never shows. The veil is --mk-fg, which is
-              // near-black in light and near-white in dark, so the same 4% wash
-              // darkens a light card and lightens a dark one.
+              // near-black in light and near-white in dark, so one wash darkens
+              // a light card and lightens a dark one. Not at one strength
+              // though: ink on a near-white well bites harder than the same
+              // amount of white on a dark one, so light runs at half.
               //
               // Nothing moves, so the card can take its own hover — a lift would
               // carry the hit box out from under the pointer at the bottom edge
@@ -717,7 +719,7 @@ function AddAppScreen() {
                 <Thumb />
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute inset-0 bg-[var(--mk-fg)] opacity-0 transition-opacity duration-200 ease-out group-hover/card:opacity-[0.04] motion-reduce:transition-none"
+                  className="pointer-events-none absolute inset-0 bg-[var(--mk-fg)] opacity-0 transition-opacity duration-200 ease-out group-hover/card:opacity-[0.02] [[data-theme=dark]_&]:group-hover/card:opacity-[0.04] motion-reduce:transition-none"
                 />
               </div>
             ))}
