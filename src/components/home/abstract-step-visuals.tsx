@@ -694,21 +694,31 @@ function AddAppScreen() {
               <CarouselArrow />
             </span>
           </div>
-          <div className="flex gap-4">
+          <div className="group/cards flex gap-4">
             {ADD_APP_CARDS.map(({ title, Thumb }) => (
-              // Hover lifts the card off the screen's ground, the way a pickable
-              // card in the real product does. Both the fill AND the edge move:
-              // --mk-elevated is only a few values off --mk-surface, so on its
-              // own the fill was too quiet to register at this size, where the
-              // brightening edge is what actually reads. The border moved from an
-              // inline style to a class for that reason — an inline value has no
-              // hover to hook. Still a surface change, no motion. The stage is
-              // pointer-events-none (decorative), so each card opts back in.
+              // Hover is a tone change and nothing else — no lift, no shadow.
+              //
+              // It's a veil laid over the card rather than a background on it:
+              // each Thumb paints its own opaque well, so a background set here
+              // sits underneath and never shows. The veil is --mk-fg, which is
+              // near-black in light and near-white in dark, so the same 4% wash
+              // darkens a light card and lightens a dark one.
+              //
+              // Nothing moves, so the card can take its own hover — a lift would
+              // carry the hit box out from under the pointer at the bottom edge
+              // and flutter.
+              //
+              // The stage is pointer-events-none (decorative), so each card opts
+              // back in.
               <div
                 key={title}
-                className="pointer-events-auto h-[128px] min-w-0 flex-1 overflow-hidden rounded-[8px] border border-[var(--mk-border)] transition-[background-color,border-color,box-shadow] duration-200 hover:border-[var(--mk-subtle)] hover:bg-[var(--mk-fill)] hover:shadow-[0_2px_10px_-4px_rgba(0,0,0,0.18)] motion-reduce:transition-none"
+                className="group/card pointer-events-auto relative h-[128px] min-w-0 flex-1 overflow-hidden rounded-[8px] border border-[var(--mk-border)]"
               >
                 <Thumb />
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 bg-[var(--mk-fg)] opacity-0 transition-opacity duration-200 ease-out group-hover/card:opacity-[0.04] motion-reduce:transition-none"
+                />
               </div>
             ))}
           </div>
@@ -1236,7 +1246,7 @@ export function BrandPortalVisual() {
                   {stat.bars.map((h, i) => (
                     <span
                       key={i}
-                      className="pointer-events-auto flex h-full flex-1 items-end transition-opacity duration-200 group-hover/spark:opacity-40 hover:!opacity-100 motion-reduce:transition-none"
+                      className="pointer-events-auto flex h-full flex-1 items-end transition-opacity duration-200 group-hover/spark:opacity-40 hover:opacity-100! motion-reduce:transition-none"
                     >
                       <span
                         className="w-full rounded-[1.5px]"
