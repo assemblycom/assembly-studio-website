@@ -234,6 +234,16 @@ function ProductionGapVisual({
           phone, where the crop lands mid-row — and only here, since on the
           44px top bar a bottom fade would erase the bar itself. */}
       <div className="production-cut-fade production-cut-bottom flex items-stretch">
+        {/* The sidebar column holds two regions: the app list, and the signed-in
+            client at its foot. They're siblings rather than nested because each
+            is its own hover target, and a button can't live inside a button. */}
+        <div
+          // A floor as well as a cap: at 22% of a narrow column the sidebar fell
+          // to ~90px, where "Time tracker" wrapped onto two lines and the longer
+          // labels ran out over the table beside them. overflow-hidden is the
+          // backstop — nothing in here may cross into the content.
+          className="relative flex w-[22%] min-w-[136px] max-w-[156px] shrink-0 flex-col overflow-hidden border-r border-[var(--mk-hairline)]"
+        >
         {/* Region: the app sidebar */}
         <button
           type="button"
@@ -244,11 +254,7 @@ function ProductionGapVisual({
               ? { backgroundColor: HL_SIDEBAR_BG }
               : undefined
           }
-          // A floor as well as a cap: at 22% of a narrow column the sidebar fell
-          // to ~90px, where "Time tracker" wrapped onto two lines and the longer
-          // labels ran out over the table beside them. overflow-hidden is the
-          // backstop — nothing in here may cross into the content.
-          className="relative flex w-[22%] min-w-[136px] max-w-[156px] shrink-0 flex-col gap-0.5 overflow-hidden border-r border-[var(--mk-hairline)] px-2 py-3 text-left outline-none transition-colors duration-200"
+          className="flex flex-1 flex-col gap-0.5 px-2 py-3 text-left outline-none transition-colors duration-200"
         >
           {/* px-2 matches the nav rows below, so the icon column shares one
               left edge down the whole sidebar. */}
@@ -286,6 +292,34 @@ function ProductionGapVisual({
             );
           })}
         </button>
+
+        {/* Region: the signed-in client. The third step talks about accounts
+            being a platform primitive, so the mock needs a face for it. */}
+        <button
+          type="button"
+          onMouseEnter={() => setActive("avatar")}
+          onFocus={() => setActive("avatar")}
+          style={active === "avatar" ? { backgroundColor: HL_SIDEBAR_BG } : undefined}
+          className="mt-auto flex items-center gap-2 border-t border-[var(--mk-hairline)] px-3 py-2.5 text-left outline-none transition-colors duration-200"
+        >
+          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--mk-fill)] text-[9px] leading-none text-[var(--mk-muted)]">
+            LF
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-[11px] leading-none text-[var(--mk-fg)]">
+              Lena Frost
+            </span>
+            <span className="mt-1 block truncate text-[9px] leading-none text-[var(--mk-subtle)]">
+              Studio lead
+            </span>
+          </span>
+          <svg viewBox="0 0 16 16" className="size-3 shrink-0 text-[var(--mk-subtle)]" fill="currentColor" aria-hidden>
+            <circle cx="8" cy="3.5" r="1.1" />
+            <circle cx="8" cy="8" r="1.1" />
+            <circle cx="8" cy="12.5" r="1.1" />
+          </svg>
+        </button>
+        </div>
 
         {/* Main content — a polished Time tracker screen. Given a fixed width
             wider than the space it has, so it runs past the box's right edge and
