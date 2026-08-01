@@ -158,15 +158,26 @@ export function TrustTicker() {
             the first figure started left of the heading under it and the row
             read as misaligned rather than as the same column. */}
         <div className="mx-auto max-w-[1100px]">
-          <div className="grid grid-cols-2 gap-y-2 sm:grid-cols-4 sm:gap-y-0 sm:divide-x sm:divide-border [[data-theme=dark]_&]:sm:divide-[#383838]">
+          {/* The column gutter is explicit below sm. Every horizontal inset here
+              is an sm: class (they pair with the dividers), so on a phone the
+              two columns butted straight together and the second one's label
+              started where the first one's figure ended — which read as the
+              whole block shoved against the left rail. */}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-9 sm:grid-cols-4 sm:gap-x-0 sm:gap-y-0 sm:divide-x sm:divide-border [[data-theme=dark]_&]:sm:divide-[#383838]">
             {STATS.map((s) => (
               // The outer cells drop their outer padding so the first figure
               // starts exactly on the rail and the last ends on it — flush with
               // the copy above and below. The inner padding stays, so the
               // dividers keep their breathing room.
+              //
+              // No vertical padding below sm, where the cells stack: py on each
+              // one bled 24px above and below the whole block and stacked into a
+              // 56px trench between the two rows, against the 6px holding a label
+              // to its own figure. The pairs came apart. The row gap spaces them
+              // there instead.
               <div
                 key={s.label}
-                className="py-6 sm:py-9 sm:first:pl-0 sm:last:pr-0 sm:[&:not(:first-child)]:pl-7 sm:[&:not(:last-child)]:pr-7"
+                className="sm:py-9 sm:first:pl-0 sm:last:pr-0 sm:[&:not(:first-child)]:pl-7 sm:[&:not(:last-child)]:pr-7"
               >
                 <p className="text-[13px] leading-snug text-muted-foreground">
                   {s.label}
