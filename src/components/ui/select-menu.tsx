@@ -23,6 +23,14 @@ export interface SelectOption {
 
 // Shared with the form fields around it so a trigger and an input are the same
 // shape. Exported because the proposal creator's text fields use it too.
+// Panel sizing. The menu never grows past MAX, never shrinks below MIN (it
+// would stop being a list), and always leaves a margin off the window edge.
+const MAX_MENU_HEIGHT = 320;
+const MIN_MENU_HEIGHT = 180;
+const VIEWPORT_MARGIN = 16;
+// The search row sits above the scrolling list inside the same panel.
+const SEARCH_ROW_HEIGHT = 56;
+
 export const FIELD_CLS =
   "w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground outline-none sm:text-sm transition-colors placeholder:text-muted-foreground focus:border-foreground/30";
 
@@ -102,6 +110,39 @@ export function SelectMenu({
     setQuery("");
   };
 
+  // Where the panel fits. Opening downward off the bottom of the window left
+  // the lower options unreachable: the list holds its own scroll
+  // (overscroll-contain), so a wheel over it never chains to the page, and the
+  // page couldn't be scrolled to them either. So the panel flips above the
+  // field when there isn't room under it, and never asks for more height than
+  // the window actually has.
+  const [placement, setPlacement] = useState<"bottom" | "top">("bottom");
+  const [maxHeight, setMaxHeight] = useState(MAX_MENU_HEIGHT);
+
+  useEffect(() => {
+    if (!open) return;
+    const measure = () => {
+      const trigger = ref.current?.getBoundingClientRect();
+      if (!trigger) return;
+      const below = window.innerHeight - trigger.bottom - VIEWPORT_MARGIN;
+      const above = trigger.top - VIEWPORT_MARGIN;
+      // Down is the default, but only while the whole menu fits there. Once it
+      // doesn't, the side with more room wins — a field low on the page has far
+      // more space above it, and squeezing the list into the last inch below
+      // shows two options when it could show ten.
+      const flip = below < MAX_MENU_HEIGHT && above > below;
+      setPlacement(flip ? "top" : "bottom");
+      setMaxHeight(Math.max(MIN_MENU_HEIGHT, Math.min(MAX_MENU_HEIGHT, flip ? above : below)));
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    window.addEventListener("scroll", measure, { passive: true });
+    return () => {
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", measure);
+    };
+  }, [open]);
+
   useEffect(() => {
     if (!open) return;
     const onPointer = (e: PointerEvent) => {
@@ -163,7 +204,11 @@ export function SelectMenu({
 
         {open && (
           <div
-            className="absolute left-0 top-full z-30 mt-2 w-full origin-top animate-fade-in overflow-hidden rounded-lg border border-border bg-background shadow-[0_16px_44px_-26px_rgba(20,20,40,0.35)] [[data-theme=dark]_&]:bg-[#1c1c1c]"
+            className={`absolute left-0 z-30 w-full animate-fade-in overflow-hidden rounded-lg border border-border bg-background shadow-[0_16px_44px_-26px_rgba(20,20,40,0.35)] [[data-theme=dark]_&]:bg-[#1c1c1c] ${
+              placement === "top"
+                ? "bottom-full mb-2 origin-bottom"
+                : "top-full mt-2 origin-top"
+            }`}
           >
             {searchable && (
               <div className="border-b border-border p-2">
@@ -182,7 +227,8 @@ export function SelectMenu({
             <ul
               role="listbox"
               aria-label={label}
-              className="scrollbar-slim max-h-[min(320px,50vh)] overflow-y-auto overscroll-contain p-1"
+              style={{ maxHeight: maxHeight - (searchable ? SEARCH_ROW_HEIGHT : 0) }}
+              className="scrollbar-slim overflow-y-auto overscroll-contain p-1"
             >
               {groups.length === 0 && (
                 <li className="px-3 py-2 text-sm text-muted-foreground">
