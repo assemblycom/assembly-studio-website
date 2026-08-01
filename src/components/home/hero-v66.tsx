@@ -544,7 +544,14 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
             // While the demo animation is playing (textDimmed), the text reads
             // as secondary/placeholder ink; it flips to full-strength once the
             // visitor takes over.
-            className={`block w-full resize-none overflow-y-auto bg-transparent px-1 text-base leading-[1.5] outline-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${textDimmed ? (dark ? "text-white/45" : "text-neutral-500") : textCls}`}
+            // focus-visible:shadow-none goes with the outline-none beside it.
+            // The global focus ring is a pair — an ink outline plus a
+            // background-toned halo just inside it — and this box drops the
+            // outline because the composer's own gradient edge is its focus
+            // treatment. The halo was left behind, so clicking in painted a bare
+            // 2px rectangle around the text: white-on-white in light, a black
+            // block on the dark card in dark.
+            className={`block w-full resize-none overflow-y-auto bg-transparent px-1 text-base leading-[1.5] outline-none focus-visible:shadow-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${textDimmed ? (dark ? "text-white/45" : "text-neutral-500") : textCls}`}
           />
         </div>
         </div>
