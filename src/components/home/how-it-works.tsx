@@ -274,8 +274,18 @@ export function HowItWorks() {
               <div
                 key={step.id}
                 aria-hidden={active !== i}
+                // All four steps sit in the same grid cell, so the hidden ones
+                // lie on top of the visible one. pointer-events-none on the
+                // wrapper alone isn't enough: the mocks inside each step opt
+                // back in with pointer-events-auto to take their own hovers, and
+                // a descendant that re-enables hit-testing does so even under a
+                // disabled ancestor. So an invisible step kept swallowing every
+                // hover meant for the step actually on screen. Force the whole
+                // subtree off instead.
                 className={`col-start-1 row-start-1 h-full w-full min-w-0 transform-gpu transition-opacity duration-700 ease-out [will-change:opacity] motion-reduce:transition-none ${
-                  active === i ? "opacity-100" : "pointer-events-none opacity-0"
+                  active === i
+                    ? "opacity-100"
+                    : "pointer-events-none opacity-0 [&_*]:pointer-events-none!"
                 }`}
               >
                 <step.Visual />
