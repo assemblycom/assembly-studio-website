@@ -6,7 +6,7 @@ export const PRICING_FAQS: FAQEntry[] = [
   {
     question: "Is there really a free plan?",
     answer:
-      "Yes, there is a free plan. You get 5 active contacts, 1 internal user, 50 build credits a month, and 5 apps. The apps you publish are real, live apps your clients can use. Upgrade only when your firm outgrows the limits.",
+      "Yes, there is a free plan. You get 5 active contacts, 1 internal user, 50 build credits a month, and 3 apps. The apps you publish are real, live apps your clients can use. Upgrade only when your firm outgrows the limits.",
   },
   {
     question: "What are build credits?",
@@ -36,7 +36,7 @@ export const PRICING_FAQS: FAQEntry[] = [
   {
     question: "How many apps can I have?",
     answer:
-      "Apps count the same whether you build them with the app builder or install them from the app library. The Free plan includes 3 apps, and all paid plans include 5 — with extra apps available for $5/month each on any paid plan.",
+      "Apps count the same whether you build them with the app builder or install them from the app library. The Free plan includes 3 apps, and all paid plans include 5. Extra apps are $5/month each on any paid plan.",
   },
   {
     question: "What does it cost to run my apps?",
