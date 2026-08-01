@@ -2443,13 +2443,9 @@ function DetailPanel({
 }
 
 export function WholeStack() {
-  // The chevron's rest colour is picked here rather than by a dark: variant.
-  // `text-muted-foreground/40` and a dark-scoped `text-muted-foreground` both
-  // set `color`, and the opacity-modified one kept winning regardless of
-  // specificity — so only ONE colour class is ever emitted.
-  const { theme } = useTheme();
-  const chevronRest =
-    theme === "dark" ? "text-muted-foreground" : "text-muted-foreground/40";
+  // One rest colour for both themes now. Light used to run the chevron at 40%,
+  // which on white was a mark you had to look for — it read as an artefact of
+  // the row rather than as the affordance saying the row opens.
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   // Keep the last-opened pillar mounted through the close animation so content
   // doesn't vanish before the panel finishes sliding out.
@@ -2504,7 +2500,7 @@ export function WholeStack() {
                   ground, so dark takes the token at full strength. Light keeps
                   40% exactly as it was. */}
               <IconChevron
-                className={`size-3.5 shrink-0 ${chevronRest} transition-colors duration-200 group-hover:text-foreground`}
+                className="size-3.5 shrink-0 text-muted-foreground transition-colors duration-200 group-hover:text-foreground"
               />
             </button>
           ))}
