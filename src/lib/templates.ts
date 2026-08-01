@@ -1,5 +1,3 @@
-import { GENERATED_TEMPLATES } from "./templates.generated";
-
 export interface Template {
   slug: string;
   title: string;
@@ -452,12 +450,12 @@ export const LOCAL_TEMPLATES: Template[] = BASE_TEMPLATES.map((t) => ({
 }));
 
 /**
- * Contentful when it's wired up, the templates committed above when it isn't.
- * `npm run contentful:pull` writes templates.generated.ts at build time, so
- * this stays a plain synchronous array — the hero strip and the proposal tools
- * read it at module scope from client components, where an await can't reach.
+ * The committed set. Contentful overlays onto this per-slug in the server
+ * components that render the gallery and detail pages — it stays a plain
+ * synchronous array because the hero strip and the proposal tools read it at
+ * module scope from client components, where an await can't reach.
  */
-export const TEMPLATES: Template[] = GENERATED_TEMPLATES ?? LOCAL_TEMPLATES;
+export const TEMPLATES: Template[] = LOCAL_TEMPLATES;
 
 export function getTemplateBySlug(slug: string): Template | undefined {
   return TEMPLATES.find((t) => t.slug === slug);

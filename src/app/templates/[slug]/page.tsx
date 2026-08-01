@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { pageMetadata } from "@/lib/seo";
+import { getAppTemplate } from "@/lib/contentful";
+import { TemplateOverview } from "@/components/templates/template-overview";
 import {
   TEMPLATES,
   TEMPLATE_CUSTOMIZATION as CUSTOMIZABLE,
@@ -23,8 +25,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const template = getTemplateBySlug(slug);
   if (!template) return {};
+  const entry = await getAppTemplate(slug);
   return pageMetadata({
-    title: template.title,
+    title: entry?.name ?? template.title,
     // The card description is a fragment ("Track records through stages");
     // the long form reads as a sentence in a search result.
     description: template.longDescription || template.description,
@@ -97,8 +100,28 @@ function TemplateHeader({
 
 export default async function TemplateDetailPage({ params }: Props) {
   const { slug } = await params;
-  const template = getTemplateBySlug(slug);
-  if (!template) notFound();
+  const local = getTemplateBySlug(slug);
+  if (!local) notFound();
+
+  // Contentful owns this template if an App Template entry exists for the slug;
+  // the rest still render from templates.ts. That lets the catalogue fill in one
+  // entry at a time without the gallery ever going half-empty.
+  const entry = await getAppTemplate(slug);
+  const template: Template = entry
+    ? {
+        ...local,
+        title: entry.name,
+        description: entry.subtitle ?? local.description,
+        category: entry.category ?? local.category,
+        images: entry.images.length
+          ? entry.images.map((image) => image.url)
+          : local.images,
+        // Once Contentful supplies the artwork it decides how many frames there
+        // are; the local previewCount only pads placeholders for templates that
+        // still have no real screenshots.
+        previewCount: entry.images.length || local.previewCount,
+      }
+    : local;
 
   return (
     <>
@@ -118,42 +141,54 @@ export default async function TemplateDetailPage({ params }: Props) {
               />
 
               <div className="mt-14 lg:mt-20">
-                <h2 className="type-h3">
-                  About this template
-                </h2>
-                <p className="mt-6 text-base leading-[1.75] text-foreground/80 md:text-[1.0625rem] md:leading-[1.85]">
-                  {template.longDescription}
-                </p>
-                <p className="mt-5 text-base leading-[1.75] text-foreground/80 md:mt-6 md:text-[1.0625rem] md:leading-[1.85]">
-                  Start from this template and describe what you want to change
-                  in plain English — Assembly Studio adapts the layout, fields,
-                  and flow to your firm, then publishes it to your client portal
-                  in minutes. No code required.
-                </p>
+                {/* One rich-text field from Contentful covers both the About
+                    copy and the customization list, so an editor can reshape
+                    those sections without a code change. Templates that aren't
+                    in the CMS yet keep the written-out version below. */}
+                {entry?.overview ? (
+                  <TemplateOverview document={entry.overview} />
+                ) : (
+                  <>
+                    <h2 className="type-h3">
+                      About this template
+                    </h2>
+                    <p className="mt-6 text-base leading-[1.75] text-foreground/80 md:text-[1.0625rem] md:leading-[1.85]">
+                      {template.longDescription}
+                    </p>
+                    <p className="mt-5 text-base leading-[1.75] text-foreground/80 md:mt-6 md:text-[1.0625rem] md:leading-[1.85]">
+                      Start from this template and describe what you want to change
+                      in plain English — Assembly Studio adapts the layout, fields,
+                      and flow to your firm, then publishes it to your client portal
+                      in minutes. No code required.
+                    </p>
 
-                <h3 className="mt-12 text-lg font-medium md:mt-14">
-                  What you can customize
-                </h3>
-                <ul className="mt-5 space-y-3">
-                  {CUSTOMIZABLE.map((item) => (
-                    <li key={item} className="flex items-start gap-3">
-                      <span className="mt-[0.7rem] size-1.5 shrink-0 rounded-full bg-foreground/40" />
-                      <span className="text-base leading-[1.7] text-foreground/80 md:text-[1.0625rem]">
-                        {item}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-
-                <h3 className="mt-12 text-lg font-medium md:mt-14">Perfect for</h3>
-                <p className="mt-3 text-base text-muted-foreground md:text-[1.0625rem]">
-                  {template.industries && template.industries.length > 0
-                    ? template.industries
-                        .join(", ")
-                        .replace(/, ([^,]*)$/, ", and $1")
-                    : "consulting, accounting, legal, and real estate"}{" "}
-                  firms running {template.category.toLowerCase()} workflows.
-                </p>
+                    <h3 className="mt-12 text-lg font-medium md:mt-14">
+                      What you can customize
+                    </h3>
+                    <ul className="mt-5 space-y-3">
+                      {CUSTOMIZABLE.map((item) => (
+                        <li key={item} className="flex items-start gap-3">
+                          <span className="mt-[0.7rem] size-1.5 shrink-0 rounded-full bg-foreground/40" />
+                          <span className="text-base leading-[1.7] text-foreground/80 md:text-[1.0625rem]">
+                            {item}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    {/* Inside the fallback: the Contentful overview carries its
+                        own "Perfect for" section, so rendering this alongside it
+                        would print the heading twice. */}
+                    <h3 className="mt-12 text-lg font-medium md:mt-14">Perfect for</h3>
+                    <p className="mt-3 text-base text-muted-foreground md:text-[1.0625rem]">
+                      {template.industries && template.industries.length > 0
+                        ? template.industries
+                            .join(", ")
+                            .replace(/, ([^,]*)$/, ", and $1")
+                        : "consulting, accounting, legal, and real estate"}{" "}
+                      firms running {template.category.toLowerCase()} workflows.
+                    </p>
+                  </>
+                )}
               </div>
             </div>
 
