@@ -13,7 +13,10 @@ export function TemplateCta() {
   return (
     <a
       href={authed ? APP_URL : SIGNUP_URL}
-      className="block w-full max-w-xs rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background sm:inline-block sm:w-auto transition-opacity hover:opacity-90"
+      // Sized to its label at every width. The site's full-width-on-mobile
+      // treatment is for centered hero CTAs; this one sits left-aligned under
+      // the tags as an inline action, where a 320px slab reads as too heavy.
+      className="inline-block rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background transition-opacity hover:opacity-90"
     >
       {authed ? "Add app to workspace" : "Get started"}
     </a>
