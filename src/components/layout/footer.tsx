@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { DOCS_URL, type NavLink } from "@/lib/constants";
+import { NAV_LINKS, type NavLink } from "@/lib/constants";
 import { DiaGradient } from "@/components/ui/dia-gradient";
 import type { ThemePreference } from "@/components/theme/theme-provider";
 
@@ -62,14 +62,10 @@ export function FooterAurora() {
 }
 
 // Two-column link set for the reveal footer: site pages under "Navigate",
-// socials under "Connect".
-const NAVIGATE: NavLink[] = [
-  { label: "Customers", href: "/customers" },
-  { label: "Templates", href: "/templates" },
-  { label: "Security", href: "/security" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "Docs", href: DOCS_URL, external: true },
-];
+// socials under "Connect". Navigate is the nav's own list, in the nav's order —
+// the two were maintained separately and had drifted out of sequence. Disabled
+// nav items are dropped rather than rendered as dead footer links.
+const NAVIGATE: NavLink[] = NAV_LINKS.filter((link) => !link.disabled);
 
 // Social links point off-site, so they keep opening in a new tab (newTab).
 const CONNECT: NavLink[] = [
