@@ -2427,14 +2427,6 @@ function DetailPanel({
             </div>
           ))}
 
-          {/* Docs link */}
-          <a
-            href={pillar.href}
-            className="type-body mt-14 inline-flex items-center gap-1.5 text-foreground transition-colors hover:text-muted-foreground"
-          >
-            Read the docs
-            <span aria-hidden>→</span>
-          </a>
         </div>
       </div>
     </div>,
@@ -2462,10 +2454,17 @@ export function WholeStack() {
         {/* Heading — left column (sticky on desktop), matching the FAQ layout. */}
         <div className="md:sticky md:top-28 md:self-start">
           <h2 className="type-h2 text-foreground">
-            A complete platform
+            A complete platform,
             <br />
             not just an app builder
           </h2>
+          {/* The heading states the claim; this says why it matters before the
+              reader has to open any of the ten rows to find out. */}
+          <p className="type-lead mt-5 max-w-md text-pretty text-muted-foreground">
+            An app builder is only as good as the platform it plugs into.
+            Assembly comes with a CRM, a client experience, workflows, and more
+            built in, so you never rebuild the basics.
+          </p>
         </div>
 
         {/* Pillar index — one column of rows, no frame and no row rules: the
