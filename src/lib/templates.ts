@@ -1,3 +1,5 @@
+import { GENERATED_TEMPLATES } from "./templates.generated";
+
 export interface Template {
   slug: string;
   title: string;
@@ -10,6 +12,8 @@ export interface Template {
   industries?: string[];
   /** Surfaced in the curated set on the homepage. */
   featured?: boolean;
+  /** Lower sorts first within the featured / non-featured groups. */
+  order?: number;
   /** Template relies on AI — drives the "AI" capability tag. */
   usesAI?: boolean;
   /** Optional preview image shown on the card in place of the grey placeholder. */
@@ -437,16 +441,23 @@ const AI_SLUGS = new Set([
 ]);
 
 // Merge industry tags + preview shape onto each template from the maps above.
-// `featured` is derived from the tracker's priority column (High = featured).
-export const TEMPLATES: Template[] = BASE_TEMPLATES.map((t) => ({
+// Each entry's own value wins where it has one, so the maps only fill gaps.
+export const LOCAL_TEMPLATES: Template[] = BASE_TEMPLATES.map((t) => ({
   ...t,
-  featured: !LOWER_PRIORITY.has(t.slug),
-  usesAI: AI_SLUGS.has(t.slug),
-  industries: INDUSTRY_BY_SLUG[t.slug] ?? [],
+  featured: t.featured ?? !LOWER_PRIORITY.has(t.slug),
+  usesAI: t.usesAI ?? AI_SLUGS.has(t.slug),
+  industries: t.industries?.length ? t.industries : (INDUSTRY_BY_SLUG[t.slug] ?? []),
   previewCount: t.previewCount ?? PREVIEW_BY_SLUG[t.slug]?.previewCount ?? 1,
   hasVideo: t.hasVideo ?? PREVIEW_BY_SLUG[t.slug]?.hasVideo ?? false,
 }));
 
+/**
+ * Contentful when it's wired up, the templates committed above when it isn't.
+ * `npm run contentful:pull` writes templates.generated.ts at build time, so
+ * this stays a plain synchronous array — the hero strip and the proposal tools
+ * read it at module scope from client components, where an await can't reach.
+ */
+export const TEMPLATES: Template[] = GENERATED_TEMPLATES ?? LOCAL_TEMPLATES;
 
 export function getTemplateBySlug(slug: string): Template | undefined {
   return TEMPLATES.find((t) => t.slug === slug);

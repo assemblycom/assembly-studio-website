@@ -61,10 +61,13 @@ export function TemplatesBrowser({ templates }: Props) {
         .toLowerCase();
       return haystack.includes(q);
     });
-    // Default order: featured (popular) first, then the rest alphabetically.
+    // Featured (popular) first, then whatever order the CMS gives them, then
+    // alphabetically for anything left unordered.
     return [...matched].sort((a, b) => {
       const byFeatured = Number(Boolean(b.featured)) - Number(Boolean(a.featured));
       if (byFeatured !== 0) return byFeatured;
+      const byOrder = (a.order ?? Infinity) - (b.order ?? Infinity);
+      if (byOrder !== 0) return byOrder;
       return a.title.localeCompare(b.title);
     });
   }, [templates, selected, query]);

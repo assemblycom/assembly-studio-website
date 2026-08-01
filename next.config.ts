@@ -21,6 +21,8 @@ const nextConfig: NextConfig = {
   // Whitelist higher steps (Next 16 requires listing any non-default value).
   images: {
     qualities: [75, 90, 100],
+    // Template screenshots uploaded to Contentful are served from its CDN.
+    remotePatterns: [{ protocol: "https", hostname: "images.ctfassets.net" }],
   },
   async rewrites() {
     return [

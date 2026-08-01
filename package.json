@@ -4,9 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/contentful/pull.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "contentful:setup": "node scripts/contentful/setup.mjs",
+    "contentful:push": "tsx scripts/contentful/push.ts",
+    "contentful:pull": "node scripts/contentful/pull.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.109.1",
@@ -32,9 +36,11 @@
     "@types/opentype.js": "^1.3.10",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "contentful-management": "^12.13.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "tailwindcss": "^4",
+    "tsx": "^4.23.1",
     "typescript": "^5"
   }
 }

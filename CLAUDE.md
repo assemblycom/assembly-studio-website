@@ -120,8 +120,24 @@ All of it runs off `src/lib/seo.ts` and `src/lib/og.tsx`.
 The sitemap picks the page up on its own — no edit needed.
 
 ## Adding a Template
-Add an entry to the `TEMPLATES` array in `src/lib/templates.ts`. The detail page,
-its social card, and its sitemap entry are all generated from that one entry.
+Add an entry to the `BASE_TEMPLATES` array in `src/lib/templates.ts`. The detail
+page and its sitemap entry are both generated from that one entry.
+
+Once Contentful is wired up (see ENV.example.md) it becomes the source instead:
+`prebuild` runs `scripts/contentful/pull.mjs`, which writes
+`src/lib/templates.generated.ts`, and `TEMPLATES` prefers it over the committed
+array. Notes for anyone touching that path:
+
+- **Codegen, not a runtime fetch.** `TEMPLATES` is read at module scope by client
+  components (the hero strip, the proposal tools), where an `await` can't reach.
+  Making it async would mean refactoring all of them, so the data is baked in at
+  build time instead. It also keeps the site static and immune to a CMS outage.
+- **The pull never fails the build.** No credentials, or an unreachable
+  Contentful, writes `null` and the committed templates are used.
+- `templates.generated.ts` is machine-written — don't hand-edit it.
+- The space is shared with another site, so everything is namespaced to the
+  `studioTemplate` content type and `contentful:setup` refuses to modify a type
+  it doesn't recognise as ours.
 
 ## Adding a Customer Story
 Add an entry to `CASE_STUDIES` in `src/lib/case-studies.ts`. `seoDescription` is

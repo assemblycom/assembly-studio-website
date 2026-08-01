@@ -26,3 +26,60 @@ Add `ANTHROPIC_API_KEY` under **Project → Settings → Environment Variables**
 
 The key is only ever read server-side in the API route — it is never sent to the
 browser.
+
+## Contentful (optional) — the `/templates` gallery
+
+Lets the templates be edited without a pull request. **Not set** → the site uses
+the templates committed in `src/lib/templates.ts` and nothing changes. **Set** →
+`npm run build` pulls the published templates from Contentful instead.
+
+| Variable | Needed for | Notes |
+| --- | --- | --- |
+| `CONTENTFUL_SPACE_ID` | everything | From **Settings → General settings** |
+| `CONTENTFUL_DELIVERY_TOKEN` | the site | Read-only. **Settings → API keys** |
+| `CONTENTFUL_MANAGEMENT_TOKEN` | setup + migration only | Write access. Delete it once the migration is done |
+| `CONTENTFUL_ENVIRONMENT` | optional | Defaults to `master` |
+
+### Sharing a space with another site
+
+This space is shared, so the tooling is built not to touch anything that isn't
+ours:
+
+- The content type is `studioTemplate`, not a bare `template` that could collide
+  with the other site's model.
+- `npm run contentful:setup` **refuses** to modify an existing `studioTemplate`
+  whose name isn't this site's, and stops with an explanation.
+- Every read and write is filtered to that one content type. Nothing else in the
+  space is listed, read, or changed.
+
+For stronger separation, put this site in its own Contentful **environment**
+(**Settings → Environments**) and set `CONTENTFUL_ENVIRONMENT` to it — the other
+site keeps using `master` and the two never see each other's content. A separate
+**space** is stronger still, if the plan has room for one.
+
+### First-time setup
+
+```
+npm run contentful:setup        # create the content type
+npm run contentful:push -- --dry # preview the migration, change nothing
+npm run contentful:push         # copy the 27 committed templates up
+npm run contentful:pull         # write src/lib/templates.generated.ts
+```
+
+Then add `CONTENTFUL_SPACE_ID` and `CONTENTFUL_DELIVERY_TOKEN` to Vercel
+(Production scope). `prebuild` runs the pull on every deploy.
+
+### Publishing rebuilds the site
+
+1. Vercel → **Settings → Git → Deploy Hooks**, create one, copy the URL.
+2. Contentful → **Settings → Webhooks → Add webhook**, paste it, and trigger on
+   **Publish** and **Unpublish** for Entry.
+
+Publishing then rebuilds the site on its own — a couple of minutes, no PR.
+
+### What stays in code
+
+Each gallery card is a React mock keyed by slug, so a template created only in
+Contentful gets a real page and a real card, just a generic-looking one until
+someone adds a mock in `hero-v71.tsx` or uploads a **Preview image** to the
+entry.
