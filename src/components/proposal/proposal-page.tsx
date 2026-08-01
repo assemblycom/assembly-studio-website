@@ -9,6 +9,7 @@ import { FooterAurora } from "@/components/layout/footer";
 import { useTheme } from "@/components/theme/theme-provider";
 import { TemplateGallery } from "@/components/templates/template-gallery";
 import { TemplateDetailPanel } from "@/components/proposal/template-detail-panel";
+import { V69CardMock } from "@/components/home/hero-v71";
 
 // ─────────────────────────────────────────────────────────────────────────
 // PROPOSAL — a page made for one person. Someone on the team refined a prompt
@@ -26,6 +27,131 @@ import { TemplateDetailPanel } from "@/components/proposal/template-detail-panel
 // navigation at all: there is one thing to do on it. The template's details open
 // in a right-hand panel rather than a link, so reading them never costs the page.
 // ─────────────────────────────────────────────────────────────────────────
+
+/**
+ * Template variant — the point is to see the thing. Real screenshots when the
+ * template has them; otherwise the same widget cover the gallery cards use,
+ * because a designed mock reads as the app and an empty placeholder frame reads
+ * as a missing image. The feature list gives it substance without spending the
+ * click on the details panel.
+ */
+function TemplateBuild({
+  template,
+  onSeeDetails,
+}: {
+  template: Template;
+  onSeeDetails: () => void;
+}) {
+  const { theme } = useTheme();
+  const hasScreenshots = Boolean(template.images?.length);
+
+  return (
+    <div className="mt-4">
+      <h2 className="type-h3">{template.title}</h2>
+      <p className="mt-3 text-base text-muted-foreground">{template.description}</p>
+
+      <div className="mt-7">
+        {hasScreenshots ? (
+          <TemplateGallery
+            title={template.title}
+            images={template.images}
+            previewCount={template.previewCount}
+          />
+        ) : (
+          // Capped rather than full-bleed: these covers are drawn for a ~300px
+          // gallery card, and stretched across the whole column the widget
+          // floats in dead space instead of reading as a screen.
+          <div className="relative aspect-[5/4] w-full max-w-[520px] overflow-hidden rounded-[20px] border border-border bg-background [[data-theme=dark]_&]:bg-[#151515]">
+            <div
+              className={`template-mock h-full w-full [font-family:var(--font-inter),system-ui,sans-serif] ${
+                theme === "dark" ? "v72-mock-dark" : ""
+              }`}
+            >
+              <V69CardMock slug={template.slug} />
+            </div>
+          </div>
+        )}
+      </div>
+
+      <p className="mt-8 text-base leading-[1.75] text-foreground/80 md:text-[1.0625rem] md:leading-[1.85]">
+        {template.longDescription}
+      </p>
+
+      {template.features.length > 0 && (
+        <ul className="mt-6 grid gap-2.5 sm:grid-cols-2">
+          {template.features.map((feature) => (
+            <li
+              key={feature}
+              className="flex items-start gap-2.5 text-[0.9375rem] text-foreground/80"
+            >
+              <span className="mt-[0.6rem] size-1.5 shrink-0 rounded-full bg-foreground/40" />
+              {feature}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <button
+        type="button"
+        onClick={onSeeDetails}
+        className="mt-8 flex h-11 items-center justify-center gap-2 rounded-lg border border-foreground/20 px-5 text-sm text-foreground transition-colors hover:bg-foreground/5"
+      >
+        See full details
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 16 16"
+          fill="none"
+          aria-hidden
+          className="text-muted-foreground"
+        >
+          <path
+            d="M6 4l4 4-4 4"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+/**
+ * Prompt variant — the point is that this is the idea someone had for them, in
+ * their words. It's a live field rather than a quote block: nothing here is
+ * saved anywhere, but being able to touch the words is what says the build
+ * isn't fixed, and whatever it says at signup is what rides along.
+ */
+function PromptBuild({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (next: string) => void;
+}) {
+  return (
+    <div className="mt-4">
+      <label className="sr-only" htmlFor="proposal-prompt">
+        The app idea, yours to edit
+      </label>
+      <textarea
+        id="proposal-prompt"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        spellCheck={false}
+        // field-sizing grows the box with the words, so a long idea is never
+        // trapped behind a scrollbar inside the page.
+        className="min-h-[9rem] w-full resize-none rounded-xl border border-border bg-muted/50 p-6 text-base leading-[1.85] text-foreground outline-none transition-colors [field-sizing:content] focus:border-foreground/30 md:p-8 md:text-[1.0625rem] [[data-theme=dark]_&]:bg-white/[0.03]"
+      />
+      <p className="type-caption mt-3 text-muted-foreground">
+        Edit it here if something isn&rsquo;t right. You can keep changing it in
+        plain English once the app is up.
+      </p>
+    </div>
+  );
+}
 
 function ProposalHeader() {
   return (
@@ -84,6 +210,11 @@ function ProposalContent() {
 
   const firstName = recipient.split(/\s+/)[0] ?? "";
 
+  // The prompt variant is editable, so what signup receives is whatever the
+  // field says now — not what the link was written with. Seeded once: this page
+  // carries no navigation, so the query it mounted with is the query it keeps.
+  const [draft, setDraft] = useState(prompt || "A brand-new app, from a blank canvas.");
+
   const [panelOpen, setPanelOpen] = useState(false);
   const emailRef = useRef<HTMLInputElement | null>(null);
   const startRef = useRef<HTMLDivElement | null>(null);
@@ -117,7 +248,7 @@ function ProposalContent() {
   // in for the three-step "what happens next" list this page used to carry.
   const howItWorks = template
     ? "Sign up and this template is waiting in your workspace. Change anything in plain English, then publish it to your client portal."
-    : "Sign up and this prompt is waiting in your workspace. Assembly builds the app, you refine it in plain English, then publish it to your client portal.";
+    : "Sign up and this idea is waiting in your workspace, exactly as it reads above. Assembly builds it, you refine it in plain English, then publish it to your client portal.";
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -154,67 +285,18 @@ function ProposalContent() {
       <section className="flex-1 px-6 pb-32 pt-12 md:px-10 md:pt-16 lg:pb-24">
         <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[1.5fr_1fr] lg:gap-16">
           <div>
+            {/* The two variants say different things. A template proposal is
+                "here is the app"; a prompt proposal is "here is the idea I had
+                for you". Same page, different centre of gravity. */}
             <p className="type-caption text-muted-foreground">
-              What we&rsquo;d build
+              {template ? "What we’d build" : "The idea"}
             </p>
 
             {template ? (
-              <div className="mt-4">
-                <h2 className="type-h3">{template.title}</h2>
-                <p className="mt-3 text-base text-muted-foreground">
-                  {template.description}
-                </p>
-
-                <div className="mt-7">
-                  <TemplateGallery
-                    title={template.title}
-                    images={template.images}
-                    previewCount={template.previewCount}
-                  />
-                </div>
-
-                <p className="mt-8 text-base leading-[1.75] text-foreground/80 md:text-[1.0625rem] md:leading-[1.85]">
-                  {template.longDescription}
-                </p>
-
-                {/* The rest of the template without leaving the proposal. */}
-                <button
-                  type="button"
-                  onClick={() => setPanelOpen(true)}
-                  className="mt-6 flex h-11 items-center justify-center gap-2 rounded-lg border border-foreground/20 px-5 text-sm text-foreground transition-colors hover:bg-foreground/5"
-                >
-                  See full details
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    aria-hidden
-                    className="text-muted-foreground"
-                  >
-                    <path
-                      d="M6 4l4 4-4 4"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </button>
-              </div>
+              <TemplateBuild template={template} onSeeDetails={() => setPanelOpen(true)} />
             ) : (
-              <div className="mt-4">
-                {/* The whole prompt, at reading size. On /get-started it's a
-                    two-line reminder of what you typed; here it's the proposal
-                    itself, so nothing is clamped away. */}
-                <div className="rounded-xl border border-border bg-muted/50 p-6 md:p-8 [[data-theme=dark]_&]:bg-white/[0.03]">
-                  <p className="whitespace-pre-wrap break-words text-base leading-[1.85] text-foreground md:text-[1.0625rem]">
-                    {prompt || "A brand-new app, from a blank canvas."}
-                  </p>
-                </div>
-              </div>
+              <PromptBuild value={draft} onChange={setDraft} />
             )}
-
           </div>
 
           {/* Signing up, kept in view the whole way down the page. */}
@@ -226,7 +308,7 @@ function ProposalContent() {
               </h2>
               <div className="mt-6">
                 <SignupHandoff
-                  prompt={template ? undefined : prompt}
+                  prompt={template ? undefined : draft}
                   template={template?.slug}
                   emailCtaLabel="Continue with email"
                   inputRef={emailRef}
