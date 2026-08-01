@@ -1,16 +1,17 @@
 import { SIGNUP_URL } from "@/lib/constants";
 
 // Plain closing CTA — the floating cursor-parallax industry chips were removed;
-// just the pitch and one action, mirroring the pricing/security pages.
+// just the pitch and one action, mirroring the pricing/security pages. The copy
+// is the pricing page's, word for word, so every page closes the same way.
 export function CustomersCta() {
   return (
     <section className="px-6 py-16 text-center md:py-24">
       <h2 className="type-display mx-auto max-w-md text-balance text-foreground md:max-w-2xl">
-        Built for firms like yours
+        Build the firm only you can build
       </h2>
       <p className="type-lead mx-auto mt-5 max-w-sm text-pretty text-muted-foreground sm:max-w-xl">
-        Give your clients a branded portal they&rsquo;ll actually log in to. No
-        code, no infrastructure.
+        Stop stitching together tools that were never meant to fit. Run and
+        build everything in one place.
       </p>
       <a
         href={SIGNUP_URL}

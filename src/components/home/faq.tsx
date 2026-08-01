@@ -90,9 +90,9 @@ const FAQS: FAQEntry[] = [
       "Public-facing sites. Assembly Studio builds apps for authenticated experiences — your team and your logged-in clients. Marketing websites, public directories, and consumer apps are better built elsewhere.",
   },
   {
-    question: "Can I migrate from Assembly to Assembly Studio?",
+    question: "Who owns what I build?",
     answer:
-      "If your workspace doesn't have the app builder enabled yet, contact our team at studio@assembly.com and we'll get you set up.",
+      "You do. Every app you build is yours — your data, your logic, your workflows. We never use your apps, your data, or your clients' data to train AI models, and we don't share them with anyone.",
   },
 ];
 

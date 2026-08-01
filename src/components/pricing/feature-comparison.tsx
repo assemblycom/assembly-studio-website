@@ -63,7 +63,7 @@ const GROUPS: FeatureGroup[] = [
       },
       {
         label: "Apps included",
-        values: ["5", "5", "5", "5", "Unlimited"],
+        values: ["3", "5", "5", "5", "Unlimited"],
       },
       {
         label: "Extra apps",

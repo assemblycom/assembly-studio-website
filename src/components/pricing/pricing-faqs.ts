@@ -36,7 +36,7 @@ export const PRICING_FAQS: FAQEntry[] = [
   {
     question: "How many apps can I have?",
     answer:
-      "Every plan includes 5 apps, whether you build them with the app builder or install from the app library, they count the same. Need more? Add extra apps for $5/month each on any paid plan. Embeds and links don't count toward the limit.",
+      "Apps count the same whether you build them with the app builder or install them from the app library. The Free plan includes 3 apps, and all paid plans include 5 — with extra apps available for $5/month each on any paid plan.",
   },
   {
     question: "What does it cost to run my apps?",
