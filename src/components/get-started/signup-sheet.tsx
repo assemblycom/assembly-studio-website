@@ -249,16 +249,14 @@ function GetStartedShell({
           it in light mode does nothing there. */}
       <main
         ref={sheetRef}
-        className="relative z-10 w-full max-w-md rounded-[24px] bg-background px-6 py-10 shadow-[0_30px_80px_-50px_rgba(0,0,0,0.55)] sm:px-10 sm:py-12 max-[479px]:max-w-none max-[479px]:rounded-b-none max-[479px]:pb-12 max-[479px]:shadow-none [[data-theme=dark]_&]:bg-[#171717] [[data-theme=dark]_&]:ring-1 [[data-theme=dark]_&]:ring-white/[0.10]">
+        className="relative z-10 w-full max-w-md rounded-[24px] bg-background px-6 py-10 shadow-[0_30px_80px_-50px_rgba(0,0,0,0.55)] ring-1 ring-foreground/10 sm:px-10 sm:py-12 max-[479px]:max-w-none max-[479px]:rounded-b-none max-[479px]:pb-12 max-[479px]:shadow-none [[data-theme=dark]_&]:bg-[#171717] [[data-theme=dark]_&]:ring-white/[0.10]">
         <div>
           <div className="mx-auto w-full max-w-sm">
               {/* Names the sheet. h2 rather than h1: the intercepted variant
-                  opens over a page that still has its own. h4 at 18px, not h3 —
-                  h3 scales to 30px at desktop, which in a 384px column read as a
-                  marketing headline rather than a card title. font-normal
-                  because the step's own 500 loads SemiBold in this family. */}
-              <h2 className="type-h4 mb-6 text-center font-normal text-foreground">
-                Sign up
+                  opens over a page that still has its own. h3 is the scale's
+                  regular-weight heading step — 22px on a phone, 30px from md. */}
+              <h2 className="type-h3 mb-6 text-center text-foreground">
+                Create your account
               </h2>
 
               {/* What you arrived with leads the column at every width: it's the
