@@ -317,11 +317,6 @@ function ProductionGapVisual({
               Studio lead
             </span>
           </span>
-          <svg viewBox="0 0 16 16" className="size-3 shrink-0 text-[var(--mk-subtle)]" fill="currentColor" aria-hidden>
-            <circle cx="8" cy="3.5" r="1.1" />
-            <circle cx="8" cy="8" r="1.1" />
-            <circle cx="8" cy="12.5" r="1.1" />
-          </svg>
         </button>
         </div>
 
