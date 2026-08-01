@@ -190,7 +190,10 @@ export default function SecurityPage() {
 
 
       {/* Certifications + FAQ — the seal row sits right before the questions. */}
-      <div className="relative">
+      {/* Extra room under the questions: the FAQ's own padding is the same top
+          and bottom, which left the last row sitting closer to the closing rule
+          than the heading sits to the section above it. */}
+      <div className="relative pb-10 md:pb-16">
 
         <FAQ
           heading="Frequently asked questions"

@@ -16,7 +16,7 @@ const STORY = {
   title:
     "How Metta Health scales HIPAA-compliant patient authorizations with Assembly",
   stats: [
-    { value: "50+", label: "HIPAA-compliant intake workflows" },
+    { value: "50+", label: "HIPAA-compliant workflows" },
     { value: "80%", label: "cost savings" },
     { value: "5x", label: "ROI vs. alternative vendors" },
   ],
