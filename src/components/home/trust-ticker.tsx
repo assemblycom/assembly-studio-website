@@ -144,18 +144,29 @@ export function TrustTicker() {
           desktop. The hero's full-bleed divider is the top boundary; this band
           draws its own bottom rule below. */}
       <div className="mx-auto max-w-[1600px] px-6 md:px-10">
-        <div className="mx-auto max-w-[1200px]">
-          <div className="grid grid-cols-2 gap-x-8 gap-y-6 px-5 py-6 sm:grid-cols-4 sm:gap-x-0 sm:px-6 sm:py-8">
-            {STATS.map((s, i) => (
+        {/* No fill. A tint light enough to sit on this near-white page reads as a
+            smudge rather than a surface, and a fill strong enough to read would
+            be a framed card on a page we just stripped every rail and divider
+            from. The balance fix is what this band actually needed: the columns
+            used to carry the divider and its 32px inset on every cell BUT the
+            first, so the row sat left of where it looked like it should and
+            trailed off short of the right edge. `divide-x` puts the rules
+            between equal cells and every cell takes the same padding, so the
+            four read as evenly spaced across the rail. */}
+        {/* 1100, matching How it works below it (and the section rails on the
+            rest of the page). At 1200 this band sat 22px wider on each side, so
+            the first figure started left of the heading under it and the row
+            read as misaligned rather than as the same column. */}
+        <div className="mx-auto max-w-[1100px]">
+          <div className="grid grid-cols-2 gap-y-2 sm:grid-cols-4 sm:gap-y-0 sm:divide-x sm:divide-border [[data-theme=dark]_&]:sm:divide-[#383838]">
+            {STATS.map((s) => (
+              // The outer cells drop their outer padding so the first figure
+              // starts exactly on the rail and the last ends on it — flush with
+              // the copy above and below. The inner padding stays, so the
+              // dividers keep their breathing room.
               <div
                 key={s.label}
-                // Hairline divider between columns on desktop (matches the band's
-                // bottom rule). Mobile keeps the 2×2 grid clean with just a gap.
-                className={
-                  i > 0
-                    ? "sm:border-l sm:border-border sm:pl-8 [[data-theme=dark]_&]:border-[#383838]"
-                    : undefined
-                }
+                className="py-6 sm:py-9 sm:first:pl-0 sm:last:pr-0 sm:[&:not(:first-child)]:pl-7 sm:[&:not(:last-child)]:pr-7"
               >
                 <p className="text-[13px] leading-snug text-muted-foreground">
                   {s.label}
@@ -171,8 +182,6 @@ export function TrustTicker() {
         </div>
       </div>
 
-      {/* Bottom rule — same 1200px guide-rail width. */}
-      <div className="mx-auto max-w-[1200px] border-t border-border [[data-theme=dark]_&]:border-[#383838]" />
     </section>
   );
 }

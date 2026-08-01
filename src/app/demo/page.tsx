@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
 import { DemoForm } from "@/components/demo/demo-form";
+import { PAGE_SEO, pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Book a demo",
-  description:
-    "See Assembly Studio in action. Book a live walkthrough tailored to your use case — and see how fast you can ship a branded, secure client app.",
-};
+export const metadata: Metadata = pageMetadata(PAGE_SEO.demo);
 
 export default function DemoPage() {
   // Rail matches the nav (max-w-[1600px] px-6 from RootShell) so the form's

@@ -30,7 +30,9 @@ const STRIP_ORDER = [
   "client-project-tracker",
   "client-support-requests",
   "client-ai-assistant",
-  "client-engagement-dashboard",
+  // Was the engagement dashboard, which left the gallery — this keeps a
+  // dashboard-shaped card in the strip and the count at eight.
+  "retainer-usage-overview",
   "document-collection",
   "proposal-builder",
   "content-approval-flow",
@@ -309,7 +311,7 @@ export function HeroV76({
                     compact
                     minimalControls
                     promptPicker
-                    promptPickerLabel="Prompt Ideas"
+                    promptPickerLabel="Ideas"
                     promptPickerSide="left"
                     promptItems={PROMPT_IDEAS}
                     hidePlus={!showPlus}

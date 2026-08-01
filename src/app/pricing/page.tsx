@@ -5,12 +5,9 @@ import { FeatureComparison } from "@/components/pricing/feature-comparison";
 import { PricingCta } from "@/components/pricing/pricing-cta";
 import { FAQ } from "@/components/home/faq";
 import { PRICING_FAQS } from "@/components/pricing/pricing-faqs";
+import { PAGE_SEO, pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Pricing",
-  description:
-    "Simple, transparent pricing for Assembly Studio. Start free and scale as you grow.",
-};
+export const metadata: Metadata = pageMetadata(PAGE_SEO.pricing);
 
 export default function PricingPage() {
   return (
@@ -43,19 +40,12 @@ export default function PricingPage() {
         <FeatureComparison />
       </Section>
 
-      {/* Full-bleed divider under the table, before the FAQ — spans edge to edge. */}
-      <div className="border-t border-border [[data-theme=dark]_&]:border-[#383838]" />
-
       {/* Pricing FAQ — matches /security: heading on the left, the divided
-          question list on the right, wrapped in the same vertical guide rails. */}
-      <div className="relative">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 z-30 hidden justify-center min-[1200px]:flex"
-        >
-          <div className="h-full w-full max-w-[1200px] border-x border-border [[data-theme=dark]_&]:border-[#383838]" />
-        </div>
-
+          question list on the right. No guide rails and no rule above it; the
+          section stands on its own spacing. Extra room underneath: the FAQ's own
+          py-24 left the last question sitting close to the rule and the CTA
+          heading right behind it, so the two sections read as one block. */}
+      <div className="relative pb-16 md:pb-24">
         <FAQ items={PRICING_FAQS} twoColumn />
       </div>
 

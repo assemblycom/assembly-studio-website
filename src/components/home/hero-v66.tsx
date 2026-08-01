@@ -182,6 +182,45 @@ function V66Nav() {
 // The prompt box. Kept top-level so its menu state doesn't remount. `tone`
 // flips the text + control colors so the same box can sit on a light panel or
 // on a dark/glass hero.
+// Opening the sign-up sheet must not move the page underneath it: the sheet is
+// an intercepted modal rendered OVER this page, and any scroll change reads as
+// the content lurching out from under the click. `scroll: false` alone doesn't
+// hold for the intercepted route, so the position is captured and reapplied on
+// the frames either side of the transition.
+function openGetStarted(
+  router: ReturnType<typeof useRouter>,
+  value: string,
+) {
+  const y = window.scrollY;
+
+  // Stamp the prompt onto the entry we're leaving. Closing the sheet is a
+  // history step back (the only thing that actually clears the intercepted
+  // slot), so the entry it returns to is this one — and the page reads
+  // ?prompt= on mount to refill the composer. Without this the composer comes
+  // back empty and you retype what you already typed.
+  const trimmed = value.trim();
+  if (trimmed) {
+    const here = new URL(window.location.href);
+    here.searchParams.set("prompt", trimmed);
+    window.history.replaceState(window.history.state, "", here);
+  }
+
+  router.push(getStartedUrl(value), { scroll: false });
+
+  // Next resets scroll when the intercepted segment mounts, and it doesn't
+  // always land on the same frame — `scroll: false` doesn't hold for this route.
+  // Reassert the position briefly rather than guessing which frame to fix.
+  const restore = () => {
+    if (window.scrollY !== y) window.scrollTo(0, y);
+  };
+  const started = performance.now();
+  const hold = () => {
+    restore();
+    if (performance.now() - started < 400) requestAnimationFrame(hold);
+  };
+  requestAnimationFrame(hold);
+}
+
 export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 ring-black/[0.06]", surfaceRadiusClass = "rounded-[22px]", minHeightClass = "min-h-[188px]", tone = "light", typewriter = false, mutedControls = false, submitLabel, submitDark = false, accent = LIME, hidePlus = false, hideHowTo = false, howToLabel = "How it works", howToSide = "left", promptPicker = false, promptPickerLabel = "Select a prompt", promptPickerSide = "left", promptPickerUp = false, promptItems, plusItems, compact = false, minimalControls = false, plusAsAttach = false, footerLeading, showSubmit = true, submitDisabled, textDimmed = false, splitFooter = false, value: valueProp, onValueChange, textareaRef }: { glow?: boolean; surfaceClassName?: string; surfaceRadiusClass?: string; minHeightClass?: string; tone?: "light" | "dark"; typewriter?: boolean; mutedControls?: boolean; submitLabel?: string; submitDark?: boolean; accent?: string; hidePlus?: boolean; hideHowTo?: boolean; howToLabel?: string; howToSide?: "left" | "right"; promptPicker?: boolean; promptPickerLabel?: string; promptPickerSide?: "left" | "right"; promptPickerUp?: boolean; promptItems?: (string | { label: string; prompt: string })[]; plusItems?: { label: string; icon: "attach" | "transfer" }[]; compact?: boolean; minimalControls?: boolean; plusAsAttach?: boolean; footerLeading?: React.ReactNode; showSubmit?: boolean; submitDisabled?: boolean; textDimmed?: boolean; splitFooter?: boolean; value?: string; onValueChange?: (v: string) => void; textareaRef?: React.Ref<HTMLTextAreaElement> } = {}) {
   const router = useRouter();
 
@@ -323,14 +362,18 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
   // Compact scales the footer controls down (v73/v74) without touching the
   // default composer other heroes use. All controls (+, pills, submit) share
   // the same subtle pill styling so nothing pops.
-  const ctrlH = compact ? "h-7" : "h-8";
+  // 32px in both modes. Compact used to run 28, which made the submit pill a
+  // visibly shorter "Get started" than the identically-labelled one in the plus
+  // menu right beneath it; the whole footer row moves together so the pill can't
+  // drift out of line with the + and the picker beside it.
+  const ctrlH = "h-8";
   const pillText = compact ? "text-[13px]" : "text-sm";
   const pillPad = compact ? "gap-1 px-2.5" : "gap-1.5 px-3";
   const plusSize = compact ? "size-7" : "size-8";
   // Submit matches the pill height so the primary CTA stands out by colour, not
   // by being noticeably taller/wider than the other footer controls.
   const submitH = ctrlH;
-  const submitW = compact ? "w-7" : "w-8";
+  const submitW = "w-8";
   const badgeSize = compact ? "size-[18px]" : "size-6";
   const videoPad = compact ? "pl-1 pr-3" : "pl-1.5 pr-4";
   const badgeCls = dark ? "bg-white/70 text-neutral-900" : "bg-neutral-900 text-white";
@@ -476,7 +519,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 if (value.trim()) {
-                  router.push(getStartedUrl(value));
+                  openGetStarted(router, value);
                 }
               }
             }}
@@ -588,7 +631,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
                         type="button"
                         onClick={() => {
                           if (value.trim()) {
-                            router.push(getStartedUrl(value));
+                            openGetStarted(router, value);
                             return;
                           }
                           window.location.href = buildSignupUrl();
@@ -597,7 +640,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
                         // background token pair, which inverts itself per theme.
                         // Was a hard-coded white/near-black pill, off-system in
                         // both radius and colour.
-                        className="rounded-lg bg-foreground px-4 py-2 text-sm text-background transition-opacity hover:opacity-90"
+                        className="flex h-8 items-center rounded-lg bg-foreground px-3.5 text-sm text-background transition-opacity hover:opacity-90"
                       >
                         Get started
                       </button>
@@ -682,7 +725,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
                 // document load. An empty click skips it and goes straight to
                 // signup, which is a different origin and so a real navigation.
                 if (value.trim()) {
-                  router.push(getStartedUrl(value));
+                  openGetStarted(router, value);
                   return;
                 }
                 window.location.href = buildSignupUrl();

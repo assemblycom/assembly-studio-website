@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { pageMetadata } from "@/lib/seo";
 import { Section } from "@/components/ui/section";
 import {
   CASE_STUDIES,
@@ -32,10 +33,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const study = getCaseStudyBySlug(slug);
   if (!study) return {};
-  return {
-    title: `${study.headline} — ${study.company}`,
-    description: study.summary,
-  };
+  return pageMetadata({
+    title: study.company,
+    description: study.seoDescription,
+    path: `/customers/${study.slug}`,
+  });
 }
 
 function MetaCard({ study }: { study: CaseStudy }) {

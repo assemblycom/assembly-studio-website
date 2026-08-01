@@ -68,6 +68,49 @@ export function getStartedUrl(prompt?: string): string {
     ? `/get-started?prompt=${encodeURIComponent(value)}`
     : "/get-started";
 }
+// ── Personalized proposals ────────────────────────────────────────────────
+// A proposal is a one-off page made for one person: their name, the build we're
+// proposing (a refined prompt or a template), and an optional line from whoever
+// sent it. It has no backend — every field rides in the URL, so the link IS the
+// proposal, and /proposal-creator is just the form that composes one.
+export const PROPOSAL_PATH = "/proposal";
+export const PROPOSAL_CREATOR_PATH = "/proposal-creator";
+
+// A personal note is a sentence or two, not a letter; capped so the link stays
+// well inside the ~2048-char URL limit alongside the prompt.
+export const MAX_PROPOSAL_NOTE_LENGTH = 280;
+
+export interface ProposalInput {
+  /** Who it's for — the name that leads the page. */
+  recipient: string;
+  /** Who it's from, e.g. "Sean Sullivan, Assembly". Optional. */
+  from?: string;
+  /** One personal line, shown under the recipient's name. Optional. */
+  note?: string;
+  /** The refined prompt, when the proposal is a custom build. */
+  prompt?: string;
+  /** A template slug, when a template is the better fit. */
+  template?: string;
+}
+
+/**
+ * Compose a proposal link. `origin` lets the creator hand back a URL on whatever
+ * host it's running on (localhost while testing, the real host in production)
+ * rather than hardcoding the canonical one; omit it for a relative link.
+ */
+export function buildProposalUrl(input: ProposalInput, origin = ""): string {
+  const params = new URLSearchParams();
+  if (input.recipient.trim()) params.set("for", input.recipient.trim());
+  if (input.template) params.set("template", input.template);
+  else if (input.prompt?.trim())
+    params.set("prompt", input.prompt.trim().slice(0, MAX_PROMPT_LENGTH));
+  if (input.from?.trim()) params.set("from", input.from.trim());
+  if (input.note?.trim())
+    params.set("note", input.note.trim().slice(0, MAX_PROPOSAL_NOTE_LENGTH));
+  const query = params.toString();
+  return `${origin}${PROPOSAL_PATH}${query ? `?${query}` : ""}`;
+}
+
 // Our own designed book-a-demo page (not the main assembly.com marketing page).
 // Its form is a prototype; the real booking on assembly.com/book-demo runs on
 // ChiliPiper (a dynamic JS router with no static URL), so wiring live booking

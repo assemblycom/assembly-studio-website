@@ -8,8 +8,9 @@
 // with a supporting visual).
 // ─────────────────────────────────────────────────────────────────────────
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useTheme } from "@/components/theme/theme-provider";
 
 // One height for every section's field, sections with artwork and sections
 // still waiting on it alike — scrolling the panel should pass a steady rhythm
@@ -33,8 +34,18 @@ type VisualSlug =
 // Inter, the face the product's own UI is set in — these are screenshots of the
 // app, not of the marketing site. Sized to sit close up on the field: the mocks
 // are the argument, so they take the width rather than floating small in it.
-const MOCK_CARD =
-  "mock-ui w-full max-w-[520px] overflow-hidden rounded-[12px] border border-[var(--mk-border)] bg-[var(--mk-surface)] [font-family:var(--font-inter),system-ui,sans-serif]";
+const MOCK_CARD_BASE =
+  "mock-ui overflow-hidden border-[var(--mk-border)] bg-[var(--mk-surface)] [font-family:var(--font-inter),system-ui,sans-serif]";
+
+// The default: a card floating centred on the blue field.
+const MOCK_CARD = `${MOCK_CARD_BASE} w-full max-w-[520px] rounded-[12px] border`;
+
+// The bleeding variant: the card runs off the field's bottom and right edges, so
+// it can be taller and wider than a floating card fits. Only the corner that
+// stays on the field keeps its radius, and the two edges that leave the frame
+// drop their border — a hairline running off the crop reads as a clipped box
+// rather than as a screen continuing past it.
+const MOCK_CARD_BLEED = `${MOCK_CARD_BASE} h-full w-full rounded-tl-[12px] border-l border-t`;
 
 // The CRM's own Contacts table, cut to the two rows that make the point: Ava
 // belongs to two companies and Jonah to one, and both sit under Meridian Corp.
@@ -323,7 +334,7 @@ function CrmCustomFieldsVisual() {
 
 // Small app marks. One rounded tile, one stroked glyph — enough to read as "an
 // app has an icon" at 14px without pretending to be a real icon set.
-type AppGlyph = "clock" | "doc" | "chat" | "card" | "check" | "folder";
+type AppGlyph = "clock" | "doc" | "chat" | "card" | "check" | "folder" | "home";
 
 function AppIcon({
   glyph,
@@ -359,6 +370,12 @@ function AppIcon({
       </>
     ),
     folder: <path d="M2.75 4.5h3.5l1 1.5h6v6.5h-10.5z" />,
+    home: (
+      <>
+        <path d="M2.75 7.25 8 3l5.25 4.25V13h-10.5z" />
+        <path d="M6.5 13V9.25h3V13" />
+      </>
+    ),
   };
   return (
     <svg
@@ -376,24 +393,6 @@ function AppIcon({
   );
 }
 
-// Grip, the mark that says a row moves.
-function IconGrip({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      fill="currentColor"
-      aria-hidden
-      className={className}
-    >
-      {[5, 8, 11].map((y) => (
-        <g key={y}>
-          <circle cx="6" cy={y} r="0.9" />
-          <circle cx="10" cy={y} r="0.9" />
-        </g>
-      ))}
-    </svg>
-  );
-}
 
 function IconChevron({ className = "" }: { className?: string }) {
   return (
@@ -417,17 +416,19 @@ function IconChevron({ className = "" }: { className?: string }) {
 // open beneath it — because the claim isn't that apps appear in a list, it's
 // that the list is yours to order.
 const SIDEBAR_APPS: { name: string; glyph: AppGlyph }[] = [
-  { name: "Home", glyph: "check" },
+  { name: "Home", glyph: "home" },
   { name: "Time tracker", glyph: "clock" },
   { name: "Messages", glyph: "chat" },
 ];
 
-function ClientSidebarVisual() {
+function ClientSidebarVisual({ bleed = false }: { bleed?: boolean }) {
   const row =
     "flex items-center gap-2 rounded-[5px] px-2 py-[6px] text-[11px] leading-none";
   return (
-    <div className={MOCK_CARD}>
-      <div className="flex min-h-[168px]">
+    <div className={bleed ? MOCK_CARD_BLEED : MOCK_CARD}>
+      {/* Bleeding, the card owns the field's full height, so the columns
+          stretch to it instead of stopping at the sidebar's natural height. */}
+      <div className={bleed ? "flex h-full" : "flex min-h-[168px]"}>
         <div className="w-[152px] shrink-0 border-r border-[var(--mk-hairline)] p-2">
           <div className="mb-1.5 flex items-center gap-2 px-2 py-[6px]">
             <span className="flex size-[16px] shrink-0 items-center justify-center rounded-[4px] bg-[var(--mk-invert-bg)] text-[8px] leading-none text-[var(--mk-invert-fg)]">
@@ -447,19 +448,18 @@ function ClientSidebarVisual() {
                   : "text-[var(--mk-muted)]"
               }`}
             >
-              {/* The lifted row swaps its icon for the grip — the cursor is on
-                  it, so that's what it would be showing. */}
-              {i === 1 ? (
-                <IconGrip className="size-[12px] shrink-0 text-[var(--mk-subtle)]" />
-              ) : (
-                <AppIcon glyph={app.glyph} className="size-[12px] shrink-0" />
-              )}
+              {/* Every item keeps its own icon. The lifted row used to swap its
+                  glyph for a drag grip, which read as the wrong icon rather than
+                  as motion — the raised surface already carries that. */}
+              <AppIcon glyph={app.glyph} className="size-[12px] shrink-0" />
               <span className="truncate">{app.name}</span>
             </div>
           ))}
 
+          {/* A folder gets one glyph in the same slot every other row uses —
+              the caret only replaces it on hover, so at rest it's the folder
+              icon alone and the open children are what says it's expanded. */}
           <div className={`${row} text-[var(--mk-muted)]`}>
-            <IconChevron className="size-[10px] shrink-0 rotate-90 text-[var(--mk-subtle)]" />
             <AppIcon glyph="folder" className="size-[12px] shrink-0" />
             <span className="truncate">Billing</span>
           </div>
@@ -537,10 +537,13 @@ function FocusedAppsVisual() {
   );
 }
 
+// Visuals that run off the field's bottom-right rather than floating in it.
+const BLEED_VISUALS = new Set<VisualSlug>(["client-sidebar"]);
+
 function SectionVisual({ slug }: { slug: VisualSlug }) {
   if (slug === "crm-relationships") return <CrmRelationshipsVisual />;
   if (slug === "crm-custom-fields") return <CrmCustomFieldsVisual />;
-  if (slug === "client-sidebar") return <ClientSidebarVisual />;
+  if (slug === "client-sidebar") return <ClientSidebarVisual bleed />;
   if (slug === "focused-apps") return <FocusedAppsVisual />;
   return null;
 }
@@ -809,40 +812,46 @@ function DetailPanel({
   // than the viewport — which trapped the drawer inside the section.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
+  const panelRef = useRef<HTMLDivElement>(null);
 
-  // Close on Escape and lock the page while the panel is open. `overflow:
-  // hidden` on <body> alone does not hold on iOS Safari — the page still pans
-  // behind the panel — so the body is also taken out of flow and pinned at its
-  // current offset, then restored (and scrolled back) on close. Without the
-  // pin, closing the panel would jump the reader to the top of the page.
+  // Close on Escape and hold the page still while the panel is open.
+  //
+  // This used to pin <body> with position:fixed, which locks scrolling but takes
+  // the page out of flow — and everything position:sticky inside it goes along,
+  // so the site nav detached from the top of the viewport and scrolled away the
+  // instant the panel opened. Same technique as the mobile menu instead:
+  // overflow:hidden on <html> stops wheel and keyboard scrolling, and a
+  // non-passive touchmove guard stops the iOS pan that overflow alone misses,
+  // while the panel's own scroller keeps working. Nothing leaves flow, so the
+  // nav stays where it is and there's no scroll position to restore.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     document.addEventListener("keydown", onKey);
-    const { body } = document;
-    const scrollY = window.scrollY;
-    const prev = {
-      overflow: body.style.overflow,
-      position: body.style.position,
-      top: body.style.top,
-      left: body.style.left,
-      right: body.style.right,
+
+    const html = document.documentElement;
+    const prevOverflow = html.style.overflow;
+    const prevPadding = html.style.paddingRight;
+    // Removing the scrollbar reflows the page a few pixels narrower, which reads
+    // as the whole layout twitching sideways as the panel arrives. Hand the
+    // width back as padding. Zero on overlay-scrollbar platforms, ~15px on
+    // Windows, so it has to be measured rather than assumed.
+    const scrollbar = window.innerWidth - html.clientWidth;
+    html.style.overflow = "hidden";
+    if (scrollbar > 0) html.style.paddingRight = `${scrollbar}px`;
+
+    const preventTouch = (e: TouchEvent) => {
+      if (!panelRef.current?.contains(e.target as Node)) e.preventDefault();
     };
-    body.style.overflow = "hidden";
-    body.style.position = "fixed";
-    body.style.top = `-${scrollY}px`;
-    body.style.left = "0";
-    body.style.right = "0";
+    document.addEventListener("touchmove", preventTouch, { passive: false });
+
     return () => {
       document.removeEventListener("keydown", onKey);
-      body.style.overflow = prev.overflow;
-      body.style.position = prev.position;
-      body.style.top = prev.top;
-      body.style.left = prev.left;
-      body.style.right = prev.right;
-      window.scrollTo(0, scrollY);
+      document.removeEventListener("touchmove", preventTouch);
+      html.style.overflow = prevOverflow;
+      html.style.paddingRight = prevPadding;
     };
   }, [open, onClose]);
 
@@ -877,6 +886,7 @@ function DetailPanel({
 
       {/* Panel */}
       <div
+        ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label={pillar.short}
@@ -957,7 +967,11 @@ function DetailPanel({
               <p className={BODY}>{s.body}</p>
               <div
                 aria-hidden
-                className={`mt-6 flex w-full items-center justify-center overflow-hidden rounded-xl p-4 sm:p-6 ${VISUAL_FIELD_H}`}
+                className={`mt-6 flex w-full overflow-hidden rounded-xl ${VISUAL_FIELD_H} ${
+                  s.visual && BLEED_VISUALS.has(s.visual)
+                    ? "items-stretch justify-end pl-4 pt-4 sm:pl-6 sm:pt-6"
+                    : "items-center justify-center p-4 sm:p-6"
+                }`}
                 style={{ backgroundColor: PANEL_BLUE }}
               >
                 {s.visual && <SectionVisual slug={s.visual} />}
@@ -981,6 +995,13 @@ function DetailPanel({
 }
 
 export function WholeStack() {
+  // The chevron's rest colour is picked here rather than by a dark: variant.
+  // `text-muted-foreground/40` and a dark-scoped `text-muted-foreground` both
+  // set `color`, and the opacity-modified one kept winning regardless of
+  // specificity — so only ONE colour class is ever emitted.
+  const { theme } = useTheme();
+  const chevronRest =
+    theme === "dark" ? "text-muted-foreground" : "text-muted-foreground/40";
   const [openIdx, setOpenIdx] = useState<number | null>(null);
   // Keep the last-opened pillar mounted through the close animation so content
   // doesn't vanish before the panel finishes sliding out.
@@ -1003,26 +1024,40 @@ export function WholeStack() {
           </h2>
         </div>
 
-        {/* Pillar index — a single column of rows divided by hairlines; each
-            row opens the detail panel. */}
-        <div className="border border-border">
+        {/* Pillar index — one column of rows, no frame and no row rules: the
+            list is short and evenly spaced, which separates the rows on its own.
+            The container is pulled out by the row padding (-mx-3 against px-3),
+            so a hovered row's fill breathes past the text on both sides while
+            the labels still line up with the column at rest. */}
+        <div className="-mx-3">
           {PILLARS.map((p, i) => (
             <button
               key={p.short}
               type="button"
               onClick={() => open(i)}
               aria-haspopup="dialog"
-              className="group flex w-full items-baseline gap-5 border-t border-border px-5 py-4 text-left transition-colors first:border-t-0 hover:bg-muted/60 [[data-theme=dark]_&]:hover:bg-white/[0.03]"
+              // The row needs a real hover: with the borders gone, brightening
+              // the chevron alone left ten labels with no sign they were
+              // clickable. A soft fill on the whole row reads as the target it
+              // is, and it's the same tone the site's other hover rows use
+              // (foreground at ~4% in light, white at ~5% over the near-black
+              // ground, where a foreground tint would be invisible).
+              className="group flex w-full items-baseline gap-5 rounded-lg px-3 py-4 text-left transition-colors hover:bg-foreground/[0.04] [[data-theme=dark]_&]:hover:bg-white/[0.05]"
             >
               <span className="type-body flex-1 text-foreground">
                 {p.short}
               </span>
-              <span
-                aria-hidden
-                className="shrink-0 select-none text-muted-foreground/40 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-foreground"
-              >
-                →
-              </span>
+              {/* A chevron, not an arrow. The row opens a panel over this page
+                  (aria-haspopup="dialog"); an arrow is the promise of going
+                  somewhere, and it was writing a cheque the row doesn't cash.
+                  The hover nudge went with it for the same reason: sliding right
+                  is the gesture of leaving. It brightens instead. */}
+              {/* 40% of the muted token disappears against the near-black dark
+                  ground, so dark takes the token at full strength. Light keeps
+                  40% exactly as it was. */}
+              <IconChevron
+                className={`size-3.5 shrink-0 ${chevronRest} transition-colors duration-200 group-hover:text-foreground`}
+              />
             </button>
           ))}
         </div>

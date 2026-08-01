@@ -9,6 +9,7 @@ import {
   IconExpand,
 } from "@/components/templates/modal-icons";
 import { APP_URL } from "@/lib/constants";
+import { TEMPLATE_CUSTOMIZATION as CUSTOMIZABLE } from "@/lib/templates";
 import { useAuthState } from "@/lib/use-auth";
 
 // Slim, serializable slice of a template the modal needs.
@@ -25,15 +26,6 @@ export interface ModalTemplate {
   previewCount?: number;
   hasVideo?: boolean;
 }
-
-// Customization points common to every Assembly template (mirrors the full
-// detail page).
-const CUSTOMIZABLE = [
-  "Branding, colors, and your own domain",
-  "Fields, sections, and the steps clients see",
-  "Automations, reminders, and notifications",
-  "Access and permissions per client or team",
-];
 
 /**
  * Notion-style template browser modal: the grid stays behind a dimmed

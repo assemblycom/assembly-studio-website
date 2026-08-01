@@ -26,6 +26,9 @@ export interface CaseStudy {
   industry: string;
   headline: string;
   summary: string;
+  // Search-snippet copy. The on-page `summary` is written for the card, which
+  // is a different job from the ~155 characters Google shows.
+  seoDescription: string;
   stats: Stat[];
   challenge: string;
   solution: string;
@@ -74,6 +77,8 @@ export const CASE_STUDIES: CaseStudy[] = [
   {
     slug: "capital-one-luxury-travel",
     company: "Capital One Luxury Travel",
+    seoDescription:
+      "How Capital One Luxury Travel weighed build vs. buy, then used Assembly Studio to onboard 1,100+ hotel partners and grow client experience adoption.",
     industry: "Travel & Hospitality",
     featured: true,
     image: "/images/customers/capital-one-hero.jpg",
@@ -194,6 +199,8 @@ export const CASE_STUDIES: CaseStudy[] = [
   {
     slug: "valuenode-accounting",
     company: "ValueNode Accounting",
+    seoDescription:
+      "How ValueNode Accounting built a fully digital CPA practice on Assembly Studio's client experience platform.",
     industry: "Accounting & CPA",
     image: "/images/customers/valuenode-accounting.jpg",
     headline:
@@ -297,6 +304,8 @@ export const CASE_STUDIES: CaseStudy[] = [
   {
     slug: "metta-health",
     company: "Metta Health",
+    seoDescription:
+      "How Metta Health runs HIPAA-compliant patient authorizations at scale inside its Assembly Studio client experience.",
     industry: "Healthcare",
     image: "/images/customers/metta-health.jpg",
     headline:
@@ -385,6 +394,8 @@ export const CASE_STUDIES: CaseStudy[] = [
   {
     slug: "orca-accounting",
     company: "Orca Accounting",
+    seoDescription:
+      "How Orca Accounting scaled 4.5x in seven months by running its client experience on Assembly Studio.",
     industry: "Accounting",
     image: "/images/customers/orca-hero.jpg",
     headline:
@@ -481,6 +492,8 @@ export const CASE_STUDIES: CaseStudy[] = [
   {
     slug: "jungle-luxe",
     company: "Jungle Luxe",
+    seoDescription:
+      "How Jungle Luxe built a client experience for international property owners in one week, onboarding 250 clients in the first month.",
     industry: "Real Estate & Property Management",
     image: "/images/customers/jungle-luxe.jpg",
     headline:
@@ -579,6 +592,8 @@ export const CASE_STUDIES: CaseStudy[] = [
   {
     slug: "zen-aegis",
     company: "Zen Aegis",
+    seoDescription:
+      "How Zen Aegis saves clients 40+ hours a week with a streamlined Assembly Studio client experience.",
     industry: "Professional Services",
     image: "/images/customers/zen-aegis-hero2.jpg",
     headline:
@@ -669,6 +684,8 @@ export const CASE_STUDIES: CaseStudy[] = [
   {
     slug: "ditto-by-dbc",
     company: "Ditto by DBC",
+    seoDescription:
+      "How Ditto by DBC uses Assembly Studio to scale secure, data-driven marketing campaigns across its client experience.",
     industry: "Marketing & Design",
     image: "/images/customers/ditto-by-dbc.jpg",
     headline:
@@ -758,6 +775,8 @@ export const CASE_STUDIES: CaseStudy[] = [
   {
     slug: "vacation-rental-license",
     company: "Vacation Rental License",
+    seoDescription:
+      "How Vacation Rental License streamlined client operations by building on Assembly Studio's client experience.",
     industry: "Real Estate & Licensing",
     headline:
       "How Vacation Rental License Streamlines Client Operations with Assembly",
@@ -837,6 +856,8 @@ export const CASE_STUDIES: CaseStudy[] = [
   {
     slug: "collective-cpa",
     company: "Collective CPA & Advisors",
+    seoDescription:
+      "How Collective CPA & Advisors unified fragmented accounting services into one client experience as its client teams grew.",
     shortName: "Collective CPA",
     industry: "Accounting & Advisory",
     image: "/images/customers/collective-cpa.jpg",
@@ -918,6 +939,8 @@ export const CASE_STUDIES: CaseStudy[] = [
   {
     slug: "heritage-law-partners",
     company: "Heritage Law Partners",
+    seoDescription:
+      "How Heritage Law Partners delivers exceptional client service through its Assembly Studio client experience.",
     industry: "Legal & Estate Planning",
     image: "/images/customers/heritage-law-partners.jpg",
     headline:
@@ -1007,6 +1030,8 @@ export const CASE_STUDIES: CaseStudy[] = [
   {
     slug: "durrick-designs",
     company: "Durrick Designs",
+    seoDescription:
+      "How Durrick Designs centralized client collaboration in one branded Assembly Studio client experience.",
     industry: "Web Development & Design",
     headline:
       "How Durrick Designs Centralizes Client Collaboration with Assembly",
@@ -1099,6 +1124,8 @@ export const CASE_STUDIES: CaseStudy[] = [
     // detail page leads with the video player.
     slug: "sargent-cpa",
     company: "Sargent CPA",
+    seoDescription:
+      "How Sargent CPA modernized its client experience for accounting clients using Assembly Studio.",
     industry: "Accounting & Advisory",
     videoUrl:
       "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
@@ -1147,6 +1174,8 @@ export const CASE_STUDIES: CaseStudy[] = [
     // detail page leads with the video player.
     slug: "advertai-marketing",
     company: "Advertai Marketing",
+    seoDescription:
+      "How Advertai Marketing scales client delivery for marketing campaigns on its Assembly Studio client experience.",
     industry: "Marketing & Design",
     videoUrl:
       "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",

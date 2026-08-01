@@ -1,36 +1,91 @@
+import { readdirSync } from "node:fs";
+import { join } from "node:path";
 import type { MetadataRoute } from "next";
-import { SITE_URL } from "@/lib/constants";
+import {
+  PROPOSAL_CREATOR_PATH,
+  PROPOSAL_PATH,
+  SITE_URL,
+} from "@/lib/constants";
 import { TEMPLATES } from "@/lib/templates";
 import { CASE_STUDIES } from "@/lib/case-studies";
 
-// Full marketing sitemap, generated from the same data that drives the
-// /templates and /customers routes so template/story pages never fall out of
-// sync with the sitemap.
+// Pin to build time so the filesystem walk below never runs in a lambda, where
+// src/ isn't shipped.
+export const dynamic = "force-static";
+
+const APP_DIR = join(process.cwd(), "src", "app");
+
+type Frequency = NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
+
+// Routes that exist but should never be listed. Everything else under src/app
+// is picked up automatically, so a new page can't be forgotten — it can only be
+// left out deliberately, here, with a reason.
+const EXCLUDED = new Set<string>([
+  // Personalized, sent to one person. Also noindex in its own metadata.
+  PROPOSAL_PATH,
+  // Internal tool that writes those proposals.
+  PROPOSAL_CREATOR_PATH,
+  // The sign-up sheet. It normally opens as a modal over another page, and the
+  // standalone route carries no content of its own worth ranking.
+  "/get-started",
+]);
+
+// Per-route crawl hints. Anything not listed falls back to DEFAULT_HINT, which
+// is the point: a new page reaches the sitemap whether or not anyone remembers
+// to tune it here.
+const HINTS: Record<string, { changeFrequency: Frequency; priority: number }> = {
+  "/": { changeFrequency: "weekly", priority: 1 },
+  "/customers": { changeFrequency: "weekly", priority: 0.8 },
+  "/templates": { changeFrequency: "weekly", priority: 0.8 },
+  "/pricing": { changeFrequency: "weekly", priority: 0.8 },
+  "/security": { changeFrequency: "monthly", priority: 0.7 },
+  "/demo": { changeFrequency: "monthly", priority: 0.6 },
+};
+
+const DEFAULT_HINT = { changeFrequency: "monthly" as Frequency, priority: 0.5 };
+
+/**
+ * Walks src/app and returns every statically-routable page path. Dynamic
+ * segments are skipped and enumerated from their source data instead, since
+ * that's the only place that knows every slug.
+ */
+function findStaticRoutes(dir = APP_DIR, route = ""): string[] {
+  const entries = readdirSync(dir, { withFileTypes: true });
+  const hasPage = entries.some(
+    (e) => e.isFile() && /^page\.(tsx|ts|jsx|js|mdx)$/.test(e.name),
+  );
+  const routes = hasPage ? [route || "/"] : [];
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const name = entry.name;
+    // [slug] — data-driven, handled below.
+    if (name.startsWith("[")) continue;
+    // @modal slots, _private folders, and route handlers aren't pages.
+    if (name.startsWith("@") || name.startsWith("_") || name === "api") continue;
+    // (group) folders organize files without adding a URL segment.
+    const nested = name.startsWith("(") ? route : `${route}/${name}`;
+    routes.push(...findStaticRoutes(join(dir, name), nested));
+  }
+  return routes;
+}
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
+  const lastModified = new Date();
 
-  const staticRoutes: MetadataRoute.Sitemap = [
-    { url: `${SITE_URL}/`, lastModified: now, changeFrequency: "weekly", priority: 1 },
-    { url: `${SITE_URL}/customers`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${SITE_URL}/templates`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${SITE_URL}/pricing`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${SITE_URL}/security`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${SITE_URL}/demo`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+  const entry = (path: string): MetadataRoute.Sitemap[number] => ({
+    url: `${SITE_URL}${path}`,
+    lastModified,
+    ...(HINTS[path] ?? DEFAULT_HINT),
+  });
+
+  const pages = findStaticRoutes()
+    .filter((path) => !EXCLUDED.has(path))
+    .sort();
+
+  return [
+    ...pages.map(entry),
+    ...TEMPLATES.map((t) => entry(`/templates/${t.slug}`)),
+    ...CASE_STUDIES.map((s) => entry(`/customers/${s.slug}`)),
   ];
-
-  const templateRoutes: MetadataRoute.Sitemap = TEMPLATES.map((t) => ({
-    url: `${SITE_URL}/templates/${t.slug}`,
-    lastModified: now,
-    changeFrequency: "monthly",
-    priority: 0.6,
-  }));
-
-  const storyRoutes: MetadataRoute.Sitemap = CASE_STUDIES.map((s) => ({
-    url: `${SITE_URL}/customers/${s.slug}`,
-    lastModified: now,
-    changeFrequency: "monthly",
-    priority: 0.6,
-  }));
-
-  return [...staticRoutes, ...templateRoutes, ...storyRoutes];
 }

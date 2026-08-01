@@ -26,9 +26,11 @@ const FEATURED = {
   // Replace together with name/firm when the beta-firm content lands.
   image: "/images/customers/jungle-luxe.jpg",
   stats: [
-    { value: "One week", label: "From idea to live client experience" },
-    { value: "250 clients", label: "Onboarded in the first month" },
-    { value: "$5,000/mo", label: "In vendor costs replaced by apps" },
+    // The number is the claim; the caption only has to say what it counts. Set
+    // in mono caps, every extra word is a long line under a short headline.
+    { value: "One week", label: "Idea to live app" },
+    { value: "250 clients", label: "Onboarded in month one" },
+    { value: "$5,000/mo", label: "Vendor costs replaced" },
   ],
   href: "/customers",
 };
@@ -131,10 +133,10 @@ export function Testimonials() {
             href={FEATURED.href}
             className="type-body group inline-flex items-center gap-1.5 px-2 pb-1 pt-2 text-foreground md:absolute md:bottom-[210px] md:right-0 md:mt-0 md:p-0 lg:bottom-[218px]"
           >
-            {/* Underline only the text — an underlined arrow that also nudges
-              on hover reads as a rendering glitch. Desktop only: inside the
-              ring the rule was a second line under a line. */}
-            <span className="decoration-border underline-offset-4 transition-colors group-hover:decoration-foreground md:underline">
+            {/* No rule under the text: the arrow beside it already reads as a
+              link, and the underline was a third horizontal line in a block
+              that is mostly horizontal lines. Hover brightens instead. */}
+            <span className="transition-colors group-hover:text-foreground">
               Read firm&rsquo;s story
             </span>
             <span className="transition-transform duration-200 group-hover:translate-x-0.5">

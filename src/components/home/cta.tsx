@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { V66Composer } from "./hero-v66";
 import { PROMPT_IDEAS } from "./prompt-ideas";
 import { useTheme } from "@/components/theme/theme-provider";
@@ -12,6 +12,19 @@ export function CTA() {
   // Same prompt data + animated "Build …" placeholder as the hero composer,
   // so the top and bottom boxes read identically.
   const [prompt, setPrompt] = useState("");
+
+  // Closing the sign-up sheet steps back to this page with ?prompt=… on the URL
+  // (openGetStarted stamps it before opening), so the composer refills with what
+  // was typed instead of coming back empty. Same carry-back the hero composer
+  // does; without it only the top composer survived a dismiss.
+  useEffect(() => {
+    const carried = new URLSearchParams(window.location.search)
+      .get("prompt")
+      ?.trim();
+    if (!carried) return;
+    const id = setTimeout(() => setPrompt(carried), 0);
+    return () => clearTimeout(id);
+  }, []);
   const { theme } = useTheme();
   const dark = theme === "dark";
   // bg-background in both themes so the CTA sits on the same canvas as the
@@ -45,7 +58,7 @@ export function CTA() {
               minimalControls
               splitFooter
               promptPicker
-              promptPickerLabel="Prompt Ideas"
+              promptPickerLabel="Ideas"
               promptPickerSide="left"
               promptItems={PROMPT_IDEAS}
               hideHowTo

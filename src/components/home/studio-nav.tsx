@@ -106,6 +106,8 @@ export function StudioNav({
   // non-passive touchmove guard on the overlay stops iOS touch scrolling,
   // while still allowing the menu's own list to scroll if it overflows.
   const menuScrollRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     if (!mobileMenuOpen) return;
     const prev = document.documentElement.style.overflow;
@@ -119,6 +121,58 @@ export function StudioNav({
       document.removeEventListener("touchmove", preventTouch);
     };
   }, [mobileMenuOpen]);
+  // The menu covers the page, so it has to behave like the modal it looks like:
+  // focus moves into it, Tab cycles inside it, Escape closes it, and closing
+  // hands focus back to the button that opened it. Without this the page behind
+  // stayed in the tab order — 64 controls a keyboard user could tab into while
+  // looking at a menu — and Escape did nothing.
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const menu = menuRef.current;
+    if (!menu) return;
+    // Captured now: by the time cleanup runs the ref may already point
+    // somewhere else, and this is the button we owe focus back to.
+    const trigger = menuTriggerRef.current;
+    const SELECTOR =
+      'a[href],button:not(:disabled),input,textarea,select,[tabindex]:not([tabindex="-1"])';
+    const items = () =>
+      [...menu.querySelectorAll<HTMLElement>(SELECTOR)].filter(
+        (el) => el.getBoundingClientRect().width > 0,
+      );
+    items()[0]?.focus();
+
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const list = items();
+      if (list.length === 0) return;
+      const first = list[0];
+      const last = list[list.length - 1];
+      if (!menu.contains(document.activeElement)) {
+        event.preventDefault();
+        first.focus();
+      } else if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      // Only when the menu itself closed — following a link navigates away, and
+      // yanking focus back to the hamburger there would undo the navigation's
+      // own focus handling.
+      const active = document.activeElement;
+      if (!active || active === document.body) trigger?.focus();
+    };
+  }, [mobileMenuOpen]);
+
   // The scrolled pill now matches the surface theme: a light capsule in light
   // contexts, a dark one over a dark hero/theme (darkTop). So contents are light
   // only in a dark context — dark otherwise, whether at rest or scrolled.
@@ -192,7 +246,23 @@ export function StudioNav({
   // whitespace-nowrap keeps every label on one line so the pill never wraps.
   const darkLink = softGlass ? "text-foreground/90 hover:text-foreground" : "text-muted-foreground hover:text-foreground";
   const darkDisabled = softGlass ? "text-foreground/90" : "text-muted-foreground";
-  const linkCls = `whitespace-nowrap rounded-full px-2 py-1.5 text-sm transition-colors lg:px-3 ${lightContent ? "text-white/70 hover:text-white" : darkLink}`;
+  const linkBase =
+    "whitespace-nowrap rounded-full px-2 py-1.5 text-sm transition-colors lg:px-3";
+  const linkRest = lightContent ? "text-white/70 hover:text-white" : darkLink;
+  const linkCls = `${linkBase} ${linkRest}`;
+  // The page you're on reads at full strength while the rest sit back — the
+  // same contrast step the links already use for hover, so no new treatment.
+  // Section pages count as their section (/templates/<slug> lights Templates).
+  const isCurrent = (href: string) =>
+    href.startsWith("/") &&
+    (pathname === href || (href !== "/" && pathname.startsWith(`${href}/`)));
+  // The colour token is SWAPPED, never appended: two text-* utilities on one
+  // element are the same specificity, so stylesheet order decides the winner
+  // and the muted one kept it.
+  const navLinkCls = (href: string) =>
+    `${linkBase} ${
+      isCurrent(href) ? (lightContent ? "text-white" : "text-foreground") : linkRest
+    }`;
   const disabledCls = `cursor-default whitespace-nowrap rounded-full px-2 py-1.5 text-sm lg:px-3 ${lightContent ? "text-white/50" : darkDisabled}`;
   const ctaCls = `whitespace-nowrap rounded-lg px-4 py-1.5 text-sm transition-[background-color,color,opacity] hover:opacity-90 ${
     theme === "light"
@@ -264,8 +334,11 @@ export function StudioNav({
             {logoMark}
           </Link>
           <button
+            ref={menuTriggerRef}
             onClick={() => setMobileMenuOpen(true)}
             aria-label="Open menu"
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-menu"
             className={`flex size-9 items-center justify-center transition-[color,opacity] ${ease} active:opacity-60 ${lightContent ? "text-white" : "text-foreground"}`}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
@@ -327,7 +400,8 @@ export function StudioNav({
                   ) : (
                     <Link
                       href={link.href}
-                      className={linkCls}
+                      aria-current={isCurrent(link.href) ? "page" : undefined}
+                      className={navLinkCls(link.href)}
                     >
                       {link.label}
                     </Link>
@@ -396,7 +470,14 @@ export function StudioNav({
       {/* Mobile full-screen menu — portaled to <body> so it escapes the home
           content wrapper's stacking context (z-10) and paints above the nav. */}
       {mounted && mobileMenuOpen && createPortal(
-        <div className={`fixed inset-0 z-[60] flex flex-col lg:hidden ${menuSurface}`}>
+        <div
+          ref={menuRef}
+          id="mobile-menu"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu"
+          className={`fixed inset-0 z-[60] flex flex-col lg:hidden ${menuSurface}`}
+        >
           {/* Match the mobile header's padding (px-5) and height exactly so the
               logo stays put when the menu opens — it must not shift. */}
           <div className={`flex items-center justify-between border-b px-5 ${scrolled ? "h-12" : "h-14"} ${menuBorder}`}>
@@ -459,7 +540,10 @@ export function StudioNav({
                   ) : (
                     <Link
                       href={link.href}
-                      className={`block py-3 text-lg ${menuInk}`}
+                      aria-current={isCurrent(link.href) ? "page" : undefined}
+                      className={`block py-3 text-lg ${menuInk} ${
+                        isCurrent(link.href) ? "font-medium" : ""
+                      }`}
                     >
                       {link.label}
                     </Link>

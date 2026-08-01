@@ -5,12 +5,9 @@ import { SecurityTestimonials } from "@/components/security/security-testimonial
 import { SecurityCompliance } from "@/components/security/security-compliance";
 import { SecurityCta } from "@/components/security/security-cta";
 import { DEMO_URL, SIGNUP_URL, TRUST_CENTER_URL } from "@/lib/constants";
+import { PAGE_SEO, pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Security",
-  description:
-    "Enterprise-grade security for your client portals. SOC 2 Type II, HIPAA-ready, end-to-end encrypted, and built for regulated industries.",
-};
+export const metadata: Metadata = pageMetadata(PAGE_SEO.security);
 
 const DIFFERENTIATORS: { title: string; description: string }[] = [
   {
@@ -131,29 +128,16 @@ export default function SecurityPage() {
       </section>
 
       {/* Compliance seals — surfaced right after the hero so the credibility
-          lands first, framed by a full-bleed rule and the vertical guide rails. */}
+          lands first, under its full-bleed rule. */}
       <div className="border-t border-border [[data-theme=dark]_&]:border-[#383838]" />
       <div className="relative">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 z-30 hidden justify-center min-[1200px]:flex"
-        >
-          <div className="h-full w-full max-w-[1200px] border-x border-border [[data-theme=dark]_&]:border-[#383838]" />
-        </div>
         <SecurityCompliance />
       </div>
 
-      {/* Guide-rail content region — the vertical rails start at the "different"
-          section and run down through the customer story below. */}
+      {/* Content region — the "different" section down through the customer
+          story. The vertical guide rails that used to frame it are gone; the
+          horizontal rules still separate the sections. */}
       <div className="relative">
-        {/* Vertical guide rails — shown once the viewport reaches the 1200px
-            content rail. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 z-30 hidden justify-center min-[1200px]:flex"
-        >
-          <div className="h-full w-full max-w-[1200px] border-x border-border [[data-theme=dark]_&]:border-[#383838]" />
-        </div>
 
         {/* Full-bleed line above the first section. */}
         <div className="border-t border-border [[data-theme=dark]_&]:border-[#383838]" />
@@ -197,8 +181,6 @@ export default function SecurityPage() {
         </div>
       </section>
 
-        {/* Divider between the two sections — meets the guide rails. */}
-        <div className="mx-auto max-w-[1200px] border-t border-border [[data-theme=dark]_&]:border-[#383838]" />
 
         {/* Customer story — Metta Health spotlight. */}
         <section className="mx-auto max-w-[1200px] px-6 pb-20 pt-16 md:px-10 md:pb-28 md:pt-16">
@@ -206,18 +188,9 @@ export default function SecurityPage() {
         </section>
       </div>
 
-      {/* Divider into the compliance + FAQ region. */}
-      <div className="border-t border-border [[data-theme=dark]_&]:border-[#383838]" />
 
-      {/* Certifications + FAQ — the seal row sits right before the questions,
-          both sharing the same vertical guide rails. */}
+      {/* Certifications + FAQ — the seal row sits right before the questions. */}
       <div className="relative">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 z-30 hidden justify-center min-[1200px]:flex"
-        >
-          <div className="h-full w-full max-w-[1200px] border-x border-border [[data-theme=dark]_&]:border-[#383838]" />
-        </div>
 
         <FAQ
           heading="Frequently asked questions"

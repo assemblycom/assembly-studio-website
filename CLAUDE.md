@@ -89,10 +89,41 @@ the next page reuses it too.
 - `npm run build` — production build
 - `npm run lint` — run ESLint
 
+## SEO, metadata, and social cards
+All of it runs off `src/lib/seo.ts` and `src/lib/og.tsx`.
+
+- **Never write a bare `export const metadata = { title, description }`.** Next
+  inherits the parent's `openGraph` object wholesale, so a page that sets only
+  those two still ships the *homepage's* social card. Always go through
+  `pageMetadata()`, which writes title, description, canonical, Open Graph, and
+  Twitter together.
+- **Static page copy lives in `PAGE_SEO`** in `src/lib/seo.ts` — one record per
+  page, read by the page metadata, the social card, and the sitemap.
+- **One social card for the whole site** — `public/og.jpg`, exported as
+  `OG_IMAGE` from `src/lib/seo.ts`. Per-page generated cards were tried and
+  rejected; don't reintroduce `opengraph-image.tsx` route files. 1200×630 is the
+  only size worth shipping, since every platform crops its own thumbnail from it.
+- Because `pageMetadata()` writes a whole `openGraph` object, it has to include
+  `images` — a page that omits it ends up with no card image at all.
+- **The sitemap walks `src/app` at build time**, so a new page appears without
+  anyone remembering. To keep a route *out*, add it to `EXCLUDED` in
+  `src/app/sitemap.ts` with a reason, and give the page `robots: { index: false }`
+  so the two can't disagree.
+
 ## Adding a New Page
 1. Create `src/app/<page-name>/page.tsx`
-2. Add the route to `NAV_LINKS` in `src/lib/constants.ts` if it belongs in the nav
-3. Use the `Section` component from `src/components/ui/section.tsx` for consistent spacing
+2. Add an entry to `PAGE_SEO` in `src/lib/seo.ts` and export
+   `metadata = pageMetadata(PAGE_SEO.<key>)` from the page
+3. Add the route to `NAV_LINKS` in `src/lib/constants.ts` if it belongs in the nav
+4. Use the `Section` component from `src/components/ui/section.tsx` for consistent spacing
+
+The sitemap picks the page up on its own — no edit needed.
 
 ## Adding a Template
-Add an entry to the `TEMPLATES` array in `src/lib/templates.ts`. The detail page is auto-generated via the `[slug]` dynamic route.
+Add an entry to the `TEMPLATES` array in `src/lib/templates.ts`. The detail page,
+its social card, and its sitemap entry are all generated from that one entry.
+
+## Adding a Customer Story
+Add an entry to `CASE_STUDIES` in `src/lib/case-studies.ts`. `seoDescription` is
+required — it's the search snippet, and it's a different job from `summary`,
+which is written for the index card.

@@ -1,17 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { TEMPLATES, getTemplateBySlug, type Template } from "@/lib/templates";
+import { pageMetadata } from "@/lib/seo";
+import {
+  TEMPLATES,
+  TEMPLATE_CUSTOMIZATION as CUSTOMIZABLE,
+  getTemplateBySlug,
+  type Template,
+} from "@/lib/templates";
 import { TemplateGallery } from "@/components/templates/template-gallery";
 import { TemplateCta } from "@/components/templates/template-cta";
-
-// Customization points common to every Assembly template.
-const CUSTOMIZABLE = [
-  "Branding, colors, and your own domain",
-  "Fields, sections, and the steps clients see",
-  "Automations, reminders, and notifications",
-  "Access and permissions per client or team",
-];
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -25,10 +23,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const template = getTemplateBySlug(slug);
   if (!template) return {};
-  return {
+  return pageMetadata({
     title: template.title,
-    description: template.description,
-  };
+    // The card description is a fragment ("Track records through stages");
+    // the long form reads as a sentence in a search result.
+    description: template.longDescription || template.description,
+    path: `/templates/${template.slug}`,
+  });
 }
 
 /**

@@ -22,8 +22,10 @@ export const BRAND_AURORA = [
 ];
 
 // Always-visible brand aurora at the bottom of the footer — a mobile band (fills
-// more of its container) and a desktop band, each rising on mount.
-function FooterAurora() {
+// more of its container) and a desktop band, each rising on mount. Exported so
+// the proposal page can end in the same aurora without inheriting the footer's
+// link columns (that page carries no navigation).
+export function FooterAurora() {
   return (
     <>
       <div

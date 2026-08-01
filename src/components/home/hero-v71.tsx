@@ -521,10 +521,6 @@ function CardTimeTracker() {
 
 // Goal tracker — visual removed for now (the donut read poorly at card size);
 // the card face stays blank until a better composition lands.
-function CardGoalTracker() {
-  return <div className="h-full bg-[var(--v69-card)]" />;
-}
-
 // Static (non-animated) filling mocks for the remaining featured cards — rows
 // centered with even gaps so the card reads composed, not top-clustered.
 // Proposal builder — banking-widget composition (à la the iOS wallet card):
@@ -1341,9 +1337,13 @@ function CardDataRoom() {
 // by brightness (ink / mid / faint), not hue; total sits in the center.
 function CardTicketing() {
   const R = 42;
+  // Rounded because the server and the client stringify the raw floats to
+  // different precision, which React reports as a hydration mismatch. Three
+  // decimals on a 100-unit viewBox is far below a pixel.
+  const round = (n: number) => Math.round(n * 1000) / 1000;
   const pt = (deg: number, r = R): [number, number] => {
     const a = (deg * Math.PI) / 180;
-    return [50 + r * Math.sin(a), 50 - r * Math.cos(a)];
+    return [round(50 + r * Math.sin(a)), round(50 - r * Math.cos(a))];
   };
   const arc = (d1: number, d2: number) => {
     const [x1, y1] = pt(d1);
@@ -1528,7 +1528,7 @@ export function V69CardMock({ slug }: { slug: string }) {
   if (slug === "client-engagement-dashboard") return <CardDashboard />;
   if (slug === "data-visualization") return <CardDataViz />;
   if (slug === "time-tracker") return <CardTimeTracker />;
-  if (slug === "goal-tracker") return <CardGoalTracker />;
+  if (slug === "goal-tracker") return <CardMetrics />;
   if (slug === "client-support-requests") return <CardSupport />;
   if (slug === "internal-ticketing") return <CardTicketing />;
   if (slug === "internal-communications-app") return <CardCommsApp />;
@@ -1546,6 +1546,12 @@ export function V69CardMock({ slug }: { slug: string }) {
   if (slug === "client-performance-dashboard") return <CardMetrics />;
   if (slug === "retainer-usage-overview") return <CardRetainer />;
   if (slug === "monthly-client-report") return <CardReport />;
+  if (slug === "events-rsvps") return <CardBooking />;
+  if (slug === "design-approvals") return <CardServiceRequest />;
+  if (slug === "mass-messenger") return <CardTicketing />;
+  if (slug === "jargon-quest") return <CardCommunityQA />;
+  if (slug === "internal-resource-library") return <CardCourse />;
+  if (slug === "block-builder-game") return <CardDeliverable />;
   return <TemplateMock slug={slug} />;
 }
 

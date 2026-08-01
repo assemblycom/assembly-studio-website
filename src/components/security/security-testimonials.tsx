@@ -71,9 +71,8 @@ export function SecurityTestimonials() {
           href={`/customers/${STORY.slug}`}
           className="type-body group inline-flex items-center gap-1.5 px-2 pb-1 pt-2 text-foreground md:absolute md:bottom-[210px] md:right-0 md:mt-0 md:p-0 lg:bottom-[218px]"
         >
-          {/* Desktop only: inside the ring the rule was a second line under a
-              line. */}
-          <span className="decoration-border underline-offset-4 transition-colors group-hover:decoration-foreground md:underline">
+          {/* No rule under the text — the arrow carries the affordance. */}
+          <span className="transition-colors group-hover:text-foreground">
             Read firm&rsquo;s story
           </span>
           <span className="transition-transform duration-200 group-hover:translate-x-0.5">

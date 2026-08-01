@@ -1,17 +1,10 @@
 "use client";
 
-import {
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TEMPLATES } from "@/lib/templates";
 import { PROMPT_IDEAS } from "@/components/home/prompt-ideas";
-import { buildSignupUrl, LOGIN_URL } from "@/lib/constants";
+import { SignupHandoff } from "@/components/ui/signup-handoff";
 import { HeroV76 } from "@/components/home/hero-v76";
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -24,29 +17,6 @@ import { HeroV76 } from "@/components/home/hero-v76";
 //   ?template=slug   a picked template (shown with a preview + details)
 //   ?for=Full%20Name optional "Prepared for …" personalization
 // ─────────────────────────────────────────────────────────────────────────
-
-function GoogleIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 18 18" aria-hidden focusable="false">
-      <path
-        fill="#4285F4"
-        d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62Z"
-      />
-      <path
-        fill="#34A853"
-        d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18Z"
-      />
-      <path
-        fill="#FBBC05"
-        d="M3.97 10.72a5.4 5.4 0 0 1 0-3.44V4.95H.96a9 9 0 0 0 0 8.1l3.01-2.33Z"
-      />
-      <path
-        fill="#EA4335"
-        d="M9 3.58c1.32 0 2.5.46 3.44 1.35l2.58-2.58C13.46.9 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58Z"
-      />
-    </svg>
-  );
-}
 
 // What you arrived with: the label on top and the words in a well under it. Two
 // lines at rest, opening to five on a click, with the cut marked by the clamp's
@@ -156,6 +126,9 @@ function PreviewCard({ template, prompt }: PreviewProps) {
 function GetStartedShell({
   preview,
   children,
+  // Intercepted (opened from inside the site) vs. standalone (a shared link or
+  // a refresh). Only the intercepted one can close by stepping back.
+  asModal = false,
   dismissHref = "/",
   // Standalone (a shared link, a refresh) has to draw the page behind the sheet
   // itself. Opened from the site, `app/@modal` renders this over the page that is
@@ -166,6 +139,7 @@ function GetStartedShell({
   children?: React.ReactNode;
   // Where dismissing lands. Carries the prompt so the composer you came from
   // still holds what you typed.
+  asModal?: boolean;
   dismissHref?: string;
   withBackdrop?: boolean;
 }) {
@@ -175,12 +149,29 @@ function GetStartedShell({
   // the sheet is a step on top of that page, so it dismisses like one. A push
   // rather than history.back(): the prompt rides in the URL, so the composer is
   // still holding what you typed even on a link opened cold.
+  // Closing is driven by local state as well as the router. Next's intercepted
+  // slot does not reliably unmount on a soft URL change — `push` never cleared
+  // it, and `back()` only sometimes did — so the sheet stayed on screen over a
+  // page that had already navigated. Unmounting ourselves makes the close
+  // deterministic; the router call still fixes up the URL and history.
+  const [closed, setClosed] = useState(false);
+
   const dismiss = useCallback(() => {
-    // A push either way, never history.back(): the prompt rides in the URL, so
-    // whether the page behind stayed mounted or not, the composer is holding what
-    // you typed when the sheet closes.
+    setClosed(true);
+    // Intercepted route: step back. Pushing changes the URL but leaves the
+    // @modal slot mounted — the sheet stayed on screen over a page that had
+    // already navigated. Back is what actually clears the slot, and the entry
+    // it returns to is the page the sheet was opened from, which still holds
+    // the typed prompt because that page never unmounted.
+    if (asModal) {
+      router.back();
+      return;
+    }
+    // Standalone (shared link, refresh): there's no history entry to return to,
+    // so this navigates. The prompt rides in dismissHref so the composer on the
+    // page we land on is still holding what was typed.
     router.push(dismissHref);
-  }, [router, dismissHref]);
+  }, [router, asModal, dismissHref]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -190,13 +181,45 @@ function GetStartedShell({
     return () => document.removeEventListener("keydown", onKey);
   }, [dismiss]);
 
+  // Hold the page still behind the sheet WITHOUT touching layout.
+  //
+  // Two layout-based locks were tried here and both moved the page in the
+  // instant before the sheet painted: overflow:hidden on <html> let the browser
+  // clamp the scroll position (~130px jump), and pinning <body> at a negative
+  // offset landed at the top of the page. Blocking the scroll *events* instead
+  // mutates nothing — no clamp, no reflow, no scrollbar removal — so there is
+  // nothing that can shift. The sheet's own scroller keeps working because
+  // events originating inside it are left alone.
+  const sheetRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const block = (event: Event) => {
+      const target = event.target as Node | null;
+      if (target && sheetRef.current?.contains(target)) return;
+      event.preventDefault();
+    };
+    document.addEventListener("wheel", block, { passive: false });
+    document.addEventListener("touchmove", block, { passive: false });
+    return () => {
+      document.removeEventListener("wheel", block);
+      document.removeEventListener("touchmove", block);
+    };
+  }, []);
+
+  if (closed) return null;
+
   return (
     // In context: the page you came from is still there behind the sheet, dimmed
     // and blurred, rather than replaced by a ground of its own — so signing up
     // reads as a step on top of what you were doing, not a different screen. The
     // backdrop is inert (aria-hidden, no pointer events) and the whole thing is
     // fixed, so nothing behind it scrolls under the sheet.
-    <div className="relative flex min-h-screen items-center justify-center p-4 sm:p-6 max-[479px]:items-end max-[479px]:p-0">
+    // Fixed to the viewport, not a min-h-screen block in normal flow. In flow
+    // this shell lands at the END of the document and centres inside itself, so
+    // opening the sheet from anywhere down the page put it a full screen below
+    // the fold and you had to scroll to find it. Fixed, it centres on what you
+    // are actually looking at, wherever that is. overflow-y-auto so a sheet
+    // taller than a short window can still be scrolled to its end.
+    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4 sm:p-6 max-[479px]:items-end max-[479px]:p-0">
       {withBackdrop && (
         <div
           aria-hidden
@@ -224,7 +247,9 @@ function GetStartedShell({
       {/* In dark mode the sheet has to lift off a near-black page, so it takes a
           surface a step above it and a hairline — the drop shadow that separates
           it in light mode does nothing there. */}
-      <main className="relative z-10 w-full max-w-md rounded-[24px] bg-background px-6 py-10 shadow-[0_30px_80px_-50px_rgba(0,0,0,0.55)] sm:px-10 sm:py-12 max-[479px]:max-w-none max-[479px]:rounded-b-none max-[479px]:pb-12 max-[479px]:shadow-none [[data-theme=dark]_&]:bg-[#171717] [[data-theme=dark]_&]:ring-1 [[data-theme=dark]_&]:ring-white/[0.10]">
+      <main
+        ref={sheetRef}
+        className="relative z-10 w-full max-w-md rounded-[24px] bg-background px-6 py-10 shadow-[0_30px_80px_-50px_rgba(0,0,0,0.55)] sm:px-10 sm:py-12 max-[479px]:max-w-none max-[479px]:rounded-b-none max-[479px]:pb-12 max-[479px]:shadow-none [[data-theme=dark]_&]:bg-[#171717] [[data-theme=dark]_&]:ring-1 [[data-theme=dark]_&]:ring-white/[0.10]">
         <div>
           <div className="mx-auto w-full max-w-sm">
               {/* What you arrived with leads the column at every width: it's the
@@ -240,7 +265,13 @@ function GetStartedShell({
   );
 }
 
-function GetStartedContent({ withBackdrop }: { withBackdrop: boolean }) {
+function GetStartedContent({
+  withBackdrop,
+  asModal,
+}: {
+  withBackdrop: boolean;
+  asModal: boolean;
+}) {
   const params = useSearchParams();
   const prompt = params.get("prompt")?.trim() ?? "";
   const templateSlug = params.get("template") ?? "";
@@ -248,133 +279,32 @@ function GetStartedContent({ withBackdrop }: { withBackdrop: boolean }) {
     ? TEMPLATES.find((t) => t.slug === templateSlug)
     : undefined;
 
-  const [email, setEmail] = useState("");
-  // Validation lives in the page, not the browser: the native bubble is a
-  // system chrome popover that ignores every type and colour decision here.
-  const [emailError, setEmailError] = useState("");
-  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-
-  // Google always hands off with prompt/template only; email adds the address
-  // so signup can prefill it.
-  const googleHref = useMemo(
-    () => buildSignupUrl(prompt || undefined, template?.slug),
-    [prompt, template],
-  );
-  const emailHref = useMemo(
-    () => buildSignupUrl(prompt || undefined, template?.slug, email.trim() || undefined),
-    [prompt, template, email],
-  );
-
-  // Never renders a disabled state: a greyed-out button on a signup screen
-  // reads as "this is broken" before you've typed anything. It stays live and
-  // the field's own validation catches an empty or malformed address.
-  // Hover fades the fill in light mode, but in dark that pulls a soft-white
-  // button *toward* the near-black ground and the hover reads as a dim-out.
-  // There it brightens to full white instead — same gesture, right direction.
-  const primary =
-    "flex h-12 items-center justify-center rounded-lg bg-foreground px-5 text-center text-sm text-background transition-[opacity,background-color] hover:opacity-90 [[data-theme=dark]_&]:hover:bg-white [[data-theme=dark]_&]:hover:opacity-100";
-  const oauth =
-    "flex h-12 items-center justify-center gap-2.5 rounded-lg border border-foreground/20 bg-transparent px-5 text-center text-sm text-foreground transition-colors hover:bg-foreground/5";
-
   return (
     <GetStartedShell
       preview={<PreviewCard template={template} prompt={prompt} />}
       dismissHref={prompt ? `/?prompt=${encodeURIComponent(prompt)}` : "/"}
       withBackdrop={withBackdrop}
+      asModal={asModal}
     >
       {/* Hand-off to signup — mirrors the app's own signup: Google, or an
           email. Carries the prompt/template (and email) along. */}
-      <div>
-        <a href={googleHref} className={oauth}>
-          <GoogleIcon className="size-[18px]" />
-          Continue with Google
-        </a>
-
-        {/* No "or" rule between the two: a divider frames them as a fork — carry
-            on with Google, or else sign up with an email — when they are two ways
-            through the same door, and both carry the prompt. Plain space instead,
-            a step wider than the gap inside the email pair so the two options
-            still read as separate choices. */}
-        <div className="h-3" />
-
-        <form
-          noValidate
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!email.trim()) {
-              setEmailError("Add your email to continue.");
-              return;
-            }
-            if (!emailValid) {
-              setEmailError("Double-check that email address.");
-              return;
-            }
-            window.location.href = emailHref;
-          }}
-          className="flex flex-col gap-3"
-        >
-          {/* No field label: the placeholder already names the field, and a
-              label between "or" and the input broke the stack's rhythm — the
-              divider sat 16px under Google and 42px above the email row. */}
-          <div className="flex flex-col gap-1.5">
-            <input
-              id="email"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              aria-label="Email"
-              aria-invalid={emailError ? true : undefined}
-              aria-describedby={emailError ? "email-error" : undefined}
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                if (emailError) setEmailError("");
-              }}
-              // text-base below sm is not a type choice — iOS Safari zooms the
-              // page on focus for any input under 16px. But at rest the field
-              // shows its placeholder, and at 16 that sat a step above the two
-              // 14px buttons around it. So the placeholder drops to 14 and the
-              // value stays at 16, keeping the zoom guard.
-              className="h-12 rounded-lg border border-foreground/20 bg-background px-4 text-base text-foreground outline-none transition-colors placeholder:text-sm placeholder:text-muted-foreground focus:border-foreground/40 aria-[invalid=true]:border-[var(--mock-negative-fg)] sm:text-sm [[data-theme=dark]_&]:bg-transparent [[data-theme=dark]_&]:aria-[invalid=true]:border-[var(--mock-negative-fg)]"
-            />
-            {emailError && (
-              <p
-                id="email-error"
-                role="alert"
-                className="type-caption text-[var(--mock-negative-fg)]"
-              >
-                {emailError}
-              </p>
-            )}
-          </div>
-          <button type="submit" className={primary}>
-            Continue with email
-          </button>
-        </form>
-      </div>
-
-      <p className="mt-6 text-center text-xs text-muted-foreground">
-        Already have an account?{" "}
-        <a
-          href={LOGIN_URL}
-          className="text-foreground transition-opacity hover:opacity-70"
-        >
-          Log in
-        </a>
-      </p>
+      <SignupHandoff prompt={prompt} template={template?.slug} />
     </GetStartedShell>
   );
 }
 
 export function GetStartedSheet({
   withBackdrop = true,
+  asModal = false,
 }: {
   withBackdrop?: boolean;
+  asModal?: boolean;
 }) {
   return (
-    <Suspense fallback={<GetStartedShell withBackdrop={withBackdrop} />}>
-      <GetStartedContent withBackdrop={withBackdrop} />
+    <Suspense
+      fallback={<GetStartedShell withBackdrop={withBackdrop} asModal={asModal} />}
+    >
+      <GetStartedContent withBackdrop={withBackdrop} asModal={asModal} />
     </Suspense>
   );
 }

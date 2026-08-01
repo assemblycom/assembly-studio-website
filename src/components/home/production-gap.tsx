@@ -424,8 +424,17 @@ function ProductionGapExplorer() {
     });
   };
 
-  // Jump to a step and restart its dwell.
+  // Jump to a step and restart its dwell. Landing on the step that is already
+  // running is a no-op: the mock's regions activate on mouseenter, so sweeping
+  // out of a region and back in fired this again and visibly restarted a rail
+  // that was halfway across.
+  //
+  // Deliberately no pause-on-hover to go with it. Hovering a region is how you
+  // SELECT it here, so freezing the clock at the same time left the rail you
+  // just lit sitting at zero for as long as the pointer stayed there — which
+  // reads as the animation being broken, not as a considered pause.
   const activate = (i: number) => {
+    if (i === activeRef.current) return;
     activeRef.current = i;
     progressRef.current = 0;
     paint();

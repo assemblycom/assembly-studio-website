@@ -232,8 +232,13 @@ const FREE_INDEX = 0;
 // when the Free column is hidden for signed-in visitors.
 // gap-x: without it the columns share an edge, and a long rate ("+$29 yr /
 // $39 mo") ran straight into the value beside it with no space between them.
-const GRID_5 = "grid grid-cols-[1.6fr_repeat(5,1fr)] gap-x-4";
-const GRID_4 = "grid grid-cols-[1.6fr_repeat(4,1fr)] gap-x-4";
+// minmax(0,…) on every track: a bare `1fr` is `minmax(auto, 1fr)`, so one wide
+// cell grew that row's columns — and because each row is its own grid, the row
+// then no longer lined up with the header or its neighbours.
+const GRID_5 =
+  "grid grid-cols-[minmax(0,1.6fr)_repeat(5,minmax(0,1fr))] gap-x-4";
+const GRID_4 =
+  "grid grid-cols-[minmax(0,1.6fr)_repeat(4,minmax(0,1fr))] gap-x-4";
 
 function CheckIcon() {
   return (
@@ -275,25 +280,32 @@ function InfoIcon() {
 // Feature name with an optional tap/hover tooltip — shared by both layouts.
 function RowLabel({ label, tooltip }: { label: string; tooltip?: string }) {
   return (
-    <div className="group relative flex items-center gap-1.5 pr-4 text-sm text-muted-foreground">
-      {label}
-      {tooltip && (
-        <>
+    // The icon sits in the text flow, not as a flex sibling: as a sibling, a
+    // label that wrapped to two lines took the full column width and shoved the
+    // icon out to the far right, away from the words it belongs to.
+    // text-balance evens the wrapped lines so a trailing info icon joins the
+    // last words instead of stranding itself on a line of its own.
+    <div className="group relative text-balance pr-4 text-sm text-muted-foreground">
+      <span>
+        {label}
+        {tooltip && (
           <button
             type="button"
             tabIndex={0}
             aria-label={`About ${label}`}
-            className="cursor-pointer text-muted-foreground/60 transition-colors hover:text-foreground"
+            className="ml-1.5 inline-flex translate-y-[2px] cursor-pointer text-muted-foreground/60 transition-colors hover:text-foreground"
           >
             <InfoIcon />
           </button>
-          <span
-            role="tooltip"
-            className="pointer-events-none absolute left-0 top-full z-30 mt-2 hidden w-60 rounded-lg border border-border bg-background p-3 text-xs leading-relaxed text-muted-foreground shadow-md group-hover:block group-focus-within:block"
-          >
-            {tooltip}
-          </span>
-        </>
+        )}
+      </span>
+      {tooltip && (
+        <span
+          role="tooltip"
+          className="pointer-events-none absolute left-0 top-full z-30 mt-2 hidden w-60 rounded-lg border border-border bg-background p-3 text-xs leading-relaxed text-muted-foreground shadow-md group-hover:block group-focus-within:block"
+        >
+          {tooltip}
+        </span>
       )}
     </div>
   );
@@ -313,9 +325,7 @@ function CellContent({ value, plain }: { value: Cell; plain?: boolean }) {
     value !== "Custom"
   ) {
     return (
-      <span className="whitespace-nowrap text-sm text-muted-foreground">
-        {value}
-      </span>
+      <span className="text-balance text-sm text-muted-foreground">{value}</span>
     );
   }
   return (
@@ -361,7 +371,7 @@ export function FeatureComparison() {
           <h2 className="type-h3">Compare plans</h2>
           <div className="mt-8 overflow-clip rounded-2xl border border-border px-6 pb-8 md:px-8 [[data-theme=dark]_&]:border-[#383838]">
       {/* Mobile: plan tabs + a single-column feature list for the chosen plan. */}
-      <div className="md:hidden">
+      <div className="lg:hidden">
         {/* Scrollable plan tabs, pinned under the nav so they stay reachable as
             you read down the list. */}
         {/* overflow-y-hidden: overflow-x-auto alone also makes this a vertical
@@ -406,7 +416,7 @@ export function FeatureComparison() {
       </div>
 
       {/* Desktop: full side-by-side table. */}
-      <div className="hidden md:block">
+      <div className="hidden lg:block">
         <div className="min-w-0">
           {/* Sticky plan header, inside the bordered card. Sticks just below the
               floating nav; an opaque bg masks rows scrolling behind it. Negative

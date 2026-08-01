@@ -209,7 +209,14 @@ function DescribeComposer() {
           crisp on top of it. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-44 opacity-95 blur-2xl saturate-150"
+        // Dark mode gets its own treatment, and ONLY dark: light keeps
+        // opacity-95 / blur-2xl / saturate-150 untouched. Over near-black those
+        // three fight each other — pushing saturation on a pale lime turns it to
+        // olive, and at 95% the blooms sit ON the surface like paint instead of
+        // reading as light coming off it. So dark drops the saturation boost,
+        // softens the falloff, pulls the opacity back, and blends with screen so
+        // the hues ADD to the dark ground the way a glow does.
+        className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-44 opacity-95 blur-2xl saturate-150 [[data-theme=dark]_&]:opacity-55 [[data-theme=dark]_&]:blur-3xl [[data-theme=dark]_&]:saturate-100 [[data-theme=dark]_&]:mix-blend-screen"
         style={{
           background: [
             "radial-gradient(62% 100% at 16% 100%, #d9ed92 0%, transparent 72%)",
@@ -619,7 +626,7 @@ function AddAppScreen() {
         {/* Heading + composer centre in the screen, held to a measure — run the
           full 800 and the field reads as a bar rather than something you type
           in, and pinned left it left a dead half-screen beside it. */}
-        <div className="mx-auto flex w-full max-w-[440px] shrink-0 flex-col gap-3">
+        <div className="mx-auto flex w-full max-w-[360px] shrink-0 flex-col gap-3">
           <p className="text-center text-[14px] leading-[20px] text-[var(--mk-fg)]">
             Margot, what will you build?
           </p>
@@ -689,10 +696,17 @@ function AddAppScreen() {
           </div>
           <div className="flex gap-4">
             {ADD_APP_CARDS.map(({ title, Thumb }) => (
+              // Hover lifts the card off the screen's ground, the way a pickable
+              // card in the real product does. Both the fill AND the edge move:
+              // --mk-elevated is only a few values off --mk-surface, so on its
+              // own the fill was too quiet to register at this size, where the
+              // brightening edge is what actually reads. The border moved from an
+              // inline style to a class for that reason — an inline value has no
+              // hover to hook. Still a surface change, no motion. The stage is
+              // pointer-events-none (decorative), so each card opts back in.
               <div
                 key={title}
-                className="h-[128px] min-w-0 flex-1 overflow-hidden rounded-[8px]"
-                style={{ border: `1px solid ${MOCK_BORDER}` }}
+                className="pointer-events-auto h-[128px] min-w-0 flex-1 overflow-hidden rounded-[8px] border border-[var(--mk-border)] transition-[background-color,border-color,box-shadow] duration-200 hover:border-[var(--mk-subtle)] hover:bg-[var(--mk-fill)] hover:shadow-[0_2px_10px_-4px_rgba(0,0,0,0.18)] motion-reduce:transition-none"
               >
                 <Thumb />
               </div>
@@ -789,10 +803,13 @@ function PlanQuestionsCard() {
       {PLAN_OPTIONS.map((option, i) => {
         const selected = i === PLAN_SELECTED;
         return (
+          // An unpicked answer lights to the same tone the picked one already
+          // carries, so hovering previews the choice rather than inventing a
+          // state the card doesn't otherwise have.
           <div
             key={option}
-            className={`flex items-center gap-2.5 px-3 py-2.5 ${
-              selected ? "bg-[var(--mk-elevated)]" : ""
+            className={`pointer-events-auto flex items-center gap-2.5 px-3 py-2.5 transition-colors duration-150 motion-reduce:transition-none ${
+              selected ? "bg-[var(--mk-elevated)]" : "hover:bg-[var(--mk-elevated)]"
             }`}
             style={{ borderTop: `1px solid ${HAIRLINE}` }}
           >
@@ -1040,6 +1057,11 @@ const ITERATE_ENTRIES: Entry[] = [
 const BUILD_COLS =
   "grid grid-cols-[minmax(0,1fr)_150px_92px_100px_96px] items-center gap-3";
 // The preview column in Iterate is roughly half as wide and drops Client/Date.
+// Depth of the softening on the clipped last row. One row is ~26px, so this
+// covers it and a little air above.
+const ITERATE_ROW_FADE =
+  "linear-gradient(to bottom, #000 calc(100% - 30px), transparent)";
+
 const ITERATE_COLS =
   "grid grid-cols-[minmax(0,1fr)_84px_84px] items-center gap-2.5";
 
@@ -1080,9 +1102,11 @@ function TableToolbar({ compact = false }: { compact?: boolean }) {
 const BUILD_STATS = [
   { label: "Total hours", value: "534.50", bars: [22, 34, 45, 55, 68, 80, 94] },
   { label: "Billable", value: "418.24", bars: [38, 66, 92, 78, 54, 40, 30] },
-  // The last value tops out at 100 so the highlighted current bar fills its
-  // track — at 96 a sliver of the grey slot showed above it.
-  { label: "This week", value: "32.25", bars: [64, 30, 88, 42, 72, 34, 100] },
+  // Two values top out at 100 rather than near it. On the phone every bar sits
+  // in a full-height track, so anything in the 90s leaves a thin unfilled sliver
+  // above the fill that reads as a rendering seam instead of as a value. Same
+  // reason the last bar is 100: at 96 the slot showed through.
+  { label: "This week", value: "32.25", bars: [64, 30, 100, 42, 72, 34, 100] },
 ];
 
 // Phone composition for Build. The desktop screen is a three-tile dashboard
@@ -1198,18 +1222,32 @@ export function BrandPortalVisual() {
                 <p className="mt-1.5 text-[15px] leading-none tabular-nums text-[var(--mk-fg)]">
                   {stat.value}
                 </p>
-                <div className="mt-2 flex h-[30px] items-end gap-[2.5px]">
+                {/* The one live thing on an otherwise still mock: hovering the
+                    chart settles the series back and holds the bar under the
+                    cursor at full strength. Focus by contrast rather than by a
+                    new colour, so it costs the palette nothing and reads at a
+                    glance. The stage is pointer-events-none (decorative), so
+                    each column opts itself back in; the wrapper is full-height
+                    so a 4px bar is still easy to land on.
+                    `!` on the hover state because it and the group-hover dim are
+                    the same specificity, and source order would otherwise pick
+                    the winner. */}
+                <div className="group/spark mt-2 flex h-[30px] items-end gap-[2.5px]">
                   {stat.bars.map((h, i) => (
                     <span
                       key={i}
-                      className="flex-1 rounded-[1.5px]"
-                      style={{
-                        height: `${h}%`,
-                        // One flat colour across the series — highlighting the last
-                        // bar read as a stray light block, not as "current".
-                        backgroundColor: "var(--mk-data)",
-                      }}
-                    />
+                      className="pointer-events-auto flex h-full flex-1 items-end transition-opacity duration-200 group-hover/spark:opacity-40 hover:!opacity-100 motion-reduce:transition-none"
+                    >
+                      <span
+                        className="w-full rounded-[1.5px]"
+                        style={{
+                          height: `${h}%`,
+                          // One flat colour across the series — highlighting the last
+                          // bar read as a stray light block, not as "current".
+                          backgroundColor: "var(--mk-data)",
+                        }}
+                      />
+                    </span>
                   ))}
                 </div>
               </div>
@@ -1233,7 +1271,9 @@ export function BrandPortalVisual() {
             {rows.map((entry, i) => (
               <div
                 key={entry.description}
-                className={`${BUILD_COLS} px-3 py-[7px] text-[11px] leading-none ${
+                // Rows light on hover, same as a real table would. --mk-elevated
+                // is the tone this mock set already uses for a lifted row.
+                className={`${BUILD_COLS} pointer-events-auto px-3 py-[7px] text-[11px] leading-none transition-colors duration-150 hover:bg-[var(--mk-elevated)] ${
                   i < rows.length - 1
                     ? "border-b border-[var(--mk-hairline)]"
                     : ""
@@ -1388,6 +1428,12 @@ export function BuildStepVisual() {
                     <span>Duration</span>
                     <span>Status</span>
                   </div>
+                  <div
+                    style={{
+                      maskImage: ITERATE_ROW_FADE,
+                      WebkitMaskImage: ITERATE_ROW_FADE,
+                    }}
+                  >
                   {updating
                     ? ITERATE_SKELETON.map((w, i) => (
                         <div
@@ -1407,9 +1453,13 @@ export function BuildStepVisual() {
                         </div>
                       ))
                     : ITERATE_ENTRIES.map((entry, i) => (
+                        // Same row hover as the Build step's table — the two are
+                        // the same app at two moments, so they answer the cursor
+                        // the same way. Only the settled rows: the skeleton above
+                        // is mid-regeneration and nothing there is pickable yet.
                         <div
                           key={entry.description}
-                          className={`${ITERATE_COLS} px-2.5 py-[7.5px] text-[10px] leading-none ${
+                          className={`${ITERATE_COLS} pointer-events-auto px-2.5 py-[7.5px] text-[10px] leading-none transition-colors duration-150 hover:bg-[var(--mk-elevated)] motion-reduce:transition-none ${
                             i < ITERATE_ENTRIES.length - 1
                               ? "border-b border-[var(--mk-hairline)]"
                               : ""
@@ -1426,6 +1476,7 @@ export function BuildStepVisual() {
                           </span>
                         </div>
                       ))}
+                  </div>
                 </div>
               </div>
             </div>

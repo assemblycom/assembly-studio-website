@@ -152,15 +152,19 @@ function FAQItem({
           className="group flex w-full cursor-pointer items-center justify-between gap-6 py-5 text-left"
         >
           <span className="type-body text-foreground">{question}</span>
-          {/* Chevron that flips up when open. */}
+          {/* The chevron turns 90°, not 180: from pointing down at a closed row
+              to lying flat when it's open. Half the travel of a full flip, and
+              it lands on a shape that reads as "nothing further down" rather
+              than as a spin. Timed to the drawer (300ms) so the two move as one
+              gesture instead of the icon finishing late. */}
           <svg
             width="20"
             height="20"
             viewBox="0 0 20 20"
             fill="none"
             aria-hidden
-            className={`shrink-0 text-muted-foreground transition-[transform,color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:text-foreground ${
-              open ? "rotate-180" : ""
+            className={`shrink-0 text-muted-foreground transition-[transform,color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:text-foreground motion-reduce:transition-none ${
+              open ? "-rotate-90" : ""
             }`}
           >
             <path
@@ -198,7 +202,7 @@ function FAQItem({
           fill="none"
           aria-hidden
           className={`shrink-0 text-muted-foreground transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
-            open ? "rotate-180" : ""
+            open ? "-rotate-90" : ""
           }`}
         >
           <path

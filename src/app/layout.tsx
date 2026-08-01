@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { RootShell } from "@/components/layout/root-shell";
 import { ThemeProvider, THEME_INIT_SCRIPT } from "@/components/theme/theme-provider";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import { OG_IMAGE, PAGE_SEO } from "@/lib/seo";
 import "./globals.css";
 
 // Inter is used for the app-like UI rendered inside the template preview cards
@@ -14,17 +15,13 @@ const inter = Inter({
   display: "swap",
 });
 
-const SITE_DESCRIPTION =
-  "The AI app builder for client-facing experiences. Build apps that ship to your client portal — no code, no infrastructure, no developer required.";
-// Product-and-category title for the homepage/default (the bare brand name read
-// too generic in search snippets and browser tabs).
-const DEFAULT_TITLE = "AI App Builder for Client Portals | Assembly Studio";
+const SITE_DESCRIPTION = PAGE_SEO.home.description;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: DEFAULT_TITLE,
-    template: "%s | Assembly Studio",
+    default: PAGE_SEO.home.title,
+    template: `${SITE_NAME} | %s`,
   },
   description: SITE_DESCRIPTION,
   // Self-referencing canonical (relative to metadataBase) consolidates UTM and
@@ -35,22 +32,21 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.svg",
   },
-  // Social card shown when the link is pasted (Open Graph + Twitter).
+  // Baseline social card. Every page overrides title/description/url via
+  // pageMetadata(); the image is the same one site-wide.
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
-    title: DEFAULT_TITLE,
+    title: PAGE_SEO.home.title,
     description: SITE_DESCRIPTION,
     url: SITE_URL,
-    images: [
-      { url: "/og.jpg", width: 1200, height: 630, alt: SITE_NAME },
-    ],
+    images: [OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
-    title: DEFAULT_TITLE,
+    title: PAGE_SEO.home.title,
     description: SITE_DESCRIPTION,
-    images: ["/og.jpg"],
+    images: [OG_IMAGE.url],
   },
 };
 

@@ -7,7 +7,7 @@ export const PROMPT_IDEAS = [
   {
     label: "Onboarding wizard",
     prompt:
-      "Build an onboarding wizard for new clients — welcome, identity, goals, timelines, and an area for file upload. Each step saves progress so they can return later.",
+      "Build a client onboarding app. Internal users define the steps a new contact works through; each contact completes welcome, identity, goals, timelines, and file upload, with progress saved so they can return later.",
   },
   {
     label: "Document collection",

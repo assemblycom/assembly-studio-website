@@ -484,7 +484,15 @@ html[data-theme="dark"] body {
   background-color: var(--background);
 }
 
-/* On-brand focus ring (replaces the browser's default blue outline). */
+/* On-brand focus ring (replaces the browser's default blue outline).
+
+   Two tones, not one. A single ink-coloured ring vanished wherever a dark
+   surface sits on a light page (the reveal footer, the dark-top hero nav, a
+   filled primary button) — ink on near-black is no ring at all. So the element
+   carries a background-toned halo at its edge and the ink outline just outside
+   it: on a light ground the outline reads, on a dark ground the halo does, and
+   one of the two always contrasts without having to know which surface a
+   control happens to be sitting on. */
 @layer base {
   a:focus-visible,
   button:focus-visible,
@@ -494,6 +502,7 @@ html[data-theme="dark"] body {
   [tabindex]:focus-visible {
     outline: 2px solid var(--foreground);
     outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--background);
   }
 
   /* Tailwind v4's Preflight gives buttons the default (arrow) cursor to match

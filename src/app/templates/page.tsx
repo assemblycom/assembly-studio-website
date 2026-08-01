@@ -3,12 +3,9 @@ import { TemplatesBrowser } from "@/components/templates/templates-browser";
 import { TemplatesCta } from "@/components/templates/templates-cta";
 import { TEMPLATES } from "@/lib/templates";
 import { SIGNUP_URL } from "@/lib/constants";
+import { PAGE_SEO, pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "App templates",
-  description:
-    "Start from a prebuilt Assembly app template and ship client-facing workflows in days, not months.",
-};
+export const metadata: Metadata = pageMetadata(PAGE_SEO.templates);
 
 export default function TemplatesPage() {
   return (

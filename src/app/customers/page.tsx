@@ -3,12 +3,9 @@ import { CustomersFeatured } from "@/components/customers/customers-featured";
 import { CustomersHub } from "@/components/customers/customers-hub";
 import { CustomersCta } from "@/components/customers/customers-cta";
 import { CAPTERRA_URL, G2_URL } from "@/lib/constants";
+import { PAGE_SEO, pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Customers",
-  description:
-    "Trusted by consulting, accounting, real estate, law, marketing, and tech firms with 1M+ clients and counting.",
-};
+export const metadata: Metadata = pageMetadata(PAGE_SEO.customers);
 
 // Capterra mark, monochrome (inherits currentColor).
 function CapterraLogo({ className = "" }: { className?: string }) {
@@ -33,9 +30,6 @@ function G2Logo({ className = "" }: { className?: string }) {
     </svg>
   );
 }
-
-// Grid line color, matching the home page's rails (stronger tint in dark).
-const GRID_LINE = "border-border [[data-theme=dark]_&]:border-[#383838]";
 
 export default function CustomersPage() {
   return (
@@ -81,16 +75,7 @@ export default function CustomersPage() {
       {/* Content region — framed by vertical guide rails aligned to the 1200px
           column, with a full-bleed divider under the header. */}
       <div className="relative">
-        {/* Vertical guide rails — shown once the viewport reaches 1200px. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 z-30 hidden justify-center min-[1200px]:flex"
-        >
-          <div className={`h-full w-full max-w-[1200px] border-x ${GRID_LINE}`} />
-        </div>
 
-        {/* Divider under the header. */}
-        <div className={`border-t ${GRID_LINE}`} />
 
         {/* Flagship stories — capped to the rail width with inner padding so the
             cards sit inset from the guide lines. */}
@@ -98,8 +83,6 @@ export default function CustomersPage() {
           <CustomersFeatured />
         </section>
 
-        {/* Divider under the featured cards — spans to the guide rails. */}
-        <div className={`mx-auto max-w-[1200px] border-t ${GRID_LINE}`} />
 
         {/* Story table — no side padding, so the row dividers run full-bleed on
             mobile and sit flush to the guide rails on desktop. Each row keeps its
