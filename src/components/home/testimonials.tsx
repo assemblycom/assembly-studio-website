@@ -41,8 +41,11 @@ const BAR_HEIGHTS = ["md:h-[280px]", "md:h-[228px]", "md:h-[186px]"];
 
 export function Testimonials() {
   return (
-    <Section id="testimonials" className="py-16 md:py-24">
-      <div className="relative mx-auto max-w-[1100px]">
+    // px-0 on the Section so the measure below owns the horizontal inset: this
+    // section's edges have to land on the same line as the one under it, and
+    // 1100px inside the Section's own padding sat 10px short on either side.
+    <Section id="testimonials" className="px-0 py-16 md:py-24">
+      <div className="relative mx-auto max-w-[1200px] px-6 md:px-10">
         {/* Portrait — pinned upper-right (desktop only). Stand-in photo so the
             section can be judged with real content; swap with the beta firm's
             own image alongside the attribution. */}
@@ -109,7 +112,10 @@ export function Testimonials() {
                 key={s.label}
                 // bg-muted (the palette's light gray) rather than a warm off-white
                 // cream, which read as a different family from the rest of the page.
-                className={`flex flex-col items-start gap-2.5 rounded-lg bg-muted p-5 [[data-theme=dark]_&]:bg-[#262626] md:flex-1 md:justify-between md:gap-0 md:p-6 ${BAR_HEIGHTS[i]}`}
+                // No dark override either: the #262626 it used to carry sat a
+                // step above the FAQ cards, so the two blocks of the same kind
+                // read as different surfaces on the same page.
+                className={`flex flex-col items-start gap-2.5 rounded-lg bg-muted p-5 md:flex-1 md:justify-between md:gap-0 md:p-6 ${BAR_HEIGHTS[i]}`}
               >
                 {/* A step down below md: at 22px over a 12px mono label the
                     pair filled a phone-width block edge to edge and read as a
@@ -120,7 +126,10 @@ export function Testimonials() {
                 {/* Small caps label in the mono face — standing in for ABC
                   Diatype Caplock, which isn't in our bundled fonts yet. On
                   mobile it sits below the value with the full box width. */}
-                <p className="type-eyebrow leading-snug text-[#16181D] max-md:text-[10px] [[data-theme=dark]_&]:text-muted-foreground">
+                {/* Muted in both themes: at full-strength ink the caption read
+                    as loud as the figure above it, which is the mark the block
+                    exists for. */}
+                <p className="type-eyebrow leading-snug text-muted-foreground max-md:text-[10px]">
                   {s.label}
                 </p>
               </div>
