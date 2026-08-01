@@ -302,7 +302,11 @@ function ProductionGapVisual({
           style={active === "avatar" ? { backgroundColor: HL_SIDEBAR_BG } : undefined}
           className="mt-auto flex items-center gap-2 border-t border-[var(--mk-hairline)] px-3 py-2.5 text-left outline-none transition-colors duration-200"
         >
-          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--mk-fill)] text-[9px] leading-none text-[var(--mk-muted)]">
+          {/* --mk-selected, plus a ring: the row lifts to --mk-elevated on its
+              tour step, and at --mk-fill the disc is five values off that and
+              disappears exactly when the step is pointing at it. The ring is
+              what guarantees the shape reads whatever sits behind it. */}
+          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--mk-selected)] text-[9px] leading-none text-[var(--mk-fg-2)] ring-1 ring-[var(--mk-border)]">
             LF
           </span>
           <span className="min-w-0 flex-1">
