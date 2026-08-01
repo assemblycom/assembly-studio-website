@@ -369,7 +369,12 @@ export function FeatureComparison() {
       {expanded && (
         <>
           <h2 className="type-h3">Compare plans</h2>
-          <div className="mt-8 overflow-clip rounded-2xl border border-border px-6 pb-8 md:px-8 [[data-theme=dark]_&]:border-[#383838]">
+          {/* Filled in dark, like the plan cards above it: on the page's own
+              near-black the table was a field of hairlines with nothing behind
+              them, and the rows were hard to hold onto while reading across.
+              Every opaque bar inside it (the sticky header, its mask, the mobile
+              tabs) has to take the same fill or it bands against the card. */}
+          <div className="mt-8 overflow-clip rounded-2xl border border-border px-6 pb-8 md:px-8 [[data-theme=dark]_&]:border-[#383838] [[data-theme=dark]_&]:bg-card">
       {/* Mobile: plan tabs + a single-column feature list for the chosen plan. */}
       <div className="lg:hidden">
         {/* Scrollable plan tabs, pinned under the nav so they stay reachable as
@@ -377,7 +382,7 @@ export function FeatureComparison() {
         {/* overflow-y-hidden: overflow-x-auto alone also makes this a vertical
             scroll container, and the -mb-px underline trick let it scroll up
             by a pixel-high strip. */}
-        <div className="-mx-6 flex gap-6 overflow-x-auto overflow-y-hidden border-b border-border bg-background px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="-mx-6 flex gap-6 overflow-x-auto overflow-y-hidden border-b border-border bg-background px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [[data-theme=dark]_&]:bg-card">
           {columns.map(({ name, i }) => (
             <button
               key={name}
@@ -428,11 +433,11 @@ export function FeatureComparison() {
               semi-transparent nav once stuck; overflow-clip on the card hides
               that bar at rest. */}
           <div
-            className={`${grid} sticky top-16 z-10 -mx-6 items-end border-b border-border bg-background px-6 pb-4 pt-6 md:-mx-8 md:px-8 [[data-theme=dark]_&]:border-[#383838]`}
+            className={`${grid} sticky top-16 z-10 -mx-6 items-end border-b border-border bg-background px-6 pb-4 pt-6 md:-mx-8 md:px-8 [[data-theme=dark]_&]:border-[#383838] [[data-theme=dark]_&]:bg-card`}
           >
             <span
               aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-full h-20 bg-background"
+              className="pointer-events-none absolute inset-x-0 bottom-full h-20 bg-background [[data-theme=dark]_&]:bg-card"
             />
             <div className="text-lg font-normal">Features</div>
             {columns.map(({ name }) => (

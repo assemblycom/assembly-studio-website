@@ -162,9 +162,14 @@ type Billing = "monthly" | "yearly";
 // the plans table above (gap, not a shared border) at every breakpoint.
 function EnterpriseCard() {
   return (
-    // Same 4-column grid + dividers as the tiers so the heading, perks, and CTA
-    // line up under the columns above (heading | perks | perks | CTA).
-    <div className="mt-6 rounded-2xl border border-border bg-card px-6 py-5 md:px-8 lg:rounded-xl lg:p-0 lg:[[data-theme=dark]_&]:bg-transparent">
+    // Same 4-column grid as the tiers so the heading, perks, and CTA line up
+    // under the columns above (heading | perks | perks | CTA). No dividers
+    // between them: the grid already does the separating, and four hairlines
+    // inside one row made it read as a second table under the real one.
+    // Keeps its fill on desktop dark, like the tier columns above it — dropped
+    // there, this card was the one row of the pricing table still sitting on the
+    // page's own near-black.
+    <div className="mt-6 rounded-2xl border border-border bg-card px-6 py-5 md:px-8 lg:rounded-xl lg:p-0">
       {/* Phones stack with tight spacing (the two perk groups read as one
           list); from 560 — where the tiers above go two up — the perks split
           into their two columns and the CTA stops running the full width of the
@@ -179,7 +184,7 @@ function EnterpriseCard() {
         ].map((col, i) => (
           <ul
             key={i}
-            className={`relative flex cursor-default flex-col gap-2.5 min-[560px]:mt-5 lg:mt-0 lg:p-6 lg:before:absolute lg:before:inset-y-6 lg:before:left-0 lg:before:w-px lg:before:bg-border lg:before:content-[''] ${
+            className={`relative flex cursor-default flex-col gap-2.5 min-[560px]:mt-5 lg:mt-0 lg:p-6 ${
               i === 0 ? "mt-5" : "mt-2.5"
             }`}
           >
@@ -197,7 +202,7 @@ function EnterpriseCard() {
           </ul>
         ))}
         {/* CTA column — solid dark fill, matching the tier buttons. */}
-        <div className="relative mt-5 min-[560px]:col-span-2 lg:col-span-1 lg:mt-0 lg:flex lg:items-center lg:p-6 lg:before:absolute lg:before:inset-y-6 lg:before:left-0 lg:before:w-px lg:before:bg-border lg:before:content-['']">
+        <div className="relative mt-5 min-[560px]:col-span-2 lg:col-span-1 lg:mt-0 lg:flex lg:items-center lg:p-6">
           {/* Full width only on a phone. Across a two-column card it became a
               600px-wide button, which reads as a banner rather than a control. */}
           <a
@@ -372,35 +377,47 @@ export function PricingPlans() {
               // as an edge rather than the brightest thing on the card. The
               // highlighted plan is marked only by its "Most popular" tag; its
               // border matches every other card so no card outshouts the rest.
-              className={`relative flex min-w-0 flex-col rounded-2xl border border-border bg-card p-4 lg:grid lg:grid-rows-subgrid lg:row-span-5 lg:rounded-none lg:border-y lg:border-l lg:border-r-0 lg:border-solid lg:border-border lg:bg-transparent lg:p-6 lg:first:!rounded-l-xl lg:last:!rounded-r-xl lg:[&:last-child]:border-r ${
+              // The desktop grid drops the card fill so the four columns read as
+              // one table on the light page. In dark that left the whole table
+              // on the page's near-black with nothing but hairlines to hold it,
+              // so there the fill stays on at every width.
+              className={`relative isolate flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-card p-4 lg:grid lg:grid-rows-subgrid lg:row-span-5 lg:rounded-none lg:border-y lg:border-l lg:border-r-0 lg:border-solid lg:border-border lg:bg-transparent lg:[[data-theme=dark]_&]:bg-card lg:p-6 lg:first:!rounded-l-xl lg:last:!rounded-r-xl lg:[&:last-child]:border-r ${
                 dropLeftDivider ? "lg:[[data-theme=dark]_&]:border-l-0" : ""
               } ${
                 plan.highlighted
-                  ? "isolate overflow-hidden [[data-theme=dark]_&]:!border-[#7DA4FF]/40 lg:[[data-theme=dark]_&]:border-r lg:[[data-theme=dark]_&]:[border-image:linear-gradient(to_bottom,rgba(125,164,255,0.55),#383838_75%)_1]"
+                  ? "[[data-theme=dark]_&]:!border-[#7DA4FF]/40 lg:[[data-theme=dark]_&]:border-r lg:[[data-theme=dark]_&]:[border-image:linear-gradient(to_bottom,rgba(125,164,255,0.55),#383838_75%)_1]"
                   : ""
               }`}
             >
-              {/* Subtle aurora wash on the highlighted plan — blooms up from the
-                  bottom, behind the content (-z-10 inside an isolated context). */}
-              {plan.highlighted && (
-                <div
-                  aria-hidden
-                  // Same brand-blue bloom as desktop; on mobile (light) the
-                  // bloom fades a touch sooner. Desktop light + all dark keep
-                  // their original lengths.
-                  className="pointer-events-none absolute inset-0 -z-10 [background:linear-gradient(to_bottom,#7DA4FF,transparent_180px)] lg:[background:linear-gradient(to_bottom,#7DA4FF,transparent_224px)] [[data-theme=dark]_&]:[background:linear-gradient(to_bottom,rgba(125,164,255,0.28),transparent_170px)]"
-                />
-              )}
-
-              {/* Header panel holding the price block. Light mode reads as a
-                  clean outlined inset (no fill); dark mode keeps a subtle filled
-                  surface so it lifts off the near-black card. */}
+              {/* Aurora wash blooming up from behind the header panel (-z-10
+                  inside an isolated context). Every card carries one now, so the
+                  four read as one set; only the highlighted plan's is brand
+                  blue, the rest take a neutral gray at the same lengths. */}
               <div
-                className={`flex min-h-[200px] flex-col justify-between rounded-xl border border-border p-5 ${
+                aria-hidden
+                className={`pointer-events-none absolute inset-0 -z-10 ${
                   plan.highlighted
-                    ? "rounded-b-none border-transparent bg-card lg:bg-background [[data-theme=dark]_&]:border-transparent"
-                    : ""
+                    ? "[background:linear-gradient(to_bottom,#7DA4FF,transparent_180px)] lg:[background:linear-gradient(to_bottom,#7DA4FF,transparent_224px)] [[data-theme=dark]_&]:[background:linear-gradient(to_bottom,rgba(125,164,255,0.28),transparent_170px)]"
+                    // Palette tokens, not hand-mixed grays. Light takes --muted,
+                    // its surface tone on white. Dark has no token between
+                    // --muted (a hair off the card, so it barely showed) and
+                    // --border (a bright band across the top), so it takes the
+                    // hairline tone held back to just over half — derived from
+                    // the scale rather than a new gray. Dark matches the
+                    // highlighted plan's 170px fade.
+                    : "[background:linear-gradient(to_bottom,var(--muted),transparent_180px)] lg:[background:linear-gradient(to_bottom,var(--muted),transparent_224px)] [[data-theme=dark]_&]:[background:linear-gradient(to_bottom,color-mix(in_srgb,var(--border)_55%,transparent),transparent_170px)]"
                 }`}
+              />
+
+              {/* Header panel holding the price block. Opaque, and squared off at
+                  the bottom: it masks the middle of the bloom so the wash reads
+                  as a halo around the panel rather than a tint across the card. */}
+              <div
+                // lg:bg-background is what hides this panel against the unfilled
+                // desktop card while still masking the aurora. In dark the card
+                // carries a fill, so the page black would read as a hole punched
+                // in it — take the card's own tone there.
+                className="flex min-h-[200px] flex-col justify-between rounded-xl rounded-b-none border border-transparent bg-card p-5 lg:bg-background lg:[[data-theme=dark]_&]:bg-card"
               >
                 <div>
                   <h3 className="text-lg font-medium">{plan.name}</h3>
