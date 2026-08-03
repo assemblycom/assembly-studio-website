@@ -18,14 +18,18 @@ import {
   IconCheckMark,
   IconClock,
   IconCreditCard,
+  IconDocuments,
   IconEnvelope,
-  IconFile,
   IconFolder,
   IconGlobe,
+  IconGlobeSolid,
+  IconHouseUser,
+  IconKey,
   IconPenFilled,
   IconPerson,
   IconQuickBooks,
   IconSquarePlus,
+  IconUser,
   IconXero,
 } from "@/components/home/mock-icons";
 
@@ -144,18 +148,69 @@ const AVATAR_TINTS = {
 
 type AvatarTint = keyof typeof AVATAR_TINTS;
 
-// The palette's resolved pair, or null in dark mode — these are the product's
-// light-theme values and it ships no dark set, so anything using them falls back
-// to the mocks' neutral treatment there instead of glowing on a near-black card.
-function useTint(tint: AvatarTint) {
+// The palette's fill, ink and self-outline, resolved for the current theme.
+//
+// The product ships only the light pair, and dark went through three wrong
+// answers before this one. Neutral grey lost the person's identity colour
+// entirely. The pale light tint kept it but glowed — a near-white disc is the
+// brightest thing on a near-black card. A low-alpha fill fixed the brightness
+// and broke the mark instead: a see-through face picks up whatever sits behind
+// it, so a hovered row tinted the disc and the stacked company tiles bled
+// through each other.
+//
+// So: derived from the same shipped hue, and OPAQUE. Mixing toward the card's
+// own surface rather than toward transparent is what makes it opaque — same
+// dark tinted face whatever it happens to sit on — and the ink is the hue
+// lifted toward white to clear it. One source colour per person, rendered for
+// the ground it lands on.
+//
+// Ring is returned pre-built rather than left to callers appending their own
+// hex alpha, which would break the moment they got a color-mix() instead.
+// A fallback avatar is one of a column of them and wants to stay quiet; the
+// workspace mark is a single logo tile that has to read on its own. `strong`
+// deepens the fill for the latter — on both themes, because the light sidebar
+// now carries the brand tint itself and the mark at the shipped pale value was
+// the same colour as the panel behind it.
+function useTint(tint: AvatarTint, prominence: "quiet" | "strong" = "quiet") {
   const { theme } = useTheme();
-  return theme === "dark" ? null : AVATAR_TINTS[tint];
+  const base = AVATAR_TINTS[tint];
+  if (theme !== "dark") {
+    // The ring exists because a pale tinted mark has no edge of its own against
+    // a white card. The strong fill does, so adding one on top only darkened
+    // it — a tinted outline over an already-deeper face reads as a heavier
+    // tile, not a defined one.
+    return prominence === "strong"
+      ? {
+          bg: `color-mix(in oklab, ${base.fg} 17%, ${base.bg})`,
+          fg: base.fg,
+          ring: "transparent",
+        }
+      : { bg: base.bg, fg: base.fg, ring: `${base.fg}33` };
+  }
+  // The logo tile derives like the avatars do, just a step stronger. Keeping its
+  // shipped light colours made it the one pale mark among a set of dark tinted
+  // ones, and a single tile in a different idiom reads as a mistake rather than
+  // as emphasis.
+  if (prominence === "strong") {
+    return {
+      bg: `color-mix(in oklab, ${base.fg} 44%, var(--mk-surface))`,
+      fg: `color-mix(in oklab, ${base.fg} 52%, #ffffff)`,
+      ring: `color-mix(in oklab, ${base.fg} 56%, var(--mk-surface))`,
+    };
+  }
+  return {
+    bg: `color-mix(in oklab, ${base.fg} 20%, var(--mk-surface))`,
+    fg: `color-mix(in oklab, ${base.fg} 45%, #ffffff)`,
+    ring: `color-mix(in oklab, ${base.fg} 34%, var(--mk-surface))`,
+  };
 }
 
 // The workspace's own mark. Square rather than round — a workspace isn't a
 // person — but coloured from the same palette as every other fallback.
 function BrandMark({ className = "" }: { className?: string }) {
-  const colors = useTint("purple");
+  // Strong: this is a lone logo tile, not one of a column of avatars, and at
+  // the quiet strength it sank into the dark sidebar and the dark settings row.
+  const colors = useTint("purple", "strong");
   return (
     <span
       className={`flex shrink-0 items-center justify-center rounded-[4px] bg-[var(--mk-invert-bg)] leading-none text-[var(--mk-invert-fg)] ${className}`}
@@ -164,7 +219,7 @@ function BrandMark({ className = "" }: { className?: string }) {
           ? {
               backgroundColor: colors.bg,
               color: colors.fg,
-              boxShadow: `inset 0 0 0 1px ${colors.fg}33`,
+              boxShadow: `inset 0 0 0 1px ${colors.ring}`,
             }
           : undefined
       }
@@ -197,7 +252,7 @@ function Avatar({
               color: colors.fg,
               // Same outline the square marks carry: a pale tinted disc on a
               // white card has no edge without it.
-              boxShadow: `inset 0 0 0 1px ${colors.fg}33`,
+              boxShadow: `inset 0 0 0 1px ${colors.ring}`,
             }
           : undefined
       }
@@ -247,8 +302,8 @@ function CompanyMark({
               // card has no edge — and the stacked pair adds the surface ring
               // outside that so one still cuts out of the next.
               boxShadow: large
-                ? `inset 0 0 0 1px ${colors.fg}33`
-                : `inset 0 0 0 1px ${colors.fg}33, 0 0 0 1px var(--mk-surface)`,
+                ? `inset 0 0 0 1px ${colors.ring}`
+                : `inset 0 0 0 1px ${colors.ring}, 0 0 0 1px var(--mk-surface)`,
             }
           : undefined
       }
@@ -385,8 +440,18 @@ function PanelSectionHead({ label }: { label: string }) {
   return (
     // Generous space above each heading and below it: at pt-3/pb-1 the sections
     // ran together and the first field crowded its own heading.
-    <div className="flex items-center justify-between gap-2 pb-2 pt-[18px]">
-      <span className="text-[13px] leading-none text-[var(--mk-fg)]">
+    //
+    // Every heading after the first takes more, because it has a different job:
+    // the first sits under the card's own rule, which already separates it, but
+    // the later ones have to break away from the previous group's last row.
+    // This panel groups by air rather than by hairlines, so that gap is the only
+    // thing marking where one section ends and the next begins.
+    <div className="flex items-center justify-between gap-2 pb-2 pt-[18px] [&:not(:first-child)]:pt-[30px]">
+      {/* Muted in dark only. On white the near-black heading sits clearly above
+          the grey field values under it; on the near-black panel both land in
+          the same bright band and the group label stops reading as a level
+          above its own fields. */}
+      <span className="text-[13px] leading-none text-[var(--mk-fg)] [[data-theme=dark]_&]:text-[var(--mk-muted)]">
         {label}
       </span>
       <IconPlus className="size-[17px] text-[var(--mk-muted)]" />
@@ -433,8 +498,15 @@ function PanelRail() {
         {RAIL_ICONS.map((icon, i) => (
           <span
             key={icon.key}
+            // Dark gets a brighter selection: --mk-fill is the lightest neutral
+            // on the light card but only three values off the panel on the dark
+            // one, so the active tab barely registered. --mk-selected exists for
+            // exactly this and sits a step above it. Light is left alone, where
+            // the fill already reads.
             className={`flex size-[24px] items-center justify-center rounded-[6px] ${
-              i === 0 ? "bg-[var(--mk-fill)]" : ""
+              i === 0
+                ? "bg-[var(--mk-fill)] [[data-theme=dark]_&]:bg-[var(--mk-selected)]"
+                : ""
             }`}
           >
             <svg
@@ -442,7 +514,9 @@ function PanelRail() {
               fill="currentColor"
               aria-hidden
               className={`${icon.className} ${
-                i === 0 ? "text-[var(--mk-fg-2)]" : "text-[var(--mk-subtle)]"
+                i === 0
+                  ? "text-[var(--mk-fg-2)] [[data-theme=dark]_&]:text-[var(--mk-icon-active)]"
+                  : "text-[var(--mk-subtle)]"
               }`}
             >
               <path d={icon.d} />
@@ -459,7 +533,7 @@ function CrmCustomFieldsVisual() {
     <div className={MOCK_CARD_DRAWER}>
       <div className="flex h-full">
         <div className="min-w-0 flex-1">
-          <div className="border-b border-[var(--mk-hairline)] px-3.5 py-3 text-[13px] leading-none text-[var(--mk-fg)]">
+          <div className={CARD_HEADER_TEXT}>
             Client Details
           </div>
 
@@ -546,7 +620,7 @@ function IconLinkGlyph({ className = "" }: { className?: string }) {
 // its hand-drawn strokes — rather than a second icon set invented in this file.
 const APP_GLYPHS: Record<AppGlyph, (props: { className?: string }) => React.ReactNode> = {
   clock: IconClock,
-  doc: IconFile,
+  doc: IconDocuments,
   chat: IconChat,
   card: IconCreditCard,
   check: IconCheckMark,
@@ -559,6 +633,13 @@ const APP_GLYPHS: Record<AppGlyph, (props: { className?: string }) => React.Reac
   link: IconLinkGlyph,
 };
 
+// These lists mix two icon families: design-system product glyphs, which are
+// filled paths shaped like outlines, and the mocks' own hand-drawn stroked
+// icons. Measured at the size these rows use, the product outlines sit around
+// 0.95px while the stroked set draws 1.09px, so a folder or a clock read
+// heavier than the chat bubble beside it. CSS beats the presentation attribute,
+// so this trims the stroked ones onto the product set's weight; the filled
+// glyphs ignore it.
 function AppIcon({
   glyph,
   className = "",
@@ -567,7 +648,9 @@ function AppIcon({
   className?: string;
 }) {
   const Glyph = APP_GLYPHS[glyph];
-  return <Glyph className={className} />;
+  return (
+    <Glyph className={`[&[fill=none]]:[stroke-width:1.1] ${className}`} />
+  );
 }
 
 function IconChevron({ className = "" }: { className?: string }) {
@@ -600,14 +683,49 @@ const SIDEBAR_APPS: { name: string; glyph: AppGlyph }[] = [
 function ClientSidebarVisual({ bleed = false }: { bleed?: boolean }) {
   // The label carries pb/-mb rather than a looser line-height: `truncate` clips
   // to the text box, and at leading-none that cut the descender off "Billing".
+  // Every row carries the label colour the selected one does — in a real
+  // sidebar the items are all live destinations, and muting the unselected ones
+  // read as four disabled rows around one enabled one. The wash alone marks the
+  // selection.
   const row =
-    "flex items-center gap-2 rounded-[6px] px-2 py-[6px] text-[12px] leading-none [&>span]:pb-[3px] [&>span]:-mb-[3px]";
+    "flex items-center gap-2 rounded-[6px] px-2 py-[6px] text-[12px] leading-none text-[var(--mk-fg)] [&>span]:pb-[3px] [&>span]:-mb-[3px]";
+  // 14px glyph against 12px type: at 12px the icons sat visibly smaller than
+  // the labels they belong to, since the drawn mark is inset in its own box.
+  const glyph = "size-[14px] shrink-0";
+  // Matches px-2 + glyph + gap-2, so a folder's children line up with the
+  // labels of the rows above them rather than with their icons.
+  const childIndent = "pl-[30px]";
+  // Light only, and the whole column takes the tint, not just the active row.
+  // With a white sidebar, the brand mark and the selection were the only two
+  // brand-coloured things in it and read as stray pink against a neutral panel.
+  // Tinting the surface makes them belong to it: the sidebar IS the branded
+  // area, which is this mock's whole claim.
+  //
+  // The selection then has to go a step deeper than the surface it sits on,
+  // since at the same value it would disappear. Same hue, mixed toward the
+  // brand ink rather than picked separately.
+  //
+  // Dark keeps a neutral sidebar: the same treatment there read as a murky
+  // purple smear rather than as a selection, and the row class already carries
+  // a neutral wash to fall back to.
+  const { theme } = useTheme();
+  const isLight = theme !== "dark";
+  const surfaceTint = isLight ? AVATAR_TINTS.purple.bg : undefined;
+  const selected = isLight
+    ? {
+        backgroundColor: `color-mix(in oklab, ${AVATAR_TINTS.purple.fg} 13%, ${AVATAR_TINTS.purple.bg})`,
+        color: AVATAR_TINTS.purple.fg,
+      }
+    : undefined;
   return (
     <div className={bleed ? MOCK_CARD_BLEED : MOCK_CARD}>
       {/* Bleeding, the card owns the field's full height, so the columns
           stretch to it instead of stopping at the sidebar's natural height. */}
       <div className={bleed ? "flex h-full" : "flex min-h-[168px]"}>
-        <div className="w-[152px] shrink-0 border-r border-[var(--mk-hairline)] p-2">
+        <div
+          className="w-[152px] shrink-0 border-r border-[var(--mk-hairline)] p-2"
+          style={surfaceTint ? { backgroundColor: surfaceTint } : undefined}
+        >
           <div className="mb-1.5 flex items-center gap-2 px-2 py-[6px]">
             <BrandMark className="size-[16px] text-[9px]" />
             <span className="truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
@@ -621,15 +739,14 @@ function ClientSidebarVisual({ bleed = false }: { bleed?: boolean }) {
               className={`${row} ${
                 // A plain wash for the selected row: the border and lift it used
                 // to carry made it the loudest thing in a sidebar of quiet rows.
-                i === 1
-                  ? "bg-[var(--mk-fill)] text-[var(--mk-fg)]"
-                  : "text-[var(--mk-muted)]"
+                i === 1 ? "bg-[var(--mk-fill)]" : ""
               }`}
+              style={i === 1 ? selected : undefined}
             >
               {/* Every item keeps its own icon. The lifted row used to swap its
                   glyph for a drag grip, which read as the wrong icon rather than
                   as motion — the raised surface already carries that. */}
-              <AppIcon glyph={app.glyph} className="size-[12px] shrink-0" />
+              <AppIcon glyph={app.glyph} className={glyph} />
               <span className="truncate">{app.name}</span>
             </div>
           ))}
@@ -637,12 +754,12 @@ function ClientSidebarVisual({ bleed = false }: { bleed?: boolean }) {
           {/* A folder gets one glyph in the same slot every other row uses —
               the caret only replaces it on hover, so at rest it's the folder
               icon alone and the open children are what says it's expanded. */}
-          <div className={`${row} text-[var(--mk-muted)]`}>
-            <AppIcon glyph="folder" className="size-[12px] shrink-0" />
+          <div className={row}>
+            <AppIcon glyph="folder" className={glyph} />
             <span className="truncate">Billing</span>
           </div>
           {["Invoices", "Documents"].map((name) => (
-            <div key={name} className={`${row} pl-7 text-[var(--mk-muted)]`}>
+            <div key={name} className={`${row} ${childIndent}`}>
               <span className="truncate">{name}</span>
             </div>
           ))}
@@ -666,11 +783,14 @@ function ClientSidebarVisual({ bleed = false }: { bleed?: boolean }) {
 // a list: the point is that these are separate, independently shipped things
 // that happen to share a front door — which is what the browser bar above them
 // is doing in the frame.
-const FOCUSED_APPS: { name: string; job: string; glyph: AppGlyph }[] = [
-  { name: "Time tracker", job: "Hours by client", glyph: "clock" },
-  { name: "Documents", job: "Signed and shared", glyph: "doc" },
-  { name: "Onboarding", job: "New client intake", glyph: "pen" },
-  { name: "Invoices", job: "Billing and payment", glyph: "card" },
+// Names only. A one-line job under each read as a caption the eye had to
+// process four times over, and the claim here is the count and separateness of
+// the apps, not what any one of them does.
+const FOCUSED_APPS: { name: string; glyph: AppGlyph }[] = [
+  { name: "Time tracker", glyph: "clock" },
+  { name: "Documents", glyph: "doc" },
+  { name: "Onboarding", glyph: "pen" },
+  { name: "Invoices", glyph: "card" },
 ];
 
 function FocusedAppsVisual() {
@@ -682,7 +802,7 @@ function FocusedAppsVisual() {
       {FOCUSED_APPS.map((app, i) => (
         <div
           key={app.name}
-          className={`flex items-center gap-2.5 px-3.5 py-2.5 ${
+          className={`flex items-center gap-2.5 px-3.5 py-3.5 ${
             i < FOCUSED_APPS.length - 1
               ? "border-b border-[var(--mk-hairline)]"
               : ""
@@ -692,13 +812,8 @@ function FocusedAppsVisual() {
             glyph={app.glyph}
             className="size-[15px] shrink-0 text-[var(--mk-fg-2)]"
           />
-          <span className="min-w-0">
-            <span className="block truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
-              {app.name}
-            </span>
-            <span className="mt-1.5 block truncate pb-[3px] -mb-[3px] text-[11px] leading-none text-[var(--mk-muted)]">
-              {app.job}
-            </span>
+          <span className="min-w-0 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
+            {app.name}
           </span>
         </div>
       ))}
@@ -711,7 +826,6 @@ function FocusedAppsVisual() {
 // firm's logo; the tile and the swatch are the mark and colour we already use
 // for "Your brand" everywhere else in these mocks.
 function BrandingVisual() {
-  const colors = useTint("purple");
   return (
     <div className={SETTINGS_CARD}>
       <div className="flex items-center gap-2 border-b border-[var(--mk-hairline)] px-3.5 py-2.5">
@@ -727,23 +841,27 @@ function BrandingVisual() {
         <span className="min-w-0 flex-1 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
           Logo
         </span>
-        <BrandMark className="size-[20px] text-[10px]" />
+        {/* Bigger than the inline mark this component uses elsewhere: at 20px
+            square these two rows read as a pair of avatars rather than as the
+            logo and colour a firm is setting. */}
+        <BrandMark className="size-[28px] rounded-[6px]! text-[12px]" />
       </div>
 
       <div className="flex items-center gap-2 border-b border-[var(--mk-hairline)] px-3.5 py-2.5">
         <span className="min-w-0 flex-1 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
           Brand color
         </span>
+        {/* The literal palette value, not the theme-resolved ink: this row is
+            the firm's chosen colour, so the swatch has to be that colour on
+            either ground. The resolved ink is lightened for legibility against
+            a dark card, which turned the swatch into a pale lilac that is not
+            the brand at all. */}
         <span
-          className="size-[20px] shrink-0 rounded-[4px] bg-[var(--mk-fill)] ring-1 ring-inset ring-[var(--mk-border)]"
-          style={
-            colors
-              ? {
-                  backgroundColor: colors.fg,
-                  boxShadow: `inset 0 0 0 1px ${colors.fg}`,
-                }
-              : undefined
-          }
+          className="size-[28px] shrink-0 rounded-[6px] bg-[var(--mk-fill)] ring-1 ring-inset ring-[var(--mk-border)]"
+          style={{
+            backgroundColor: AVATAR_TINTS.purple.fg,
+            boxShadow: `inset 0 0 0 1px ${AVATAR_TINTS.purple.fg}`,
+          }}
         />
       </div>
 
@@ -768,7 +886,7 @@ function BrandingVisual() {
 // product, and at 520px it read as a settings pane. Scaled down below `sm`,
 // where the field is 300px tall and the card's natural height doesn't fit;
 // every other mock is short enough not to need it.
-const LOGIN_CARD = `${MOCK_CARD_BASE} w-full max-w-[292px] scale-[0.9] rounded-[8px] border px-4 py-4 sm:scale-100`;
+const LOGIN_CARD = `${MOCK_CARD_BASE} w-full max-w-[292px] scale-[0.9] rounded-[8px] border px-4 py-6 sm:scale-100`;
 
 // Label over field, the shape both inputs share. The password label carries its
 // reset link on the right, which is the row the product itself uses.
@@ -809,18 +927,18 @@ function SignInMethodsVisual() {
         <BrandMark className="size-[22px] text-[10px]" />
       </div>
 
-      <p className="mt-3 text-center text-[12px] leading-none text-[var(--mk-fg)]">
+      <p className="mt-4 text-center text-[12px] leading-none text-[var(--mk-fg)]">
         Sign in to your account
       </p>
 
       {/* Google keeps its own colours; the mark is what makes the button
           recognisable, so it's the one thing here that isn't a mock token. */}
-      <div className="mt-3.5 flex h-[30px] items-center justify-center gap-2 rounded-[6px] border border-[var(--mk-border)] bg-[var(--mk-surface)] text-[12px] leading-none text-[var(--mk-fg)]">
+      <div className="mt-4 flex h-[32px] items-center justify-center gap-2 rounded-[6px] border border-[var(--mk-border)] bg-[var(--mk-surface)] text-[12px] leading-none text-[var(--mk-fg)]">
         <GoogleIcon className="size-[13px]" />
         Continue with Google
       </div>
 
-      <div className="my-2.5 flex items-center gap-2">
+      <div className="my-3.5 flex items-center gap-2">
         <span className="h-px flex-1 bg-[var(--mk-hairline)]" />
         <span className="text-[11px] leading-none text-[var(--mk-muted)]">
           or
@@ -830,7 +948,7 @@ function SignInMethodsVisual() {
 
       <LoginField label="Email" value="ava@meridiancorp.com" />
 
-      <div className="mt-3 flex h-[30px] items-center justify-center rounded-[6px] bg-[var(--mk-invert-bg)] text-[12px] leading-none text-[var(--mk-invert-fg)]">
+      <div className="mt-4 flex h-[32px] items-center justify-center rounded-[6px] bg-[var(--mk-invert-bg)] text-[12px] leading-none text-[var(--mk-invert-fg)]">
         Sign up
       </div>
     </div>
@@ -841,6 +959,29 @@ function SignInMethodsVisual() {
 // switch, sitting beside the sign-in methods it applies to. A wider card than
 // the login form — this is a settings pane, and it should read as one.
 const SETTINGS_CARD = `${MOCK_CARD_BASE} w-full max-w-[380px] rounded-[8px] border`;
+
+// Every card's title bar, in one place so the fifteen of them can't drift. It
+// sits a step up from the surface the rows use: sharing their white left the
+// header reading as a first row with a rule under it rather than as the card's
+// chrome. --mk-elevated carries the same lift in dark mode.
+// Light only. On the white card the lift is what separates chrome from content;
+// on the near-black one --mk-elevated reads as a distinctly lighter band across
+// the top rather than as the same surface, so dark keeps the card's own colour
+// and lets the rule under the title do the separating.
+const CARD_HEADER =
+  "border-b border-[var(--mk-hairline)] bg-[var(--mk-elevated)] px-3.5 py-3 [[data-theme=dark]_&]:bg-transparent";
+// Muted, because a title bar naming the card ("Team", "Trust Center") is chrome
+// rather than content: at the rows' near-black it sat at the same weight as the
+// data under it and the card read as a list whose first line happened to be a
+// word. Headers that carry a subject instead of a label — a person's name, an
+// endpoint — keep the foreground colour and set it themselves.
+const CARD_HEADER_TEXT = `${CARD_HEADER} text-[13px] leading-none text-[var(--mk-muted)]`;
+
+// The small status/suggestion pill these mocks use. Outlined as well as filled:
+// at --mk-fill alone the chip was four values off the card behind it and read as
+// a patch of tinted text rather than as a discrete tag.
+const MOCK_TAG =
+  "rounded-[4px] bg-[var(--mk-fill)] px-1.5 py-[4px] text-[10px] leading-none text-[var(--mk-fg-2)] ring-1 ring-inset ring-[var(--mk-border)]";
 
 // The product's switch, cut to what survives at 22px: a filled track when on,
 // an outlined one when off, and a plain knob.
@@ -928,10 +1069,13 @@ const IconLockGlyph = ({ className = "" }: { className?: string }) => (
   </svg>
 );
 
+// One glyph each rather than the same lock three times: repeated, the lock
+// stopped saying "this is platform-owned" and started reading as a bullet.
+// What the rows have in common is already carried by the copy above them.
 const PLATFORM_PARTS = [
-  "Login and sessions",
-  "Roles and permissions",
-  "Client records",
+  { label: "Login and sessions", Glyph: IconKey },
+  { label: "Roles and permissions", Glyph: IconHouseUser },
+  { label: "Client records", Glyph: IconGlobeSolid },
 ];
 
 // Only the platform's half, as a plain stack of locked rows. The generated half
@@ -940,18 +1084,18 @@ const PLATFORM_PARTS = [
 function NeverGeneratedVisual() {
   return (
     <div className={SETTINGS_CARD}>
-      {PLATFORM_PARTS.map((part, i) => (
+      {PLATFORM_PARTS.map(({ label, Glyph }, i) => (
         <div
-          key={part}
+          key={label}
           className={`flex items-center gap-2.5 px-3.5 py-3 ${
             i < PLATFORM_PARTS.length - 1
               ? "border-b border-[var(--mk-hairline)]"
               : ""
           }`}
         >
-          <IconLockGlyph className="size-[15px] shrink-0 text-[var(--mk-fg-2)]" />
+          <Glyph className="size-[15px] shrink-0 text-[var(--mk-fg-2)]" />
           <span className="min-w-0 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
-            {part}
+            {label}
           </span>
         </div>
       ))}
@@ -972,9 +1116,12 @@ type TeamMember = {
   tint: AvatarTint;
 };
 
+// Lena is the firm-side account the rest of the site is signed in as (the
+// sidebar avatar in the production-gap mock), so she holds the Admin row —
+// listing her as staff with partial access contradicted that mock.
 const TEAM_MEMBERS: TeamMember[] = [
-  { initials: "MV", name: "Margot Vale", role: "Admin", access: "All clients", tint: "violet" },
-  { initials: "LF", name: "Lena Frost", role: "Staff", access: "6 clients", tint: "rose" },
+  { initials: "LF", name: "Lena Frost", role: "Admin", access: "All clients", tint: "rose" },
+  { initials: "MV", name: "Margot Vale", role: "Staff", access: "6 clients", tint: "violet" },
   { initials: "SO", name: "Sam Okafor", role: "Staff", access: "2 clients", tint: "cyan" },
 ];
 
@@ -983,7 +1130,7 @@ const TEAM_COLS = "grid-cols-[1fr_58px_78px]";
 function TeamRolesVisual() {
   return (
     <div className={SETTINGS_CARD}>
-      <div className="border-b border-[var(--mk-hairline)] px-3.5 py-3 text-[13px] leading-none text-[var(--mk-fg)]">
+      <div className={CARD_HEADER_TEXT}>
         Team
       </div>
 
@@ -1018,12 +1165,14 @@ function TeamRolesVisual() {
             {member.role}
           </span>
           {/* A count, dotted like the CRM's collapsed company cell, so a limited
-              staff member reads as a list you can open rather than a label. */}
+              staff member reads as a list you can open rather than a label. The
+              dotted rule is what separates the two cases; muting "All clients"
+              on top of that read as a disabled cell in a table of live ones. */}
           <span
-            className={`truncate text-[12px] leading-none ${
+            className={`truncate text-[12px] leading-none text-[var(--mk-fg)] ${
               member.access === "All clients"
-                ? "text-[var(--mk-muted)]"
-                : "text-[var(--mk-fg)] underline decoration-[var(--mk-subtle)] decoration-dotted decoration-[1px] underline-offset-[3px]"
+                ? ""
+                : "underline decoration-[var(--mk-subtle)] decoration-dotted decoration-[1px] underline-offset-[3px]"
             }`}
           >
             {member.access}
@@ -1046,36 +1195,45 @@ const CLIENT_SCOPE: { label: string; note: string; company?: string }[] = [
 function ClientScopeVisual() {
   return (
     <div className={SETTINGS_CARD}>
-      <div className="flex items-center gap-2 border-b border-[var(--mk-hairline)] px-3.5 py-3">
+      <div className={`flex items-center gap-2 ${CARD_HEADER}`}>
         <Avatar initials="AE" tint="teal" className="size-[24px] text-[10px]" />
         <span className="min-w-0 flex-1 truncate pb-[3px] -mb-[3px] text-[13px] leading-none text-[var(--mk-fg)]">
           Ava Ellis
         </span>
-        <span className="shrink-0 rounded-[4px] bg-[var(--mk-fill)] px-1.5 py-[3px] text-[10px] leading-none text-[var(--mk-muted)]">
-          Client
-        </span>
+        <span className={`shrink-0 ${MOCK_TAG}`}>Client</span>
       </div>
 
-      <div className="px-3.5 py-3">
-        <span className="block text-[10px] leading-none text-[var(--mk-muted)]">
-          Ava can see
-        </span>
-        <div className="mt-2.5 flex flex-col gap-2.5">
-          {CLIENT_SCOPE.map((item) => (
-            <span key={item.label} className="flex items-center gap-2">
-              {/* No mark on either row: the label is the subject here, and a lock
-                  against one line and a company tile against the other read as
-                  two different kinds of thing rather than one list. */}
-              <span className="min-w-0 flex-1 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
-                {item.label}
-              </span>
-              <span className="shrink-0 text-[11px] leading-none text-[var(--mk-muted)]">
-                {item.note}
-              </span>
-            </span>
-          ))}
+      {/* "Ava can see" is a column heading for the two rows under it, so it sits
+          on its own line at the label step with the rows given the same height
+          and rule every other card's list rows get. Stacked at gap-2.5 inside
+          one padded block, the three lines ran together as a paragraph. */}
+      <span className="block px-3.5 pb-1 pt-3 text-[10px] leading-none text-[var(--mk-muted)]">
+        Ava can see
+      </span>
+
+      {CLIENT_SCOPE.map((item, i) => (
+        <div
+          key={item.label}
+          // The last row takes extra below it. Every other row's bottom space
+          // is closed off by the rule under it; this one's runs straight into
+          // the card edge, so at the shared py it read as sitting on the floor.
+          className={`flex items-center gap-2 px-3.5 py-2.5 ${
+            i < CLIENT_SCOPE.length - 1
+              ? "border-b border-[var(--mk-hairline)]"
+              : "pb-4"
+          }`}
+        >
+          {/* No mark on either row: the label is the subject here, and a lock
+              against one line and a company tile against the other read as
+              two different kinds of thing rather than one list. */}
+          <span className="min-w-0 flex-1 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
+            {item.label}
+          </span>
+          <span className="shrink-0 text-[11px] leading-none text-[var(--mk-muted)]">
+            {item.note}
+          </span>
         </div>
-      </div>
+      ))}
     </div>
   );
 }
@@ -1094,7 +1252,7 @@ const VISIBILITY_AUDIENCE = ["Meridian Corp", "Bloom Studios", "Ava Ellis"];
 function AppVisibilityVisual() {
   return (
     <div className={SETTINGS_CARD}>
-      <div className="border-b border-[var(--mk-hairline)] px-3.5 py-3 text-[13px] leading-none text-[var(--mk-fg)]">
+      <div className={CARD_HEADER_TEXT}>
         Onboarding wizard
       </div>
 
@@ -1127,10 +1285,7 @@ function AppVisibilityVisual() {
             {option.on && (
               <div className="ml-[21px] mt-2 flex flex-wrap gap-1.5">
                 {VISIBILITY_AUDIENCE.map((name) => (
-                  <span
-                    key={name}
-                    className="rounded-[4px] bg-[var(--mk-fill)] px-1.5 py-[4px] text-[10px] leading-none text-[var(--mk-fg-2)]"
-                  >
+                  <span key={name} className={MOCK_TAG}>
                     {name}
                   </span>
                 ))}
@@ -1192,7 +1347,9 @@ const TEAM_FEED: FeedItem[] = [
     unread: true,
   },
   {
-    title: "Invoice 1042 paid · $2,400",
+    // 1038, not 1042: the client billing mock shows 1042 still due, so a feed
+    // announcing it paid put the two panels in contradiction.
+    title: "Invoice 1038 paid · $1,150",
     source: "Invoices",
     time: "1h",
     unread: true,
@@ -1207,11 +1364,13 @@ const TEAM_FEED: FeedItem[] = [
 function TeamFeedVisual() {
   return (
     <div className={SETTINGS_CARD}>
-      <div className="flex items-center justify-between gap-2 border-b border-[var(--mk-hairline)] px-3.5 py-3">
-        <span className="text-[13px] leading-none text-[var(--mk-fg)]">
+      <div className={`flex items-center justify-between gap-2 ${CARD_HEADER}`}>
+        <span className="text-[13px] leading-none text-[var(--mk-muted)]">
           Notifications
         </span>
-        <span className="rounded-[4px] bg-[var(--mk-fill)] px-1.5 py-[3px] text-[10px] leading-none text-[var(--mk-muted)]">
+        {/* On the card's surface, like the method chip: --mk-fill against the
+            header's --mk-elevated is four values and disappears. */}
+        <span className="shrink-0 rounded-[4px] bg-[var(--mk-surface)] px-1.5 py-[4px] text-[10px] leading-none text-[var(--mk-fg-2)] ring-1 ring-inset ring-[var(--mk-border)]">
           2 new
         </span>
       </div>
@@ -1330,32 +1489,31 @@ function NotificationVolumeVisual() {
 // One automation, in the when/then shape every builder uses. The two actions are
 // stacked under a single "Then" rather than repeated as when/then pairs, because
 // one event fanning out to several responses is the thing being claimed.
+// No glyphs: an icon per step implied each one was a kind of thing, when the
+// only structure that matters here is which side of when/then a step sits on.
 const AUTOMATION_ACTIONS = [
-  { label: "Assign onboarding tasks", glyph: "plus-square" as AppGlyph },
-  { label: "Email the client their next step", glyph: "mail" as AppGlyph },
+  "Assign onboarding tasks",
+  "Email the client their next step",
 ];
 
 // A step in the automation: a bordered row on the surface, so the steps read as
 // blocks you can pick up rather than list items.
 function AutomationStep({
   label,
-  glyph,
   emphasis = false,
 }: {
   label: string;
-  glyph: AppGlyph;
   emphasis?: boolean;
 }) {
   return (
     <div
-      className={`flex items-center gap-2 rounded-[6px] border px-2.5 py-2 ${
+      className={`rounded-[6px] border px-2.5 py-2 ${
         emphasis
           ? "border-[var(--mk-border)] bg-[var(--mk-surface)]"
           : "border-[var(--mk-hairline)] bg-[var(--mk-well)]"
       }`}
     >
-      <AppIcon glyph={glyph} className="size-[14px] shrink-0 text-[var(--mk-fg-2)]" />
-      <span className="min-w-0 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
+      <span className="block min-w-0 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
         {label}
       </span>
     </div>
@@ -1365,7 +1523,7 @@ function AutomationStep({
 function AutomationVisual() {
   return (
     <div className={SETTINGS_CARD}>
-      <div className="border-b border-[var(--mk-hairline)] px-3.5 py-3 text-[13px] leading-none text-[var(--mk-fg)]">
+      <div className={CARD_HEADER_TEXT}>
         New client onboarding
       </div>
 
@@ -1374,7 +1532,7 @@ function AutomationVisual() {
           When
         </span>
         <div className="mt-2">
-          <AutomationStep label="A client is created" glyph="person" emphasis />
+          <AutomationStep label="A client is created" emphasis />
         </div>
 
         {/* The connector line between the two blocks is gone, so the gap does
@@ -1384,11 +1542,7 @@ function AutomationVisual() {
         </span>
         <div className="mt-2 flex flex-col gap-2">
           {AUTOMATION_ACTIONS.map((action) => (
-            <AutomationStep
-              key={action.label}
-              label={action.label}
-              glyph={action.glyph}
-            />
+            <AutomationStep key={action} label={action} />
           ))}
         </div>
       </div>
@@ -1403,32 +1557,30 @@ function AutomationVisual() {
 // Platform triggers and the built app's own events sit in the same list, in the
 // same row treatment, with nothing at all marking which is which — that sameness
 // is the claim.
-const TRIGGER_ROWS: { label: string; glyph: AppGlyph }[] = [
-  { label: "Client created", glyph: "person" },
-  { label: "Invoice paid", glyph: "card" },
-  { label: "Request submitted", glyph: "pen" },
-  { label: "Approval granted", glyph: "check" },
+// No glyphs, for the same reason the rows carry no badge: anything that varies
+// row to row invites the reader to look for which ones are the built app's.
+const TRIGGER_ROWS = [
+  "Client created",
+  "Invoice paid",
+  "Request submitted",
+  "Approval granted",
 ];
 
 function AppEventsVisual() {
   return (
     <div className={SETTINGS_CARD}>
-      <div className="border-b border-[var(--mk-hairline)] px-3.5 py-3 text-[13px] leading-none text-[var(--mk-fg)]">
+      <div className={CARD_HEADER_TEXT}>
         Select a trigger
       </div>
 
       <div className="flex flex-col gap-2 px-3.5 py-3">
-        {TRIGGER_ROWS.map((trigger) => (
+        {TRIGGER_ROWS.map((label) => (
           <div
-            key={trigger.label}
-            className="flex items-center gap-2 rounded-[6px] border border-[var(--mk-border)] px-2.5 py-2"
+            key={label}
+            className="rounded-[6px] border border-[var(--mk-border)] bg-[var(--mk-fill)] px-2.5 py-2"
           >
-            <AppIcon
-              glyph={trigger.glyph}
-              className="size-[14px] shrink-0 text-[var(--mk-fg-2)]"
-            />
-            <span className="min-w-0 flex-1 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
-              {trigger.label}
+            <span className="block min-w-0 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
+              {label}
             </span>
           </div>
         ))}
@@ -1453,7 +1605,7 @@ const INSTALLED_APPS: { name: string; glyph: AppGlyph; built?: boolean }[] = [
 function SameFoundationVisual() {
   return (
     <div className={SETTINGS_CARD}>
-      <div className="border-b border-[var(--mk-hairline)] px-3.5 py-3 text-[13px] leading-none text-[var(--mk-fg)]">
+      <div className={CARD_HEADER_TEXT}>
         Apps
       </div>
 
@@ -1474,9 +1626,12 @@ function SameFoundationVisual() {
             {app.name}
           </span>
           {/* The only difference between the two kinds is this label, which is
-              the point — everything else about the rows is identical. */}
+              the point — everything else about the rows is identical. The two
+              read as a pair because they share a word: "built in" against
+              "built by you" is one distinction, where "ready-made" against
+              "built by you" was two unrelated descriptions. */}
           <span className="shrink-0 text-[11px] leading-none text-[var(--mk-muted)]">
-            {app.built ? "Built by you" : "Ready-made"}
+            {app.built ? "Built by you" : "Built-in"}
           </span>
         </div>
       ))}
@@ -1493,7 +1648,7 @@ const EMBED_SUGGESTIONS = ["Calendly", "Airtable", "Looker Studio", "Typeform"];
 function EmbedToolsVisual() {
   return (
     <div className={SETTINGS_CARD}>
-      <div className="border-b border-[var(--mk-hairline)] px-3.5 py-3 text-[13px] leading-none text-[var(--mk-fg)]">
+      <div className={CARD_HEADER_TEXT}>
         Add an embed
       </div>
 
@@ -1501,7 +1656,7 @@ function EmbedToolsVisual() {
         <span className="block text-[10px] leading-none text-[var(--mk-muted)]">
           URL
         </span>
-        <div className="mt-1.5 flex h-[28px] items-center rounded-[6px] border border-[var(--mk-border)] bg-[var(--mk-surface)] px-2 text-[12px] leading-none text-[var(--mk-fg)]">
+        <div className="mt-1.5 flex h-[28px] items-center rounded-[4px] border border-[var(--mk-border)] bg-[var(--mk-surface)] px-2 text-[12px] leading-none text-[var(--mk-fg)]">
           calendly.com/margot/intro-call
         </div>
 
@@ -1511,7 +1666,7 @@ function EmbedToolsVisual() {
           {EMBED_SUGGESTIONS.map((tool) => (
             <span
               key={tool}
-              className="rounded-[4px] bg-[var(--mk-fill)] px-1.5 py-[4px] text-[10px] leading-none text-[var(--mk-fg-2)]"
+              className={MOCK_TAG}
             >
               {tool}
             </span>
@@ -1535,7 +1690,7 @@ const WORKFLOW_TEMPLATES: { name: string; job: string }[] = [
 function TemplatePickerVisual() {
   return (
     <div className={SETTINGS_CARD}>
-      <div className="border-b border-[var(--mk-hairline)] px-3.5 py-3 text-[13px] leading-none text-[var(--mk-fg)]">
+      <div className={CARD_HEADER_TEXT}>
         Start from a template
       </div>
 
@@ -1545,7 +1700,13 @@ function TemplatePickerVisual() {
             key={template.name}
             className="flex items-center gap-2.5 rounded-[6px] border border-[var(--mk-border)] p-2"
           >
-            <span className="size-[34px] shrink-0 rounded-[4px] bg-[var(--mk-fill)] ring-1 ring-inset ring-[var(--mk-border)]" />
+            {/* The tile stands in for the template's preview image, so the
+                glyph inside it is a stand-in too: muted rather than the body
+                text's near-black, which would make it the loudest mark in a
+                row whose subject is the name beside it. */}
+            <span className="flex size-[34px] shrink-0 items-center justify-center rounded-[4px] bg-[var(--mk-fill)] ring-1 ring-inset ring-[var(--mk-border)]">
+              <IconUser className="size-[16px] text-[var(--mk-muted)]" />
+            </span>
             <span className="min-w-0">
               <span className="block truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
                 {template.name}
@@ -1565,7 +1726,10 @@ function TemplatePickerVisual() {
           <span className="min-w-0 flex-1 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
             Add a document upload step
           </span>
-          <span className="flex size-[16px] shrink-0 items-center justify-center rounded-[4px] bg-[var(--mk-invert-bg)] text-[var(--mk-invert-fg)]">
+          {/* 20px in a 28px row. At 16 the button read as an afterthought
+              against the request beside it, when submitting is the whole
+              gesture the mock is showing. */}
+          <span className="flex size-[20px] shrink-0 items-center justify-center rounded-[5px] bg-[var(--mk-invert-bg)] text-[var(--mk-invert-fg)]">
             <svg
               viewBox="0 0 16 16"
               fill="none"
@@ -1574,7 +1738,7 @@ function TemplatePickerVisual() {
               strokeLinecap="round"
               strokeLinejoin="round"
               aria-hidden
-              className="size-[9px]"
+              className="size-[11px]"
             >
               <path d="M8 12.5V3.5" />
               <path d="M4.5 7 8 3.5 11.5 7" />
@@ -1717,8 +1881,13 @@ const API_LINES: CodeToken[][] = [
 function ApiRequestVisual() {
   return (
     <div className={SETTINGS_CARD}>
-      <div className="flex items-center gap-2 border-b border-[var(--mk-hairline)] px-3.5 py-3">
-        <span className="rounded-[4px] bg-[var(--mk-fill)] px-1.5 py-[3px] font-mono text-[10px] leading-none text-[var(--mk-fg-2)]">
+      <div className={`flex items-center gap-2 ${CARD_HEADER}`}>
+        {/* On the card's own surface rather than --mk-fill: the header behind
+            it is now --mk-elevated, and the two greys were four values apart,
+            so the chip read as a smudge. White plus the tag outline lifts it
+            off the bar; the method is the one word in here that has to be
+            legible at a glance. */}
+        <span className="shrink-0 rounded-[4px] bg-[var(--mk-surface)] px-1.5 py-[3px] font-mono text-[10px] leading-none text-[var(--mk-fg)] ring-1 ring-inset ring-[var(--mk-border)]">
           GET
         </span>
         <span className="min-w-0 truncate font-mono text-[12px] leading-none text-[var(--mk-fg)]">
@@ -1766,7 +1935,7 @@ const BILLING_MODES: { name: string; detail: string }[] = [
 function BillingModesVisual() {
   return (
     <div className={SETTINGS_CARD}>
-      <div className="border-b border-[var(--mk-hairline)] px-3.5 py-3 text-[13px] leading-none text-[var(--mk-fg)]">
+      <div className={CARD_HEADER_TEXT}>
         New charge
       </div>
 
@@ -1794,16 +1963,20 @@ function BillingModesVisual() {
 // The client's own billing page: what they owe, what they've already paid, and
 // the card on file — one screen, under the firm's brand. The brand line sits in
 // the header because "no third-party checkout" is the claim.
+// Named for the work, not numbered: a client reading their own billing page
+// recognises "Q1 advisory" and has no idea what 1042 was for. The numbers stay
+// as the reference they are, sized down beside the name. The work matches the
+// entries the time-tracker mocks log for this firm.
 const CLIENT_INVOICES = [
-  { label: "Invoice 1042", meta: "$2,400", status: "Due Apr 18" },
-  { label: "Invoice 1038", meta: "$1,150", status: "Paid Apr 2" },
-  { label: "Invoice 1031", meta: "$980", status: "Paid Mar 4" },
+  { label: "Q1 advisory", num: "1042", meta: "$2,400", status: "Due Apr 18" },
+  { label: "March bookkeeping", num: "1038", meta: "$1,150", status: "Paid Apr 2" },
+  { label: "Year-end tax filing", num: "1031", meta: "$980", status: "Paid Mar 4" },
 ];
 
 function ClientBillingVisual() {
   return (
     <div className={SETTINGS_CARD}>
-      <div className="flex items-center gap-2 border-b border-[var(--mk-hairline)] px-3.5 py-3">
+      <div className={`flex items-center gap-2 ${CARD_HEADER}`}>
         <BrandMark className="size-[20px] text-[10px]" />
         <span className="min-w-0 flex-1 truncate pb-[3px] -mb-[3px] text-[13px] leading-none text-[var(--mk-fg)]">
           Billing
@@ -1819,8 +1992,13 @@ function ClientBillingVisual() {
               : ""
           }`}
         >
-          <span className="min-w-0 flex-1 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
-            {invoice.label}
+          <span className="flex min-w-0 flex-1 items-baseline gap-1.5">
+            <span className="truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
+              {invoice.label}
+            </span>
+            <span className="shrink-0 pb-[3px] -mb-[3px] text-[11px] leading-none tabular-nums text-[var(--mk-subtle)]">
+              {invoice.num}
+            </span>
           </span>
           <span className="shrink-0 text-[12px] leading-none text-[var(--mk-fg)]">
             {invoice.meta}
@@ -1837,28 +2015,34 @@ function ClientBillingVisual() {
 // Both books apps, connected, each behind its own brand mark. Listing both is
 // the honest version of the claim — a single logo would imply we only work with
 // that one — and the synced-records list underneath was detail the copy covers.
+const ACCOUNTING_APPS = [
+  { name: "QuickBooks", Mark: IconQuickBooks },
+  { name: "Xero", Mark: IconXero },
+];
+
 function AccountingSyncVisual() {
   return (
     <div className={SETTINGS_CARD}>
-      <div className="flex items-center gap-2 border-b border-[var(--mk-hairline)] px-3.5 py-3">
-        <IconQuickBooks className="size-[16px] shrink-0 text-[var(--mk-fg-2)]" />
-        <span className="min-w-0 flex-1 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
-          QuickBooks
-        </span>
-        <span className="shrink-0 rounded-[4px] bg-[var(--mk-fill)] px-1.5 py-[3px] text-[10px] leading-none text-[var(--mk-fg-2)]">
-          Connected
-        </span>
-      </div>
-
-      <div className="flex items-center gap-2 px-3.5 py-3">
-        <IconXero className="size-[16px] shrink-0 text-[var(--mk-fg-2)]" />
-        <span className="min-w-0 flex-1 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
-          Xero
-        </span>
-        <span className="shrink-0 rounded-[4px] bg-[var(--mk-fill)] px-1.5 py-[3px] text-[10px] leading-none text-[var(--mk-fg-2)]">
-          Connected
-        </span>
-      </div>
+      {ACCOUNTING_APPS.map(({ name, Mark }, i) => (
+        <div
+          key={name}
+          className={`flex items-center gap-2.5 px-3.5 py-3 ${
+            i < ACCOUNTING_APPS.length - 1
+              ? "border-b border-[var(--mk-hairline)]"
+              : ""
+          }`}
+        >
+          {/* 22px, not the 16 the in-row app glyphs take: these are other
+              companies' logos rather than UI icons, and both marks are drawn
+              inset in their own box, so at 16 the artwork itself was down
+              around 12px and stopped being recognisable. */}
+          <Mark className="size-[22px] shrink-0 text-[var(--mk-fg-2)]" />
+          <span className="min-w-0 flex-1 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
+            {name}
+          </span>
+          <span className={`shrink-0 ${MOCK_TAG}`}>Connected</span>
+        </div>
+      ))}
     </div>
   );
 }
@@ -1868,28 +2052,50 @@ function AccountingSyncVisual() {
 // Three apps as three separate boxes, each with its own database inside it and
 // nothing drawn between them. The gaps carry the argument: any line connecting
 // the boxes would say the opposite of what the copy claims.
-const ISOLATED_APPS = ["Time tracker", "Onboarding", "Approvals"];
+// The version tag is what makes these read as three separately shipped things
+// rather than three labels: they're on their own release numbers because
+// nothing about one is tied to another. The mono line is the app's own store.
+const ISOLATED_APPS = [
+  { name: "Time tracker", store: "db_time_tracker" },
+  { name: "Onboarding", store: "db_onboarding" },
+  { name: "Approvals", store: "db_approvals" },
+];
 
-// Three apps, three separate boxes, nothing drawn between them — the gaps are the
-// argument, so each box holds only the app's name and the lock that says its data
-// is its own. The header and the per-box "Database" pill were doing the copy's job
-// twice over.
+// One card, and the claim is the pairing: every app on the left, its own store
+// on the right, one to one, with no shared row anywhere in the list. That reads
+// in a glance and needs no diagram.
+//
+// Two earlier versions missed it. Three lock chips in a row made the lock a
+// bullet rather than a statement. Three separate floating cards made the gaps
+// carry the argument, but three unattached boxes read as three unrelated
+// things rather than as one workspace whose apps happen not to touch. No lock
+// at all in the end, not even one in the header: the copy above already says
+// nothing can reach across, and a padlock on a settings list is decoration
+// once the pairing has made the point.
 function IsolationVisual() {
   return (
-    <div className={`${SETTINGS_CARD} p-3`}>
-      <div className="grid grid-cols-3 gap-2">
-        {ISOLATED_APPS.map((app) => (
-          <div
-            key={app}
-            className="flex items-center gap-1.5 rounded-[6px] border border-[var(--mk-border)] bg-[var(--mk-well)] px-2 py-2.5"
+    <div className={SETTINGS_CARD}>
+      <div className={CARD_HEADER_TEXT}>Environments</div>
+
+      {ISOLATED_APPS.map((app, i) => (
+        <div
+          key={app.name}
+          className={`flex items-center gap-3 px-3.5 py-3 ${
+            i < ISOLATED_APPS.length - 1
+              ? "border-b border-[var(--mk-hairline)]"
+              : ""
+          }`}
+        >
+          <span className="min-w-0 flex-1 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
+            {app.name}
+          </span>
+          <span
+            className={`shrink-0 font-mono ${MOCK_TAG}`}
           >
-            <IconLockGlyph className="size-[12px] shrink-0 text-[var(--mk-subtle)]" />
-            <span className="min-w-0 truncate pb-[3px] -mb-[3px] text-[11px] leading-none text-[var(--mk-fg)]">
-              {app}
-            </span>
-          </div>
-        ))}
-      </div>
+            {app.store}
+          </span>
+        </div>
+      ))}
     </div>
   );
 }
@@ -1907,7 +2113,7 @@ const COMPLIANCE_ROWS = [
 function ComplianceVisual() {
   return (
     <div className={SETTINGS_CARD}>
-      <div className="border-b border-[var(--mk-hairline)] px-3.5 py-3 text-[13px] leading-none text-[var(--mk-fg)]">
+      <div className={CARD_HEADER_TEXT}>
         Trust Center
       </div>
 
@@ -1923,9 +2129,11 @@ function ComplianceVisual() {
           <span className="min-w-0 flex-1 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
             {row.label}
           </span>
-          <span className="shrink-0 text-[11px] leading-none text-[var(--mk-muted)]">
-            {row.state}
-          </span>
+          {/* Tagged rather than set as loose grey text: these are statuses on a
+              standard, the same kind of thing the "Connected" pills are, and
+              four right-aligned words in a column read as a second label track
+              instead of as a state attached to each row. */}
+          <span className={`shrink-0 ${MOCK_TAG}`}>{row.state}</span>
         </div>
       ))}
     </div>
@@ -2025,21 +2233,21 @@ const PILLARS: Pillar[] = [
     short: "Client experience",
     tagline: "Your brand, out of the box.",
     overview:
-      "A branded client experience on your own domain comes standard. It's the space clients log into to work with your firm. Publish a client-facing app and it's live there instantly: no hosting, no URLs to wrangle, no downtime to worry about.",
+      "A branded client experience on your own domain comes standard. It's where clients log in to work with your firm, and publishing an app puts it there instantly. No hosting to set up, no URLs to wrangle.",
     sections: [
       {
         heading: "Apps are a first-class primitive",
-        body: "Every client-facing app appears in the client's sidebar with a name and icon you choose. Reorder them, group them into folders, arrange the experience your way.",
+        body: "Every app you publish lands in the client's sidebar under a name and icon you choose. Reorder them or group them into folders.",
         visual: "client-sidebar",
       },
       {
         heading: "Many focused apps, one experience",
-        body: "Build small apps that each do one job well, not one fragile mega app. Each runs independently, so iterating on one never puts the others at risk.",
+        body: "Build small apps that each do one job well, not one fragile mega app. Each runs on its own, so changing one never puts the others at risk.",
         visual: "focused-apps",
       },
       {
         heading: "Your brand throughout",
-        body: "Your domain, your logo, your colors, and email notifications sent from your address. Clients only ever see your firm.",
+        body: "Your domain, your logo, your colors, and emails sent from your address. Clients only ever see your firm.",
         visual: "branding",
       },
     ],
@@ -2079,17 +2287,17 @@ const PILLARS: Pillar[] = [
     sections: [
       {
         heading: "Your team",
-        body: "Internal roles decide what each teammate can do. Admins manage the workspace, while staff access can be limited to only the clients they're assigned.",
+        body: "Admins manage the whole workspace. Staff can be limited to only the clients they're assigned.",
         visual: "team-roles",
       },
       {
         heading: "Your clients",
-        body: "Clients don't have roles; they have scope. Each contact sees their own data, plus anything assigned to a company they belong to. It's handled correctly even when one person belongs to multiple companies.",
+        body: "Clients don't have roles, they have scope. Each contact sees their own data plus anything shared with a company they belong to, even when they belong to several.",
         visual: "client-scope",
       },
       {
         heading: "Per-app visibility",
-        body: "Any app can be shown to everyone, or only to specific contacts and companies. It's a setting, not something you build.",
+        body: "Show an app to everyone, or only to specific contacts and companies. It's a setting, not something you build.",
         visual: "app-visibility",
       },
     ],
@@ -2104,7 +2312,7 @@ const PILLARS: Pillar[] = [
     sections: [
       {
         heading: "Branded for clients",
-        body: "Client emails go out under your name and, with a custom email domain, from your address. A notification from your firm should look like it came from your firm.",
+        body: "Client emails go out under your name, and from your own address once you add a custom email domain.",
         visual: "branded-email",
       },
       {
@@ -2114,7 +2322,7 @@ const PILLARS: Pillar[] = [
       },
       {
         heading: "Volume you control",
-        body: "Settings decide what deserves an email and what stays a quiet in-product update, so clients hear from you when it matters, and not when it doesn't.",
+        body: "Decide what deserves an email and what stays a quiet in-product update, so clients hear from you only when it matters.",
         visual: "notification-volume",
       },
     ],

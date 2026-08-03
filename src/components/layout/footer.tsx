@@ -3,7 +3,13 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { NAV_LINKS, type NavLink } from "@/lib/constants";
+import {
+  API_REFERENCE_URL,
+  DOCS_URL,
+  GUIDE_URL,
+  NAV_LINKS,
+  type NavLink,
+} from "@/lib/constants";
 import { DiaGradient } from "@/components/ui/dia-gradient";
 import type { ThemePreference } from "@/components/theme/theme-provider";
 
@@ -65,7 +71,16 @@ export function FooterAurora() {
 // socials under "Connect". Navigate is the nav's own list, in the nav's order —
 // the two were maintained separately and had drifted out of sequence. Disabled
 // nav items are dropped rather than rendered as dead footer links.
-const NAVIGATE: NavLink[] = NAV_LINKS.filter((link) => !link.disabled);
+// The footer has room the nav doesn't, so the single "Docs" entry expands here
+// into the two things people actually go looking for. Same-tab, like the nav's.
+const DOCS_LINKS: NavLink[] = [
+  { label: "Assembly Guide", href: GUIDE_URL, external: true },
+  { label: "API Reference", href: API_REFERENCE_URL, external: true },
+];
+
+const NAVIGATE: NavLink[] = NAV_LINKS.filter((link) => !link.disabled).flatMap(
+  (link) => (link.href === DOCS_URL ? DOCS_LINKS : [link]),
+);
 
 // Social links point off-site, so they keep opening in a new tab (newTab).
 const CONNECT: NavLink[] = [

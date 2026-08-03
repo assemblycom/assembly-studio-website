@@ -13,6 +13,23 @@ interface Props {
 
 const ALL = "All";
 
+// Widgets are drawn at one design size and scaled into the card
+// (.template-mock-fit). A few carry no large focal element, so at the shared
+// 288px design size every part of them lands at the small end of the type scale
+// and the card reads as mostly empty; drawing them smaller scales them up in the
+// same frame. Gallery only — the home hero sizes these itself.
+const MOCK_DESIGN_SIZE: Record<string, string> = {
+  "client-ai-assistant": "[--template-mock-w:240px] [--template-mock-h:240px]",
+  "new-client-intake": "[--template-mock-w:240px] [--template-mock-h:240px]",
+  "client-discussion-forum":
+    "[--template-mock-w:240px] [--template-mock-h:240px]",
+  "internal-communications-app":
+    "[--template-mock-w:240px] [--template-mock-h:240px]",
+  // The wizard is a single narrow bar in an otherwise empty square, so it takes
+  // the largest step.
+  "onboarding-wizard": "[--template-mock-w:224px] [--template-mock-h:224px]",
+};
+
 export function TemplatesBrowser({ templates }: Props) {
   // Widget covers (shared with the home hero) reskin to the dark surface.
   const { theme } = useTheme();
@@ -172,26 +189,30 @@ export function TemplatesBrowser({ templates }: Props) {
           outline, the title beneath, then the category + industry tags. The card
           itself stays borderless; only the image is framed. */}
       {filtered.length > 0 ? (
-        <div className="mt-10 grid gap-x-6 gap-y-10 min-[560px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="mt-10 grid gap-x-6 gap-y-10 min-[560px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {filtered.map((template) => (
             <article key={template.slug} className="w-full">
 
               <Link href={`/templates/${template.slug}`} className="block">
                 {/* Real preview image when set; otherwise the template's widget
                     cover mock (shared with the home hero). */}
-                <div className="relative aspect-[5/4] overflow-hidden rounded-[20px] border border-border bg-background min-[560px]:aspect-square [[data-theme=dark]_&]:bg-[#151515]">
+                {/* Square at every width: the widgets are drawn square, and the
+                    old 5/4 mobile frame cropped the bottom off the taller ones. */}
+                <div
+                  className={`template-mock-fit relative aspect-square overflow-hidden rounded-[20px] border border-border bg-background [[data-theme=dark]_&]:border-transparent [[data-theme=dark]_&]:bg-[#151515] ${MOCK_DESIGN_SIZE[template.slug] ?? ""}`}
+                >
                   <div
-                    className={`template-mock h-full w-full [font-family:var(--font-inter),system-ui,sans-serif] ${
+                    className={`template-mock [font-family:var(--font-inter),system-ui,sans-serif] ${
                       dark ? "v72-mock-dark" : ""
                     }`}
                   >
                     <V69CardMock slug={template.slug} />
                   </div>
                 </div>
-                <h3 className="mt-4 text-[15px] font-medium text-foreground">
+                <h3 className="mt-4 text-sm font-medium text-foreground">
                   {template.title}
                 </h3>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="mt-1 text-[13px] text-muted-foreground">
                   {template.description}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-1.5 overflow-hidden">

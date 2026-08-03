@@ -647,7 +647,20 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
                         // background token pair, which inverts itself per theme.
                         // Was a hard-coded white/near-black pill, off-system in
                         // both radius and colour.
-                        className="flex h-8 items-center rounded-lg bg-foreground px-3.5 text-sm text-background transition-opacity hover:opacity-90"
+                        //
+                        // Dark takes the composer's own submit fill instead —
+                        // same accent, same maths — because the two buttons
+                        // carry the same label a few pixels apart, and a white
+                        // one next to the accent one read as two different
+                        // actions. Light keeps the token pair.
+                        className={`flex h-8 items-center rounded-lg px-3.5 text-sm transition-opacity hover:opacity-90 ${
+                          dark ? "text-neutral-900" : "bg-foreground text-background"
+                        }`}
+                        style={
+                          dark
+                            ? { backgroundColor: submitDark ? "#171717" : accent }
+                            : undefined
+                        }
                       >
                         Get started
                       </button>

@@ -28,6 +28,7 @@
 // narrower than the desktop card's, so the same size would read smaller there.
 // ─────────────────────────────────────────────────────────────────────────
 
+import { useId } from "react";
 import {
   IconBrandMark,
   IconCheck,
@@ -216,12 +217,40 @@ function DescribeComposer() {
         // reading as light coming off it. So dark drops the saturation boost,
         // softens the falloff, pulls the opacity back, and blends with screen so
         // the hues ADD to the dark ground the way a glow does.
-        className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-44 opacity-95 blur-2xl saturate-150 [[data-theme=dark]_&]:opacity-55 [[data-theme=dark]_&]:blur-3xl [[data-theme=dark]_&]:saturate-100 [[data-theme=dark]_&]:mix-blend-screen"
+        // Taller than the glow needs to be, and masked to nothing across its
+        // top third. The blooms used to run out inside a 176px box, so the blur
+        // had a hard ceiling to stop against and the whole thing read as a
+        // tinted rectangle with soft corners rather than as light. Giving it
+        // height it never fills and dissolving the top means there is no edge
+        // to find. Saturation is off the boost too: at 150% the lime turned
+        // olive where it met the periwinkle, which is what made the middle of
+        // the wash look muddy rather than clean.
+        // Bled out of the column it lives in, by exactly the padding that
+        // column carries: px-4 and pb-2.5. Sitting inside that padding the wash
+        // stopped 16px short of each side and 10px short of the bottom, so it
+        // read as a rectangle of colour floating on the screen rather than as
+        // light in it. Out here the phone shell's own overflow clip is what
+        // ends it, which leaves no edge of its own to see. The blooms are
+        // anchored to this element's bottom, so it has to land ON the screen
+        // edge, not past it — over-bleed and their brightest part falls
+        // outside the frame.
+        // Hues come through custom properties so dark can swap them without
+        // touching light. Dark drops the lime: a pale yellow-green screened
+        // over near-black turns olive, and that khaki smear against the blue
+        // was what made the glow look cheap rather than lit. The dark wash
+        // stays in the cool family — the periwinkle flanking the panel blue —
+        // and runs quieter, because light coming off a dark surface reads at a
+        // fraction of the strength the same wash needs on white.
+        className="pointer-events-none absolute -inset-x-4 -bottom-2.5 -z-10 h-64 opacity-100 blur-2xl saturate-[1.35] [--aurora-1:#d9ed92] [--aurora-2:#9fb0e8] [--aurora-3:#7da4ff] [mask-image:linear-gradient(to_bottom,transparent_0%,#000_34%)] [-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,#000_34%)] [[data-theme=dark]_&]:opacity-45 [[data-theme=dark]_&]:blur-3xl [[data-theme=dark]_&]:saturate-100 [[data-theme=dark]_&]:mix-blend-screen [[data-theme=dark]_&]:[--aurora-1:#9fb0e8] [[data-theme=dark]_&]:[--aurora-2:#7da4ff] [[data-theme=dark]_&]:[--aurora-3:#9fb0e8]"
         style={{
           background: [
-            "radial-gradient(62% 100% at 16% 100%, #d9ed92 0%, transparent 72%)",
-            "radial-gradient(58% 100% at 52% 100%, #9fb0e8 0%, transparent 72%)",
-            "radial-gradient(62% 100% at 90% 100%, #7da4ff 0%, transparent 72%)",
+            // Held further out (82% rather than 70%) and blurred less, so each
+            // hue keeps its own body instead of everything averaging to a pale
+            // wash in the middle. The mask is what softens the top now, which
+            // is why the blur no longer has to.
+            "radial-gradient(64% 92% at 14% 100%, var(--aurora-1) 0%, transparent 82%)",
+            "radial-gradient(58% 86% at 52% 100%, var(--aurora-2) 0%, transparent 82%)",
+            "radial-gradient(64% 92% at 90% 100%, var(--aurora-3) 0%, transparent 82%)",
           ].join(", "),
         }}
       />
@@ -236,12 +265,15 @@ function DescribeComposer() {
           animated gradient border (same as the hero composer). Uses the
           solid-loop ring: the default sweep has a transparent arc, which at
           this small size reads as the ring breaking apart mid-rotation.
-          Filled in both themes: the aurora sits behind this, and an unfilled
-          field let the glow run straight through the request. */}
+          Glass rather than solid: the aurora sits directly behind this, and a
+          flat white panel read as a card pasted over the glow. A translucent
+          fill over a blurred backdrop lets the colour register at the field's
+          lower edge while the blur keeps the request crisp — an unfilled field
+          was the version that let the glow run straight through the text. */}
       {/* 94, not 104: the field is justify-between, so the extra height landed
           as a 20px hole between the request and the controls under it. This
           leaves a 10px gap — the box now sizes to what it holds. */}
-      <div className="v63-gradient-border v63-ring-solid relative flex min-h-[94px] flex-col justify-between rounded-[12px] bg-[var(--mk-surface)] p-3 [[data-theme=dark]_&]:bg-[var(--mk-elevated)]">
+      <div className="v63-gradient-border v63-ring-solid relative flex min-h-[94px] flex-col justify-between rounded-[12px] bg-[var(--mk-surface)]/72 p-3 backdrop-blur-xl backdrop-saturate-150 [[data-theme=dark]_&]:bg-[var(--mk-elevated)]/72">
         <p className="text-[12px] leading-[1.5] text-[var(--mk-fg-2)]">
           {TYPEWRITER_PREFIX}
           {FLOW_PROMPT}
@@ -496,6 +528,11 @@ function ThumbIntake({ compact = false }: { compact?: boolean }) {
   const radius = 30;
   const circumference = 2 * Math.PI * radius;
   const progress = 2.4 / 3;
+  // The engagement card hatches its in-progress column; the gauge carried no
+  // texture at all, so the two sat on the same rail as different materials.
+  // Geometry converted from that card's CSS hatch — 45deg, a 1.5px line every
+  // 9px — into this viewBox, where the ring renders at roughly 2.4x.
+  const hatchId = useId();
   return (
     // Same surface language as the engagement card: a grey well with the mark
     // sitting on it. The donut's empty run is the riser white — what a bar is
@@ -503,11 +540,41 @@ function ThumbIntake({ compact = false }: { compact?: boolean }) {
     // without boxing the ring in a second card. Grey and not the shared
     // --mk-data tint: at this size the ring is one continuous band rather than
     // a row of thin bars, and the blue turned the whole tile into the coloured
-    // one in a monotone rail. The quiet grey, not the full one, for the same
-    // reason — a band that size carries far more weight than a bar does.
+    // one in a monotone rail. --mk-fill rather than a heavier grey for the same
+    // reason: a band this size carries far more weight than a bar does, and now
+    // that the hatch runs over it the fill no longer has to do that work alone.
+    // It is also the fill the in-progress sparkline bar takes, so every
+    // provisional surface in these mocks is the same grey under the same hatch.
     <div className="flex h-full w-full items-center justify-center bg-[var(--mk-well)]">
       <div className="relative aspect-square h-[70%]">
-        <svg viewBox="0 0 72 72" className="size-full -rotate-90" aria-hidden>
+        {/* The stripe rides on currentColor so one pattern serves both themes:
+            ink on the light band, white on the dark one. Well above the
+            engagement card's 3.5%, because the band under it is --mk-fill —
+            ten values off the riser white either side of it — so the hatch is
+            most of what makes the filled run legible as a run at all. */}
+        <svg
+          viewBox="0 0 72 72"
+          className="size-full -rotate-90 text-[rgba(16,24,40,0.11)] [[data-theme=dark]_&]:text-[rgba(255,255,255,0.13)]"
+          aria-hidden
+        >
+          <defs>
+            <pattern
+              id={hatchId}
+              width="3.75"
+              height="3.75"
+              patternUnits="userSpaceOnUse"
+              patternTransform="rotate(45)"
+            >
+              <line
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="3.75"
+                stroke="currentColor"
+                strokeWidth="0.65"
+              />
+            </pattern>
+          </defs>
           <circle
             cx="36"
             cy="36"
@@ -521,7 +588,20 @@ function ThumbIntake({ compact = false }: { compact?: boolean }) {
             cy="36"
             r={radius}
             fill="none"
-            stroke="var(--mk-data-quiet)"
+            stroke="var(--mk-fill)"
+            strokeWidth="7"
+            strokeDasharray={circumference}
+            strokeDashoffset={circumference * (1 - progress)}
+          />
+          {/* The hatch as its own pass over the filled run, so the band keeps
+              its grey and gains the texture rather than swapping one for the
+              other. */}
+          <circle
+            cx="36"
+            cy="36"
+            r={radius}
+            fill="none"
+            stroke={`url(#${hatchId})`}
             strokeWidth="7"
             strokeDasharray={circumference}
             strokeDashoffset={circumference * (1 - progress)}
@@ -788,7 +868,10 @@ function PlanQuestionsCard() {
       {/* The brand mark stays black — greyed out it read as disabled.
                   The pager beside it runs on one gray, so the strip has a
                   single dark accent rather than two competing ones. */}
-      <div className="flex items-center gap-2 bg-[var(--mk-elevated)] px-3 py-2">
+      {/* --mk-fill rather than --mk-elevated: at neutral-50 the strip was five
+          values off the white card under it, so the questions read as one
+          undivided block instead of a header over a list. */}
+      <div className="flex items-center gap-2 bg-[var(--mk-fill)] px-3 py-2">
         <span className="flex size-[16px] shrink-0 items-center justify-center rounded-[4px] bg-[var(--mk-invert-bg)] text-[var(--mk-invert-fg)]">
           <IconBrandMark className="size-[9px]" />
         </span>
@@ -817,11 +900,16 @@ function PlanQuestionsCard() {
         return (
           // An unpicked answer lights to the same tone the picked one already
           // carries, so hovering previews the choice rather than inventing a
-          // state the card doesn't otherwise have.
+          // state the card doesn't otherwise have. Desktop only: this card is
+          // the phone composition below sm, where the second option is half
+          // cut by the screen's bottom edge and a highlight on it reads as a
+          // stuck state rather than as an answer being considered.
           <div
             key={option}
-            className={`pointer-events-auto flex items-center gap-2.5 px-3 py-2.5 transition-colors duration-150 motion-reduce:transition-none ${
-              selected ? "bg-[var(--mk-elevated)]" : "hover:bg-[var(--mk-elevated)]"
+            className={`pointer-events-auto flex items-center gap-2.5 px-3 py-2.5 transition-colors duration-150 max-sm:pointer-events-none motion-reduce:transition-none ${
+              selected
+                ? "bg-[var(--mk-elevated)]"
+                : "sm:hover:bg-[var(--mk-elevated)]"
             }`}
             style={{ borderTop: `1px solid ${HAIRLINE}` }}
           >
@@ -1121,6 +1209,18 @@ const BUILD_STATS = [
   { label: "This week", value: "32.25", bars: [64, 30, 100, 42, 72, 34, 100] },
 ];
 
+// The current period's bar, which is still filling in. Exactly the engagement
+// card's hatch geometry — a 1.5px line every 9px — so the two read as the same
+// material. A tighter 1px/4px pitch was the first attempt, on the assumption
+// these bars were only a few pixels wide; at their real ~20px they packed in
+// enough stripes to read as a screen texture rather than as a hatch. Dark takes
+// the reference's alpha too; light runs a step stronger because it sits on
+// --mk-fill rather than on a white tile.
+const SPARK_HATCH =
+  "bg-[repeating-linear-gradient(45deg,rgba(16,24,40,0.06)_0,rgba(16,24,40,0.06)_1.5px,transparent_1.5px,transparent_9px)]";
+const SPARK_HATCH_DARK =
+  "[[data-theme=dark]_&]:bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.055)_0,rgba(255,255,255,0.055)_1.5px,transparent_1.5px,transparent_9px)]";
+
 // Phone composition for Build. The desktop screen is a three-tile dashboard
 // over a four-column table, and neither survives a ~320px column — the tiles
 // lose the numbers they exist to show and every table cell truncates to an
@@ -1149,7 +1249,9 @@ function BuildPhoneContent() {
             at full height a solid accent dragged the whole tile to its right
             edge. The same grey as every other track, not a darker one — a
             heavier block there read as a value rather than as the period still
-            filling in. */}
+            filling in. It carries the hatch instead, the same texture the
+            engagement card's in-progress column and the gauge use, which is
+            what lets it register at all against a track of its own colour. */}
         <div className="mt-2.5 flex h-[64px] items-end gap-[5px]">
           {stat.bars.map((h, i) => (
             <div
@@ -1157,7 +1259,11 @@ function BuildPhoneContent() {
               className="relative h-full flex-1 rounded-[6px] bg-[var(--mk-fill)]"
             >
               <span
-                className="absolute inset-x-0 bottom-0 rounded-[6px]"
+                className={`absolute inset-x-0 bottom-0 rounded-[6px] ${
+                  i === stat.bars.length - 1
+                    ? `${SPARK_HATCH} ${SPARK_HATCH_DARK}`
+                    : ""
+                }`}
                 style={{
                   height: `${h}%`,
                   backgroundColor:
@@ -1250,13 +1356,29 @@ export function BrandPortalVisual() {
                       key={i}
                       className="pointer-events-auto flex h-full flex-1 items-end transition-opacity duration-200 group-hover/spark:opacity-40 hover:opacity-100! motion-reduce:transition-none"
                     >
+                      {/* Grey, not the lime accent: three tiles of coloured
+                          bars made the dashboard's chrome the loudest thing on
+                          a screen whose subject is the table under it. The last
+                          bar is the period still filling in — a step lighter
+                          than the series and hatched, the same pairing the
+                          gauge and the engagement card use for provisional.
+                          Outlined like the engagement card's columns and the
+                          gauge's band: once the fill went grey the bars needed
+                          an edge to keep their silhouette against the tile. At
+                          a full pixel that edge was most of a bar this small,
+                          so it takes a half-pixel hairline instead. */}
                       <span
-                        className="w-full rounded-[1.5px]"
+                        className={`w-full rounded-[1.5px] ring-[0.5px] ring-inset ring-[var(--mk-border)] ${
+                          i === stat.bars.length - 1
+                            ? `${SPARK_HATCH} ${SPARK_HATCH_DARK}`
+                            : ""
+                        }`}
                         style={{
                           height: `${h}%`,
-                          // One flat colour across the series — highlighting the last
-                          // bar read as a stray light block, not as "current".
-                          backgroundColor: "var(--mk-data)",
+                          backgroundColor:
+                            i === stat.bars.length - 1
+                              ? "var(--mk-fill)"
+                              : "var(--mk-data-quiet)",
                         }}
                       />
                     </span>
@@ -1270,9 +1392,9 @@ export function BrandPortalVisual() {
 
           {/* Entries table — flex-1 so it fills the card, giving this step the
             same fixed height as the Iterate step. */}
-          <div className="mx-3.5 mb-3.5 flex-1 min-h-0 overflow-hidden rounded-[8px] border border-[var(--mk-border)]">
+          <div className="mx-3.5 mb-3.5 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[8px] border border-[var(--mk-border)]">
             <div
-              className={`${BUILD_COLS} border-b border-[var(--mk-hairline)] bg-[var(--mk-elevated)] px-3 py-2 text-[10px] leading-none text-[var(--mk-muted)]`}
+              className={`${BUILD_COLS} shrink-0 border-b border-[var(--mk-hairline)] bg-[var(--mk-elevated)] px-3 py-2 text-[10px] leading-none text-[var(--mk-muted)]`}
             >
               <span>Description</span>
               <span>Client</span>
@@ -1280,6 +1402,10 @@ export function BrandPortalVisual() {
               <span>Duration</span>
               <span>Status</span>
             </div>
+            {/* No dissolve here, unlike the Iterate preview: these seven rows
+                are sized to fill the frame exactly, so nothing is ever cut and
+                a fade would only soften a last row that is entirely present. */}
+            <div className="min-h-0 flex-1 overflow-hidden">
             {rows.map((entry, i) => (
               <div
                 key={entry.description}
@@ -1308,6 +1434,7 @@ export function BrandPortalVisual() {
                 </span>
               </div>
             ))}
+            </div>
           </div>
         </ScreenCard>
       </div>
@@ -1387,7 +1514,7 @@ export function BuildStepVisual() {
               to that edge, with no inset — the bar and the row below split at
               the same 44% of the same box, so the switch starts exactly on the
               rule. */}
-          <div className="relative flex h-[36px] shrink-0 items-center justify-between border-b border-[var(--mk-hairline)] px-3.5">
+          <div className="relative flex h-[38px] shrink-0 items-center justify-between border-b border-[var(--mk-hairline)] px-3.5">
             <span className="text-[12px] leading-none text-[var(--mk-fg)]">
               Time tracker
             </span>
@@ -1432,15 +1559,20 @@ export function BuildStepVisual() {
             <div className="flex min-w-0 flex-1 flex-col bg-[var(--mk-fill)] p-2.5">
               <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[8px] border border-[var(--mk-border)] bg-[var(--mk-surface)] pt-2.5">
                 <TableToolbar compact />
-                <div className="mx-2.5 mb-2.5 flex-1 overflow-hidden rounded-[6px] border border-[var(--mk-border)]">
+                <div className="mx-2.5 mb-2.5 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[6px] border border-[var(--mk-border)]">
                   <div
-                    className={`${ITERATE_COLS} border-b border-[var(--mk-hairline)] bg-[var(--mk-elevated)] px-2.5 py-1.5 text-[10px] leading-none text-[var(--mk-muted)]`}
+                    className={`${ITERATE_COLS} shrink-0 border-b border-[var(--mk-hairline)] bg-[var(--mk-elevated)] px-2.5 py-1.5 text-[10px] leading-none text-[var(--mk-muted)]`}
                   >
                     <span>Description</span>
                     <span>Duration</span>
                     <span>Status</span>
                   </div>
+                  {/* The fade has to sit on the viewport that does the clipping,
+                      not on the rows inside it: measured against the full list
+                      the gradient resolved ~20px past the cut, so it rendered
+                      entirely out of frame and the last row stayed sliced. */}
                   <div
+                    className="min-h-0 flex-1 overflow-hidden"
                     style={{
                       maskImage: ITERATE_ROW_FADE,
                       WebkitMaskImage: ITERATE_ROW_FADE,

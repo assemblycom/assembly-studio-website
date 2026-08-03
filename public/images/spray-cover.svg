@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480" viewBox="0 0 480 480">
+  <!-- Sprayed bands: lime over a periwinkle transition over blue. Each band is
+       near-solid through its own depth and only its meeting zone with the next
+       one is dithered — noise added to the band's alpha ramp, then hard-
+       thresholded, so hues meet by dot density rather than by blending. Peaks
+       reach full coverage, which is what makes a band read as a field of colour
+       instead of a haze; the loose blob composition that came before read as
+       unfinished. Coverage is even across each band's width — thinning the lime
+       toward one side let dark's ground show through and read as a fade to
+       black. No ground of its own — the card face shows through between specks,
+       so both themes share this artwork. -->
+  <defs>
+    <filter id="s-lime" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.36" numOctaves="1" seed="11" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 -0.5" result="na"/>
+      <feComposite in="SourceAlpha" in2="na" operator="arithmetic" k2="1" k3="1" result="sum"/>
+      <feComponentTransfer in="sum" result="dots">
+        <feFuncA type="discrete" tableValues="0 1"/>
+      </feComponentTransfer>
+      <feFlood flood-color="#C4DE7A" result="c"/>
+      <feComposite in="c" in2="dots" operator="in"/>
+    </filter>
+    <filter id="s-peri" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.44" numOctaves="1" seed="47" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 -0.5" result="na"/>
+      <feComposite in="SourceAlpha" in2="na" operator="arithmetic" k2="1" k3="1" result="sum"/>
+      <feComponentTransfer in="sum" result="dots">
+        <feFuncA type="discrete" tableValues="0 1"/>
+      </feComponentTransfer>
+      <feFlood flood-color="#A9C3E4" result="c"/>
+      <feComposite in="c" in2="dots" operator="in"/>
+    </filter>
+    <filter id="s-blue" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.36" numOctaves="1" seed="23" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 -0.5" result="na"/>
+      <feComposite in="SourceAlpha" in2="na" operator="arithmetic" k2="1" k3="1" result="sum"/>
+      <feComponentTransfer in="sum" result="dots">
+        <feFuncA type="discrete" tableValues="0 1"/>
+      </feComponentTransfer>
+      <feFlood flood-color="#7DA4FF" result="c"/>
+      <feComposite in="c" in2="dots" operator="in"/>
+    </filter>
+
+    <linearGradient id="band-lime" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="1"/>
+      <stop offset="0.3" stop-color="#fff" stop-opacity="1"/>
+      <stop offset="0.42" stop-color="#fff" stop-opacity="0.6"/>
+      <stop offset="0.56" stop-color="#fff" stop-opacity="0.16"/>
+      <stop offset="0.68" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="band-peri" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0.28" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="0.48" stop-color="#fff" stop-opacity="0.72"/>
+      <stop offset="0.62" stop-color="#fff" stop-opacity="0.88"/>
+      <stop offset="0.78" stop-color="#fff" stop-opacity="0.4"/>
+      <stop offset="0.92" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="band-blue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0.48" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="0.64" stop-color="#fff" stop-opacity="0.32"/>
+      <stop offset="0.76" stop-color="#fff" stop-opacity="0.8"/>
+      <stop offset="0.84" stop-color="#fff" stop-opacity="1"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="480" height="480" fill="url(#band-lime)" filter="url(#s-lime)"/>
+  <rect width="480" height="480" fill="url(#band-peri)" filter="url(#s-peri)"/>
+  <rect width="480" height="480" fill="url(#band-blue)" filter="url(#s-blue)"/>
+</svg>

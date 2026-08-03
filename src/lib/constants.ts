@@ -15,6 +15,10 @@ export interface NavLink {
 }
 
 export const DOCS_URL = "https://studio.assembly.com/docs";
+// The footer splits docs into its two halves, where the nav keeps one "Docs"
+// entry. Both live on assembly.com, not the studio subdomain DOCS_URL uses.
+export const GUIDE_URL = "https://assembly.com/docs";
+export const API_REFERENCE_URL = "https://assembly.com/docs/api-reference";
 
 export const NAV_LINKS: NavLink[] = [
   { label: "Templates", href: "/templates" },
@@ -27,8 +31,9 @@ export const NAV_LINKS: NavLink[] = [
 ];
 // The app lives at dashboard.assembly.com (app.assembly.com does not resolve).
 export const APP_URL = "https://dashboard.assembly.com";
-// referrer=studio tags signups that originate from this marketing site.
-export const SIGNUP_URL = "https://dashboard.assembly.com/signup?referrer=studio";
+// referrer=studio-pricing tags signups that originate from this marketing site.
+export const SIGNUP_URL =
+  "https://dashboard.assembly.com/signup?referrer=studio-pricing";
 export const LOGIN_URL = "https://dashboard.assembly.com/login";
 
 // The composer prompt rides along to signup as a query param. Cap it so the
@@ -37,7 +42,8 @@ export const MAX_PROMPT_LENGTH = 2000;
 const MAX_URL_LENGTH = 2048;
 
 // Build the signup URL, carrying the visitor's composer prompt when they have
-// one. SIGNUP_URL already holds ?referrer=studio, so the prompt appends with &.
+// one. SIGNUP_URL already holds ?referrer=studio-pricing, so the prompt appends
+// with &.
 // The prompt is trimmed until the full URL fits MAX_URL_LENGTH, so oddly long
 // or heavily-encoded input can never produce an over-length URL.
 export function buildSignupUrl(

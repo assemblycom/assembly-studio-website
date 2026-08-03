@@ -84,7 +84,7 @@ const TemplateCard = memo(function TemplateCard({
     >
       <Card
         size="sm"
-        className={`gap-0 rounded-2xl py-0 pb-0! shadow-none transition-[transform,box-shadow] duration-200 ease-out [will-change:transform] ${dark ? "ring-0" : "ring-1 ring-black/[0.07]"}`}
+        className={`gap-0 rounded-2xl py-0 pb-0! shadow-none transition-[transform,box-shadow] duration-200 ease-out [will-change:transform] ${dark ? "ring-0" : "ring-1 ring-black/[0.04]"}`}
       >
         {(() => {
           const hue = CARD_HUE[template.slug];
@@ -241,25 +241,31 @@ export function HeroV76({
         "--v69-ink": "#f2f3f5",
       }
     : {
-        // Card faces take the ground tone instead of white, so the tiles read
-        // as part of the page; wells step a notch darker to stay legible and
-        // chips stay white so they pop against the gray face.
-        "--card": "#f7f8fa",
+        // Card faces take the warm off-white every hand-tuned card on this
+        // rail already uses (F5F5F0) instead of the original cool grey, so
+        // every OTHER reused card mock — the ones nobody has re-tuned by hand
+        // yet — picks up the same warm family for free. Wells step a notch
+        // darker/warmer to stay legible and chips stay white so they still
+        // pop against the face.
+        "--card": "#f5f5f0",
         "--card-foreground": "#1a1a1a",
         "--foreground": "#111111",
         "--muted-foreground": "rgba(0,0,0,0.5)",
-        "--v69-box": "#f7f8fa",
-        "--v69-card": "#f1f2f4",
-        // Inner elements (panels, tiles, bars) sit a touch lighter than the
-        // gray face so they lift off it.
-        "--v69-inner": "#f7f8fa",
-        "--v69-well": "#eaecef",
-        "--v69-well-2": "#e1e4e9",
+        "--v69-box": "#f5f5f0",
+        // Three-step ladder, one job each: the widget's ground (--v69-card,
+        // the mock's own face), the surfaces that sit on it (--v69-inner —
+        // panels, rows, bubbles, fields), and the recess for anything nested
+        // inside a surface (--v69-well). Each step is darker than the last, so
+        // depth always reads the same way round on every card.
+        "--v69-card": "#f5f5f0",
+        "--v69-inner": "#e7e7de",
+        "--v69-well": "#dcdcd0",
+        "--v69-well-2": "#cfcfc0",
         // Tracker heatmap's lightest (empty) cell reads a touch more neutral
         // than the shared well tone; dark mode falls back to --v69-well-2.
-        "--v69-tracker-empty": "#e3e4e6",
+        "--v69-tracker-empty": "#e3e3d6",
         "--v69-chip": "#ffffff",
-        "--v69-chip-border": "rgba(16,24,40,0.1)",
+        "--v69-chip-border": "rgba(20,20,10,0.09)",
         "--v69-ink": "#262626",
       };
 
@@ -273,14 +279,6 @@ export function HeroV76({
         restPaddingClass="px-6 md:px-10"
       />
       <section className={`relative -mt-14 pb-24 md:-mt-16 ${dark ? "bg-[#0a0a0a]" : "bg-white"}`}>
-        {/* Hero guide rails — vertical lines at the hero edge, framing the nav
-            and content. Very wide screens only, where there's room outside. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 z-20 hidden justify-center min-[1700px]:flex"
-        >
-          <div className="h-full w-full max-w-[1600px] border-x border-border" />
-        </div>
         <div className="relative overflow-hidden" style={{ background: groundGradient }}>
 
           <div className={`relative z-10 ${RAIL} pb-16 pt-36 md:pt-36 lg:pb-20`}>
@@ -368,7 +366,15 @@ export function HeroV76({
               <div
                 ref={rowRef}
                 onScroll={updateArrows}
-                style={rowTokens as React.CSSProperties}
+                // The two fade switches drive the row's edge mask (see
+                // .v76-card-row): a side only dissolves while there's still
+                // something to scroll to on it, so the first and last card sit
+                // crisp at the ends.
+                style={{
+                  ...rowTokens,
+                  "--v76-fade-l": canLeft ? 1 : 0,
+                  "--v76-fade-r": canRight ? 1 : 0,
+                } as React.CSSProperties}
                 // Card left edge lines up with the hero title/prompt box: pl-6
                 // brings the first card back to the title's left edge.
                 className="v76-card-row mt-1 flex gap-4 overflow-x-auto pb-10 pl-6 pr-6 pt-3 md:mt-3 md:pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -392,13 +398,18 @@ export function HeroV76({
                     size="sm"
                     // Flat and page-toned (no shadow, face = ground color) so
                     // the empty tile recedes behind the real template cards.
-                    className={`gap-0 rounded-2xl py-0 pb-0! shadow-none ring-1 transition-transform duration-200 ease-out group-hover:-translate-y-0.5 ${dark ? "ring-white/15" : "ring-black/[0.07]"}`}
+                    // No outline in dark — the tile's own face already separates
+                    // it from the page there, and the hairline was the brightest
+                    // edge in the row.
+                    className={`gap-0 rounded-2xl py-0 pb-0! shadow-none transition-transform duration-200 ease-out group-hover:-translate-y-0.5 ${dark ? "ring-0" : "ring-1 ring-black/[0.04]"}`}
                   >
                     <div data-slot="card-media" className="flex h-[212px] w-full items-center justify-center bg-[var(--card)]">
-                      {/* Outlined, not filled — a tinted fill on a tile whose
-                          face is already a tint read as a muddy patch rather
-                          than a control. */}
-                      <span className={`flex size-11 items-center justify-center rounded-xl border transition-colors ${dark ? "border-white/20 text-white/55 group-hover:border-white/35" : "border-black/[0.12] text-neutral-500 group-hover:border-black/25"}`}>
+                      {/* Light mode is the bare glyph — the tile is already
+                          outlined, so a second box around the plus read as a
+                          frame inside a frame. Dark mode keeps a filled chip,
+                          since an unframed hairline glyph all but disappears
+                          against the dark card face. */}
+                      <span className={`flex size-11 items-center justify-center rounded-xl transition-colors ${dark ? "bg-white/12 text-white/70 group-hover:bg-white/20" : "text-neutral-400 group-hover:text-neutral-600"}`}>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden>
                           <path d="M12 5v14M5 12h14" />
                         </svg>
@@ -412,22 +423,21 @@ export function HeroV76({
                   <p className="mt-1 text-[11px] text-muted-foreground">{TEMPLATES.length - CAROUSEL.length} more</p>
                 </a>
               </div>
-              {/* Edge cards dissolve into the viewport with a soft progressive
-                  blur (not a fade-to-background) — strongest right at the edge,
-                  tapering inward. Kept narrow and gentle, and dialed back further
-                  on small screens where a wide mask reads as too heavy. */}
-              {canLeft && (
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-y-0 left-0 w-20 md:w-36 [-webkit-mask-image:linear-gradient(to_right,#000_0%,rgba(0,0,0,0.5)_40%,transparent_90%)] [mask-image:linear-gradient(to_right,#000_0%,rgba(0,0,0,0.5)_40%,transparent_90%)] [-webkit-backdrop-filter:blur(5px)] [backdrop-filter:blur(5px)] md:[-webkit-backdrop-filter:blur(8px)] md:[backdrop-filter:blur(8px)]"
-                />
-              )}
-              {canRight && (
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-y-0 right-0 w-20 md:w-36 [-webkit-mask-image:linear-gradient(to_left,#000_0%,rgba(0,0,0,0.5)_40%,transparent_90%)] [mask-image:linear-gradient(to_left,#000_0%,rgba(0,0,0,0.5)_40%,transparent_90%)] [-webkit-backdrop-filter:blur(5px)] [backdrop-filter:blur(5px)] md:[-webkit-backdrop-filter:blur(8px)] md:[backdrop-filter:blur(8px)]"
-                />
-              )}
+              {/* Progressive blur over the same edges the row's mask fades —
+                  the blur softens the card before the mask takes its alpha, so
+                  the two together read as a dissolve rather than a crop. Kept
+                  narrow and gentle, and dialed back further on small screens
+                  where a wide mask reads as too heavy. Always mounted and
+                  cross-faded, since mounting a blur on the first scroll pixel
+                  popped. */}
+              <div
+                aria-hidden
+                className={`pointer-events-none absolute inset-y-0 left-0 w-20 transition-opacity duration-300 ease-out md:w-36 [-webkit-mask-image:linear-gradient(to_right,#000_0%,rgba(0,0,0,0.5)_40%,transparent_90%)] [mask-image:linear-gradient(to_right,#000_0%,rgba(0,0,0,0.5)_40%,transparent_90%)] [-webkit-backdrop-filter:blur(5px)] [backdrop-filter:blur(5px)] md:[-webkit-backdrop-filter:blur(8px)] md:[backdrop-filter:blur(8px)] motion-reduce:transition-none ${canLeft ? "opacity-100" : "opacity-0"}`}
+              />
+              <div
+                aria-hidden
+                className={`pointer-events-none absolute inset-y-0 right-0 w-20 transition-opacity duration-300 ease-out md:w-36 [-webkit-mask-image:linear-gradient(to_left,#000_0%,rgba(0,0,0,0.5)_40%,transparent_90%)] [mask-image:linear-gradient(to_left,#000_0%,rgba(0,0,0,0.5)_40%,transparent_90%)] [-webkit-backdrop-filter:blur(5px)] [backdrop-filter:blur(5px)] md:[-webkit-backdrop-filter:blur(8px)] md:[backdrop-filter:blur(8px)] motion-reduce:transition-none ${canRight ? "opacity-100" : "opacity-0"}`}
+              />
               </div>
             </div>
           </div>

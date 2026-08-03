@@ -61,9 +61,9 @@ function TemplateBuild({
           // Capped rather than full-bleed: these covers are drawn for a ~300px
           // gallery card, and stretched across the whole column the widget
           // floats in dead space instead of reading as a screen.
-          <div className="relative aspect-[5/4] w-full max-w-[520px] overflow-hidden rounded-[20px] border border-border bg-background [[data-theme=dark]_&]:bg-[#151515]">
+          <div className="template-mock-fit template-mock-fit--cap relative aspect-[5/4] w-full max-w-[520px] overflow-hidden rounded-[20px] border border-border bg-background [--template-mock-h:230.4px] [[data-theme=dark]_&]:bg-[#151515]">
             <div
-              className={`template-mock h-full w-full [font-family:var(--font-inter),system-ui,sans-serif] ${
+              className={`template-mock [font-family:var(--font-inter),system-ui,sans-serif] ${
                 theme === "dark" ? "v72-mock-dark" : ""
               }`}
             >

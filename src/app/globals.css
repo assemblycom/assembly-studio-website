@@ -523,9 +523,13 @@ html[data-theme="dark"] body {
    step H3, and so on. Change a size here, never per-component. Sizes are
    mobile-first with a md bump; weight stays 400/500 (never bold).
 
-   Display/H2/H3 sit at 400, not 500: PP Mori maps 500 to SemiBold, which at
-   display sizes reads as bold and makes the page feel heavy rather than fluid.
-   H4 keeps 500 — at 18px it needs the weight to register as a heading.
+   Every step sits at 400. The family ships two files, Regular and SemiBold, and
+   the @font-face above maps SemiBold to 500 — so there is no medium here, and
+   any 500 renders as the bold face. H4 used to take that exception on the
+   grounds that 18px needs weight to register as a heading; in the detail panels
+   where it lives, it was the only bold text on the page. Size, near-black
+   against the body's muted grey, and the space above it carry the heading
+   without it.
    ─────────────────────────────────────────────────────────────────────────── */
 @layer components {
   .type-display {
@@ -552,7 +556,7 @@ html[data-theme="dark"] body {
     font-size: 1.125rem; /* 18px */
     line-height: 1.4;
     letter-spacing: -0.006em;
-    font-weight: 500;
+    font-weight: 400;
   }
   .type-lead {
     font-size: 0.9375rem; /* 15px */
@@ -766,6 +770,53 @@ html[data-theme="dark"] .v63-ring-solid::before {
   ) border-box;
 }
 
+/* The hero card row scrolls past its own edges, and clipping alone left the
+   first and last card sliced off mid-mock. The row fades its content to
+   transparent at whichever side has more to scroll, so a card dissolves out
+   instead of ending on a cut. Registering the two switches as <number> lets the
+   fade animate in and out when the scroll reaches an end — an unregistered
+   custom property would jump. */
+@property --v76-fade-l {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+@property --v76-fade-r {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+
+.v76-card-row {
+  /* Narrower on phones, where the row is barely wider than one card and a
+     desktop-width fade would eat most of it. */
+  --v76-fade-w: 44px;
+  --v76-mask: linear-gradient(
+    to right,
+    transparent 0,
+    #000 calc(var(--v76-fade-l) * var(--v76-fade-w)),
+    #000 calc(100% - var(--v76-fade-r) * var(--v76-fade-w)),
+    transparent 100%
+  );
+  -webkit-mask-image: var(--v76-mask);
+  mask-image: var(--v76-mask);
+  transition:
+    --v76-fade-l 260ms ease-out,
+    --v76-fade-r 260ms ease-out;
+}
+
+@media (min-width: 768px) {
+  .v76-card-row {
+    --v76-fade-w: 132px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v76-card-row {
+    transition: none;
+  }
+}
+
 /* Hovering one hero template card dims the rest of the row so the hovered one
    reads as focused. Hover-capable pointers only — on touch the row is a plain
    swipeable strip. */
@@ -894,10 +945,26 @@ html[data-theme="dark"] .v63-ring-solid::before {
   from { stroke-dashoffset: 1; }
   to { stroke-dashoffset: 0; }
 }
+/* Ring draw-in for the onboarding donut (path uses pathLength=1). Named
+   distinctly from v69Draw, which a later @keyframes in this file redefines
+   for a dashoffset-24 checkmark reveal — reusing that name here would silently
+   pick up the wrong keyframe under CSS's last-definition-wins cascade. */
+@keyframes onboardingRingDraw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
 /* Radial goal gauge — the arc sweeps from empty to its ~80% target on hover. */
-@keyframes v69Ring {
-  from { stroke-dashoffset: 100; }
-  to { stroke-dashoffset: 20; }
+/* Gauge segments sweep by growing their dash, not by shifting the dash offset:
+   the second segment carries a fixed negative offset to park it after the first,
+   so animating the offset would drag it around the ring instead of drawing it.
+   The `to` lengths must match GAUGE_MAIN / GAUGE_SECOND in hero-v71.tsx. */
+@keyframes v69RingMain {
+  from { stroke-dasharray: 0 100; }
+  to { stroke-dasharray: 62 38; }
+}
+@keyframes v69RingSecond {
+  from { stroke-dasharray: 0 100; }
+  to { stroke-dasharray: 15 85; }
 }
 /* Horizontal fill for progress / usage bars — scaleX from the left. */
 @keyframes v69GrowX {
@@ -970,16 +1037,360 @@ html[data-theme="dark"] .v63-ring-solid::before {
   50%, 95% { opacity: 0; }
   100% { opacity: 1; }
 }
+/* Time-tracker card face: flat brand blue at rest, and on hover the fill
+   becomes the site's lime→blue gradient drifting slowly through the frame, so
+   the biggest colour field on the strip reacts instead of sitting still.
+   Scoped to the hero strip's `group` (and the mobile in-view stand-in), so the
+   same mock stays flat wherever it renders without one. */
+.v69-accent-drift {
+  background-color: #7da4ff;
+  background-image: linear-gradient(
+    180deg,
+    #d9ed92 0%,
+    #cfe5a2 20%,
+    #a7bde4 50%,
+    /* Blue hits full strength inside the drift window (the frame only ever
+       shows the middle two-thirds of this gradient), so the bottom of the card
+       is solid brand blue rather than a still-blending midpoint. */
+    #7da4ff 70%,
+    #7da4ff 100%
+  );
+  /* Taller than the frame so there's somewhere to drift to. The animation is
+     mounted but paused and offset half a cycle, which parks the fill mid-drift
+     (lime through blue both on screen) and lets hover simply resume it — a
+     hover-only animation would jump the fill to its start frame instead. */
+  background-size: 100% 150%;
+  animation: v69AccentDrift 3s ease-in-out -1.5s infinite alternate paused;
+}
+.group:hover .v69-accent-drift,
+.group.is-inview .v69-accent-drift {
+  animation-play-state: running;
+}
+/* Light mode's static gallery card is parked mid-drift, which landed the top of
+   the frame on the lime's pale end and read washed out. Holding full-strength
+   lime longer puts real green at the top of that frozen window. Dark keeps the
+   stops above, and the animated hero card is untouched. */
+[data-theme="light"] .template-mock .v69-accent-drift {
+  background-image: linear-gradient(
+    180deg,
+    #d9ed92 0%,
+    #d9ed92 32%,
+    #cfe5a2 44%,
+    #a7bde4 62%,
+    #7da4ff 80%,
+    #7da4ff 100%
+  );
+}
+@keyframes v69AccentDrift {
+  from { background-position: 50% 0%; }
+  to { background-position: 50% 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .group:hover .v69-accent-drift,
+  .group.is-inview .v69-accent-drift {
+    animation-play-state: paused;
+  }
+}
+/* AI-assistant composer: a tinted gradient fill in the brand hues, in the
+   idiom of a voice-assistant input that lights up rather than sitting inert.
+   Alphas are low so placeholder text keeps its contrast on both skins — dark
+   mode needs the fill weaker still, since it sits on a near-black surface.
+   Glass rather than a flat tint: a sheen layer over the hue gradient, plus a lit
+   top edge and a faint lower one — the highlights are what sell the thickness.
+   No backdrop-filter: the card face behind it is flat, so a blur bought nothing
+   and the hovered card's own compositing layer split it down the middle. */
+/* Light mode reads as frosted glass: a white base carries the pill, and the
+   lime→blue only tints it. At full strength the hue was the pill rather than a
+   tint, so it landed as a coloured smear next to the neutral card. The base is
+   a gradient layer, not background-color, so the dark rule below (which swaps
+   background-image wholesale) stays untouched. */
+.v69-composer-gradient {
+  background-image:
+    linear-gradient(
+      165deg,
+      rgba(255, 255, 255, 0.85) 0%,
+      rgba(255, 255, 255, 0.4) 42%,
+      rgba(255, 255, 255, 0) 72%
+    ),
+    linear-gradient(
+      100deg,
+      rgba(217, 237, 146, 0.32) 0%,
+      rgba(179, 205, 205, 0.24) 46%,
+      rgba(125, 164, 255, 0.28) 100%
+    ),
+    linear-gradient(rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.82));
+  /* The white border vanishes against the card, so the lift is what gives the
+     pill its edge. */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.4),
+    0 1px 3px rgba(16, 24, 40, 0.1);
+}
+[data-theme="dark"] .v69-composer-gradient {
+  background-image:
+    linear-gradient(
+      165deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.04) 40%,
+      rgba(255, 255, 255, 0) 64%
+    ),
+    linear-gradient(
+      100deg,
+      rgba(217, 237, 146, 0.2) 0%,
+      rgba(179, 205, 205, 0.18) 46%,
+      rgba(125, 164, 255, 0.26) 100%
+    );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+/* Templates gallery, dark: the composer drops the glass and takes the mock's own
+   panel fill (set on the element). The tinted pill with its lit lips was the only
+   glass material in a card that is otherwise flat, so it read as borrowed from
+   the home hero, which keeps it. Light already runs the composer flat, below. */
+[data-theme="dark"] .template-mock .v69-composer-gradient {
+  background-image: none;
+  box-shadow: none;
+}
+/* Light mode sits the composer on the card's warm off-white face, where the
+   shared skin's tinted glass plus its lit lips read as a lozenge floating over
+   the card. Light instead takes the message bubble's own fill — flat, no ring —
+   so the pill reads as a recessed input sitting on the card. */
+[data-theme="light"] .v69-composer-gradient {
+  background-image: none;
+  background-color: #e7e7de;
+  border-color: transparent;
+  box-shadow: none;
+}
+/* AI-assistant card, hover sequence: the question rises out of the composer as
+   a sent bubble, and the assistant only starts working once it lands. Both
+   elements are the card's resting state, so they use `both` fill — the backwards
+   fill is what holds them hidden until their turn.
+   Timeline: send 0.08–0.78s · start loading 0.8s. */
+.group:hover .v69-chat-send,
+.group.is-inview .v69-chat-send {
+  will-change: transform, opacity;
+  /* Expo-out: most of the travel happens early and it eases to a stop, which
+     reads as a smooth glide rather than a launch with a bounce at the end. */
+  animation: v69ChatSend 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+}
+.group:hover .v69-chat-status,
+.group.is-inview .v69-chat-status {
+  will-change: transform, opacity;
+  animation: cardRowIn 0.45s ease-out 0.8s both;
+}
+.group:hover .v69-chat-shimmer,
+.group.is-inview .v69-chat-shimmer {
+  animation: shimmer-sweep 2.6s linear 0.8s infinite;
+}
+/* The gallery's static skin plays nothing, so the resting state has to stand on
+   its own there — everything at full opacity, in place. */
+.template-mock .v69-chat-send,
+.template-mock .v69-chat-status,
+.template-mock .v69-chat-shimmer {
+  animation: none !important;
+}
+@keyframes v69ChatSend {
+  0% { opacity: 0; transform: translateY(74px) scale(0.94); }
+  40% { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
 /* Staggered entrance for template-card mock content — replays on each hover. */
 /* Notification drop-in — items fall in from just above and settle, like a toast
    arriving. Paired with a slight-overshoot spring easing for the settle. */
-@keyframes v69NotifIn {
+/* Glass tile — the request rows on the help-desk card. Neutral, not hued like
+   the composer: a translucent fill, a diagonal sheen and a lit top edge, so the
+   rows read as panes sitting on the card rather than filled blocks. Explicit
+   rgba throughout, since the `white` token inverts with the theme. */
+.v69-glass-tile {
+  background-color: rgba(255, 255, 255, 0.55);
+  background-image: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.35) 45%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.35),
+    0 1px 2px rgba(16, 24, 40, 0.05);
+}
+[data-theme="dark"] .v69-glass-tile {
+  background-color: rgba(255, 255, 255, 0.06);
+  background-image: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.13) 0%,
+    rgba(255, 255, 255, 0.05) 45%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+/* Opt-out for tiles sitting on a card face that already carries a gradient (the
+   intake card): in dark, glass over a lit face read as a second sheet of glass,
+   so the tile takes a flat fill and keeps only its hairline. Light is unchanged —
+   there the face is flat and the glass is what separates the tile from it. */
+[data-theme="dark"] .v69-glass-tile.v69-glass-tile--flat {
+  background-color: var(--v69-inner);
+  background-image: none;
+  box-shadow: none;
+}
+/* Dark used to run this card on the same lime face, which needed a whole set of
+   inverted tokens (dark ink, olive glyphs, a pale well) to stay readable. It is
+   neutral in dark now, so it wants none of that — the ordinary dark tokens are
+   correct and the overrides are gone. Light keeps the lime. */
+/* Light shares the lime face, so it takes the same olive for the status glyphs —
+   the neutral grey read as a foreign colour on the green. The ink and well
+   tokens already suit it, so only this one is re-pointed. */
+[data-theme="light"] .v69-support-accent {
+  --muted-foreground: #8fa84f;
+}
+/* On the coloured face the glass keeps its light values — the shared dark-mode
+   variant is tuned for a near-black surface and all but vanishes on the lime.
+   Declared after the base so this wins on source order.
+
+   It runs a flatter glass than the shared tile: the lit top edge paired with a
+   lit bottom edge and a cast shadow made each row read as an extruded bevel,
+   which fought the flat lime face. The sheen is halved, the bottom lip and the
+   shadow are gone, and the fill carries more of the contrast — so the rows read
+   as panes laid on the card rather than blocks standing off it.
+
+   Light only: the one card that uses this is neutral in dark now, where the
+   shared dark glass is the right surface. */
+[data-theme="light"] .v69-glass-tile--on-accent {
+  background-color: rgba(255, 255, 255, 0.6);
+  background-image: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.42) 0%,
+    rgba(255, 255, 255, 0.14) 50%,
+    rgba(255, 255, 255, 0) 78%
+  );
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+/* Content-preview render: the dot matrix works — each dot at its own resting
+   brightness, pulsing on staggered offsets so the field never blinks in unison —
+   and at 1.5s the picture resolves in over it out of a blur while the dots fade.
+   Resting state is the finished picture; hover rewinds to "rendering" and plays
+   it out, which is why both layers animate with `both` fill. */
+/* The finished picture is a spray-paint stipple, not a smooth mesh gradient:
+   colour is laid down as discrete specks whose density follows each hue's own
+   ramp, so lime and blue meet by dot density the way an airbrush overlaps two
+   passes. The artwork lives in public/images/spray-cover.svg (dither filters
+   there) and carries no ground of its own, so the card's face — warm off-white
+   in light, near-black in dark — shows through the gaps in both themes. */
+.v69-preview-image {
+  background: url("/images/spray-cover.svg") center / cover no-repeat;
+}
+/* Both themes run the same bands; dark only adds a ground beneath them. Light's
+   card face is an off-white, so the gaps between specks read as paper, while
+   against a near-black face the same gaps read as grit — the dithered zone
+   between two bands turned into a patch of black noise. A dimmed copy of the
+   same three hues sits under the dots there, so the gaps show dim sky. */
+[data-theme="dark"] .v69-preview-image {
+  background:
+    url("/images/spray-cover.svg") center / cover no-repeat,
+    linear-gradient(180deg, #464f33 0%, #3f4a63 50%, #3a4783 100%);
+}
+.v69-preview-dot {
+  opacity: var(--dot-op, 0.3);
+}
+/* On light mode's warm off-white preview face the shared mid-grey dots sat too
+   close to the panel to read as a working render, so the field looked static.
+   Light takes the warm taupe ink its sibling cards use on this palette and a
+   wider brightness swing, which is what makes the twinkle visible. */
+[data-theme="light"] .v69-preview-dots {
+  color: #5b5c53;
+}
+[data-theme="light"] .v69-preview-dot {
+  opacity: calc(var(--dot-op, 0.3) + 0.25);
+}
+[data-theme="light"] .group:hover .v69-preview-dot,
+[data-theme="light"] .group.is-inview .v69-preview-dot {
+  animation-name: v69DotTwinkleLight;
+}
+@keyframes v69DotTwinkleLight {
+  0%,
+  100% {
+    opacity: calc(var(--dot-op, 0.3) + 0.2);
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.v69-preview-dots {
+  opacity: 0;
+}
+.group:hover .v69-preview-dot,
+.group.is-inview .v69-preview-dot {
+  animation: v69DotTwinkle 1.4s ease-in-out infinite;
+}
+.group:hover .v69-preview-dots,
+.group.is-inview .v69-preview-dots {
+  animation: v69DotsRender 2.05s linear both;
+}
+.group:hover .v69-preview-image,
+.group.is-inview .v69-preview-image {
+  animation: v69ImageIn 0.8s ease-out 1.5s both;
+}
+.template-mock .v69-preview-dot,
+.template-mock .v69-preview-dots,
+.template-mock .v69-preview-image {
+  animation: none !important;
+}
+@keyframes v69DotTwinkle {
+  0%, 100% { opacity: var(--dot-op, 0.3); }
+  50% { opacity: 0.85; }
+}
+/* Dots are only present while the render runs: solid from the first frame, gone
+   by the time the picture has resolved. */
+@keyframes v69DotsRender {
+  0%, 74% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes v69ImageIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    filter: blur(14px);
+    transform: scale(1.06);
   }
   to {
     opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+/* iOS notification arrival: the banner comes down from above slightly small and
+   soft, and decelerates into place — the scale and the early opacity ramp are
+   what make it read as arriving rather than sliding. */
+@keyframes v69NotifIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.96);
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+/* Document-collector folder: the sheet inside rises out of the folder and
+   settles back down, like pulling a page half out and letting it drop. Both
+   halves are eased (out on the way up, in on the way back) with a brief hold
+   at the top, so it reads as a considered gesture rather than a bounce. */
+@keyframes v69PaperPeek {
+  0% {
+    transform: translateY(0);
+  }
+  38% {
+    transform: translateY(-11px);
+  }
+  56% {
+    transform: translateY(-11px);
+  }
+  100% {
     transform: translateY(0);
   }
 }
@@ -1166,6 +1577,17 @@ html[data-theme="dark"] .v63-ring-solid::before {
    mode's inverted (white) ink is left untouched. */
 [data-theme="light"] .template-mock {
   --v69-ink: #262626;
+
+  /* Same three-step ladder the hero rail runs on (see rowTokens in
+     hero-v76.tsx), so a widget reads identically in both places: the widget's
+     ground, the surfaces sitting on it, and the recess for anything nested
+     inside a surface. Warm F5F5F0 family, matching the hero rail's palette —
+     was a cool grey that read as a different family from every hand-tuned
+     card on the home hero. */
+  --v69-card: #f5f5f0;
+  --v69-inner: #e7e7de;
+  --v69-well: #dcdcd0;
+  --v69-well-2: #cfcfc0;
 }
 
 /* Templates gallery type scale — the mocks carry many ad-hoc sizes; snap them
@@ -1197,6 +1619,41 @@ html[data-theme="dark"] .v63-ring-solid::before {
 .template-mock .text-\[50px\],
 .template-mock .text-\[60px\],
 .template-mock .text-\[68px\] { font-size: 56px !important; }
+
+/* Widget covers are drawn at one fixed design size (the type scale above is
+   tuned for it), so letting a card stretch them re-flows the layout instead of
+   resizing it — narrow columns clipped their content and wide ones left the
+   widget floating. Render at the design size and scale the whole thing to the
+   card, the same way the home hero shrinks a mock into its stacked rail. */
+.template-mock-fit {
+  container-type: inline-size;
+}
+/* Defaults live in the var() fallbacks, not on .template-mock-fit — an unlayered
+   rule there would outrank the Tailwind utility a card uses to override them. */
+.template-mock-fit > * {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--template-mock-w, 288px);
+  height: var(--template-mock-h, 288px);
+  /* calc() can't divide two lengths; atan2 + tan turns the container width
+     into the unitless ratio a transform needs. */
+  transform: translate(-50%, -50%)
+    scale(
+      var(
+        --template-mock-scale,
+        tan(atan2(100cqw, var(--template-mock-w, 288px)))
+      )
+    );
+}
+/* Detail-page covers sit in a much wider column — fit down, never blow up past
+   the size the widget was drawn at. */
+.template-mock-fit--cap {
+  --template-mock-scale: min(
+    1,
+    tan(atan2(100cqw, var(--template-mock-w, 288px)))
+  );
+}
 
 /* ============================================================
    Product mock — "Generation is the easy part" (production-gap).
