@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { Template } from "@/lib/templates";
 import { TEMPLATE_CATEGORIES } from "@/lib/templates";
@@ -13,6 +13,46 @@ interface Props {
 }
 
 const ALL = "All";
+
+/** Edge affordance for the chip strip: a round button sitting on a fade that
+ *  blends the clipped chips into the page background. */
+function ScrollArrow({
+  direction,
+  onClick,
+}: {
+  direction: "left" | "right";
+  onClick: () => void;
+}) {
+  const isLeft = direction === "left";
+  return (
+    <div
+      className={`pointer-events-none absolute inset-y-0 flex items-center ${
+        isLeft
+          ? "left-0 justify-start bg-gradient-to-r pr-8"
+          : "right-0 justify-end bg-gradient-to-l pl-8"
+      } from-background via-background to-transparent`}
+    >
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={isLeft ? "Scroll categories left" : "Scroll categories right"}
+        className="pointer-events-auto flex size-9 items-center justify-center rounded-full border border-border bg-background text-foreground outline-none transition-colors hover:bg-muted active:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          className="size-4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d={isLeft ? "m14 6-6 6 6 6" : "m10 6 6 6-6 6"} />
+        </svg>
+      </button>
+    </div>
+  );
+}
 
 // Widgets are drawn at one design size and scaled into the card they're framed
 // in; the per-template exceptions live with the frame (see MOCK_DESIGN_SIZE).
@@ -35,13 +75,6 @@ export function TemplatesBrowser({ templates }: Props) {
   };
   // Free-text search across title, description, category, and industries.
   const [query, setQuery] = useState("");
-
-  // Extra categories collapse under a "More" toggle — there are more here than
-  // fit in a tidy couple of rows, on desktop and mobile alike.
-  const [showAllCats, setShowAllCats] = useState(false);
-
-  // Chip list: show a first handful, tuck the rest behind "More (N)".
-  const COLLAPSED_CHIP_COUNT = 6;
 
   const categories = useMemo(() => {
     const present = new Set(templates.map((t) => t.category));
@@ -76,7 +109,83 @@ export function TemplatesBrowser({ templates }: Props) {
     });
   }, [templates, selected, query]);
 
-  const hiddenCatCount = categories.length - COLLAPSED_CHIP_COUNT;
+  // The chip row is one non-wrapping strip that scrolls; arrows appear only when
+  // it actually overflows, and each end's arrow hides once you reach that end.
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [canScroll, setCanScroll] = useState({ left: false, right: false });
+
+  const measure = useCallback(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    // A pixel of slack: fractional widths otherwise leave an arrow lit at an end.
+    const max = el.scrollWidth - el.clientWidth;
+    setCanScroll({ left: el.scrollLeft > 1, right: el.scrollLeft < max - 1 });
+  }, []);
+
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    measure();
+    // Watch the strip and its contents: fonts landing or a category list change
+    // both move the overflow point without a window resize.
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    for (const child of Array.from(el.children)) ro.observe(child);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [measure, categories]);
+
+  // Vertical wheel over the strip scrolls it sideways, but only while it has
+  // room left in that direction — otherwise the page keeps the gesture.
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      const max = el.scrollWidth - el.clientWidth;
+      if (max <= 0) return;
+      const next = el.scrollLeft + e.deltaY;
+      if (next < 0 || next > max) return;
+      e.preventDefault();
+      el.scrollLeft = next;
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
+  const scrollByPage = (direction: 1 | -1) => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    // Just under a full width, so the chip at the edge stays partly in view as a
+    // hint that the row continues.
+    el.scrollBy({ left: direction * el.clientWidth * 0.8, behavior: "smooth" });
+  };
+
+  // Whatever category you just picked should be fully visible, even if it was
+  // clipped at an edge when you clicked it.
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const target = selected.length > 0 ? selected[selected.length - 1] : ALL;
+    const chip = el.querySelector<HTMLElement>(
+      `[data-category="${CSS.escape(target)}"]`,
+    );
+    if (!chip) return;
+    const EDGE_GUTTER = 48;
+    const start = chip.offsetLeft;
+    const end = start + chip.offsetWidth;
+    if (start < el.scrollLeft + EDGE_GUTTER) {
+      el.scrollTo({ left: Math.max(0, start - EDGE_GUTTER), behavior: "smooth" });
+    } else if (end > el.scrollLeft + el.clientWidth - EDGE_GUTTER) {
+      el.scrollTo({
+        left: end - el.clientWidth + EDGE_GUTTER,
+        behavior: "smooth",
+      });
+    }
+  }, [selected]);
 
   return (
     <div>
@@ -130,43 +239,46 @@ export function TemplatesBrowser({ templates }: Props) {
         )}
       </div>
 
-      {/* Toolbar — Linear-style plain-text filters: the active word reads in
-          full ink, the rest muted; extras tuck behind "More (N)". A single
-          swipeable row on mobile, wraps from sm up. */}
-      <div className="flex flex-nowrap items-center gap-x-5 gap-y-2.5 overflow-x-auto text-[15px] [scrollbar-width:none] lg:min-w-0 lg:flex-1 lg:flex-wrap lg:overflow-visible [&::-webkit-scrollbar]:hidden">
-        {/* Mobile swipes through every category, so show them all and skip the
-            collapse; on desktop the row wraps, so extras past the cap stay
-            hidden behind "More" (below) until expanded. */}
-        {categories.map((cat, i) => {
-          const active = cat === ALL ? selected.length === 0 : selected.includes(cat);
-          const collapsedOnDesktop = i >= COLLAPSED_CHIP_COUNT && !showAllCats;
-          return (
-            <button
-              key={cat}
-              type="button"
-              aria-pressed={active}
-              onClick={() => toggleCategory(cat)}
-              className={`whitespace-nowrap transition-colors ${
-                collapsedOnDesktop ? "lg:hidden" : ""
-              } ${
-                active
-                  ? "text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {cat}
-            </button>
-          );
-        })}
-        {hiddenCatCount > 0 && (
-          <button
-            type="button"
-            onClick={() => setShowAllCats((v) => !v)}
-            aria-expanded={showAllCats}
-            className="hidden whitespace-nowrap text-muted-foreground/70 transition-colors hover:text-foreground lg:inline-block"
-          >
-            {showAllCats ? "Less" : `More (${hiddenCatCount})`}
-          </button>
+      {/* Category chips — one non-wrapping strip that scrolls, YouTube-style:
+          swipe or trackpad at any width, plus edge arrows once the row is wider
+          than the space beside the search field. The arrows overlay the strip
+          rather than reserving room for it, so nothing shifts when they appear;
+          the right one is gone by the time you reach the last chip, so it never
+          sits on top of it. */}
+      <div className="relative min-w-0 lg:flex-1">
+        <div
+          ref={scrollerRef}
+          onScroll={measure}
+          role="group"
+          aria-label="Filter templates by category"
+          className="flex flex-nowrap items-center gap-2 overflow-x-auto scroll-pl-12 scroll-pr-12 py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {categories.map((cat) => {
+            const active = cat === ALL ? selected.length === 0 : selected.includes(cat);
+            return (
+              <button
+                key={cat}
+                type="button"
+                data-category={cat}
+                aria-pressed={active}
+                onClick={() => toggleCategory(cat)}
+                className={`inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded-full px-4 text-[14px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                  active
+                    ? "bg-foreground text-background"
+                    : "bg-muted text-foreground hover:bg-foreground/10 active:bg-foreground/15"
+                }`}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+
+        {canScroll.left && (
+          <ScrollArrow direction="left" onClick={() => scrollByPage(-1)} />
+        )}
+        {canScroll.right && (
+          <ScrollArrow direction="right" onClick={() => scrollByPage(1)} />
         )}
       </div>
       </div>
