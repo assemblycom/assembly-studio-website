@@ -19,6 +19,47 @@ export interface SelectOption {
   hint?: string;
   /** Groups the options under a heading, in first-seen order. */
   group?: string;
+  /**
+   * Photo shown before the label, in the trigger and in the row. A person is
+   * recognised by their face before their name, which is the whole reason to
+   * pick a teammate from a list rather than type them.
+   */
+  avatar?: string;
+}
+
+/**
+ * The avatar, with the person's initials underneath it. The initials are not a
+ * placeholder for a missing file so much as what shows while the photo loads,
+ * and what stays if a photo was never added for that person.
+ */
+function OptionAvatar({ option, size }: { option: SelectOption; size: number }) {
+  const [failed, setFailed] = useState(false);
+  const initials = option.label
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0] ?? "")
+    .join("")
+    .toUpperCase();
+
+  return (
+    <span
+      aria-hidden
+      style={{ width: size, height: size }}
+      className="relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-[10px] text-muted-foreground [[data-theme=dark]_&]:bg-white/[0.08]"
+    >
+      {initials}
+      {option.avatar && !failed && (
+        // A plain img rather than next/image: these are small fixed-size photos
+        // and a missing file has to fall back to the initials rather than throw.
+        <img
+          src={option.avatar}
+          alt=""
+          onError={() => setFailed(true)}
+          className="absolute inset-0 size-full object-cover"
+        />
+      )}
+    </span>
+  );
 }
 
 // Shared with the form fields around it so a trigger and an input are the same
@@ -201,7 +242,12 @@ export function SelectMenu({
             selected ? "" : "!text-muted-foreground"
           }`}
         >
-          <span className="truncate">{selected?.label ?? placeholder}</span>
+          <span className="flex min-w-0 items-center gap-2.5">
+            {selected?.avatar !== undefined && (
+              <OptionAvatar option={selected} size={22} />
+            )}
+            <span className="truncate">{selected?.label ?? placeholder}</span>
+          </span>
           <IconChevron open={open} />
         </button>
 
@@ -264,15 +310,20 @@ export function SelectMenu({
                           }}
                           className="flex w-full items-start justify-between gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-muted [[data-theme=dark]_&]:hover:bg-white/[0.06]"
                         >
-                          <span className="min-w-0">
-                            <span className="block truncate text-sm text-foreground">
-                              {option.label}
-                            </span>
-                            {option.hint && (
-                              <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                                {option.hint}
-                              </span>
+                          <span className="flex min-w-0 items-center gap-2.5">
+                            {option.avatar !== undefined && (
+                              <OptionAvatar option={option} size={26} />
                             )}
+                            <span className="min-w-0">
+                              <span className="block truncate text-sm text-foreground">
+                                {option.label}
+                              </span>
+                              {option.hint && (
+                                <span className="mt-0.5 block truncate text-xs text-muted-foreground">
+                                  {option.hint}
+                                </span>
+                              )}
+                            </span>
                           </span>
                           {value === option.value && <IconCheck />}
                         </button>

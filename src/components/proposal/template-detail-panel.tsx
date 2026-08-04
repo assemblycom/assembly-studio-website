@@ -87,7 +87,7 @@ export function TemplateDetailPanel({
 
         <div className="scrollbar-slim flex-1 overflow-y-auto overscroll-contain px-6 py-7">
           <h2 className="type-h3">{template.title}</h2>
-          <p className="mt-3 text-base text-muted-foreground">
+          <p className="type-lead mt-3 text-muted-foreground">
             {template.description}
           </p>
 
@@ -96,7 +96,7 @@ export function TemplateDetailPanel({
               is still worth saying up front. */}
           {template.usesAI && (
             <div className="mt-5">
-              <span className="rounded-md bg-foreground px-2.5 py-1 font-mono text-xs tracking-wide text-background">
+              <span className="rounded-md bg-foreground px-2.5 py-1 text-xs tracking-wide text-background [font-family:var(--font-diatype-mono),ui-monospace,monospace]">
                 AI
               </span>
             </div>
@@ -111,24 +111,21 @@ export function TemplateDetailPanel({
           </div>
 
           <h3 className="type-h4 mt-10">About this template</h3>
-          <p className="mt-3 text-base leading-[1.75] text-foreground/80">
+          <p className="type-body mt-3 text-foreground/80">
             {template.longDescription}
           </p>
-          <p className="mt-4 text-base leading-[1.75] text-foreground/80">
-            Start from this template and describe what you want to change in
-            plain English. Assembly Studio adapts the layout, fields, and flow to
-            your firm, then publishes it to your client portal in minutes. No
-            code required.
+          <p className="type-body mt-4 text-foreground/80">
+            Start from this template and describe what you want changed.
+            Assembly Studio reshapes it to your firm, then publishes it to your
+            client portal in minutes.
           </p>
 
           <h3 className="type-h4 mt-9">What you can customize</h3>
           <ul className="mt-3 space-y-2.5">
             {TEMPLATE_CUSTOMIZATION.map((item) => (
               <li key={item} className="flex items-start gap-3">
-                <span className="mt-[0.65rem] size-1.5 shrink-0 rounded-full bg-foreground/40" />
-                <span className="text-base leading-[1.7] text-foreground/80">
-                  {item}
-                </span>
+                <span className="mt-2.5 size-1.5 shrink-0 rounded-full bg-foreground/40" />
+                <span className="type-body text-foreground/80">{item}</span>
               </li>
             ))}
           </ul>
@@ -138,9 +135,12 @@ export function TemplateDetailPanel({
               <h3 className="type-h4 mt-9">What&rsquo;s included</h3>
               <div className="mt-3 flex flex-wrap gap-2">
                 {template.features.map((feature) => (
+                  // Set in the mono, in caps, the way the tags on the proposal's
+                  // own card are: the same fact should look the same in both
+                  // places the recipient meets it.
                   <span
                     key={feature}
-                    className="rounded-md bg-muted px-3 py-1.5 text-sm text-muted-foreground [[data-theme=dark]_&]:bg-white/[0.06]"
+                    className="rounded-sm bg-muted px-2.5 py-1.5 text-[11px] uppercase leading-none tracking-[0.04em] text-muted-foreground [font-family:var(--font-diatype-mono),ui-monospace,monospace] [[data-theme=dark]_&]:bg-white/[0.06]"
                   >
                     {feature}
                   </span>
@@ -153,7 +153,7 @@ export function TemplateDetailPanel({
           {/* The industries, and not the catalogue category the template is
               filed under: naming the shelf tells the recipient nothing about
               whether this fits their firm. */}
-          <p className="mt-2 text-base text-muted-foreground">
+          <p className="type-body mt-2 text-muted-foreground">
             {perfectFor} firms.
           </p>
         </div>
@@ -166,7 +166,11 @@ export function TemplateDetailPanel({
             onClick={onStart}
             className="flex h-11 w-full items-center justify-center rounded-lg bg-foreground px-5 text-sm text-background transition-[opacity,background-color] hover:opacity-90 [[data-theme=dark]_&]:hover:bg-white [[data-theme=dark]_&]:hover:opacity-100"
           >
-            Start with this template
+            {/* The same words as every other action on the proposal: the page's
+                closing CTA, the bar that floats until you reach it, and Build on
+                the card all open this one signup, so they read as one action
+                rather than three. */}
+            Get started
           </button>
         </div>
       </aside>

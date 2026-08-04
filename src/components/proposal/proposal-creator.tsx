@@ -49,6 +49,38 @@ const TEMPLATE_OPTIONS = [...TEMPLATES]
 // It's a floor, not a suggestion — the sender is expected to write over it.
 const DEFAULT_NOTE = "We put this together for you.";
 
+/**
+ * Who a proposal can come from. A list rather than a free-text field: the sender
+ * is one of us, the recipient sees the name on the page, and a typo or an
+ * inconsistent "Sean W." / "Sean Walsh, Assembly" went out with it. Photos live
+ * in public/images/team, named after the value here; a missing file falls back to
+ * the person's initials, so adding someone is one line and one image.
+ */
+const TEAM: { value: string; label: string; avatar: string }[] = [
+  { value: "sean", label: "Sean Walsh", avatar: "/images/team/sean.jpg" },
+  {
+    value: "vivienne",
+    label: "Vivienne Chen",
+    avatar: "/images/team/vivienne.jpg",
+  },
+  { value: "marlon", label: "Marlon Misra", avatar: "/images/team/marlon.jpg" },
+  {
+    value: "veronique",
+    label: "Véronique Cadet",
+    avatar: "/images/team/veronique.jpg",
+  },
+  { value: "jordan", label: "Jordan Wechsler", avatar: "/images/team/jordan.jpg" },
+  { value: "adam", label: "Adam Schwartz", avatar: "/images/team/adam.jpg" },
+];
+
+// The link carries the name, not the key: the proposal page prints whatever
+// `from` says, and it has no idea this list exists.
+const teamOptions = TEAM.map(({ label, avatar }) => ({
+  value: label,
+  label,
+  avatar,
+}));
+
 const PROMPT_PLACEHOLDER =
   "Build a collaborative sketch app where my clients and I can draw on the same canvas: freehand, shapes, and text, with every board saved per client and shareable by link.";
 
@@ -205,16 +237,15 @@ export function ProposalCreator() {
           />
         </Field>
 
-        <Field label="From" htmlFor="from">
-          <input
-            id="from"
-            type="text"
-            value={from}
-            onChange={(e) => setFrom(e.target.value)}
-            placeholder="Sean Walsh, Assembly"
-            className={FIELD_CLS}
-          />
-        </Field>
+        {/* Picked from the team rather than typed: same control as the template
+            picker, with the face next to the name. */}
+        <SelectMenu
+          label="From"
+          value={from}
+          onChange={setFrom}
+          options={teamOptions}
+          placeholder="Choose who it's from"
+        />
 
         {/* What we're proposing — a template, or a prompt we refined for them.
             Same sliding-thumb toggle as the pricing billing switch. */}

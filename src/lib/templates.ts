@@ -472,6 +472,263 @@ export const TEMPLATE_CUSTOMIZATION = [
   "Access and permissions per client or team",
 ];
 
+/**
+ * What each feature actually means, for the rails that let a feature row open.
+ * Keyed by the label rather than held per template: the labels are all but unique
+ * across the set, and the handful that repeat (Reminders, Search, Milestones)
+ * mean the same thing wherever they appear. A row with no entry here still reads
+ * as a row, it just doesn't open, so this can be filled in as copy is reviewed.
+ */
+export const TEMPLATE_FEATURE_DETAILS: Record<string, string> = {
+  // Onboarding wizard
+  "Multi-step flow":
+    "The questions are split across short steps instead of one long form, so nobody faces a wall of fields.",
+  "Saved progress":
+    "Answers are kept as they go. Clients can stop halfway, come back later, and pick up where they left off.",
+  "File upload":
+    "Documents are attached inside the flow and land in the client's own folder, not in your inbox.",
+  "Guided steps":
+    "Each step says what it needs and why, so you aren't answering the same setup questions over email.",
+
+  // New client intake
+  "Scope & goals":
+    "What the engagement covers and what the client wants out of it, captured in their words at the start.",
+  Stakeholders:
+    "Who to talk to on their side, and who signs off. Collected once rather than pieced together later.",
+  "Budget & timeline":
+    "Range and dates up front, so the first call starts from something real.",
+  "E-signature":
+    "Signed in the portal. The executed copy is stored with the client's record, no separate signing tool.",
+
+  // Document collection
+  "Upload checklist":
+    "Every document you need, listed as a checklist the client works through and can see the end of.",
+  Reminders:
+    "Automatic nudges before something is due, and after. Nobody on your team has to chase.",
+  "Secure storage":
+    "Files stay in the client's own folder with your access rules on them, not in an email thread.",
+  "Completion tracking":
+    "Who has finished, who has started, and what's still outstanding, at a glance.",
+
+  // Client project tracker
+  Milestones:
+    "The points that matter, dated, so progress reads as a shape rather than a percentage.",
+  "Progress per engagement":
+    "Each engagement carries its own status, so one client's delay isn't another client's mystery.",
+  "Status stages":
+    "Your own stages, named the way your team already talks about the work.",
+  Notifications:
+    "Clients hear when something moves without you writing the update.",
+
+  // Time tracker
+  "Billable hours":
+    "Time logged against a client and a project as the work happens, not reconstructed at month end.",
+  "Roll-ups":
+    "Hours totalled by client, project, and period, so the number you invoice is already there.",
+  Exportable:
+    "Clean timesheets out, ready for whatever you bill from.",
+  "Per-project":
+    "Every entry belongs to a project, so a client with three jobs running stays three jobs.",
+
+  // Content approval flow
+  "Posts & campaigns":
+    "The work goes to the client as it will appear, not as an attachment to describe.",
+  "Status history":
+    "Every change and who made it, kept in order, so nobody argues about what was approved.",
+  Comments:
+    "Feedback sits on the thing it's about instead of in a separate email.",
+  "Audit trail":
+    "A dated record of who did what, kept automatically for when it's asked for.",
+
+  // Client support requests
+  "Categorized requests":
+    "Requests arrive sorted by type, so the right person picks them up first time.",
+  "Shared triage queue":
+    "One queue your team works from, so nothing sits in an individual's inbox.",
+  Priority:
+    "What's urgent is marked as urgent, and stays at the top.",
+  "Real-time updates":
+    "The client sees the status change as it changes, and stops asking whether you got it.",
+
+  // Proposal builder
+  "Templated proposals":
+    "Start from your own template, change what's specific to this client, send.",
+  "View tracking":
+    "You can see when it was opened and how far they read, so following up isn't guesswork.",
+  "Accept & pay":
+    "Accepting and paying happen in the same place, so a yes doesn't wait on an invoice.",
+
+  // Client AI assistant
+  "Trained on your docs":
+    "It answers from your own guides and policies, not from the open internet.",
+  "Instant answers":
+    "The common questions are handled the moment they're asked, at any hour.",
+  "Smart escalation":
+    "When it isn't sure, it hands the question to your team with the context attached.",
+  "Multi-channel":
+    "Available where clients already are in the portal, rather than as one more tool to learn.",
+
+  // Voice AI integration
+  "AI voice calls":
+    "Calls are placed and taken for you, with the outcome recorded against the client.",
+  "Call status":
+    "Completed, voicemail, no answer. Each attempt is logged with its result and time.",
+  Transcripts:
+    "Every call is written up, so what was said is readable rather than remembered.",
+  "Searchable call log":
+    "Find the call by client, date, or what was said in it.",
+
+  // Client discussion forum
+  "Threaded topics":
+    "Conversations keep their shape, so an answer stays attached to its question.",
+  Mentions:
+    "Pull someone in by name and they hear about it.",
+  Searchable:
+    "Answers given once stay findable, so the same question isn't asked three times.",
+  Moderation:
+    "You decide what's posted and what stays, with the controls to act on it.",
+
+  // Internal communications app
+  Announcements:
+    "One place the team looks for what changed, rather than a message that scrolls away.",
+  "Team channels":
+    "Channels per team or topic, so a project's noise stays in the project.",
+  "Read receipts":
+    "You can see who has read the thing that mattered.",
+  "Pinned posts":
+    "What the team needs constantly stays at the top instead of being reposted.",
+
+  // Client resource library
+  "Branded guides":
+    "Your guides in your branding, in the portal clients already sign into.",
+  Search:
+    "Everything is findable by what it's about, not by remembering where it was filed.",
+  "Access controls":
+    "Who sees what, set per client or group.",
+  "Usage insights":
+    "What's being read tells you what to write next.",
+
+  // Data room
+  "Permissioned access":
+    "Access granted per person and revoked the same way, down to the file.",
+  Watermarking:
+    "Documents carry who opened them, which changes how they get shared on.",
+  "Activity tracking":
+    "Every open and download is recorded against a name and a time.",
+
+  // Progress tracker
+  "Custom stages":
+    "Define the stages once, in your own language, and everything moves through them.",
+  "Live status":
+    "Where each record stands right now, without anyone compiling it.",
+  "Progress %":
+    "How far along, as a number, for the things that are measured that way.",
+  "Per-record updates":
+    "Each record carries its own history, so the detail is there when it's questioned.",
+
+  // Client to-do list
+  "Per-client checklist":
+    "Each client sees their own list of what to do next, not a general one.",
+  "Due dates":
+    "Dates on the items that have them, so what's late is obvious.",
+
+  // Case status page
+  "Live case status":
+    "Where the matter stands, current, so the client can look instead of emailing.",
+  Timeline:
+    "What has happened so far, in order, with dates.",
+  "Next steps":
+    "What happens next and who it's waiting on.",
+  "Client-visible":
+    "Written to be read by the client, so nothing has to be translated before sharing.",
+
+  // Retainer usage overview
+  "Used vs. remaining":
+    "How much of the retainer is spent and how much is left, kept current.",
+  "Breakdown by work":
+    "Where the time went, grouped the way you'd explain it on a call.",
+  "Per-period":
+    "Each month or quarter stands on its own, so trends are visible.",
+
+  // Conditional forms
+  "Conditional logic":
+    "Questions appear based on earlier answers, so clients only see what applies to them.",
+  "Branching questions":
+    "One form covers several situations without becoming a form for none of them.",
+  "Auto data capture":
+    "Answers land on the client's record as data, not as a PDF someone has to retype.",
+
+  // Client calendar
+  "Shared calendar":
+    "Meetings, milestones, and deadlines in one view both sides are looking at.",
+  "Event details":
+    "What it is, who's coming, and what to bring, on the event itself.",
+  "Milestones & deadlines":
+    "The dates that matter from the work itself, not re-entered by hand.",
+
+  // Mass messenger
+  "Audience filters":
+    "Write once and send to everyone, or to the segment the message is actually for.",
+  "Scheduled sends":
+    "Set when it goes out and it goes out then.",
+  "Delivery status":
+    "Sent, delivered, opened. You know it landed.",
+  "Replies in one place":
+    "Answers come back to one queue rather than to whoever pressed send.",
+
+  // Events & RSVPs
+  "Event listings":
+    "Events published to your clients in the portal, with the detail they need to decide.",
+  "RSVP tracking":
+    "Who's coming, who declined, and who hasn't answered.",
+  "Attendee list":
+    "The list stays with the event, so check-in and follow-up work from the same place.",
+
+  // Design approvals
+  "Round-by-round review":
+    "Feedback comes in rounds, so a design isn't being changed in three directions at once.",
+  "Approve or request changes":
+    "Two clear answers, recorded, instead of an email you have to interpret.",
+  "Version history":
+    "Every version is kept, so what changed between two of them is a fact.",
+  "Sign-off record":
+    "Who approved which version, dated.",
+
+  // Goal tracker
+  "Goals per client":
+    "Each client's own targets, set with them rather than for them.",
+  "Progress to target":
+    "How far along against the number, updated as the work lands.",
+  "Trend over time":
+    "The direction, not just today's figure, so a good month reads as a good month.",
+
+  // Internal resource library
+  Categories:
+    "Grouped the way your team thinks about the work, so browsing gets somewhere.",
+  "Access by team":
+    "Each team sees what belongs to it, without a folder maze.",
+
+  // Jargon quest
+  "Term library":
+    "Your industry's vocabulary, written plainly, in one place clients can return to.",
+  "Quiz rounds":
+    "Short rounds rather than a test, so it gets finished.",
+  "Scores & streaks":
+    "A reason to come back tomorrow.",
+  "Progress per client":
+    "Who has played and how far they got.",
+
+  // Block builder game
+  "Drag-and-drop board":
+    "A board clients build on directly, in the portal, with no app to install.",
+  "Saved layouts":
+    "What they made is still there next time.",
+  "Shareable results":
+    "The result can be sent on, which is half the fun of it.",
+  "Works on mobile":
+    "Built for a thumb as much as a cursor.",
+};
+
 /** Curated templates shown on the homepage. Falls back to the first few. */
 export function getFeaturedTemplates(limit = 6): Template[] {
   const featured = TEMPLATES.filter((t) => t.featured);
