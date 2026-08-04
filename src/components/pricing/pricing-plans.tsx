@@ -39,8 +39,8 @@ const PLANS: Plan[] = [
         items: [
           "CRM",
           "Client experience",
-          "30+ pre-made apps",
           "App builder",
+          "30+ pre-made apps",
           "Messaging and team inbox",
           "Billing and payments",
         ],
@@ -70,9 +70,9 @@ const PLANS: Plan[] = [
       {
         label: "Everything in Free, plus",
         items: [
-          "Custom domain",
-          "Custom email domain",
+          "Unlimited apps",
           "API & MCP connector",
+          "More included credits",
           "Add-on build credits",
         ],
       },
@@ -101,11 +101,11 @@ const PLANS: Plan[] = [
       {
         label: "Everything in Starter, plus",
         items: [
+          "Custom domains",
           "Remove Assembly badge",
           "App visibility",
           "Automation builder",
           "AI model selection",
-          "Multi-company contacts",
         ],
       },
       {

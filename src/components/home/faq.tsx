@@ -152,11 +152,14 @@ function FAQItem({
           className="group flex w-full cursor-pointer items-center justify-between gap-6 py-5 text-left"
         >
           <span className="type-body text-foreground">{question}</span>
-          {/* The chevron turns 90°, not 180: from pointing down at a closed row
-              to lying flat when it's open. Half the travel of a full flip, and
-              it lands on a shape that reads as "nothing further down" rather
-              than as a spin. Timed to the drawer (300ms) so the two move as one
-              gesture instead of the icon finishing late. */}
+          {/* The chevron turns 90°, not 180 — half the travel of a full flip,
+              and timed to the drawer (300ms) so the two move as one gesture.
+              Which 90° depends on the width. On a phone it rests pointing right
+              and swings down as the row opens, the direction the answer actually
+              arrives from; pointing down at a closed row promised the answer was
+              already below. From md it keeps the desktop turn it had, down at
+              rest to flat when open. The drawn path points down, so the resting
+              state is the rotated one on mobile and the plain one above it. */}
           <svg
             width="20"
             height="20"
@@ -164,7 +167,7 @@ function FAQItem({
             fill="none"
             aria-hidden
             className={`shrink-0 text-muted-foreground transition-[transform,color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:text-foreground motion-reduce:transition-none ${
-              open ? "-rotate-90" : ""
+              open ? "rotate-0 md:-rotate-90" : "-rotate-90 md:rotate-0"
             }`}
           >
             <path
@@ -201,8 +204,9 @@ function FAQItem({
           viewBox="0 0 20 20"
           fill="none"
           aria-hidden
+          // Same right-at-rest, down-on-open turn as the divided variant.
           className={`shrink-0 text-muted-foreground transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
-            open ? "-rotate-90" : ""
+            open ? "rotate-0 md:-rotate-90" : "-rotate-90 md:rotate-0"
           }`}
         >
           <path

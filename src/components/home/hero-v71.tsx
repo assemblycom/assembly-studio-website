@@ -1315,7 +1315,8 @@ const SUPPORT_REQUESTS: {
   { title: "Password reset", meta: "Resolved", state: "done" },
 ];
 function SupportStatusIcon({ state }: { state: "open" | "progress" | "done" }) {
-  const cls = "size-3.5 shrink-0 text-muted-foreground";
+  const cls =
+    "size-3.5 shrink-0 text-muted-foreground [[data-theme=light]_&]:text-[#5B5C53]";
   if (state === "done") {
     return (
       <svg viewBox="0 0 16 16" className={cls} aria-hidden>
@@ -1361,20 +1362,19 @@ function SupportStatusIcon({ state }: { state: "open" | "progress" | "done" }) {
 }
 function CardSupport() {
   return (
-    // The brand lime face in light — the one colour tile in the row. Dark is
-    // neutral like its siblings, so it needs none of the inverted tokens the
-    // lime demanded (see .v69-support-accent, now light-only).
-    <div className="v69-support-accent flex h-full flex-col justify-center gap-2 bg-[var(--v69-card)] p-4 [[data-theme=light]_&]:bg-[#D9ED92]">
+    // Light rides the same warm beige face and inner step as the chat card, so
+    // the row of mocks reads as one family. Dark is unchanged.
+    <div className="flex h-full flex-col justify-center gap-2 bg-[var(--v69-card)] p-4 [[data-theme=light]_&]:bg-[#F5F5F0]">
       {SUPPORT_REQUESTS.map((r, i) => (
         <div
           key={r.title}
           // Rows drop in one after another like notifications arriving on a
           // phone: a decelerating glide down, no bounce at the end.
-          className="v69-glass-tile v69-glass-tile--flat v69-glass-tile--on-accent flex items-center gap-2.5 rounded-lg border border-[rgba(255,255,255,0.6)] px-3 py-2.5 [[data-theme=dark]_&]:border-[rgba(255,255,255,0.1)] group-hover:[will-change:transform,opacity] group-hover:[animation:v69NotifIn_0.66s_cubic-bezier(0.22,1,0.36,1)_both] group-[.is-inview]:[animation:v69NotifIn_0.66s_cubic-bezier(0.22,1,0.36,1)_both]"
+          className="flex items-center gap-2.5 rounded-lg border border-black/[0.05] bg-[var(--v69-inner)] px-3 py-2.5 [[data-theme=dark]_&]:border-[rgba(255,255,255,0.1)] [[data-theme=light]_&]:bg-[#E7E7DE] group-hover:[will-change:transform,opacity] group-hover:[animation:v69NotifIn_0.66s_cubic-bezier(0.22,1,0.36,1)_both] group-[.is-inview]:[animation:v69NotifIn_0.66s_cubic-bezier(0.22,1,0.36,1)_both]"
           style={{ animationDelay: `${i * 0.13}s` }}
         >
           <SupportStatusIcon state={r.state} />
-          <p className="min-w-0 truncate text-[13px] leading-tight text-[var(--v69-ink)]">
+          <p className="min-w-0 truncate text-[13px] leading-tight text-[var(--v69-ink)] [[data-theme=light]_&]:text-[#3B3C34]">
             {r.title}
           </p>
         </div>

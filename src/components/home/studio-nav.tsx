@@ -113,6 +113,15 @@ export function StudioNav({
   const menuScrollRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
+  // Handing focus back to the hamburger is right for a keyboard user and wrong
+  // for a thumb: focusing it programmatically paints the focus ring, so the
+  // trigger sat there looking pressed long after the menu had gone. Only the
+  // closes that came from the keyboard ask for focus back.
+  const restoreFocusRef = useRef(false);
+  const closeMenu = (restoreFocus = false) => {
+    restoreFocusRef.current = restoreFocus;
+    setMobileMenuOpen(false);
+  };
   useEffect(() => {
     if (!mobileMenuOpen) return;
     const prev = document.documentElement.style.overflow;
@@ -144,11 +153,16 @@ export function StudioNav({
       [...menu.querySelectorAll<HTMLElement>(SELECTOR)].filter(
         (el) => el.getBoundingClientRect().width > 0,
       );
-    items()[0]?.focus();
+    // The dialog itself, not its first link. Focus has to come in here for the
+    // trap and for Escape, but WebKit treats a programmatic focus as
+    // keyboard-driven, so sending it to the logo painted the site's 2px
+    // focus-visible ring around the mark on every tap. The container is
+    // outline-none and invisible, and Tab from it still lands on the logo.
+    menu.focus();
 
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setMobileMenuOpen(false);
+        closeMenu(true);
         return;
       }
       if (event.key !== "Tab") return;
@@ -156,9 +170,13 @@ export function StudioNav({
       if (list.length === 0) return;
       const first = list[0];
       const last = list[list.length - 1];
-      if (!menu.contains(document.activeElement)) {
+      const active = document.activeElement;
+      // Focus parked on the container (the state it opens in) counts as "not on
+      // an item": Tab takes the first, Shift+Tab the last, so the very first
+      // keypress can't escape backwards out of the portal.
+      if (!menu.contains(active) || active === menu) {
         event.preventDefault();
-        first.focus();
+        (event.shiftKey ? last : first).focus();
       } else if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
         last.focus();
@@ -174,7 +192,10 @@ export function StudioNav({
       // yanking focus back to the hamburger there would undo the navigation's
       // own focus handling.
       const active = document.activeElement;
-      if (!active || active === document.body) trigger?.focus();
+      if (restoreFocusRef.current && (!active || active === document.body)) {
+        trigger?.focus();
+      }
+      restoreFocusRef.current = false;
     };
   }, [mobileMenuOpen]);
 
@@ -214,15 +235,6 @@ export function StudioNav({
     WebkitMaskImage:
       "linear-gradient(to bottom, #000 0%, #000 42%, transparent 100%)",
   };
-
-  // The minimal bar's only action. The site's canonical outline button, with
-  // the border and ink following the same lightContent switch every other nav
-  // item uses so it reads correctly over a dark hero and a light page alike.
-  const backCls = `rounded-lg border px-5 py-2.5 text-sm transition-colors ${
-    lightContent
-      ? "border-white/25 text-white hover:bg-white/10"
-      : "border-foreground/20 text-foreground hover:bg-foreground/5"
-  }`;
 
   // One shared easing/duration for the rest→pill transition so every animated
   // property (chrome, geometry, logo tint) settles together on the same soft
@@ -337,7 +349,12 @@ export function StudioNav({
       {/* Mobile header — mirrors the desktop nav: transparent with light
           contents over the dark hero, settling into the same dark glass pill on
           scroll. Logo on the left, grid menu button on the right. */}
-      <header className={`${position} z-50 transition-colors ${ease} lg:hidden`}>
+      {/* `invisible` rather than unmounted while the menu is open: the overlay
+          covers this bar anyway, and leaving a backdrop-filter layer painting
+          underneath a fixed overlay is a reliable way to get a flicker on iOS.
+          Keeping it in the DOM preserves the layout and the trigger we owe
+          focus back to. */}
+      <header className={`${position} z-50 transition-colors ${ease} lg:hidden ${mobileMenuOpen ? "invisible" : ""}`}>
         <div
           aria-hidden
           className={`pointer-events-none absolute inset-x-0 top-0 h-[135%] transition-opacity ${ease} ${scrolled ? "opacity-100" : "opacity-0"}`}
@@ -347,11 +364,11 @@ export function StudioNav({
           <Link href="/" onClick={onLogoClick} className="flex items-center">
             {logoMark}
           </Link>
-          {minimal ? (
-            <Link href="/" className={backCls}>
-              Back to homepage
-            </Link>
-          ) : (
+          {/* The minimal bar carries nothing on mobile: at 375px the full-width
+              "Back to homepage" button was the loudest thing on the screen, and
+              the logo beside it already goes home. It stays on desktop, where
+              there's room for it. */}
+          {minimal ? null : (
           <button
             ref={menuTriggerRef}
             onClick={() => setMobileMenuOpen(true)}
@@ -464,11 +481,7 @@ export function StudioNav({
                 </button>
               );
             })()}
-            {minimal ? (
-              <Link href="/" className={backCls}>
-                Back to homepage
-              </Link>
-            ) : authed ? (
+            {minimal ? null : authed ? (
               <a href={APP_URL} className={ctaCls}>
                 Open Assembly
               </a>
@@ -500,15 +513,20 @@ export function StudioNav({
           role="dialog"
           aria-modal="true"
           aria-label="Menu"
-          className={`fixed inset-0 z-[60] flex flex-col lg:hidden ${menuSurface}`}
+          tabIndex={-1}
+          className={`fixed inset-0 z-[60] flex flex-col outline-none lg:hidden ${menuSurface}`}
         >
           {/* Match the mobile header's padding (px-5) and height exactly so the
-              logo stays put when the menu opens — it must not shift. */}
-          <div className={`flex items-center justify-between border-b px-5 ${scrolled ? "h-12" : "h-14"} ${menuBorder}`}>
+              logo stays put when the menu opens — it must not shift.
+              The hairline lives on the panel below rather than as a border-b
+              here: heights are border-box, so a border on this row shrank its
+              content box to 55px and lifted both glyphs half a pixel against
+              the header they're meant to replace. */}
+          <div className={`flex shrink-0 items-center justify-between px-5 ${scrolled ? "h-12" : "h-14"}`}>
             <Link
               href="/"
               onClick={(e) => {
-                setMobileMenuOpen(false);
+                closeMenu();
                 onLogoClick(e);
               }}
               className="flex items-center"
@@ -523,9 +541,14 @@ export function StudioNav({
             </Link>
             <div className="flex items-center gap-4">
               <button
-                onClick={() => setMobileMenuOpen(false)}
+                // detail === 0 means the click came from Enter/Space rather
+                // than a pointer, which is the case that wants focus back.
+                onClick={(e) => closeMenu(e.detail === 0)}
                 aria-label="Close menu"
-                className={menuInk}
+                // Same size-9 box as the hamburger it replaces — without it the
+                // glyph sat flush to the gutter and the icon visibly hopped 7px
+                // sideways the moment the menu opened.
+                className={`flex size-9 items-center justify-center ${menuInk}`}
               >
                 <svg
                   width="22"
@@ -541,7 +564,7 @@ export function StudioNav({
             </div>
           </div>
 
-          <div ref={menuScrollRef} className="flex flex-1 flex-col overflow-y-auto overscroll-contain px-5 pt-6">
+          <div ref={menuScrollRef} className={`flex flex-1 flex-col overflow-y-auto overscroll-contain border-t px-5 pt-6 ${menuBorder}`}>
             <ul className="flex flex-col gap-1">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
@@ -557,14 +580,20 @@ export function StudioNav({
                       href={link.href}
                       target={link.newTab ? "_blank" : undefined}
                       rel={link.newTab ? "noopener noreferrer" : undefined}
+                      onClick={() => closeMenu()}
                       className={`block py-3 text-lg ${menuInk}`}
                     >
                       {link.label}
                     </a>
                   ) : (
+                    // Picking a page dismisses the menu. A client-side route
+                    // change leaves this overlay mounted on its own, so without
+                    // this the new page loaded silently behind a menu that
+                    // looked like nothing had happened.
                     <Link
                       href={link.href}
                       aria-current={isCurrent(link.href) ? "page" : undefined}
+                      onClick={() => closeMenu()}
                       className={`block py-3 text-lg ${menuInk} ${
                         isCurrent(link.href) ? "font-medium" : ""
                       }`}

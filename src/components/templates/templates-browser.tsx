@@ -6,6 +6,7 @@ import type { Template } from "@/lib/templates";
 import { TEMPLATE_CATEGORIES } from "@/lib/templates";
 import { V69CardMock } from "@/components/home/hero-v71";
 import { useTheme } from "@/components/theme/theme-provider";
+import { MockFit, MOCK_DESIGN_SIZE } from "@/components/templates/mock-fit";
 
 interface Props {
   templates: Template[];
@@ -13,22 +14,8 @@ interface Props {
 
 const ALL = "All";
 
-// Widgets are drawn at one design size and scaled into the card
-// (.template-mock-fit). A few carry no large focal element, so at the shared
-// 288px design size every part of them lands at the small end of the type scale
-// and the card reads as mostly empty; drawing them smaller scales them up in the
-// same frame. Gallery only — the home hero sizes these itself.
-const MOCK_DESIGN_SIZE: Record<string, string> = {
-  "client-ai-assistant": "[--template-mock-w:240px] [--template-mock-h:240px]",
-  "new-client-intake": "[--template-mock-w:240px] [--template-mock-h:240px]",
-  "client-discussion-forum":
-    "[--template-mock-w:240px] [--template-mock-h:240px]",
-  "internal-communications-app":
-    "[--template-mock-w:240px] [--template-mock-h:240px]",
-  // The wizard is a single narrow bar in an otherwise empty square, so it takes
-  // the largest step.
-  "onboarding-wizard": "[--template-mock-w:224px] [--template-mock-h:224px]",
-};
+// Widgets are drawn at one design size and scaled into the card they're framed
+// in; the per-template exceptions live with the frame (see MOCK_DESIGN_SIZE).
 
 export function TemplatesBrowser({ templates }: Props) {
   // Widget covers (shared with the home hero) reskin to the dark surface.
@@ -186,10 +173,21 @@ export function TemplatesBrowser({ templates }: Props) {
       </div>
 
       {/* Grid — Linear-style story cards: a preview image framed with a hairline
-          outline, the title beneath, then the category + industry tags. The card
-          itself stays borderless; only the image is framed. */}
+          outline and the title beneath. The card itself stays borderless; only
+          the image is framed.
+
+          The row gap is deliberately far larger than the gap between a widget and
+          its own label (16px), so each card groups as one thing and the rows stop
+          reading as a single dense field. Held back on small screens, where two
+          columns don't need the same separation and the extra height just becomes
+          scrolling.
+
+          Column steps are set by the card width the widgets need (~230px is where
+          the busier mocks start losing their detail), not by the default
+          breakpoints: 3-up used to wait for lg, so a laptop-width window sat on
+          two very wide cards and then jumped straight to five. */}
       {filtered.length > 0 ? (
-        <div className="mt-10 grid gap-x-6 gap-y-10 min-[560px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <div className="mt-10 grid gap-x-6 gap-y-12 min-[560px]:grid-cols-2 min-[760px]:grid-cols-3 min-[1100px]:grid-cols-4 lg:gap-x-8 lg:gap-y-[72px] min-[1440px]:grid-cols-5">
           {filtered.map((template) => (
             <article key={template.slug} className="w-full">
 
@@ -198,8 +196,8 @@ export function TemplatesBrowser({ templates }: Props) {
                     cover mock (shared with the home hero). */}
                 {/* Square at every width: the widgets are drawn square, and the
                     old 5/4 mobile frame cropped the bottom off the taller ones. */}
-                <div
-                  className={`template-mock-fit relative aspect-square overflow-hidden rounded-[20px] border border-border bg-background [[data-theme=dark]_&]:border-transparent [[data-theme=dark]_&]:bg-[#151515] ${MOCK_DESIGN_SIZE[template.slug] ?? ""}`}
+                <MockFit
+                  className={`relative aspect-square overflow-hidden rounded-[20px] border border-border bg-background [[data-theme=dark]_&]:border-transparent [[data-theme=dark]_&]:bg-[#151515] ${MOCK_DESIGN_SIZE[template.slug] ?? ""}`}
                 >
                   <div
                     className={`template-mock [font-family:var(--font-inter),system-ui,sans-serif] ${
@@ -208,27 +206,20 @@ export function TemplatesBrowser({ templates }: Props) {
                   >
                     <V69CardMock slug={template.slug} />
                   </div>
-                </div>
-                <h3 className="mt-4 text-sm font-medium text-foreground">
+                </MockFit>
+                {/* Card text on the site's own steps: body for the name, caption
+                    for the line under it. Both sit at 400 — the name reads as the
+                    heading through colour and the space above it, not weight.
+                    The category tag that used to close the card is gone: it was
+                    the only uppercase on the page, and the row it sat on was most
+                    of what made the grid feel packed. The filter tabs above
+                    already say which category you're looking at. */}
+                <h3 className="type-body mt-4 text-foreground">
                   {template.title}
                 </h3>
-                <p className="mt-1 text-[13px] text-muted-foreground">
+                <p className="type-caption mt-1 text-muted-foreground">
                   {template.description}
                 </p>
-                <div className="mt-3 flex flex-wrap gap-1.5 overflow-hidden">
-                  {/* Just the category by default — one clean tag per card,
-                      no repetitive industry filler. */}
-                  {[...new Set([template.category, ...(template.industries ?? [])])]
-                    .slice(0, 1)
-                    .map((tag) => (
-                      <span
-                        key={tag}
-                        className="shrink-0 whitespace-nowrap rounded-md bg-muted px-1.5 py-[3px] font-mono text-[10px] uppercase tracking-wide text-muted-foreground"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                </div>
               </Link>
             </article>
           ))}

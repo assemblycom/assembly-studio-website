@@ -653,19 +653,18 @@ function AppIcon({
   );
 }
 
-function IconChevron({ className = "" }: { className?: string }) {
+// The supplied mark (plus-large), drawn as a filled path with its round caps in
+// the geometry rather than as a stroke. It runs the full width of its box, so it
+// reads a size up from the inset stroked plus it replaces at the same 14px.
+function IconRowPlus({ className = "" }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 20 20"
+      fill="currentColor"
       aria-hidden
       className={className}
     >
-      <path d="m6.5 4 4 4-4 4" />
+      <path d="M10.9375 0.9375C10.9375 0.417969 10.5195 0 10 0C9.48047 0 9.0625 0.417969 9.0625 0.9375V9.0625H0.9375C0.417969 9.0625 0 9.48047 0 10C0 10.5195 0.417969 10.9375 0.9375 10.9375H9.0625V19.0625C9.0625 19.582 9.48047 20 10 20C10.5195 20 10.9375 19.582 10.9375 19.0625V10.9375H19.0625C19.582 10.9375 20 10.5195 20 10C20 9.48047 19.582 9.0625 19.0625 9.0625H10.9375V0.9375Z" />
     </svg>
   );
 }
@@ -2533,7 +2532,7 @@ function DetailPanel({
           panel arriving. */}
       <div
         aria-hidden
-        className={`pointer-events-none absolute -bottom-32 -top-32 right-0 w-full max-w-xl bg-background transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [[data-theme=dark]_&]:bg-[#151515] md:max-w-2xl ${
+        className={`pointer-events-none absolute -bottom-32 -top-32 right-0 w-full max-w-xl bg-background transition-transform duration-[380ms] ease-[cubic-bezier(0.22,1,0.36,1)] md:duration-300 [[data-theme=dark]_&]:bg-[#151515] md:max-w-2xl ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       />
@@ -2546,7 +2545,7 @@ function DetailPanel({
         aria-label={pillar.short}
         // overscroll-contain: without it, a flick that reaches the end of the
         // panel keeps going and scrolls the page underneath instead of stopping.
-        className={`absolute inset-y-0 right-0 flex w-full max-w-xl flex-col overflow-y-auto overscroll-contain border-l border-border bg-background transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [[data-theme=dark]_&]:bg-[#151515] [[data-theme=dark]_&]:border-[#383838] [[data-theme=dark]_&]:shadow-[-32px_0_60px_-30px_rgba(0,0,0,0.8)] md:max-w-2xl ${
+        className={`absolute inset-y-0 right-0 flex w-full max-w-xl flex-col overflow-y-auto overscroll-contain border-l border-border bg-background transition-transform duration-[380ms] ease-[cubic-bezier(0.22,1,0.36,1)] md:duration-300 [[data-theme=dark]_&]:bg-[#151515] [[data-theme=dark]_&]:border-[#383838] [[data-theme=dark]_&]:shadow-[-32px_0_60px_-30px_rgba(0,0,0,0.8)] md:max-w-2xl ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -2698,15 +2697,14 @@ export function WholeStack() {
               <span className="type-body flex-1 text-foreground">
                 {p.short}
               </span>
-              {/* A chevron, not an arrow. The row opens a panel over this page
-                  (aria-haspopup="dialog"); an arrow is the promise of going
-                  somewhere, and it was writing a cheque the row doesn't cash.
-                  The hover nudge went with it for the same reason: sliding right
-                  is the gesture of leaving. It brightens instead. */}
-              {/* 40% of the muted token disappears against the near-black dark
-                  ground, so dark takes the token at full strength. Light keeps
-                  40% exactly as it was. */}
-              <IconChevron
+              {/* A plus, not a chevron or an arrow. The row opens a panel over
+                  this page (aria-haspopup="dialog"), and both of the pointed
+                  marks name a direction: a chevron reads as drilling in and
+                  expanding in place, an arrow as leaving for another page.
+                  A plus only says there is more here, which is the one thing
+                  that's true. No hover nudge, for the same reason — movement
+                  would put the direction back. It brightens instead. */}
+              <IconRowPlus
                 className="size-3.5 shrink-0 text-muted-foreground transition-colors duration-200 group-hover:text-foreground"
               />
             </button>

@@ -91,18 +91,16 @@ export function TemplateDetailPanel({
             {template.description}
           </p>
 
-          {/* Category, not industries — the same tag the catalogue and the
-              template's own page show. */}
-          <div className="mt-5 flex flex-wrap gap-2">
-            {template.usesAI && (
-              <span className="rounded-md bg-foreground px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-background">
+          {/* No category tag: the recipient isn't browsing a catalogue, so the
+              shelf this template sits on tells them nothing. Whether it uses AI
+              is still worth saying up front. */}
+          {template.usesAI && (
+            <div className="mt-5">
+              <span className="rounded-md bg-foreground px-2.5 py-1 font-mono text-xs tracking-wide text-background">
                 AI
               </span>
-            )}
-            <span className="rounded-md bg-muted px-2.5 py-1 font-mono text-xs uppercase tracking-wide text-muted-foreground [[data-theme=dark]_&]:bg-white/[0.08]">
-              {template.category}
-            </span>
-          </div>
+            </div>
+          )}
 
           <div className="mt-7">
             <TemplateGallery
@@ -152,9 +150,11 @@ export function TemplateDetailPanel({
           )}
 
           <h3 className="type-h4 mt-9">Perfect for</h3>
+          {/* The industries, and not the catalogue category the template is
+              filed under: naming the shelf tells the recipient nothing about
+              whether this fits their firm. */}
           <p className="mt-2 text-base text-muted-foreground">
-            {perfectFor} firms running {template.category.toLowerCase()}{" "}
-            workflows.
+            {perfectFor} firms.
           </p>
         </div>
 

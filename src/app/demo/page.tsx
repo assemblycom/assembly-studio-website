@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { DemoChatVisual } from "@/components/demo/demo-chat-visual";
 import { DemoForm } from "@/components/demo/demo-form";
 import { PAGE_SEO, pageMetadata } from "@/lib/seo";
 
@@ -16,13 +17,11 @@ export default function DemoPage() {
             form/button never stretch full-width or get cramped beside a skinny
             visual. */}
         <div className="mx-auto w-full max-w-xl lg:mx-0 lg:max-w-none">
-          {/* Broken by hand so "in action" always takes the second line, and
-              sized fluidly rather than stepping 36→48 on the md breakpoint —
-              on a phone the stepped size filled a third of the screen. */}
-          <h1
-            className="type-display mx-auto max-w-md text-center lg:mx-0 lg:text-left"
-            style={{ fontSize: "clamp(1.75rem, 1.33vw + 1.44rem, 3rem)" }}
-          >
+          {/* Broken by hand so "in action" always takes the second line. Plain
+              type-display, no bespoke curve: undersized against the site's
+              other page headings it read as a label above the form rather than
+              the title of the page. */}
+          <h1 className="type-display mx-auto max-w-md text-center lg:mx-0 lg:text-left">
             See Assembly
             <br />
             in action
@@ -32,10 +31,10 @@ export default function DemoPage() {
           </div>
         </div>
 
-        {/* Right — placeholder for a visual (testimonial / product shot).
-            Stretches to the form's height so it never runs past the fold.
+        {/* Right — the chat visual. Stretches to the form's height so it never
+            runs past the fold, and scales itself to whatever box that leaves.
             Shown only at lg+, where the two-column layout has room. */}
-        <div className="hidden w-full rounded-xl bg-[#D9ED92] lg:block" />
+        <DemoChatVisual className="hidden w-full lg:block" />
       </div>
     </section>
   );

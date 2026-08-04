@@ -31,8 +31,11 @@ const VIEWPORT_MARGIN = 16;
 // The search row sits above the scrolling list inside the same panel.
 const SEARCH_ROW_HEIGHT = 56;
 
+// Border is foreground/20 rather than --border: at the divider weight the
+// outline barely registered as a field you could type in. Same weight the
+// signup email field already uses.
 export const FIELD_CLS =
-  "w-full rounded-lg border border-border bg-background px-4 py-3 text-base text-foreground outline-none sm:text-sm transition-colors placeholder:text-muted-foreground focus:border-foreground/30";
+  "w-full rounded-lg border border-foreground/20 bg-background px-4 py-3 text-base text-foreground outline-none sm:text-sm transition-colors placeholder:text-muted-foreground focus:border-foreground/40";
 
 function IconChevron({ open }: { open: boolean }) {
   return (
@@ -41,7 +44,7 @@ function IconChevron({ open }: { open: boolean }) {
       height="16"
       viewBox="0 0 16 16"
       fill="none"
-      className={`shrink-0 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+      className={`shrink-0 text-muted-foreground transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${open ? "rotate-180" : ""}`}
       aria-hidden
     >
       <path
@@ -219,7 +222,13 @@ export function SelectMenu({
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={searchPlaceholder}
                   aria-label={searchPlaceholder}
-                  className="w-full rounded-md bg-muted px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground [[data-theme=dark]_&]:bg-white/[0.06]"
+                  // The global focus ring (a 2px outline over a 2px background
+                  // halo) is drawn for controls sitting on the page. Here the
+                  // field is auto-focused the moment the menu opens and sits
+                  // inside a panel of its own, so that halo read as a hard dark
+                  // outline boxing the field in. A hairline ring on the fill
+                  // says "focused" without the frame.
+                  className="w-full rounded-md bg-muted px-3 py-2 text-sm text-foreground outline-none ring-1 ring-inset ring-transparent placeholder:text-muted-foreground focus-visible:shadow-none focus-visible:outline-none focus-visible:ring-foreground/20 [[data-theme=dark]_&]:bg-white/[0.06]"
                 />
               </div>
             )}

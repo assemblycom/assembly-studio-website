@@ -3,7 +3,6 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { TEMPLATES } from "@/lib/templates";
-import { PROMPT_IDEAS } from "@/components/home/prompt-ideas";
 import { SignupHandoff } from "@/components/ui/signup-handoff";
 import { HeroV76 } from "@/components/home/hero-v76";
 
@@ -20,10 +19,14 @@ import { HeroV76 } from "@/components/home/hero-v76";
 
 // What you arrived with: the label on top and the words in a well under it. Two
 // lines at rest, opening to five on a click, with the cut marked by the clamp's
-// ellipsis under a soft fade rather than by a control — it's a reminder of what you asked for on the way to signing up,
+// ellipsis under a soft fade and named by a Show more control — it's a reminder
+// of what you asked for on the way to signing up,
 // not the thing you came here to read, and the whole prompt travels with the link.
-// A template reads the same way a typed prompt does; its own cover mock made the
-// two arrivals look like different kinds of thing.
+//
+// A template does NOT read as a typed prompt. Most people who pick one aren't
+// there to build something — they're taking a thing that already exists — so the
+// row names the app and says in one line what it does, and the label says
+// starting with rather than building.
 type PreviewProps = {
   template?: (typeof TEMPLATES)[number];
   prompt: string;
@@ -37,16 +40,7 @@ const PROMPT_FADE =
   "linear-gradient(to bottom, #000 50%, rgba(0,0,0,0.55) 100%)";
 
 function PreviewCard({ template, prompt }: PreviewProps) {
-  // A picked template reads as the request you'd have typed: the Prompt Idea of
-  // the same name where there is one — those are the spec-rich lines the composer
-  // seeds — and otherwise the template's own long description, opened with
-  // "Build …" so it starts like a prompt rather than like a catalogue entry.
-  const asked = template
-    ? (PROMPT_IDEAS.find(
-        (idea) => idea.label.toLowerCase() === template.title.toLowerCase(),
-      )?.prompt ??
-      `Build a ${template.title.toLowerCase()}. ${template.longDescription ?? template.description}`)
-    : prompt || "A brand-new app, from a blank canvas.";
+  const asked = prompt || "A brand-new app, from a blank canvas.";
 
   const [expanded, setExpanded] = useState(false);
   // Whether the cap is actually cutting anything off, so a prompt that fits gets
@@ -66,6 +60,26 @@ function PreviewCard({ template, prompt }: PreviewProps) {
 
   const canOpen = overflows || expanded;
 
+  // A picked template is a finished thing, not a request: name it, then say in
+  // one line what it does. No clamp and no Show more — there is nothing hidden
+  // to open, so the row is inert and the sheet stays one screen shorter.
+  if (template) {
+    return (
+      <div className="w-full">
+        <p className="type-caption px-0.5 pb-1.5 text-muted-foreground">
+          You&apos;re starting with
+        </p>
+
+        <div className="rounded-lg border border-foreground/15 bg-muted/60 px-4 py-3 [[data-theme=dark]_&]:border-white/[0.10] [[data-theme=dark]_&]:bg-white/[0.05]">
+          <p className="type-body text-foreground">{template.title}</p>
+          <p className="type-caption mt-1 text-muted-foreground">
+            {template.description}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full">
       {/* The label is a caption on the row under it, so it sits on the card
@@ -79,8 +93,10 @@ function PreviewCard({ template, prompt }: PreviewProps) {
       {/* The hairline is what makes the row visible; the fill only has to lift it
           off the card. Same radius and inset as the controls below it, but sized
           by its text rather than pinned to their height. The whole row is the
-          control when there's more to see — a fade says "continues", and a
-          "See more" label under it was a second thing to read. */}
+          control when there's more to see — and it says so: the fade alone read
+          as styling, so a cut prompt carries a named control and lifts on hover.
+          The label lives inside the row rather than beside it, so there's still
+          one thing to click. */}
       <div
         {...(canOpen
           ? {
@@ -96,8 +112,10 @@ function PreviewCard({ template, prompt }: PreviewProps) {
               },
             }
           : {})}
-        className={`rounded-lg border border-foreground/15 bg-muted/60 px-4 py-3 [[data-theme=dark]_&]:border-white/[0.10] [[data-theme=dark]_&]:bg-white/[0.05] ${
-          canOpen ? "cursor-pointer" : ""
+        className={`rounded-lg border border-foreground/15 bg-muted/60 px-4 py-3 transition-colors [[data-theme=dark]_&]:border-white/[0.10] [[data-theme=dark]_&]:bg-white/[0.05] ${
+          canOpen
+            ? "cursor-pointer hover:border-foreground/30 hover:bg-muted focus-visible:border-foreground/30 focus-visible:outline-none [[data-theme=dark]_&]:hover:border-white/20 [[data-theme=dark]_&]:hover:bg-white/[0.08]"
+            : ""
         }`}
       >
         <p
@@ -112,6 +130,30 @@ function PreviewCard({ template, prompt }: PreviewProps) {
         >
           {asked}
         </p>
+
+        {canOpen && (
+          // Not a nested button: the row already is one, so this is the label on
+          // it rather than a second target inside it.
+          <span className="type-caption mt-2 flex items-center gap-1 text-muted-foreground">
+            {expanded ? "Show less" : "Show more"}
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 16 16"
+              fill="none"
+              aria-hidden
+              className={`transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+            >
+              <path
+                d="M4 6l4 4 4-4"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+        )}
       </div>
     </div>
   );

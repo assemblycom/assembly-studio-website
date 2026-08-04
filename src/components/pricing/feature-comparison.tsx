@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useAuthState } from "@/lib/use-auth";
 
 const PLAN_NAMES = [
@@ -107,16 +107,16 @@ const GROUPS: FeatureGroup[] = [
         label: "File-sharing, intake forms, and tasks",
         values: [true, true, true, true, true],
       },
+      { label: "API, Zapier & Make", values: [false, true, true, true, true] },
       {
         label: "Custom domain for client experience",
         tooltip: "Serve the client experience from your own domain.",
-        values: [false, true, true, true, true],
+        values: [false, false, true, true, true],
       },
       {
         label: "Custom email domain for notifications",
-        values: [false, true, true, true, true],
+        values: [false, false, true, true, true],
       },
-      { label: "API, Zapier & Make", values: [false, true, true, true, true] },
       {
         label: "Remove Assembly badge",
         values: [false, false, true, true, true],
@@ -347,12 +347,21 @@ export function FeatureComparison() {
   const [expanded, setExpanded] = useState(false);
   // Collapsing from deep in the long table would strand the reader in empty
   // space, so send them back to the top of the page on collapse.
+  const collapsingRef = useRef(false);
   const toggle = () => {
-    if (expanded) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+    collapsingRef.current = expanded;
     setExpanded((e) => !e);
   };
+  // The scroll has to wait for the collapsed DOM. Starting it in the click
+  // handler meant it was still animating when the table unmounted, and a
+  // document that shrinks by thousands of pixels mid-flight cancels the smooth
+  // scroll and clamps you to the bottom of the now-short page instead — which
+  // is exactly the stranding this is here to prevent.
+  useEffect(() => {
+    if (expanded || !collapsingRef.current) return;
+    collapsingRef.current = false;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [expanded]);
   // Signed-in visitors don't see the Free column (matches the pricing cards).
   const { authed } = useAuthState();
   const columns = PLAN_NAMES.map((name, i) => ({ name, i })).filter(

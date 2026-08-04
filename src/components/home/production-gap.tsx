@@ -242,7 +242,17 @@ function ProductionGapVisual({
           // to ~90px, where "Time tracker" wrapped onto two lines and the longer
           // labels ran out over the table beside them. overflow-hidden is the
           // backstop — nothing in here may cross into the content.
-          className="relative flex w-[22%] min-w-[136px] max-w-[156px] shrink-0 flex-col overflow-hidden border-r border-[var(--mk-hairline)]"
+          //
+          // The sidebar step's fill is painted here below md, not on the app-list
+          // button: without flex-1 that button is only as tall as its rows, so the
+          // lit region stopped short and left the rest of the column white. From
+          // md up the button fills the column itself and owns the fill, which
+          // keeps it clear of the client row at the foot — its own region.
+          className={`relative flex w-[22%] min-w-[136px] max-w-[156px] shrink-0 flex-col overflow-hidden border-r border-[var(--mk-hairline)] transition-colors duration-200 ${
+            active === "sidebar"
+              ? "bg-[var(--mk-elevated)] md:bg-transparent"
+              : ""
+          }`}
         >
         {/* Region: the app sidebar */}
         <button
@@ -254,7 +264,9 @@ function ProductionGapVisual({
               ? { backgroundColor: HL_SIDEBAR_BG }
               : undefined
           }
-          className="flex flex-1 flex-col gap-0.5 px-2 py-3 text-left outline-none transition-colors duration-200"
+          // flex-1 from md up only: it's what pushes the client row to the foot
+          // of the sidebar, which on a phone is past the crop (see that row).
+          className="flex flex-col gap-0.5 px-2 py-3 text-left outline-none transition-colors duration-200 md:flex-1"
         >
           {/* px-2 matches the nav rows below, so the icon column shares one
               left edge down the whole sidebar. */}
@@ -294,13 +306,26 @@ function ProductionGapVisual({
         </button>
 
         {/* Region: the signed-in client. The third step talks about accounts
-            being a platform primitive, so the mock needs a face for it. */}
+            being a platform primitive, so the mock needs a face for it.
+            It sits at the foot of the sidebar on desktop, where the whole mock
+            is in frame. On a phone the mock is cropped to its top-left corner,
+            and the foot of a 450px sidebar is a long way past the cut — the
+            third step lit a region nobody could see. There it follows the app
+            list instead, so the sidebar still runs to the crop but the client
+            is in view. */}
         <button
           type="button"
           onMouseEnter={() => setActive("avatar")}
           onFocus={() => setActive("avatar")}
           style={active === "avatar" ? { backgroundColor: HL_SIDEBAR_BG } : undefined}
-          className="mt-auto flex items-center gap-2 border-t border-[var(--mk-hairline)] px-3 py-2.5 text-left outline-none transition-colors duration-200"
+          // Two shapes for two contexts. At the foot of a full sidebar it's a
+          // row divided off by a hairline; floating mid-column on a phone that
+          // read as a stray line, so there it's a card instead — inset to the
+          // app rows' own text edge, and dropped clear of the list so it doesn't
+          // look like a sixth app. No resting fill — the card takes the sidebar
+          // step's colour along with the rest of the column and reads by its
+          // border there, then lifts on its own step against an unlit sidebar.
+          className="mx-2 mt-6 flex items-center gap-2 rounded-[6px] border border-[var(--mk-border)] px-2 py-2.5 text-left outline-none transition-colors duration-200 md:mx-0 md:mt-auto md:rounded-none md:border-x-0 md:border-b-0 md:border-[var(--mk-hairline)] md:px-3"
         >
           {/* --mk-selected, plus a ring: the row lifts to --mk-elevated on its
               tour step, and at --mk-fill the disc is five values off that and

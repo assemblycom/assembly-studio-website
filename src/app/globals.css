@@ -403,6 +403,70 @@ html[data-theme="dark"] body {
   }
 }
 
+/* The proposal card leans toward the pointer wherever it is on the page, and the
+   light on its face moves with it. --sheen-pos and --sheen-x/y are written on the
+   block around the card (see TemplateFlipCard) and inherit down to the faces.
+   Two layers, because one alone reads as a smudge: ::before is the body of the
+   surface turning toward and away from the light, ::after is the specular — a
+   narrow raking band with a tight core and a fainter second band trailing it,
+   which is what a coated surface actually does. Both slide with the pointer. */
+.card-sheen::before,
+.card-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+/* Shading. Light gets the stronger version: on a near-white card the tilt reads
+   through the side falling away, where dark reads it through the lift. */
+.card-sheen::before {
+  background: radial-gradient(
+    150% 120% at var(--sheen-x, 50%) var(--sheen-y, 50%),
+    rgba(16, 24, 40, 0) 30%,
+    rgba(16, 24, 40, 0.1) 100%
+  );
+}
+[data-theme="dark"] .card-sheen::before {
+  background: radial-gradient(
+    120% 100% at var(--sheen-x, 50%) var(--sheen-y, 50%),
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0) 65%
+  );
+}
+/* The specular. Light takes it in the field's blue rather than white — a white
+   band on a white card is nothing, where the card catching the blue it sits on
+   is what the eye expects. */
+.card-sheen::after {
+  background-image: linear-gradient(
+    103deg,
+    rgba(125, 164, 255, 0) 34%,
+    rgba(125, 164, 255, 0.08) 43%,
+    rgba(125, 164, 255, 0.15) 46.5%,
+    rgba(125, 164, 255, 0.08) 50%,
+    rgba(125, 164, 255, 0) 58%,
+    rgba(125, 164, 255, 0) 64%,
+    rgba(125, 164, 255, 0.05) 68%,
+    rgba(125, 164, 255, 0) 73%
+  );
+  background-size: 240% 100%;
+  background-position: var(--sheen-pos, 50%) 0;
+  background-repeat: no-repeat;
+}
+[data-theme="dark"] .card-sheen::after {
+  background-image: linear-gradient(
+    103deg,
+    rgba(255, 255, 255, 0) 34%,
+    rgba(255, 255, 255, 0.022) 43%,
+    rgba(255, 255, 255, 0.05) 46.5%,
+    rgba(255, 255, 255, 0.022) 50%,
+    rgba(255, 255, 255, 0) 58%,
+    rgba(255, 255, 255, 0) 64%,
+    rgba(255, 255, 255, 0.018) 68%,
+    rgba(255, 255, 255, 0) 73%
+  );
+}
+
 /* Animated gradient border for the hero composer panel. A conic blue→green
    gradient rotates continuously; a masked ::before paints only the 2px edge
    ring so the interior stays clean. --gb-angle is registered so the browser
@@ -661,12 +725,13 @@ html[data-theme="dark"] body {
      squares in Chrome; this variant renders identically but keeps corners clean. */
   border: 1.5px solid transparent;
   background: conic-gradient(
-    from var(--v63-angle),
-    transparent 0deg,
-    #b4bfe4 130deg,
-    #d9ed92 230deg,
-    transparent 360deg
-  ) border-box;
+      from var(--v63-angle),
+      transparent 0deg,
+      #b4bfe4 130deg,
+      #d9ed92 230deg,
+      transparent 360deg
+    )
+    border-box;
   -webkit-mask:
     linear-gradient(#fff 0 0) padding-box,
     linear-gradient(#fff 0 0);
@@ -678,7 +743,8 @@ html[data-theme="dark"] body {
   /* The hero keeps the ring visible at rest so the box always reads as the live
      entry point. */
   opacity: 1;
-  transition: opacity 0.3s ease,
+  transition:
+    opacity 0.3s ease,
     border-width 0.45s cubic-bezier(0.25, 1, 0.5, 1),
     filter 0.45s ease;
 }
@@ -690,7 +756,7 @@ html[data-theme="dark"] body {
    saturation pump (that read garish on white) and a calmer spin, so it feels
    premium rather than lit-up. */
 .v63-gradient-border:hover {
-  box-shadow: 0 12px 40px -16px rgba(111, 150, 240, 0.20);
+  box-shadow: 0 12px 40px -16px rgba(111, 150, 240, 0.2);
 }
 .v63-gradient-border:hover::before {
   /* Subtle hover only — a faint brightness lift; the soft bloom below carries
@@ -740,12 +806,13 @@ html[data-theme="dark"] .v63-gradient-border:focus-within:hover::before {
    1.5px ring shows a misaligned, seam-y sweep instead of one clean loop. */
 html:not([data-theme="dark"]) .v63-gradient-border::before {
   background: conic-gradient(
-    from var(--v63-angle),
-    transparent 0deg,
-    #6f96f0 120deg,
-    #93c53a 240deg,
-    transparent 360deg
-  ) border-box;
+      from var(--v63-angle),
+      transparent 0deg,
+      #6f96f0 120deg,
+      #93c53a 240deg,
+      transparent 360deg
+    )
+    border-box;
 }
 html:not([data-theme="dark"]) .v63-gradient-border:focus-within::before {
   opacity: 0.8;
@@ -755,19 +822,21 @@ html:not([data-theme="dark"]) .v63-gradient-border:focus-within::before {
    Scoped like the light override above so it wins on specificity + order. */
 html:not([data-theme="dark"]) .v63-ring-solid::before {
   background: conic-gradient(
-    from var(--v63-angle),
-    #6f96f0 0deg,
-    #93c53a 180deg,
-    #6f96f0 360deg
-  ) border-box;
+      from var(--v63-angle),
+      #6f96f0 0deg,
+      #93c53a 180deg,
+      #6f96f0 360deg
+    )
+    border-box;
 }
 html[data-theme="dark"] .v63-ring-solid::before {
   background: conic-gradient(
-    from var(--v63-angle),
-    #9fb0e4 0deg,
-    #cfe985 180deg,
-    #9fb0e4 360deg
-  ) border-box;
+      from var(--v63-angle),
+      #9fb0e4 0deg,
+      #cfe985 180deg,
+      #9fb0e4 360deg
+    )
+    border-box;
 }
 
 /* The hero card row scrolls past its own edges, and clipping alone left the
@@ -926,32 +995,60 @@ html[data-theme="dark"] .v63-ring-solid::before {
 
 /* Typewriter reveal — grows the text's layout width left-to-right in steps. */
 @keyframes v68Type {
-  from { max-width: 0; }
-  to { max-width: 100%; }
+  from {
+    max-width: 0;
+  }
+  to {
+    max-width: 100%;
+  }
 }
 /* Windowed blink so only the field being filled shows a caret. */
 @keyframes v68Caret {
-  0% { opacity: 0; }
-  12% { opacity: 1; }
-  24% { opacity: 0; }
-  36% { opacity: 1; }
-  48% { opacity: 0; }
-  60% { opacity: 1; }
-  72% { opacity: 0; }
-  100% { opacity: 0; }
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  24% {
+    opacity: 0;
+  }
+  36% {
+    opacity: 1;
+  }
+  48% {
+    opacity: 0;
+  }
+  60% {
+    opacity: 1;
+  }
+  72% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 /* Line-draw for the dashboard sparkline (path uses pathLength=1). */
 @keyframes v69Draw {
-  from { stroke-dashoffset: 1; }
-  to { stroke-dashoffset: 0; }
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 /* Ring draw-in for the onboarding donut (path uses pathLength=1). Named
    distinctly from v69Draw, which a later @keyframes in this file redefines
    for a dashoffset-24 checkmark reveal — reusing that name here would silently
    pick up the wrong keyframe under CSS's last-definition-wins cascade. */
 @keyframes onboardingRingDraw {
-  from { stroke-dashoffset: 1; }
-  to { stroke-dashoffset: 0; }
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 /* Radial goal gauge — the arc sweeps from empty to its ~80% target on hover. */
 /* Gauge segments sweep by growing their dash, not by shifting the dash offset:
@@ -959,22 +1056,38 @@ html[data-theme="dark"] .v63-ring-solid::before {
    so animating the offset would drag it around the ring instead of drawing it.
    The `to` lengths must match GAUGE_MAIN / GAUGE_SECOND in hero-v71.tsx. */
 @keyframes v69RingMain {
-  from { stroke-dasharray: 0 100; }
-  to { stroke-dasharray: 62 38; }
+  from {
+    stroke-dasharray: 0 100;
+  }
+  to {
+    stroke-dasharray: 62 38;
+  }
 }
 @keyframes v69RingSecond {
-  from { stroke-dasharray: 0 100; }
-  to { stroke-dasharray: 15 85; }
+  from {
+    stroke-dasharray: 0 100;
+  }
+  to {
+    stroke-dasharray: 15 85;
+  }
 }
 /* Horizontal fill for progress / usage bars — scaleX from the left. */
 @keyframes v69GrowX {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 /* Vertical grow for bar-chart columns — scaleY from the bottom. */
 @keyframes v69GrowY {
-  from { transform: scaleY(0.04); }
-  to { transform: scaleY(1); }
+  from {
+    transform: scaleY(0.04);
+  }
+  to {
+    transform: scaleY(1);
+  }
 }
 /* Count-up for the engagement score. Driven by an animatable integer property
    surfaced through a counter, so it steps cleanly with no fractional flicker. */
@@ -984,8 +1097,12 @@ html[data-theme="dark"] .v63-ring-solid::before {
   inherits: false;
 }
 @keyframes v69Count {
-  from { --v69-score: 0; }
-  to { --v69-score: 82; }
+  from {
+    --v69-score: 0;
+  }
+  to {
+    --v69-score: 82;
+  }
 }
 .v69-score-num {
   counter-reset: v69-score var(--v69-score);
@@ -1027,15 +1144,31 @@ html[data-theme="dark"] .v63-ring-solid::before {
   }
 }
 @keyframes v69Pop {
-  0% { opacity: 0; transform: scale(0.7); }
-  55% { opacity: 1; }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 /* Steady caret blink for the chat input (loops while the card is hovered). */
 @keyframes v69Blink {
-  0%, 45% { opacity: 1; }
-  50%, 95% { opacity: 0; }
-  100% { opacity: 1; }
+  0%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  95% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 /* Time-tracker card face: flat brand blue at rest, and on hover the fill
    becomes the site's lime→blue gradient drifting slowly through the frame, so
@@ -1082,8 +1215,12 @@ html[data-theme="dark"] .v63-ring-solid::before {
   );
 }
 @keyframes v69AccentDrift {
-  from { background-position: 50% 0%; }
-  to { background-position: 50% 100%; }
+  from {
+    background-position: 50% 0%;
+  }
+  to {
+    background-position: 50% 100%;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .group:hover .v69-accent-drift,
@@ -1191,9 +1328,17 @@ html[data-theme="dark"] .v63-ring-solid::before {
   animation: none !important;
 }
 @keyframes v69ChatSend {
-  0% { opacity: 0; transform: translateY(74px) scale(0.94); }
-  40% { opacity: 1; }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+  0% {
+    opacity: 0;
+    transform: translateY(74px) scale(0.94);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 /* Staggered entrance for template-card mock content — replays on each hover. */
 /* Notification drop-in — items fall in from just above and settle, like a toast
@@ -1236,38 +1381,9 @@ html[data-theme="dark"] .v63-ring-solid::before {
   background-image: none;
   box-shadow: none;
 }
-/* Dark used to run this card on the same lime face, which needed a whole set of
-   inverted tokens (dark ink, olive glyphs, a pale well) to stay readable. It is
-   neutral in dark now, so it wants none of that — the ordinary dark tokens are
-   correct and the overrides are gone. Light keeps the lime. */
-/* Light shares the lime face, so it takes the same olive for the status glyphs —
-   the neutral grey read as a foreign colour on the green. The ink and well
-   tokens already suit it, so only this one is re-pointed. */
-[data-theme="light"] .v69-support-accent {
-  --muted-foreground: #8fa84f;
-}
-/* On the coloured face the glass keeps its light values — the shared dark-mode
-   variant is tuned for a near-black surface and all but vanishes on the lime.
-   Declared after the base so this wins on source order.
-
-   It runs a flatter glass than the shared tile: the lit top edge paired with a
-   lit bottom edge and a cast shadow made each row read as an extruded bevel,
-   which fought the flat lime face. The sheen is halved, the bottom lip and the
-   shadow are gone, and the fill carries more of the contrast — so the rows read
-   as panes laid on the card rather than blocks standing off it.
-
-   Light only: the one card that uses this is neutral in dark now, where the
-   shared dark glass is the right surface. */
-[data-theme="light"] .v69-glass-tile--on-accent {
-  background-color: rgba(255, 255, 255, 0.6);
-  background-image: linear-gradient(
-    165deg,
-    rgba(255, 255, 255, 0.42) 0%,
-    rgba(255, 255, 255, 0.14) 50%,
-    rgba(255, 255, 255, 0) 78%
-  );
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
-}
+/* The help-desk card is neutral in both themes now (warm beige in light), so the
+   lime-face overrides it used to carry — an olive glyph token and a flatter glass
+   for tiles on a coloured ground — are gone. */
 /* Content-preview render: the dot matrix works — each dot at its own resting
    brightness, pulsing on staggered offsets so the field never blinks in unison —
    and at 1.5s the picture resolves in over it out of a blur while the dots fade.
@@ -1339,14 +1455,24 @@ html[data-theme="dark"] .v63-ring-solid::before {
   animation: none !important;
 }
 @keyframes v69DotTwinkle {
-  0%, 100% { opacity: var(--dot-op, 0.3); }
-  50% { opacity: 0.85; }
+  0%,
+  100% {
+    opacity: var(--dot-op, 0.3);
+  }
+  50% {
+    opacity: 0.85;
+  }
 }
 /* Dots are only present while the render runs: solid from the first frame, gone
    by the time the picture has resolved. */
 @keyframes v69DotsRender {
-  0%, 74% { opacity: 1; }
-  100% { opacity: 0; }
+  0%,
+  74% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 @keyframes v69ImageIn {
   from {
@@ -1539,9 +1665,13 @@ html[data-theme="dark"] .v63-ring-solid::before {
   border-radius: inherit;
   padding: 1.5px;
   background: linear-gradient(135deg, #6f96f0, #93c53a);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   mask-composite: exclude;
   animation: planRingBreathe 4.5s ease-in-out infinite;
   pointer-events: none;
@@ -1596,29 +1726,41 @@ html[data-theme="dark"] .v63-ring-solid::before {
    56. Tiny 7–8px glyph badges are left alone. */
 .template-mock .text-\[9px\],
 .template-mock .text-\[10px\],
-.template-mock .text-\[11px\] { font-size: 11px !important; }
+.template-mock .text-\[11px\] {
+  font-size: 11px !important;
+}
 
 .template-mock .text-\[12px\],
-.template-mock .text-\[13px\] { font-size: 13px !important; }
+.template-mock .text-\[13px\] {
+  font-size: 13px !important;
+}
 
 .template-mock .text-\[14px\],
 .template-mock .text-\[15px\],
-.template-mock .text-\[16px\] { font-size: 15px !important; }
+.template-mock .text-\[16px\] {
+  font-size: 15px !important;
+}
 
 .template-mock .text-\[18px\],
 .template-mock .text-\[19px\],
 .template-mock .text-\[20px\],
-.template-mock .text-\[22px\] { font-size: 22px !important; }
+.template-mock .text-\[22px\] {
+  font-size: 22px !important;
+}
 
 .template-mock .text-\[26px\],
 .template-mock .text-\[28px\],
 .template-mock .text-\[30px\],
-.template-mock .text-\[34px\] { font-size: 30px !important; }
+.template-mock .text-\[34px\] {
+  font-size: 30px !important;
+}
 
 .template-mock .text-\[40px\],
 .template-mock .text-\[50px\],
 .template-mock .text-\[60px\],
-.template-mock .text-\[68px\] { font-size: 56px !important; }
+.template-mock .text-\[68px\] {
+  font-size: 56px !important;
+}
 
 /* Widget covers are drawn at one fixed design size (the type scale above is
    tuned for it), so letting a card stretch them re-flows the layout instead of
@@ -1664,18 +1806,18 @@ html[data-theme="dark"] .v63-ring-solid::before {
 .production-mock,
 .mock-ui {
   --mk-surface: #ffffff;
-  --mk-elevated: #fafafa;   /* neutral-50 */
-  --mk-fill: #f5f5f5;       /* neutral-100 */
+  --mk-elevated: #fafafa; /* neutral-50 */
+  --mk-fill: #f5f5f5; /* neutral-100 */
   /* Both sit off the neutral ramp on purpose. At neutral-100 the hairline was
      10/255 off the white screen face and read as no divider at all; these are
      the weights where a row separator and a container edge actually register,
      while staying lighter than --mk-data so chart marks still lead. */
   --mk-border: #dfdfdf;
   --mk-hairline: #e9e9e9;
-  --mk-fg: #171717;         /* neutral-900 */
-  --mk-fg-2: #262626;       /* neutral-800 */
-  --mk-muted: #737373;      /* neutral-500 */
-  --mk-subtle: #a3a3a3;     /* neutral-400 */
+  --mk-fg: #171717; /* neutral-900 */
+  --mk-fg-2: #262626; /* neutral-800 */
+  --mk-muted: #737373; /* neutral-500 */
+  --mk-subtle: #a3a3a3; /* neutral-400 */
   --mk-dots: #e5e5e5;
   --mk-invert-bg: #101114;
   --mk-invert-fg: #ffffff;
@@ -1745,7 +1887,11 @@ html[data-theme="dark"] .v63-ring-solid::before {
    same fade just washes into the white surface (looks unfinished), so light
    keeps a crisp cut — no mask. */
 [data-theme="dark"] .production-cut-fade {
-  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 72px), transparent);
+  -webkit-mask-image: linear-gradient(
+    to right,
+    #000 calc(100% - 72px),
+    transparent
+  );
   mask-image: linear-gradient(to right, #000 calc(100% - 72px), transparent);
 }
 
@@ -1756,7 +1902,11 @@ html[data-theme="dark"] .v63-ring-solid::before {
    the two masks intersecting. */
 @media (max-width: 767px) {
   .production-cut-bottom {
-    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 56px), transparent);
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      #000 calc(100% - 56px),
+      transparent
+    );
     mask-image: linear-gradient(to bottom, #000 calc(100% - 56px), transparent);
   }
   [data-theme="dark"] .production-cut-bottom {

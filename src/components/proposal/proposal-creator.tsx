@@ -9,6 +9,7 @@ import {
 import { TEMPLATES, TEMPLATE_CATEGORIES } from "@/lib/templates";
 import { FIELD_CLS, SelectMenu } from "@/components/ui/select-menu";
 import { StudioNav } from "@/components/home/studio-nav";
+import { FooterAurora } from "@/components/layout/footer";
 import { useTheme } from "@/components/theme/theme-provider";
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -51,29 +52,56 @@ const DEFAULT_NOTE = "We put this together for you.";
 const PROMPT_PLACEHOLDER =
   "Build a collaborative sketch app where my clients and I can draw on the same canvas: freehand, shapes, and text, with every board saved per client and shareable by link.";
 
+// Errors sit under the field they belong to, in the same red the rest of the
+// site uses, rather than collecting in one alert above the button — with the
+// message that far from the input, it wasn't obvious which field to fix.
 function Field({
   label,
   htmlFor,
-  hint,
+  error,
   children,
 }: {
   label: string;
   htmlFor: string;
-  hint?: string;
+  error?: string;
   children: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={htmlFor} className="text-sm text-foreground">
         {label}
-        {hint && (
-          <span className="ml-2 text-muted-foreground">{hint}</span>
-        )}
       </label>
       {children}
+      {error && <FieldError id={`${htmlFor}-error`}>{error}</FieldError>}
     </div>
   );
 }
+
+function FieldError({
+  id,
+  children,
+}: {
+  id?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <p id={id} role="alert" className="type-caption text-[var(--mock-negative-fg)]">
+      {children}
+    </p>
+  );
+}
+
+// Red outline on the field itself, so the error reads at a glance before you
+// read the sentence. Same hook the demo form uses.
+const INVALID_FIELD_CLS = `${FIELD_CLS} aria-[invalid=true]:border-[var(--mock-negative-fg)]`;
+
+const ERRORS = {
+  recipient: "Enter the name this proposal is for.",
+  template: "Choose the template you want to propose.",
+  prompt: "Write the prompt you want to propose.",
+} as const;
+
+type FieldErrors = Partial<Record<keyof typeof ERRORS, string>>;
 
 export function ProposalCreator() {
   const { theme } = useTheme();
@@ -83,32 +111,38 @@ export function ProposalCreator() {
   const [mode, setMode] = useState<Mode>("prompt");
   const [templateSlug, setTemplateSlug] = useState("");
   const [prompt, setPrompt] = useState("");
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState<FieldErrors>({});
   // The finished link. Held in state rather than derived, so editing a field
   // after generating doesn't silently change a link that's already been copied.
   const [link, setLink] = useState("");
   const [copied, setCopied] = useState(false);
   const copyTimer = useRef<number | null>(null);
 
+  const clearError = (field: keyof typeof ERRORS) =>
+    setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
+
+  // Switching what you're proposing drops whichever of the two that side had
+  // flagged: the field it belonged to is no longer on screen.
+  const clearProposalError = () =>
+    setErrors((prev) => ({ ...prev, template: undefined, prompt: undefined }));
+
   const template = useMemo(
     () => TEMPLATES.find((t) => t.slug === templateSlug),
     [templateSlug],
   );
 
+  // Every problem is reported at once, each under its own field, rather than one
+  // at a time in the order they're checked.
   const submit = () => {
-    if (!recipient.trim()) {
-      setError("Add a name. The whole page is built around it.");
+    const next: FieldErrors = {};
+    if (!recipient.trim()) next.recipient = ERRORS.recipient;
+    if (mode === "template" && !templateSlug) next.template = ERRORS.template;
+    if (mode === "prompt" && !prompt.trim()) next.prompt = ERRORS.prompt;
+    setErrors(next);
+    if (Object.keys(next).length > 0) {
+      document.getElementById(next.recipient ? "recipient" : "prompt")?.focus();
       return;
     }
-    if (mode === "template" && !templateSlug) {
-      setError("Pick the template you’re proposing.");
-      return;
-    }
-    if (mode === "prompt" && !prompt.trim()) {
-      setError("Write the prompt you refined for them.");
-      return;
-    }
-    setError("");
     setLink(
       buildProposalUrl(
         {
@@ -143,7 +177,7 @@ export function ProposalCreator() {
     "inline-flex items-center justify-center rounded-lg border border-foreground/20 bg-transparent px-5 py-2.5 text-sm text-foreground transition-colors hover:bg-foreground/5";
 
   return (
-    <>
+    <div className="flex min-h-screen flex-col">
       <StudioNav minimal hideDemo darkTop={theme === "dark"} maxWidthClass="max-w-[1600px]" restPaddingClass="px-6 md:px-10" />
       <div className="mx-auto w-full max-w-xl px-6 pb-16 pt-10 md:pb-24 md:pt-14">
       <h1 className="type-h2">Proposal creator</h1>
@@ -151,28 +185,33 @@ export function ProposalCreator() {
         A page made for one person, and a link you can send them.
       </p>
 
-      <div className="mt-10 flex flex-col gap-5">
-        <Field label="Prepared for" htmlFor="recipient">
+      {/* Room between the title block and the first field — at mt-10 the form
+          started right under the lead on mobile, where there's no column width
+          to separate them. */}
+      <div className="mt-14 flex flex-col gap-5 md:mt-16">
+        <Field label="Prepared for" htmlFor="recipient" error={errors.recipient}>
           <input
             id="recipient"
             type="text"
             value={recipient}
+            aria-invalid={errors.recipient ? true : undefined}
+            aria-describedby={errors.recipient ? "recipient-error" : undefined}
             onChange={(e) => {
               setRecipient(e.target.value);
-              if (error) setError("");
+              clearError("recipient");
             }}
             placeholder="Jonathan"
-            className={FIELD_CLS}
+            className={INVALID_FIELD_CLS}
           />
         </Field>
 
-        <Field label="From" htmlFor="from" hint="optional">
+        <Field label="From" htmlFor="from">
           <input
             id="from"
             type="text"
             value={from}
             onChange={(e) => setFrom(e.target.value)}
-            placeholder="Sean Sullivan, Assembly"
+            placeholder="Sean Walsh, Assembly"
             className={FIELD_CLS}
           />
         </Field>
@@ -209,7 +248,7 @@ export function ProposalCreator() {
               aria-checked={mode === "prompt"}
               onClick={() => {
                 setMode("prompt");
-                setError("");
+                clearProposalError();
               }}
               className="relative px-4 py-1.5 text-center text-muted-foreground transition-colors hover:text-foreground"
             >
@@ -221,7 +260,7 @@ export function ProposalCreator() {
               aria-checked={mode === "template"}
               onClick={() => {
                 setMode("template");
-                setError("");
+                clearProposalError();
               }}
               className="relative px-4 py-1.5 text-center text-muted-foreground transition-colors hover:text-foreground"
             >
@@ -234,18 +273,23 @@ export function ProposalCreator() {
           // No description line under the picker: the menu already shows each
           // template's description next to its name, so repeating the picked
           // one under the field said nothing new.
-          <SelectMenu
-            label="Template"
-            value={templateSlug}
-            onChange={(value) => {
-              setTemplateSlug(value);
-              if (error) setError("");
-            }}
-            options={TEMPLATE_OPTIONS}
-            placeholder="Choose a template…"
-            searchable
-            searchPlaceholder="Search templates…"
-          />
+          // SelectMenu draws its own label, so its error hangs below the control
+          // rather than going through Field.
+          <div className="flex flex-col gap-1.5">
+            <SelectMenu
+              label="Template"
+              value={templateSlug}
+              onChange={(value) => {
+                setTemplateSlug(value);
+                clearError("template");
+              }}
+              options={TEMPLATE_OPTIONS}
+              placeholder="Choose a template…"
+              searchable
+              searchPlaceholder="Search templates…"
+            />
+            {errors.template && <FieldError>{errors.template}</FieldError>}
+          </div>
         ) : (
           <Field label="The prompt" htmlFor="prompt">
             <textarea
@@ -253,20 +297,31 @@ export function ProposalCreator() {
               rows={6}
               value={prompt}
               maxLength={MAX_PROMPT_LENGTH}
+              aria-invalid={errors.prompt ? true : undefined}
+              aria-describedby={errors.prompt ? "prompt-error" : undefined}
               onChange={(e) => {
                 setPrompt(e.target.value);
-                if (error) setError("");
+                clearError("prompt");
               }}
               placeholder={PROMPT_PLACEHOLDER}
-              className={`${FIELD_CLS} resize-none leading-relaxed`}
+              className={`${INVALID_FIELD_CLS} resize-none leading-relaxed`}
             />
-            <p className="type-caption text-right text-muted-foreground">
-              {prompt.length}/{MAX_PROMPT_LENGTH}
-            </p>
+            {/* Error and counter share the line under the field, so the message
+                still sits directly beneath the textarea. */}
+            <div className="flex items-start justify-between gap-4">
+              {errors.prompt ? (
+                <FieldError id="prompt-error">{errors.prompt}</FieldError>
+              ) : (
+                <span />
+              )}
+              <p className="type-caption shrink-0 text-muted-foreground">
+                {prompt.length}/{MAX_PROMPT_LENGTH}
+              </p>
+            </div>
           </Field>
         )}
 
-        <Field label="A line for them" htmlFor="note" hint="optional">
+        <Field label="A line for them" htmlFor="note">
           <textarea
             id="note"
             rows={3}
@@ -281,20 +336,6 @@ export function ProposalCreator() {
           </p>
         </Field>
 
-        {error && (
-          <p
-            role="alert"
-            className="flex items-start gap-2 text-sm text-foreground"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden className="mt-[0.15rem] shrink-0">
-              <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.25" />
-              <path d="M8 4.75v3.75" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
-              <circle cx="8" cy="11" r="0.85" fill="currentColor" />
-            </svg>
-            {error}
-          </p>
-        )}
-
         <button type="button" onClick={submit} className={`${primary} mt-1`}>
           {link ? "Update link" : "Create proposal page"}
         </button>
@@ -304,11 +345,10 @@ export function ProposalCreator() {
         // The result, not a confirmation screen: the form stays open above it so
         // a name typo is a two-second fix rather than a restart.
         <div className="mt-8 rounded-xl border border-border p-5">
-          <p className="type-caption text-muted-foreground">
-            Prepared for {recipient.trim()}
-            {mode === "template" && template ? ` · ${template.title}` : " · Custom prompt"}
-          </p>
-          <p className="mt-3 break-all rounded-lg bg-muted px-4 py-3 font-mono text-xs leading-relaxed text-foreground [[data-theme=dark]_&]:bg-white/[0.06]">
+          {/* No summary line above the link: it restated the name and the
+              template that the URL right below it already spells out, and a long
+              name made it the widest thing in the card. */}
+          <p className="break-all rounded-lg bg-muted px-4 py-3 font-mono text-xs leading-relaxed text-foreground [[data-theme=dark]_&]:bg-white/[0.06]">
             {link}
           </p>
           <div className="mt-4 flex flex-wrap gap-2.5">
@@ -327,6 +367,22 @@ export function ProposalCreator() {
         </div>
       )}
       </div>
-    </>
+
+      {/* The tool closes on the same brand aurora as every page on the site,
+          and on nothing else: it's internal, so it carries no links, no small
+          print and no controls down here. */}
+      <footer
+        className={`footer-reveal relative mt-auto overflow-hidden ${
+          theme === "dark" ? "bg-[#101010]" : "bg-background"
+        }`}
+      >
+        {/* Holds the aurora off the form above it, and has to be taller than the
+            negative margin the aurora pulls itself up by (-mt-44 / -mt-40) — at
+            128/160px the top of the gradient landed at or above the footer's top
+            edge and `overflow-hidden` cropped it flat. */}
+        <div className="h-56 md:h-64" />
+        <FooterAurora />
+      </footer>
+    </div>
   );
 }

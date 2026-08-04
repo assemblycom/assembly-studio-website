@@ -48,8 +48,11 @@ export function Testimonials() {
       <div className="relative mx-auto max-w-[1200px] px-6 md:px-10">
         {/* Portrait — pinned upper-right (desktop only). Stand-in photo so the
             section can be judged with real content; swap with the beta firm's
-            own image alongside the attribution. */}
-        <div className="absolute right-0 top-0 hidden size-32 overflow-hidden rounded-xl bg-muted [[data-theme=dark]_&]:bg-white/[0.06] md:block lg:size-36">
+            own image alongside the attribution.
+            right-10, not right-0: absolute offsets resolve against the padding
+            box, so right-0 parked it on the measure's outer edge — 40px past the
+            column every other element in the section lines up on. */}
+        <div className="absolute right-10 top-0 hidden size-32 overflow-hidden rounded-xl bg-muted [[data-theme=dark]_&]:bg-white/[0.06] md:block lg:size-36">
           <Image
             src={FEATURED.image}
             alt=""
@@ -140,7 +143,7 @@ export function Testimonials() {
             desktop; the last line inside the ringed block on mobile. */}
           <Link
             href={FEATURED.href}
-            className="type-body group inline-flex items-center gap-1.5 px-2 pb-1 pt-2 text-foreground md:absolute md:bottom-[210px] md:right-0 md:mt-0 md:p-0 lg:bottom-[218px]"
+            className="type-body group inline-flex items-center gap-1.5 px-2 pb-1 pt-2 text-foreground md:absolute md:bottom-[210px] md:right-10 md:mt-0 md:p-0 lg:bottom-[218px]"
           >
             {/* No rule under the text: the arrow beside it already reads as a
               link, and the underline was a third horizontal line in a block

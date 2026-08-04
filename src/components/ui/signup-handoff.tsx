@@ -1,7 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { buildSignupUrl, LOGIN_URL } from "@/lib/constants";
+import {
+  buildSignupUrl,
+  INVALID_EMAIL_ERROR,
+  LOGIN_URL,
+} from "@/lib/constants";
 import { GoogleIcon } from "@/components/ui/google-icon";
 
 /**
@@ -71,11 +75,11 @@ export function SignupHandoff({
         onSubmit={(e) => {
           e.preventDefault();
           if (!email.trim()) {
-            setEmailError("Add your email to continue.");
+            setEmailError("Enter your email to continue.");
             return;
           }
           if (!emailValid) {
-            setEmailError("Double-check that email address.");
+            setEmailError(INVALID_EMAIL_ERROR);
             return;
           }
           window.location.href = emailHref;

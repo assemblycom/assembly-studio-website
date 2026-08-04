@@ -1,5 +1,12 @@
 export const SITE_NAME = "Assembly Studio";
 
+// Shared so the same mistake reads the same way on every form. An error should
+// say what a good answer looks like, not just that this one was rejected:
+// "Double-check that email address" told someone who typed "df" nothing about
+// what was actually missing.
+export const INVALID_EMAIL_ERROR =
+  "Enter a complete email address, like jane@company.com.";
+
 // Canonical host for metadata, sitemap, and robots. Currently the Vercel host;
 // on cutover to studio.assembly.com, change this one line.
 export const SITE_URL = "https://assembly-studio-website.vercel.app";
@@ -89,7 +96,7 @@ export const MAX_PROPOSAL_NOTE_LENGTH = 280;
 export interface ProposalInput {
   /** Who it's for — the name that leads the page. */
   recipient: string;
-  /** Who it's from, e.g. "Sean Sullivan, Assembly". Optional. */
+  /** Who it's from, e.g. "Sean Walsh, Assembly". Optional. */
   from?: string;
   /** One personal line, shown under the recipient's name. Optional. */
   note?: string;
@@ -118,9 +125,8 @@ export function buildProposalUrl(input: ProposalInput, origin = ""): string {
 }
 
 // Our own designed book-a-demo page (not the main assembly.com marketing page).
-// Its form is a prototype; the real booking on assembly.com/book-demo runs on
-// ChiliPiper (a dynamic JS router with no static URL), so wiring live booking
-// here would need the ChiliPiper script + router config from marketing.
+// Its form now hands off to the same ChiliPiper Concierge router marketing uses,
+// so a submit here books a real call rather than showing a mock confirmation.
 export const DEMO_URL = "/demo";
 // The "Watch the demo" walkthrough video — points at the YouTube channel for
 // now; swap for the specific video URL when it's up.

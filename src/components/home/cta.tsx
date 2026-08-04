@@ -84,6 +84,17 @@ export function CTA() {
               }
             />
           </div>
+
+          {/* Answers the two things people weigh before typing anything, right
+              where they'd hesitate. Caption scale and muted, so it reassures
+              without competing with the submit button above it. */}
+          <p className="type-caption mt-3 text-center text-muted-foreground">
+            Free forever
+            <span aria-hidden className="px-1.5 opacity-50">
+              &middot;
+            </span>
+            No credit card required
+          </p>
         </div>
       </div>
     </section>
