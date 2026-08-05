@@ -4,6 +4,7 @@ import { FAQ, type FAQEntry } from "@/components/home/faq";
 import { GridRails } from "@/components/ui/grid-lines";
 import { SecurityTestimonials } from "@/components/security/security-testimonials";
 import { SecurityCompliance } from "@/components/security/security-compliance";
+import { SecurityDifferentiators } from "@/components/security/security-differentiators";
 import { SecurityCta } from "@/components/security/security-cta";
 import { DEMO_URL, SIGNUP_URL, TRUST_CENTER_URL } from "@/lib/constants";
 import { PAGE_SEO, pageMetadata } from "@/lib/seo";
@@ -160,27 +161,8 @@ export default function SecurityPage() {
             </p>
           </div>
 
-          {/* Right — numbered primitives, divided rows */}
-          <ul>
-            {DIFFERENTIATORS.map((card, i) => (
-              <li
-                key={card.title}
-                className="border-t border-border py-8 first:border-t-0 first:pt-0 md:grid md:grid-cols-[auto_1fr] md:gap-x-6"
-              >
-                {/* Zero-padded, no brackets: the number is a position in a list,
-                    and the brackets read as notation on top of it. */}
-                <span className="mb-3 block font-mono text-sm tabular-nums text-muted-foreground md:mb-0 md:pt-0.5">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <div>
-                  <h3 className="text-base font-medium">{card.title}</h3>
-                  <p className="mt-2 leading-relaxed text-muted-foreground">
-                    {card.description}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          {/* Right — numbered primitives on desktop, tap-to-open rows on mobile */}
+          <SecurityDifferentiators items={DIFFERENTIATORS} />
         </div>
       </section>
 
