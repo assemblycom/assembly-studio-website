@@ -2607,10 +2607,18 @@ function CardServiceRequest() {
 }
 
 export function V69CardMock({ slug }: { slug: string }) {
-  if (slug === "booking-meeting-request") return <CardBooking />;
+  // The booking cover was keyed to "booking-meeting-request", a slug no template
+  // in the gallery carries, so the one template that wants it fell through to the
+  // generic mock while the real booking widget went unreachable.
+  if (slug === "booking-app") return <CardBooking />;
   if (slug === "client-calendar") return <CardCalendar />;
   if (slug === "case-status-page") return <CardCaseStatus />;
   if (slug === "client-discussion-forum") return <CardDiscussion />;
+  // No annotation cover exists yet, so this borrows the comment thread — the
+  // nearest true thing the set has for "comments". Not CardApproval, which would
+  // be the closer metaphor but is already the content-approval cover and sits in
+  // the same Approvals tab, where two identical covers would read as a bug.
+  if (slug === "markup-comments") return <CardDiscussion />;
   if (slug === "client-resource-library") return <CardResourceLibrary />;
   if (slug === "client-todo-list") return <CardTodo />;
   if (slug === "community-qa") return <CardCommunityQA />;
