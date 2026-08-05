@@ -43,6 +43,7 @@ const DIFFERENTIATORS: Differentiator[] = [
 const SECURITY_FAQS: FAQEntry[] = [
   {
     question: "How secure are the apps that I build?",
+    shortQuestion: "How secure are my apps?",
     answer:
       "The security-critical parts of every app aren't written by AI — they're built into Assembly's maintained foundation and enforced at build time. Apps never implement their own authentication: every request runs on short-lived, cryptographically signed tokens scoped to that specific app, and a token minted for one app is rejected by every other. Each app gets its own dedicated database, and access to workspace data is validated server-side on every request — isolation is enforced at the storage layer, not by generated code remembering to filter.\n\nSecrets and API credentials are server-only by construction: injected as environment variables at deploy, encrypted at rest, and never returned through any API. If generated code tries to pull a secret into the browser, the build fails — the app won't ship.",
   },
@@ -59,11 +60,13 @@ const SECURITY_FAQS: FAQEntry[] = [
   },
   {
     question: "How are apps isolated from one another?",
+    shortQuestion: "How are apps isolated?",
     answer:
       "Every app is born with its own boundaries: a dedicated codebase, its own database, and its own deployment, all scoped to your workspace. Apps render in sandboxed environments inside the platform and reach data only through Assembly's permission-checked APIs. An issue in one app can't reach another, and can never reach another customer's data.",
   },
   {
     question: "Which subprocessors does Assembly use?",
+    shortQuestion: "Which subprocessors are used?",
     answer:
       "Assembly uses a small set of vetted subprocessors for cloud hosting, app deployment, AI model inference, payments, and analytics — each bound by data processing agreements. The current, complete list is maintained in the Trust Center and updated whenever it changes.",
     links: [
@@ -73,6 +76,7 @@ const SECURITY_FAQS: FAQEntry[] = [
   },
   {
     question: "How are secrets and API credentials managed?",
+    shortQuestion: "How are secrets managed?",
     answer:
       "Secrets and API credentials are never written into generated code. When an app needs a third-party service, you provide the credential through a secure form; the platform stores it encrypted and injects it at runtime as an environment variable. The AI never holds your keys, and they never appear in your app's codebase.",
   },
@@ -90,6 +94,7 @@ const SECURITY_FAQS: FAQEntry[] = [
   },
   {
     question: "What happens if there's a security incident?",
+    shortQuestion: "What if there's an incident?",
     answer:
       "Assembly maintains a documented incident response process: incidents are triaged by severity, contained, and remediated, and affected customers are notified in line with contractual and legal requirements. Because security is engineered at the platform level, a fix ships platform-wide — every workspace and every app at once, with nothing for you to patch.",
     links: [
@@ -98,6 +103,7 @@ const SECURITY_FAQS: FAQEntry[] = [
   },
   {
     question: "How is Assembly different from vibe coding tools?",
+    shortQuestion: "Different from vibe coding tools?",
     answer:
       "Other tools generate your app's security along with your app, then hand you scanners to find what the AI got wrong. On Assembly, apps don't generate that layer at all. Authentication, permissions, data scoping, and hosting are platform infrastructure, engineered once and inherited by every app you build. And your apps ship into the client experience your customers already log into, not to a standalone app you have to secure yourself.",
   },

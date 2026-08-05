@@ -518,7 +518,19 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
           {!value && (previewing || typewriter) && (
             <div
               aria-hidden
-              className={`pointer-events-none absolute inset-0 px-1 text-base leading-[1.5] transition-colors duration-150 ${dark ? "text-white/40" : "text-neutral-400"}`}
+              // Clipped to the box, and faded out at its foot when there is more
+              // preview than fits: a prompt longer than the field would otherwise
+              // spill over the footer row and out of the composer entirely. The
+              // fade says the text continues rather than ending mid-sentence.
+              className={`pointer-events-none absolute inset-0 overflow-hidden px-1 text-base leading-[1.5] transition-colors duration-150 ${dark ? "text-white/40" : "text-neutral-400"}`}
+              style={
+                previewing
+                  ? {
+                      maskImage: `linear-gradient(to bottom, #000 calc(100% - ${EDGE_FADE}px), transparent 100%)`,
+                      WebkitMaskImage: `linear-gradient(to bottom, #000 calc(100% - ${EDGE_FADE}px), transparent 100%)`,
+                    }
+                  : undefined
+              }
             >
               {previewing ?? (
                 <>

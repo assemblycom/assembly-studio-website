@@ -10,6 +10,11 @@ export interface FAQLink {
 
 export interface FAQEntry {
   question: string;
+  // Shown in place of `question` below sm. A question that wraps to a second
+  // line turns a tidy stack of rows into a ragged one, and on a phone there is
+  // no room to solve that with type size. Optional: only the questions that
+  // actually wrap carry one, and the short form has to mean the same thing.
+  shortQuestion?: string;
   answer: string;
   // Substrings of the answer to turn into links (first match of each label).
   // Answers stay plain strings; links live as data alongside them.
@@ -103,6 +108,7 @@ type FAQVariant = "cards" | "divided";
 
 function FAQItem({
   question,
+  shortQuestion,
   answer,
   links,
   open,
@@ -151,7 +157,10 @@ function FAQItem({
           aria-expanded={open}
           className="group flex w-full cursor-pointer items-center justify-between gap-6 py-5 text-left"
         >
-          <span className="type-body text-foreground">{question}</span>
+          <span className="type-body text-foreground">
+            <span className="sm:hidden">{shortQuestion ?? question}</span>
+            <span className="hidden sm:inline">{question}</span>
+          </span>
           {/* The chevron turns 90°, not 180 — half the travel of a full flip,
               and timed to the drawer (300ms) so the two move as one gesture.
               Which 90° depends on the width. On a phone it rests pointing right
@@ -196,7 +205,8 @@ function FAQItem({
         className="flex w-full cursor-pointer items-center justify-between gap-4 px-5 py-3 text-left"
       >
         <span className="type-body text-foreground">
-          {question}
+          <span className="sm:hidden">{shortQuestion ?? question}</span>
+          <span className="hidden sm:inline">{question}</span>
         </span>
         <svg
           width="20"

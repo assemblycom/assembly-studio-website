@@ -1459,14 +1459,11 @@ export const CASE_STUDIES: CaseStudy[] = [
         text: "The part he weights most heavily, though, is what clients see. Approvals, feedback, reporting, and communication all now happen inside AdvertAI’s own branded environment.",
       },
       {
-        type: "quote",
-        text: "Everything stays within the client portal now. They don’t have to jump to another tool for feedback: everything stays within our own branded area.",
-        attribution: "Garrett Leonard, Founder, AdvertAI Marketing",
-      },
-      {
-        type: "quote",
-        text: "Our clients have said nothing but great things about all the apps we’ve shared with them. We’ve heard how professional everything feels, and how it’s really unique compared to any other experience they’ve had.",
-        attribution: "Garrett Leonard, Founder, AdvertAI Marketing",
+        // Run inline rather than as two stacked pull-quotes: back to back, the
+        // quote element turned one continuous thought into two monuments and the
+        // page lost its rhythm. Set as prose, it reads the way he said it.
+        type: "paragraph",
+        text: "“Everything stays within the client portal now. They don’t have to jump to another tool for feedback: everything stays within our own branded area,” Garrett said. “Our clients have said nothing but great things about all the apps we’ve shared with them. We’ve heard how professional everything feels, and how it’s really unique compared to any other experience they’ve had.”",
       },
       {
         type: "paragraph",
