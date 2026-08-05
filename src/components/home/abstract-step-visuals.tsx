@@ -370,6 +370,13 @@ function PhoneStatusBar() {
 // the telling: a fade to the blue said "this is dissolving", a shadow says
 // "this passes under something and there is more below it".
 const PHONE_CUT_SHADOW = "inset 0 -22px 18px -14px rgba(16,24,40,0.16)";
+// The overlay twin of that shadow, matched to its falloff, for the content that
+// runs into the cut. See PhoneScreen for why both exist.
+// Deeper than the inset it mirrors, because it has to reach the whole of the row
+// that runs into the cut: the answer's number badge carries its own light fill
+// and sat clear of a shorter gradient, which is exactly what read as floating.
+const PHONE_CUT_OVERLAY =
+  "linear-gradient(to top, rgba(16,24,40,0.2) 0%, rgba(16,24,40,0.12) 34%, rgba(16,24,40,0.055) 66%, rgba(16,24,40,0) 100%)";
 // What a step holds back from the cut. Steps whose content is meant to run off
 // the bottom (the entry list, the conversation, the Recommended rail) hold back
 // nothing.
@@ -413,9 +420,22 @@ function PhoneScreen({
       // At the outer shell's own 20px, though — three nested edges at 16, 12 and
       // 22 read as three arbitrary curves; repeating the outermost value makes
       // the set a rhythm instead.
-      className="mock-ui flex h-[calc(100%+20px)] w-full shrink-0 flex-col overflow-hidden rounded-t-[20px] bg-[var(--mk-surface)] sm:hidden"
+      className="mock-ui relative flex h-[calc(100%+20px)] w-full shrink-0 flex-col overflow-hidden rounded-t-[20px] bg-[var(--mk-surface)] sm:hidden"
       style={{ boxShadow: PHONE_CUT_SHADOW }}
     >
+      {/* The same shading again, this time OVER the content. An inset shadow
+          paints on the element's own background and children draw on top of it,
+          so a row running into the cut kept its full contrast and sat above the
+          shadow instead of passing under it. Only for the steps that run into the
+          cut: one that holds its content clear has nothing down there to shade,
+          and the veil would only dull the face. */}
+      {contentInset === 0 && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[52px]"
+          style={{ background: PHONE_CUT_OVERLAY }}
+        />
+      )}
       <PhoneStatusBar />
       {/* Title bar — menu, the screen's name, and the panel toggle: the three
           controls the real app carries at this width. Bordered with --mk-border,

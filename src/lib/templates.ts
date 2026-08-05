@@ -86,6 +86,7 @@ const INDUSTRY_BY_SLUG: Record<string, string[]> = {
   // From the tracker.
   "progress-tracker": ["Consulting", "Marketing", "Technology", "Real estate"],
   "client-todo-list": ["Consulting", "Accounting", "Legal", "Marketing"],
+  "deals-pipeline": ["Real estate", "Consulting", "Financial services", "Technology"],
   "case-status-page": ["Legal", "Healthcare", "Financial services"],
   "retainer-usage-overview": ["Marketing", "Consulting", "Legal"],
   "conditional-forms": ["Legal", "Healthcare", "Accounting", "Financial services"],
@@ -309,6 +310,16 @@ const BASE_TEMPLATES: Template[] = [
     longDescription:
       "Give each client a clear checklist of what to do next, with due dates and reminders, so nothing stalls on their side.",
     features: ["Per-client checklist", "Due dates", "Reminders", "Completion tracking"],
+  },
+  {
+    slug: "deals-pipeline",
+    title: "Deals pipeline",
+    description: "Open deals by stage, with value and owner",
+    icon: "📈",
+    category: "Trackers",
+    longDescription:
+      "See every open deal by stage, with its value, owner, and next step, so the pipeline is one shared view instead of a spreadsheet someone remembers to update on Fridays.",
+    features: ["Stages you define", "Value per deal", "Owner and next step", "Weighted total"],
   },
   {
     slug: "case-status-page",
@@ -731,6 +742,16 @@ export const TEMPLATE_FEATURE_DETAILS: Record<string, string> = {
     "Documents carry who opened them, which changes how they get shared on.",
   "Activity tracking":
     "Every open and download is recorded against a name and a time.",
+
+  // Deals pipeline
+  "Stages you define":
+    "Your own stages, named the way the team already talks about a deal.",
+  "Value per deal":
+    "What each one is worth, so the pipeline adds up instead of being counted.",
+  "Owner and next step":
+    "Who has it and what happens next, on the deal itself rather than in someone's head.",
+  "Weighted total":
+    "The total adjusted for how likely each stage is to close, so the forecast isn't the best case.",
 
   // Progress tracker
   "Custom stages":

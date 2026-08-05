@@ -24,8 +24,8 @@ const TABLE_TITLES: Record<string, string> = {
   "vacation-rental-license": "Streamlining client operations",
   "heritage-law-partners": "Delivering exceptional client service",
   "durrick-designs": "Centralizing client collaboration",
-  "sargent-cpa": "Modernizing the client experience",
-  "advertai-marketing": "Scaling client delivery",
+  "sargent-cpa": "Custom client apps, built in plain language",
+  "advertai-marketing": "Differentiating on client experience",
 };
 
 function StoryTableRow({ study }: { study: CaseStudy }) {
