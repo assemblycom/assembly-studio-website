@@ -400,7 +400,7 @@ const BASE_TEMPLATES: Template[] = [
   // Copy here is a first draft, written from each name; review before launch.
   {
     slug: "booking-app",
-    title: "Booking app",
+    title: "Meeting Request",
     description: "Clients book time from your availability",
     icon: "📆",
     category: "Requests",

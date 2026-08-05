@@ -14,6 +14,12 @@ interface Props {
 
 const ALL = "All";
 
+// Covers whose own fill runs dark all the way to the card edge. The frame's
+// hairline and inner highlight are both light, so on those cards they drew a pale
+// outline across the dark area instead of disappearing into it; the dark fill
+// already defines the card's edge, so the overlay is dropped entirely.
+const BLEED_COVERS = new Set(["design-approvals", "service-request-intake"]);
+
 /** Edge affordance for the chip strip: just the button. The fade itself lives on
  *  the scroller (see EDGE_FADE) rather than in an overlay here. */
 function ScrollArrow({
@@ -373,10 +379,18 @@ export function TemplatesBrowser({ templates }: Props) {
                       <V69CardMock slug={template.slug} />
                     </div>
                   </MockFit>
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 rounded-[20px] border border-border/60 [[data-theme=dark]_&]:border-transparent"
-                  />
+                  {!BLEED_COVERS.has(template.slug) && (
+                    <div
+                      aria-hidden
+                      // The same overlay also carries the depth, since it's the
+                      // one layer that sits above the widget: a 1px white inner
+                      // ring just inside the hairline, then two soft dark insets
+                      // that fall off before they reach the middle. Light only —
+                      // the dark surface has no hairline to catch a highlight,
+                      // and an inset there reads as grime rather than a lip.
+                      className="pointer-events-none absolute inset-0 rounded-[20px] border border-border/60 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.55),inset_0_1px_2px_rgba(0,0,0,0.05),inset_0_8px_20px_-10px_rgba(0,0,0,0.07)] [[data-theme=dark]_&]:border-transparent [[data-theme=dark]_&]:shadow-none"
+                    />
+                  )}
                 </div>
                 {/* Card text on the site's own steps: body for the name, caption
                     for the line under it. Both sit at 400 — the name reads as the

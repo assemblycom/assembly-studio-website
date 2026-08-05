@@ -726,7 +726,7 @@ function CardProposal() {
               // read as a hole punched through the glass.
               // No ring in either skin: the fill already steps off the panel, so
               // a hairline only drew a box around each row.
-              className="flex items-center justify-between rounded-lg bg-white px-3 py-2 ring-0 [[data-theme=light]_&]:bg-[#F5F5F0] [[data-theme=dark]_&]:bg-[#3A3A3A]"
+              className="flex items-center justify-between rounded-lg bg-white px-3 py-3.5 ring-0 [[data-theme=light]_&]:bg-[#F5F5F0] [[data-theme=dark]_&]:bg-[#3A3A3A]"
             >
               <div className="text-[11px] font-normal leading-tight text-[var(--v69-ink)]">
                 {title}
@@ -1037,40 +1037,45 @@ function CardMetrics() {
   );
 }
 
-// Retainer usage overview — a hours-used-vs-remaining bar that fills on hover.
+// One dot per hour of the retainer, so the graph counts the thing it measures
+// instead of abstracting it into a percentage. 34 of 40 are spent (33.5 rounded to
+// the hour the client is currently in).
+const RETAINER_HOURS = 40;
+const RETAINER_USED = 34;
+const RETAINER_COLS = 8;
+
+// Retainer usage overview — the month as a field of hours: a dot each, the spent
+// ones in ink and the rest faint, with the running total under it. The progress
+// bar it replaces said the same thing in a shape you had to read a number off to
+// understand.
 function CardRetainer() {
   return (
     <div className="flex h-full flex-col justify-between bg-[var(--v69-card)] p-5">
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] font-normal text-muted-foreground">
-          Hours used
-        </span>
-        <span
-          className={`rounded-full bg-[var(--v69-well)] px-2 py-0.5 text-[9px] font-normal text-muted-foreground ${MOCK_OUTLINE}`}
-        >
-          This month
-        </span>
+      <div
+        className="grid gap-2"
+        style={{
+          gridTemplateColumns: `repeat(${RETAINER_COLS}, minmax(0, 1fr))`,
+        }}
+      >
+        {Array.from({ length: RETAINER_HOURS }, (_, i) => (
+          <span
+            key={i}
+            className="aspect-square rounded-full"
+            style={{
+              background:
+                i < RETAINER_USED ? "var(--v69-ink)" : INK_FAINT,
+            }}
+          />
+        ))}
       </div>
 
-      <div className="flex flex-col gap-5">
-        <div className="flex items-end gap-2">
-          <span className="text-[68px] font-normal leading-[0.78] tracking-tight tabular-nums text-[var(--v69-ink)]">
-            33.5
-          </span>
-          <span className="mb-2.5 text-[13px] font-normal text-muted-foreground">
-            / 40h
-          </span>
-        </div>
-        <div className="relative h-1.5 rounded-full bg-[var(--v69-well)]">
-          <div
-            className="absolute inset-y-0 left-0 rounded-full bg-[var(--v69-ink)]"
-            style={{ width: "84%" }}
-          />
-          <span
-            className="absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--v69-ink)] ring-2 ring-[var(--v69-card)]"
-            style={{ left: "84%" }}
-          />
-        </div>
+      <div className="flex items-end gap-2">
+        <span className="text-[52px] font-normal leading-[0.78] tracking-tight tabular-nums text-[var(--v69-ink)]">
+          33.5
+        </span>
+        <span className="mb-1.5 text-[13px] font-normal tabular-nums text-muted-foreground">
+          / 40h this month
+        </span>
       </div>
     </div>
   );
@@ -1401,42 +1406,58 @@ const MOCK_OUTLINE =
 // dark mode (the ink token inverts, so the label must invert with it).
 const ON_INK = "text-[var(--v69-well)]";
 
-// Booking & meeting requests — a contact card: the person you'd book with
-// (initials avatar, name, company) above a single "Book meeting" action.
-// Monochrome and outline-framed, matching the homepage widget mocks.
+// Meeting request — a composer, not a confirmation: the empty field the client
+// types their request into, with the attach control, the length they're asking
+// for, and the send button on the footer row. The contact-card version showed a
+// booking that had already happened, which is the end of the flow rather than
+// the thing the app is for.
 function CardBooking() {
   return (
-    <div className="flex h-full flex-col justify-center bg-[var(--v69-card)] p-4">
-      {/* Dark rebuilds the ladder the light skin has. The shared tokens land
-          panel, row and avatar all between 31 and 38 there — the well is DARKER
-          than the card face in dark — so the three surfaces merged into one murky
-          block. Light's relationships are kept (row above panel, avatar its own
-          surface) but the steps are widened: 38 → 60 → 74 → 90, plus a hairline on
-          the panel and the button, since a step of eight levels was still reading
-          as one flat block. */}
-      <div className="flex flex-col gap-2.5 rounded-2xl bg-[var(--v69-well)] p-2 [[data-theme=light]_&]:ring-1 [[data-theme=light]_&]:ring-black/[0.06] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.10)] [[data-theme=dark]_&]:ring-1 [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.14)]">
-        <div className="flex items-center gap-2.5 rounded-xl bg-[var(--v69-card)] p-2.5 [[data-theme=dark]_&]:bg-[#4A4A4A]">
-          <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-[var(--v69-well)] text-[13px] font-normal text-[var(--v69-ink)] [[data-theme=dark]_&]:bg-[#5A5A5A]">
-            AE
-          </span>
-          <div className="min-w-0">
-            <div className="truncate text-[12px] font-normal text-[var(--v69-ink)]">
-              Discovery call
-            </div>
-            <div className="truncate text-[10px] font-normal text-muted-foreground">
-              with Ava Ellis
-            </div>
-            <div className="mt-0.5 truncate text-[10px] font-normal tabular-nums text-muted-foreground">
-              Sep 18 &middot; 2:00 PM
-            </div>
-          </div>
-        </div>
+    // No inner panel: the card IS the field, so the placeholder starts at the top
+    // and the controls sit on the bottom edge, the full width apart. Send is the
+    // only filled surface left.
+    <div className="flex h-full flex-col justify-between bg-[var(--v69-card)] p-5">
+      <p className="text-[13px] font-normal text-muted-foreground">
+        What&rsquo;s the meeting about?
+      </p>
 
-        {/* Dark puts the card's one colour on its one action: the brand lime,
-            with the label on the dark ground, so the button is unmistakably a
-            control rather than a third grey surface. */}
-        <div className="flex items-center justify-center rounded-lg bg-[var(--v69-card)] py-2 text-[11px] font-normal text-[var(--v69-ink)] [[data-theme=dark]_&]:bg-[#D9ED92] [[data-theme=dark]_&]:text-[#1B1B1B]">
-          Add to calendar
+      <div className="flex items-center justify-between">
+        {/* Attach — the composer's secondary control, drawn rather than set as
+            a glyph so it keeps the stroke weight of every other mock icon. */}
+        <svg
+          viewBox="0 0 24 24"
+          className="size-4 text-[var(--v69-ink)]"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+        >
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-normal tabular-nums text-[var(--v69-ink)]">
+            30 min
+          </span>
+          <span className="text-[11px] font-normal text-muted-foreground">
+            Discovery
+          </span>
+          {/* Dark puts the card's one colour on its one action: the brand lime,
+              with the arrow on the dark ground, so send reads as a control
+              rather than a third grey surface. */}
+          <span className="flex size-7 items-center justify-center rounded-full bg-[var(--v69-ink)] [[data-theme=dark]_&]:bg-[#D9ED92]">
+            <svg
+              viewBox="0 0 24 24"
+              className={`size-4 ${ON_INK} [[data-theme=dark]_&]:text-[#1B1B1B]`}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M12 19V6M6 12l6-6 6 6" />
+            </svg>
+          </span>
         </div>
       </div>
     </div>
@@ -2059,49 +2080,54 @@ function CardDataRoom() {
 // Progress tracker — one record and how far through its stages it is, nothing
 // else. It used to fall through to the generic intake form, which showed three
 // text fields and said nothing about progress at all.
-// The stages are the readout: twelve ticks, the completed ones in the brand blue
-// and the rest in the recessed well token, so the count is legible at a glance
-// and needs no "7 / 12" caption under it. One record rather than a list — a
-// second row turned a dashboard component into a list view.
+// The gauge is a ring rather than a row of ticks now, and it is SEGMENTED: one
+// arc per stage, the completed ones in the brand blue. Twelve discrete arcs is
+// what keeps it from reading as the goal tracker's cover, which is the same size
+// ring drawn as two continuous streams.
 const TRACKER_STAGES = 12;
 const TRACKER_DONE = 7;
+// Arc geometry on a pathLength of 100, so a segment is stated as a percentage of
+// the ring: a slice per stage, minus the gap that separates it from the next.
+const TRACKER_SLICE = 100 / TRACKER_STAGES;
+const TRACKER_GAP = 2.4;
 
 function CardProgressTracker() {
   return (
-    <div className="flex h-full flex-col bg-[var(--v69-card)] p-3.5">
-      <div className="flex flex-1 flex-col rounded-2xl bg-[var(--v69-inner)] p-4">
-        <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-[13px] font-normal text-[var(--v69-ink)]">
-            Northwind Co.
-          </span>
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden
-            className="size-3.5 shrink-0 text-muted-foreground"
-          >
-            <path d="M9 6l6 6-6 6" />
-          </svg>
-        </div>
-        {/* Ticks flex to fill the row, so the gauge always spans the panel and
-            the stage count sets the tick width rather than the other way round.
-            Blue is literal in both themes; the remaining ticks ride the well
-            token, which inverts on its own. */}
-        <div className="mt-auto flex items-stretch gap-[5px]">
+    <div className="flex h-full flex-col items-center justify-center gap-4 bg-[var(--v69-card)] p-5">
+      <div className="relative flex items-center justify-center">
+        <svg viewBox="0 0 84 84" className="size-[186px] -rotate-90">
           {Array.from({ length: TRACKER_STAGES }, (_, i) => (
-            <span
+            <circle
               key={i}
-              className={`h-7 flex-1 rounded-full ${
-                i < TRACKER_DONE ? "bg-[#7DA4FF]" : "bg-[var(--v69-well)]"
+              cx="42"
+              cy="42"
+              r="34"
+              fill="none"
+              strokeWidth="9"
+              strokeLinecap="round"
+              stroke={i < TRACKER_DONE ? "#7DA4FF" : INK_FAINT}
+              pathLength={100}
+              strokeDasharray={`${TRACKER_SLICE - TRACKER_GAP} ${
+                100 - (TRACKER_SLICE - TRACKER_GAP)
               }`}
+              style={{ strokeDashoffset: -(i * TRACKER_SLICE) }}
             />
           ))}
+        </svg>
+        <div className="absolute flex flex-col items-center leading-none">
+          <span className="text-[34px] font-normal tracking-tight tabular-nums text-[var(--v69-ink)]">
+            {TRACKER_DONE}
+          </span>
+          <span className="mt-2 text-[11px] font-normal tabular-nums text-muted-foreground">
+            of {TRACKER_STAGES} stages
+          </span>
         </div>
       </div>
+      {/* The record the ring is about, under it — the name used to sit in a
+          header row, which a centred gauge has no use for. */}
+      <span className="max-w-full truncate text-[13px] font-normal text-[var(--v69-ink)]">
+        Northwind Co.
+      </span>
     </div>
   );
 }
@@ -2319,35 +2345,58 @@ function CardCommsApp() {
   );
 }
 
-// Internal AI assistant — a glassy ask panel: a version pill, a greeting, a
-// listening waveform, and a prompt caption. Monochrome, framed as a well so it
-// reads as an assistant surface rather than a chat log.
+// Listening waveform bar heights, in the mock's own px. Slightly asymmetric so it
+// reads as a voice rather than as a symmetrical graphic.
+const ASSISTANT_WAVE = [12, 26, 42, 54, 36, 22, 13];
+
+// Internal AI assistant — one object, not a screen: a large recessed disc with
+// the listening waveform sunk into it and a single quiet caption. It used to be a
+// pill, a greeting, a small waveform and a prompt line stacked in a rounded
+// rectangle, which read as a miniature chat UI; the disc is the composition now
+// and the waveform is the only thing with weight in it. The carve is the time
+// tracker's watch face, so the two read as the same material.
 function CardAIAssistant() {
   return (
-    <div className="flex h-full bg-[var(--v69-card)] p-3">
-      <div className="relative flex flex-1 flex-col items-center justify-center gap-3 overflow-hidden rounded-[20px] border border-black/[0.08] bg-[var(--v69-well)] p-4 [[data-theme=dark]_&]:border-white/[0.12] [.template-mock_&]:border-transparent">
-        <span className="pointer-events-none absolute -top-8 left-1/2 size-28 -translate-x-1/2 rounded-full bg-[var(--v69-well-2)] blur-2xl" />
+    <div className="flex h-full items-center justify-center bg-[var(--v69-card)] p-4">
+      <div className="relative flex aspect-square h-full max-h-[220px] flex-col items-center justify-center gap-5 overflow-hidden rounded-full bg-[var(--v69-card)] [[data-theme=light]_&]:bg-[#EDEDE4] [[data-theme=dark]_&]:bg-[#1B1B1B] [[data-theme=dark]_.template-mock_&]:bg-[var(--v69-well)]">
+        {/* Dark-only carve: a hairline highlight along the top edge, a darker
+            lower edge, and a soft falloff between, so the disc reads as sunk into
+            the card rather than as a flat cutout. */}
         <span
-          className={`relative rounded-full bg-[var(--v69-card)] px-2.5 py-1 text-[9px] font-normal tracking-wide text-muted-foreground ${MOCK_OUTLINE}`}
-        >
-          Assembly AI
-        </span>
-        <p className="relative text-center text-[15px] font-normal leading-tight text-[var(--v69-ink)]">
-          How can I help
-          <br />
-          you today?
-        </p>
-        <span className="relative flex h-6 items-center gap-[3px]">
-          {[9, 16, 24, 16, 9].map((h, i) => (
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-full [[data-theme=light]_&]:hidden"
+          style={{
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -1px 0 rgba(0,0,0,0.5), inset 0 10px 18px -10px rgba(0,0,0,0.45), inset 0 -12px 20px -12px rgba(0,0,0,0.55)",
+          }}
+        />
+        {/* Light-only counterpart, an order of magnitude softer: light's own value
+            step does most of the separating, so this only suggests the recess. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-full [[data-theme=dark]_&]:hidden"
+          style={{
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -1px 0 rgba(16,24,40,0.06), inset 0 8px 14px -8px rgba(16,24,40,0.09), inset 0 -10px 16px -10px rgba(16,24,40,0.11)",
+          }}
+        />
+
+        {/* The one element with weight — full ink, centred, and the tallest thing
+            on the card. */}
+        <span className="relative flex h-[54px] items-center gap-[5px]">
+          {ASSISTANT_WAVE.map((h, i) => (
             <span
               key={i}
-              className="w-[3px] rounded-full bg-[var(--v69-ink)]"
+              className="w-[4px] rounded-full bg-[var(--v69-ink)]"
               style={{ height: `${h}px` }}
             />
           ))}
         </span>
-        <span className="relative text-[9px] font-normal text-muted-foreground">
-          Press to ask Assembly
+
+        {/* One caption, no chrome: the pill's own outline and fill were a second
+            surface competing with the disc. */}
+        <span className="relative text-[11px] font-normal text-muted-foreground">
+          Assembly AI
         </span>
       </div>
     </div>
@@ -2479,6 +2528,9 @@ const blockVars = (code: string) =>
 // cells; seven rows is what still fits in the height that leaves, which is
 // nearly all of it — the board is the widget.
 const BLOCK_BOARD = [
+  // Eight rows for eight columns: the board is the whole card now, so it has to
+  // be square or it leaves a band of card above and below it.
+  "........",
   "....YYYY",
   "......Y.",
   ".YY.GG..",
@@ -2486,12 +2538,6 @@ const BLOCK_BOARD = [
   "TT..G...",
   ".TTTOPPP",
   ".OO..GGG",
-];
-// The pieces waiting in the tray, on their own 3x2 grids.
-const BLOCK_NEXT = [
-  ["TTT", ".T."],
-  [".YY", "YY."],
-  ["PP.", ".PP"],
 ];
 // Puffy top-lit face: a highlight along the top edge, a shaded lower edge.
 const BLOCK_FACE =
@@ -2520,87 +2566,195 @@ function BlockCell({ code, radius }: { code: string; radius: string }) {
 
 function CardBlockGame() {
   return (
-    <div className="flex h-full flex-col gap-1.5 bg-[var(--v69-card)] p-2.5">
-      {/* Tray: the pieces queued up next, nothing else — the board is the card,
-          so the tray is only as tall as the pieces need. */}
-      <div className="flex items-center gap-2">
-        {BLOCK_NEXT.map((piece, i) => (
-          <div
-            key={i}
-            className={`flex h-6 flex-1 items-center justify-center rounded-lg ${BLOCK_SURFACE}`}
-          >
-            <div className="grid grid-cols-3 gap-[2px]">
-              {piece.flatMap((row, y) =>
-                [...row].map((code, x) => (
-                  <span key={`${x}-${y}`} className="size-[6px]">
-                    {BLOCK_HUES_LIGHT[code] ? (
-                      <span
-                        className={`block size-full rounded-[2px] ${BLOCK_FACE} ${BLOCK_FILL}`}
-                        style={blockVars(code)}
-                      />
-                    ) : null}
-                  </span>
-                )),
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Board — spans the tray's full width; the cells carry the aspect ratio,
-          so its height follows from the column width and stays a true grid. */}
-      <div className="flex min-h-0 flex-1 items-center">
-        <div
-          className={`grid w-full grid-cols-8 gap-[3px] rounded-xl p-1.5 ${BLOCK_SURFACE}`}
-        >
-          {BLOCK_BOARD.flatMap((row, y) =>
-            [...row].map((code, x) => (
-              <BlockCell key={`${x}-${y}`} code={code} radius="rounded-[4px]" />
-            )),
-          )}
-        </div>
+    // Board only — the piece tray that used to sit above it is gone, so the grid
+    // takes the whole card. An 8x8 of square cells fills the square exactly, and
+    // the cells carry the aspect ratio, so the height still follows the column
+    // width and it stays a true grid.
+    <div className="flex h-full items-center bg-[var(--v69-card)] p-2">
+      <div
+        className={`grid w-full grid-cols-8 gap-[3px] rounded-xl p-1.5 ${BLOCK_SURFACE}`}
+      >
+        {BLOCK_BOARD.flatMap((row, y) =>
+          [...row].map((code, x) => (
+            <BlockCell key={`${x}-${y}`} code={code} radius="rounded-[4px]" />
+          )),
+        )}
       </div>
     </div>
   );
 }
 
-// Design approvals / service request — one fact, stated large: which review
-// round the work is in, when it is due, and who has it. Modelled on the wallet
-// "upcoming payment" widget, pared right back: a meta line and one oversized
-// value on a lifted panel, with nothing else — no preview, badge, button, rule or
-// ambient glow. The card used to carry five stacked pieces and read as a list.
+// Service request intake — the request stated as a sentence, on the model of the
+// system weather widget: no panel, no badge, no avatar, just the facts set inline
+// with the ones that matter bright and the words joining them dim, so the card is
+// read rather than parsed. It used to be a lifted panel carrying one oversized
+// value, which said "Round 2" loudly and left out what the request was.
+// Ink-filled: this is the composition's whole surface, which is why the card is
+// exempt from the gallery frame's pale hairline (see BLEED_COVERS).
+const INTAKE_LINES: { text: string; dim?: boolean }[][] = [
+  [{ text: "2 new" }, { text: "requests", dim: true }],
+  [{ text: "Website refresh" }],
+  [{ text: "from", dim: true }, { text: "Ava Ellis" }],
+  [{ text: "needs a quote", dim: true }],
+  [{ text: "in 2 days" }],
+];
+
 function CardServiceRequest() {
   return (
-    <div className="relative flex h-full flex-col justify-center overflow-hidden bg-[var(--v69-card)] p-4">
-      <div className="relative flex flex-col gap-3 rounded-[20px] bg-[var(--v69-inner)] p-4 [[data-theme=light]_&]:shadow-[0_1px_2px_rgba(16,24,40,0.05),0_12px_26px_-16px_rgba(16,24,40,0.2)] [[data-theme=dark]_&]:shadow-[0_2px_6px_rgba(0,0,0,0.4),0_16px_34px_-16px_rgba(0,0,0,0.6)]">
-        <div className="flex items-start justify-between gap-2">
-          <span className="flex items-center gap-1.5 text-[11px] font-normal text-muted-foreground">
-            <svg
-              viewBox="0 0 16 16"
-              className="size-3.5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              aria-hidden
-            >
-              <rect x="2" y="3.5" width="12" height="10" rx="2" />
-              <path d="M2 6.5h12M5.5 2v2.5M10.5 2v2.5" strokeLinecap="round" />
-            </svg>
-            Due in 2 days
+    <div className="flex h-full flex-col justify-center bg-[var(--v69-ink)] p-5">
+      <p className="text-[19px] font-normal leading-[1.35] tracking-tight">
+        {INTAKE_LINES.map((line, i) => (
+          <span key={i} className="block">
+            {line.map((part, j) => (
+              <span
+                key={j}
+                className={
+                  part.dim
+                    ? "text-[color-mix(in_srgb,var(--v69-well)_55%,transparent)]"
+                    : ON_INK
+                }
+              >
+                {j > 0 ? " " : ""}
+                {part.text}
+              </span>
+            ))}
           </span>
-          {/* Stands in for the reference's service logo: the reviewer holding the
-              round, on the brand blue with a dark glyph so it reads in both skins. */}
-          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#7DA4FF] text-[9px] font-normal text-[#1B1B1B]">
-            AE
-          </span>
-        </div>
+        ))}
+      </p>
+    </div>
+  );
+}
 
-        {/* The one value, oversized — on the card's own ink. The brand blue read
-            as purple at this size, so the colour lives on the reviewer chip
-            instead and the value stays neutral. */}
-        <div className="text-[32px] font-normal leading-none tracking-tight text-[var(--v69-ink)]">
-          Round 2
+// The day's blocks as fractions of the 9–1 window the rail draws, so a block's
+// position is stated the way it reads: where it starts, how long it runs. The
+// first two share a row; the third drops so its overlap with the second shows.
+const EVENT_BLOCKS = [
+  { left: "17%", width: "24%", top: "26%", weight: 0.32 },
+  { left: "45%", width: "22%", top: "26%", weight: 1 },
+  { left: "58%", width: "26%", top: "52%", weight: 0.55 },
+];
+
+const EVENT_HOURS = ["9 AM", "10 AM", "11 AM", "12 PM"];
+
+// Events & RSVPs — the day as a rail: the block running now named at the top,
+// then the day's events laid against the hours they occupy, with the headcount
+// on the invite. A single-invite card said nothing about a day filling up, which
+// is the thing the app is for. Monotone: the current block is full ink and the
+// rest step down in weight, so "now" reads without a second hue.
+function CardEvents() {
+  return (
+    // No inner panel: the rail owns the whole square, so the hour lines run the
+    // full height of the card and the day reads as the widget rather than as a
+    // chip sitting inside it.
+    <div className="flex h-full flex-col bg-[var(--v69-card)] p-5">
+      <div className="flex items-baseline justify-between gap-2">
+        <div className="flex min-w-0 items-baseline gap-1.5">
+          <span className="shrink-0 text-[11px] font-normal tabular-nums text-muted-foreground">
+            10:09 AM
+          </span>
+          <span className="truncate text-[13px] font-normal text-[var(--v69-ink)]">
+            Client workshop
+          </span>
         </div>
+        <span className="shrink-0 text-[11px] font-normal tabular-nums text-muted-foreground">
+          12 going
+        </span>
+      </div>
+
+      <div className="relative mt-4 flex-1">
+        {/* Hour ticks, drawn as a row of hairlines rather than a background
+            gradient so they land exactly where the labels below do. */}
+        <div className="absolute inset-0 flex justify-between">
+          {EVENT_HOURS.map((hour) => (
+            <span
+              key={hour}
+              className="w-px bg-[var(--v69-ink)] opacity-[0.14]"
+            />
+          ))}
+          <span className="w-px bg-[var(--v69-ink)] opacity-[0.14]" />
+        </div>
+        {EVENT_BLOCKS.map((block) => (
+          <span
+            key={block.left}
+            className="absolute h-[7px] rounded-full bg-[var(--v69-ink)]"
+            style={{
+              left: block.left,
+              width: block.width,
+              top: block.top,
+              opacity: block.weight,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Each label takes a quarter of the rail and sits left-aligned in it, so
+          it hangs off its own tick the way a calendar gutter reads. */}
+      <div className="mt-2 flex">
+        {EVENT_HOURS.map((hour) => (
+          <span
+            key={hour}
+            className="flex-1 pl-1 text-[11px] font-normal tabular-nums text-muted-foreground"
+          >
+            {hour}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const APPROVAL_ROWS = [
+  { title: "Homepage hero", meta: "Round 2 · 3 comments" },
+  { title: "Brand palette", meta: "Round 1 · Approved" },
+  { title: "Social kit", meta: "Round 1 · Waiting on you" },
+];
+
+// Design approvals — a titled folder of what is out for review: a filled header
+// band naming the set, then a row per piece with the round it is on. Borrowed
+// from a files-app folder view, with the reference's colour band taken to ink so
+// the gallery stays monotone.
+function CardDesignApprovals() {
+  return (
+    // No inner panel: the header band runs to the card's own edges and the rows
+    // sit straight on the card face, so the widget IS the folder view. The frame
+    // clips the band to the card radius, so it needs no rounding of its own.
+    <div className="flex h-full flex-col bg-[var(--v69-card)]">
+      <div className="flex items-center gap-2 bg-[var(--v69-ink)] px-5 py-4">
+        <svg
+          viewBox="0 0 16 16"
+          className={`size-4 ${ON_INK}`}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="M2 4.5A1.5 1.5 0 0 1 3.5 3h2.2l1.3 1.6h5.5A1.5 1.5 0 0 1 14 6.1v5.4A1.5 1.5 0 0 1 12.5 13h-9A1.5 1.5 0 0 1 2 11.5z" />
+        </svg>
+        <span className={`text-[13px] font-normal ${ON_INK}`}>
+          Design reviews
+        </span>
+      </div>
+      {/* The rail lives on each row, not on this wrapper, so a row's top border
+          runs the full width of the card the way the header band does. */}
+      <div>
+        {APPROVAL_ROWS.map((row, i) => (
+          <div
+            key={row.title}
+            className={`px-5 py-3.5 ${
+              i > 0
+                ? "border-t [[data-theme=light]_&]:border-black/[0.07] [[data-theme=dark]_&]:border-white/10"
+                : ""
+            }`}
+          >
+            <div className="truncate text-[13px] font-normal text-[var(--v69-ink)]">
+              {row.title}
+            </div>
+            <div className="mt-0.5 truncate text-[11px] font-normal text-muted-foreground">
+              {row.meta}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -2648,8 +2802,8 @@ export function V69CardMock({ slug }: { slug: string }) {
   if (slug === "client-performance-dashboard") return <CardMetrics />;
   if (slug === "retainer-usage-overview") return <CardRetainer />;
   if (slug === "monthly-client-report") return <CardReport />;
-  if (slug === "events-rsvps") return <CardBooking />;
-  if (slug === "design-approvals") return <CardServiceRequest />;
+  if (slug === "events-rsvps") return <CardEvents />;
+  if (slug === "design-approvals") return <CardDesignApprovals />;
   if (slug === "mass-messenger") return <CardMassMessenger />;
   if (slug === "jargon-quest") return <CardCommunityQA />;
   if (slug === "internal-resource-library")

@@ -167,13 +167,16 @@ export function TrustTicker() {
             slack beside it; nudging earlier pushed the last figure out past the
             page padding. */}
         <div className="mx-auto max-w-[1100px] min-[1280px]:translate-x-11">
-          {/* Phone: ONE outline around the whole 2x2, with hairlines between the
-              cells — four separate outlined tiles read as four separate things
-              when they are one set of figures. So the frame moves out here and
-              the tiles lose their own, closing the gap so they can share the
-              divider between them. From sm up this frame is gone and the tiles
-              dissolve back into one divided row (see the cell classes). */}
-          <div className="grid grid-cols-2 max-sm:overflow-hidden max-sm:rounded-xl max-sm:ring-1 max-sm:ring-border sm:grid-cols-4 sm:gap-x-0 sm:gap-y-0 sm:divide-x sm:divide-border [[data-theme=dark]_&]:max-sm:ring-[#383838] [[data-theme=dark]_&]:sm:divide-[#383838]">
+          {/* Phone: no frame at all — the 2x2 is set by two guide lines instead,
+              the row rule running the full width of the screen and the column
+              rule down the middle of it. An outline made the figures a card
+              parked on the page; the lines make them part of its grid, which is
+              what a set of four figures is. The bleed is why the rule reaches the
+              edges: the band sits in the page's 24px rail, so the grid steps back
+              out of it and each cell takes the rail back as its own padding. From
+              sm up all of it is reset and the row goes back to four columns (see
+              the cell classes). */}
+          <div className="grid grid-cols-2 max-sm:-mx-6 sm:grid-cols-4 sm:gap-x-0 sm:gap-y-0 sm:divide-x sm:divide-border [[data-theme=dark]_&]:sm:divide-[#383838]">
             {STATS.map((s, i) => (
               // The outer cells drop their outer padding so the first figure
               // starts exactly on the rail and the last ends on it — flush with
@@ -183,9 +186,10 @@ export function TrustTicker() {
               // but broke the one thing the row has going for it, which is that
               // all four figures start at the same offset from their own column.
               //
-              // Below sm the cells are centred and divided by hairlines inside the
-              // grid's own frame; at sm every one of those properties is reset so
-              // the row goes back to four columns of a single band.
+              // Below sm the cells are centred, take the page rail back as their
+              // own padding, and are divided by the two guide lines; at sm every
+              // one of those properties is reset so the row goes back to four
+              // columns of a single band.
               //
               // The mobile dividers are keyed off the index rather than divide-x:
               // divide-* walks DOM order, which in a 2x2 puts its line on the
@@ -193,7 +197,7 @@ export function TrustTicker() {
               // second row a top edge, so only the two interior lines get drawn.
               <div
                 key={s.label}
-                className={`px-4 py-5 text-center max-sm:border-border sm:rounded-none sm:p-0 sm:py-9 sm:text-left sm:first:pl-0 sm:last:pr-0 [[data-theme=dark]_&]:max-sm:border-[#383838] sm:[&:not(:first-child)]:pl-7 sm:[&:not(:last-child)]:pr-7 ${
+                className={`px-6 py-7 text-center max-sm:border-border sm:rounded-none sm:p-0 sm:py-9 sm:text-left sm:first:pl-0 sm:last:pr-0 [[data-theme=dark]_&]:max-sm:border-[#383838] sm:[&:not(:first-child)]:pl-7 sm:[&:not(:last-child)]:pr-7 ${
                   i % 2 === 1 ? "max-sm:border-l" : ""
                 } ${i > 1 ? "max-sm:border-t" : ""}`}
               >
