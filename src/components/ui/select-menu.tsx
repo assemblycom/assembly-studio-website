@@ -100,8 +100,13 @@ const SEARCH_ROW_HEIGHT = 56;
 // Border is foreground/20 rather than --border: at the divider weight the
 // outline barely registered as a field you could type in. Same weight the
 // signup email field already uses.
+// text-base below sm is not a type choice — iOS Safari zooms the page on focus
+// for any input under 16px. But that only needs to apply to the VALUE: left on
+// the placeholder too, every empty field sat a step above the 14px labels and
+// buttons around it. So the placeholder drops to 14 and the value keeps the
+// guard, the same split the signup sheet's email field uses.
 export const FIELD_CLS =
-  "w-full rounded-lg border border-foreground/20 bg-background px-4 py-3 text-base text-foreground outline-none sm:text-sm transition-colors placeholder:text-muted-foreground focus:border-foreground/40";
+  "w-full rounded-lg border border-foreground/20 bg-background px-4 py-3 text-base text-foreground outline-none sm:text-sm transition-colors placeholder:text-sm placeholder:text-muted-foreground focus:border-foreground/40";
 
 function IconChevron({ open }: { open: boolean }) {
   return (
@@ -278,12 +283,17 @@ export function SelectMenu({
         {required && <RequiredMark />}
       </span>
       <div ref={ref} className="relative">
+        {/* !text-sm: FIELD_CLS carries the 16px iOS zoom guard, but this is a
+            button, not a text input — it can't trigger the zoom, so the guard
+            only made the closed select a step larger than every label and
+            placeholder beside it. Important because two text-* utilities are the
+            same specificity and stylesheet order would otherwise decide. */}
         <button
           type="button"
           onClick={() => (open ? close() : setOpen(true))}
           aria-haspopup="listbox"
           aria-expanded={open}
-          className={`${FIELD_CLS} flex items-center justify-between gap-3 text-left ${
+          className={`${FIELD_CLS} flex items-center justify-between gap-3 text-left !text-sm ${
             selected ? "" : "!text-muted-foreground"
           }`}
         >
