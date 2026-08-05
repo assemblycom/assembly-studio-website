@@ -348,7 +348,7 @@ export function TemplatesBrowser({ templates }: Props) {
                 {/* Square at every width: the widgets are drawn square, and the
                     old 5/4 mobile frame cropped the bottom off the taller ones. */}
                 <MockFit
-                  className={`relative aspect-square overflow-hidden rounded-[20px] border border-border bg-background [[data-theme=dark]_&]:border-transparent [[data-theme=dark]_&]:bg-[#151515] ${MOCK_DESIGN_SIZE[template.slug] ?? ""}`}
+                  className={`relative aspect-square overflow-hidden rounded-[20px] border border-border/60 bg-background [[data-theme=dark]_&]:border-transparent [[data-theme=dark]_&]:bg-[#151515] ${MOCK_DESIGN_SIZE[template.slug] ?? ""}`}
                 >
                   <div
                     className={`template-mock [font-family:var(--font-inter),system-ui,sans-serif] ${
