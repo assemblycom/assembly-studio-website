@@ -1044,6 +1044,48 @@ const RETAINER_HOURS = 40;
 const RETAINER_USED = 34;
 const RETAINER_COLS = 8;
 
+// A field of dots, one per unit of whatever the cover counts, laid out in bands
+// from most to least resolved. Shared, because counting the units is the same
+// idea on more than one cover — only the number of bands differs.
+function DotField({
+  bands,
+  cols,
+}: {
+  bands: { count: number; fill: string }[];
+  cols: number;
+}) {
+  return (
+    <div
+      className="grid gap-2"
+      style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+    >
+      {bands.flatMap((band, b) =>
+        Array.from({ length: band.count }, (_, i) => (
+          <span
+            key={`${b}-${i}`}
+            className="aspect-square rounded-full"
+            style={{ background: band.fill }}
+          />
+        )),
+      )}
+    </div>
+  );
+}
+
+// The unit a hero number is measured against, set as a tag rather than as a run
+// of prose next to it: mono, so the figure inside it lines up with the number it
+// qualifies.
+function MockTag({ children }: { children: React.ReactNode }) {
+  return (
+    <span
+      className="rounded-sm bg-[var(--v69-well)] px-1.5 py-[5px] text-[11px] leading-none tabular-nums text-muted-foreground shadow-[inset_0_0_0_1px_rgba(16,24,40,0.05)] [[data-theme=dark]_&]:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]"
+      style={{ fontFamily: MONO }}
+    >
+      {children}
+    </span>
+  );
+}
+
 // Retainer usage overview — the month as a field of hours: a dot each, the spent
 // ones in ink and the rest faint, with the running total under it. The progress
 // bar it replaces said the same thing in a shape you had to read a number off to
@@ -1051,30 +1093,20 @@ const RETAINER_COLS = 8;
 function CardRetainer() {
   return (
     <div className="flex h-full flex-col justify-between bg-[var(--v69-card)] p-5">
-      <div
-        className="grid gap-2"
-        style={{
-          gridTemplateColumns: `repeat(${RETAINER_COLS}, minmax(0, 1fr))`,
-        }}
-      >
-        {Array.from({ length: RETAINER_HOURS }, (_, i) => (
-          <span
-            key={i}
-            className="aspect-square rounded-full"
-            style={{
-              background:
-                i < RETAINER_USED ? "var(--v69-ink)" : INK_FAINT,
-            }}
-          />
-        ))}
-      </div>
+      <DotField
+        cols={RETAINER_COLS}
+        bands={[
+          { count: RETAINER_USED, fill: "var(--v69-ink)" },
+          { count: RETAINER_HOURS - RETAINER_USED, fill: INK_FAINT },
+        ]}
+      />
 
-      <div className="flex items-end gap-2">
+      <div className="flex items-end gap-2.5">
         <span className="text-[52px] font-normal leading-[0.78] tracking-tight tabular-nums text-[var(--v69-ink)]">
           33.5
         </span>
-        <span className="mb-1.5 text-[13px] font-normal tabular-nums text-muted-foreground">
-          / 40h this month
+        <span className="mb-1.5">
+          <MockTag>40h</MockTag>
         </span>
       </div>
     </div>
@@ -2080,54 +2112,67 @@ function CardDataRoom() {
 // Progress tracker — one record and how far through its stages it is, nothing
 // else. It used to fall through to the generic intake form, which showed three
 // text fields and said nothing about progress at all.
-// The gauge is a ring rather than a row of ticks now, and it is SEGMENTED: one
-// arc per stage, the completed ones in the brand blue. Twelve discrete arcs is
-// what keeps it from reading as the goal tracker's cover, which is the same size
-// ring drawn as two continuous streams.
+// The gauge is the app's own speedometer widget: a single continuous 270° sweep
+// with the gap at the bottom, a recessed dial face, the value stacked in the
+// middle and the total sitting low inside the ring. The earlier version drew one
+// arc per stage, which is the goal tracker's language, not this one's.
 const TRACKER_STAGES = 12;
 const TRACKER_DONE = 7;
-// Arc geometry on a pathLength of 100, so a segment is stated as a percentage of
-// the ring: a slice per stage, minus the gap that separates it from the next.
-const TRACKER_SLICE = 100 / TRACKER_STAGES;
-const TRACKER_GAP = 2.4;
+// Arc geometry on a pathLength of 100: the dial covers three quarters of the
+// circle, and the value takes its share of that.
+const GAUGE_SWEEP = 75;
+const GAUGE_VALUE = (GAUGE_SWEEP * TRACKER_DONE) / TRACKER_STAGES;
 
 function CardProgressTracker() {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-4 bg-[var(--v69-card)] p-5">
-      <div className="relative flex items-center justify-center">
-        <svg viewBox="0 0 84 84" className="size-[186px] -rotate-90">
-          {Array.from({ length: TRACKER_STAGES }, (_, i) => (
-            <circle
-              key={i}
-              cx="42"
-              cy="42"
-              r="34"
-              fill="none"
-              strokeWidth="9"
-              strokeLinecap="round"
-              stroke={i < TRACKER_DONE ? "#7DA4FF" : INK_FAINT}
-              pathLength={100}
-              strokeDasharray={`${TRACKER_SLICE - TRACKER_GAP} ${
-                100 - (TRACKER_SLICE - TRACKER_GAP)
-              }`}
-              style={{ strokeDashoffset: -(i * TRACKER_SLICE) }}
-            />
-          ))}
+    <div className="flex h-full flex-col bg-[var(--v69-card)] p-5">
+      <div className="relative flex flex-1 items-center justify-center">
+        {/* Rotated 135° so the circle's 3-o'clock start point lands at the
+            bottom-left, where the sweep begins. The readout can't ride along, so
+            it sits in an upright overlay. */}
+        <svg viewBox="0 0 100 100" className="size-[208px] rotate-[135deg]">
+          {/* Dial face, drawn to the outer edge so the track sits on it rather
+              than on the card. */}
+          <circle cx="50" cy="50" r="46.5" fill="var(--v69-inner)" />
+          <circle
+            cx="50"
+            cy="50"
+            r="42"
+            fill="none"
+            stroke={INK_FAINT}
+            strokeWidth="9"
+            strokeLinecap="round"
+            pathLength={100}
+            strokeDasharray={`${GAUGE_SWEEP} ${100 - GAUGE_SWEEP}`}
+          />
+          <circle
+            cx="50"
+            cy="50"
+            r="42"
+            fill="none"
+            stroke="#7DA4FF"
+            strokeWidth="9"
+            strokeLinecap="round"
+            pathLength={100}
+            strokeDasharray={`${GAUGE_VALUE} ${100 - GAUGE_VALUE}`}
+          />
         </svg>
-        <div className="absolute flex flex-col items-center leading-none">
-          <span className="text-[34px] font-normal tracking-tight tabular-nums text-[var(--v69-ink)]">
+        {/* The readout is set to the dial, not to the card: the value sits above
+            the middle, its unit right under it, and the total low in the face
+            where the reference puts it. */}
+        <div className="absolute flex translate-y-[12px] flex-col items-center leading-none">
+          <span className="text-[52px] font-normal tracking-tight tabular-nums text-[var(--v69-ink)]">
             {TRACKER_DONE}
           </span>
-          <span className="mt-2 text-[11px] font-normal tabular-nums text-muted-foreground">
-            of {TRACKER_STAGES} stages
+          <span className="mt-2.5 text-[14px] font-normal text-muted-foreground">
+            stages
+          </span>
+          <span className="mt-9 text-[14px] font-normal tabular-nums text-[var(--v69-ink)]">
+            {TRACKER_STAGES}
+            <span className="text-muted-foreground"> total</span>
           </span>
         </div>
       </div>
-      {/* The record the ring is about, under it — the name used to sit in a
-          header row, which a centred gauge has no use for. */}
-      <span className="max-w-full truncate text-[13px] font-normal text-[var(--v69-ink)]">
-        Northwind Co.
-      </span>
     </div>
   );
 }
@@ -2178,75 +2223,34 @@ function CardMassMessenger() {
   );
 }
 
-// Internal ticketing — a queue widget: a hero open-count over a segmented
-// queue split by status. Monochrome radial gauge — the three states separate
-// by brightness (ink / mid / faint), not hue; total sits in the center.
+// Internal ticketing — the week as a field of tickets, one dot each, in the three
+// states the queue actually has: resolved in ink, in progress mid, still open
+// faint. It was a segmented ring reading the same split as arc lengths, which
+// made a queue of 37 things look like a percentage.
+const TICKETS_RESOLVED = 24;
+const TICKETS_IN_PROGRESS = 8;
+const TICKETS_OPEN = 5;
+const TICKET_COLS = 8;
+
 function CardTicketing() {
-  const R = 42;
-  // Rounded because the server and the client stringify the raw floats to
-  // different precision, which React reports as a hydration mismatch. Three
-  // decimals on a 100-unit viewBox is far below a pixel.
-  const round = (n: number) => Math.round(n * 1000) / 1000;
-  const pt = (deg: number, r = R): [number, number] => {
-    const a = (deg * Math.PI) / 180;
-    return [round(50 + r * Math.sin(a)), round(50 - r * Math.cos(a))];
-  };
-  const arc = (d1: number, d2: number) => {
-    const [x1, y1] = pt(d1);
-    const [x2, y2] = pt(d2);
-    return `M ${x1} ${y1} A ${R} ${R} 0 ${d2 - d1 > 180 ? 1 : 0} 1 ${x2} ${y2}`;
-  };
-  // Resolved 0–214°, In progress 218–304°, Open 308–356° (ticked, not solid).
-  const openTicks = Array.from({ length: 13 }, (_, i) => 308 + i * 4);
   return (
-    <div className="flex h-full flex-col items-center justify-center bg-[var(--v69-card)] p-4">
-      <div className="relative flex items-center justify-center">
-        <svg viewBox="0 0 100 100" className="size-[188px]" aria-hidden>
-          <circle
-            cx="50"
-            cy="50"
-            r={R}
-            fill="none"
-            strokeWidth="10"
-            style={{ stroke: ink(7) }}
-          />
-          <path
-            d={arc(0, 214)}
-            fill="none"
-            strokeWidth="10"
-            stroke="var(--v69-ink)"
-          />
-          <path
-            d={arc(218, 304)}
-            fill="none"
-            strokeWidth="10"
-            style={{ stroke: INK_MID }}
-          />
-          {openTicks.map((d) => {
-            const [x1, y1] = pt(d, R - 5);
-            const [x2, y2] = pt(d, R + 5);
-            return (
-              <line
-                key={d}
-                x1={x1}
-                y1={y1}
-                x2={x2}
-                y2={y2}
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                style={{ stroke: ink(45) }}
-              />
-            );
-          })}
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-[40px] font-normal leading-none tracking-tight tabular-nums text-[var(--v69-ink)]">
-            37
-          </span>
-          <span className="mt-1.5 text-[11px] font-normal text-muted-foreground">
-            this week
-          </span>
-        </div>
+    <div className="flex h-full flex-col justify-between bg-[var(--v69-card)] p-5">
+      <DotField
+        cols={TICKET_COLS}
+        bands={[
+          { count: TICKETS_RESOLVED, fill: "var(--v69-ink)" },
+          { count: TICKETS_IN_PROGRESS, fill: INK_MID },
+          { count: TICKETS_OPEN, fill: INK_FAINT },
+        ]}
+      />
+
+      <div className="flex items-end gap-2.5">
+        <span className="text-[52px] font-normal leading-[0.78] tracking-tight tabular-nums text-[var(--v69-ink)]">
+          {TICKETS_RESOLVED + TICKETS_IN_PROGRESS + TICKETS_OPEN}
+        </span>
+        <span className="mb-1.5">
+          <MockTag>this week</MockTag>
+        </span>
       </div>
     </div>
   );
@@ -2349,16 +2353,33 @@ function CardCommsApp() {
 // reads as a voice rather than as a symmetrical graphic.
 const ASSISTANT_WAVE = [12, 26, 42, 54, 36, 22, 13];
 
-// Internal AI assistant — one object, not a screen: a large recessed disc with
-// the listening waveform sunk into it and a single quiet caption. It used to be a
-// pill, a greeting, a small waveform and a prompt line stacked in a rounded
-// rectangle, which read as a miniature chat UI; the disc is the composition now
-// and the waveform is the only thing with weight in it. The carve is the time
-// tracker's watch face, so the two read as the same material.
+// Internal AI assistant — one object, not a screen: a large disc with the
+// listening waveform sunk into it. It used to be a pill, a greeting, a small
+// waveform and a prompt line stacked in a rounded rectangle, which read as a
+// miniature chat UI; the disc is the composition now and the waveform is the only
+// thing with weight in it. The carve is the time tracker's watch face, so the two
+// read as the same material.
+// The disc is lit rather than flat: a soft key light from the upper left, a glass
+// sheen across the top, two concentric ripples out from the middle, and a
+// recessed well the waveform sits in with its own halo. Every layer is a
+// theme-scoped pair — light works in white, dark in black, and neither borrows
+// the other's values.
+// Light gets the highlight only — the carve below it already darkens the lower
+// edge, and doubling that up turned the disc into a sphere.
+const DISC_LIGHT_KEY =
+  "radial-gradient(70% 70% at 32% 24%, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.1) 44%, rgba(255,255,255,0) 74%)";
+const DISC_DARK_KEY =
+  "radial-gradient(72% 72% at 30% 22%, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.025) 42%, rgba(255,255,255,0) 72%), radial-gradient(66% 66% at 74% 86%, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 64%)";
+// Ripples out from the well, fading as they go — the widest is barely there.
+const DISC_RIPPLES = [
+  { size: 60, light: 0.07, dark: 0.075 },
+  { size: 82, light: 0.045, dark: 0.05 },
+];
+
 function CardAIAssistant() {
   return (
     <div className="flex h-full items-center justify-center bg-[var(--v69-card)] p-4">
-      <div className="relative flex aspect-square h-full max-h-[220px] flex-col items-center justify-center gap-5 overflow-hidden rounded-full bg-[var(--v69-card)] [[data-theme=light]_&]:bg-[#EDEDE4] [[data-theme=dark]_&]:bg-[#1B1B1B] [[data-theme=dark]_.template-mock_&]:bg-[var(--v69-well)]">
+      <div className="relative flex aspect-square h-full max-h-[220px] flex-col items-center justify-center overflow-hidden rounded-full bg-[var(--v69-card)] [[data-theme=light]_&]:bg-[#EDEDE4] [[data-theme=dark]_&]:bg-[#1B1B1B] [[data-theme=dark]_.template-mock_&]:bg-[var(--v69-well)]">
         {/* Dark-only carve: a hairline highlight along the top edge, a darker
             lower edge, and a soft falloff between, so the disc reads as sunk into
             the card rather than as a flat cutout. */}
@@ -2381,6 +2402,55 @@ function CardAIAssistant() {
           }}
         />
 
+        {/* Key light and shadow, one pair per theme. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-full [[data-theme=dark]_&]:hidden"
+          style={{ background: DISC_LIGHT_KEY }}
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-full [[data-theme=light]_&]:hidden"
+          style={{ background: DISC_DARK_KEY }}
+        />
+
+        {/* Glass sheen: one blurred ellipse across the top of the disc, which is
+            what makes the surface read as covered rather than as raw material. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-[12%] top-[6%] h-[26%] rounded-[50%] bg-[linear-gradient(180deg,rgba(255,255,255,0.28),rgba(255,255,255,0))] blur-[8px] [[data-theme=dark]_&]:bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0))]"
+        />
+
+        {DISC_RIPPLES.map((r) => (
+          <span
+            key={r.size}
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,transparent_80%,rgba(16,24,40,var(--ripple-light))_92%,transparent_100%)] [[data-theme=dark]_&]:bg-[radial-gradient(closest-side,transparent_80%,rgba(255,255,255,var(--ripple-dark))_92%,transparent_100%)]"
+            style={
+              {
+                width: `${r.size}%`,
+                height: `${r.size}%`,
+                "--ripple-light": r.light,
+                "--ripple-dark": r.dark,
+              } as React.CSSProperties
+            }
+          />
+        ))}
+
+        {/* The well the waveform sits in — a shallow dish, not a second disc:
+            fill stays the disc's own value and only the inset edge describes it. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 size-[42%] -translate-x-1/2 -translate-y-1/2 rounded-full shadow-[inset_0_2px_4px_rgba(16,24,40,0.10),inset_0_-1px_0_rgba(255,255,255,0.9)] [[data-theme=dark]_&]:shadow-[inset_0_2px_5px_rgba(0,0,0,0.55),inset_0_-1px_0_rgba(255,255,255,0.06)]"
+        />
+
+        {/* Halo behind the bars, so the waveform sits in its own light instead of
+            on the surface. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/2 size-[54%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,0.5),rgba(255,255,255,0)_72%)] blur-[3px] [[data-theme=dark]_&]:bg-[radial-gradient(closest-side,rgba(255,255,255,0.12),rgba(255,255,255,0)_72%)]"
+        />
+
         {/* The one element with weight — full ink, centred, and the tallest thing
             on the card. */}
         <span className="relative flex h-[54px] items-center gap-[5px]">
@@ -2391,12 +2461,6 @@ function CardAIAssistant() {
               style={{ height: `${h}px` }}
             />
           ))}
-        </span>
-
-        {/* One caption, no chrome: the pill's own outline and fill were a second
-            surface competing with the disc. */}
-        <span className="relative text-[11px] font-normal text-muted-foreground">
-          Assembly AI
         </span>
       </div>
     </div>

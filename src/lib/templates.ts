@@ -1,12 +1,12 @@
 export interface Template {
   slug: string;
   /**
-   * The app id the product resolves this template by, e.g. "app-0548119d" — NOT
+   * The app id the product resolves this template by, e.g. "app-e070af55" — NOT
    * the slug, which is only this site's URL handle. Signup receives this as
    * `templateId`, so a wrong value silently starts the visitor on the wrong app.
-   * Optional because most templates have no id yet: where it's missing, the
-   * param is omitted rather than guessed. Contentful's "Template Id" field wins
-   * over anything set here.
+   * Optional because a handful of templates still have no app behind them: where
+   * it's missing, the param is omitted rather than guessed. Contentful's
+   * "Template Id" field wins over anything set here.
    */
   templateId?: string;
   title: string;
@@ -110,6 +110,7 @@ const BASE_TEMPLATES: Template[] = [
   // Onboarding
   {
     slug: "onboarding-wizard",
+    templateId: "app-b789d151",
     title: "Onboarding wizard",
     description: "Multi-step flow with saved progress",
     icon: "🪄",
@@ -121,6 +122,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "new-client-intake",
+    templateId: "app-2db3315f",
     title: "New client intake",
     description: "Scope, goals, budget, timeline",
     icon: "👤",
@@ -132,6 +134,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "document-collection",
+    templateId: "app-03b42204",
     title: "Document collector",
     description: "Requested docs with upload checklist",
     icon: "📂",
@@ -144,6 +147,7 @@ const BASE_TEMPLATES: Template[] = [
   // Trackers
   {
     slug: "client-project-tracker",
+    templateId: "app-2ccc13ce",
     title: "Project tracker",
     description: "Milestones and progress per engagement",
     icon: "✅",
@@ -155,6 +159,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "time-tracker",
+    templateId: "app-e7b9fd47",
     title: "Time tracker",
     description: "Log billable hours, roll-ups, exportable",
     icon: "⏱️",
@@ -167,6 +172,7 @@ const BASE_TEMPLATES: Template[] = [
   // Approvals
   {
     slug: "content-approval-flow",
+    templateId: "app-31720927",
     title: "Content approval flow",
     description: "Posts and campaigns with status history",
     icon: "✅",
@@ -180,6 +186,7 @@ const BASE_TEMPLATES: Template[] = [
   // Support
   {
     slug: "client-support-requests",
+    templateId: "app-76f90bd2",
     title: "Client help desk",
     description: "Categorized requests in a triage queue",
     icon: "📥",
@@ -192,6 +199,7 @@ const BASE_TEMPLATES: Template[] = [
   // Proposals
   {
     slug: "proposal-builder",
+    templateId: "app-40930443",
     title: "Proposal builder",
     description: "Branded proposals clients can e-sign",
     icon: "🧾",
@@ -205,6 +213,7 @@ const BASE_TEMPLATES: Template[] = [
   // AI assistants
   {
     slug: "client-ai-assistant",
+    templateId: "app-990e42c6",
     title: "Client AI assistant",
     description: "Answers client questions from your docs",
     icon: "🤖",
@@ -216,6 +225,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "voice-ai-integration",
+    templateId: "app-b84608d5",
     title: "Voice AI integration",
     description: "AI voice calls with status and transcripts",
     icon: "📞",
@@ -230,6 +240,7 @@ const BASE_TEMPLATES: Template[] = [
   // Community
   {
     slug: "client-discussion-forum",
+    templateId: "app-daffe7dd",
     title: "Client discussion forum",
     description: "Threaded topics clients can search",
     icon: "💬",
@@ -240,6 +251,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "internal-communications-app",
+    templateId: "app-1dda4757",
     title: "Internal communications app",
     description: "Announcements and team channels",
     icon: "📨",
@@ -252,6 +264,7 @@ const BASE_TEMPLATES: Template[] = [
   // Knowledge base
   {
     slug: "client-resource-library",
+    templateId: "app-96af46a6",
     title: "Client resource library",
     description: "Branded guides and resources for clients",
     icon: "📚",
@@ -262,6 +275,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "data-room",
+    templateId: "app-402dffba",
     title: "Data room",
     description: "Securely share sensitive documents",
     icon: "🔒",
@@ -274,6 +288,7 @@ const BASE_TEMPLATES: Template[] = [
   // ── From the Studio template tracker (copy generated from each name) ──────
   {
     slug: "progress-tracker",
+    templateId: "app-8d92d4c8",
     title: "Progress tracker",
     description: "Track records through stages",
     icon: "📊",
@@ -286,6 +301,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "client-todo-list",
+    templateId: "app-309153ef",
     title: "Client to-do list",
     description: "A clear checklist of next steps per client",
     icon: "☑️",
@@ -296,6 +312,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "case-status-page",
+    templateId: "app-0ccf0862",
     title: "Case status page",
     description: "A live status page for each client case",
     icon: "📋",
@@ -306,6 +323,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "retainer-usage-overview",
+    templateId: "app-1ee5fd2e",
     title: "Retainer usage overview",
     description: "Hours used against each client's retainer",
     icon: "⏳",
@@ -316,6 +334,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "conditional-forms",
+    templateId: "app-67adf3fa",
     title: "Conditional forms",
     description: "Smart forms that adapt to each answer",
     icon: "📜",
@@ -326,6 +345,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "client-calendar",
+    templateId: "app-b6fb2741",
     title: "Client calendar",
     description: "A shared calendar of key dates",
     icon: "🗓️",
@@ -337,6 +357,7 @@ const BASE_TEMPLATES: Template[] = [
   // ── Added from the app's own template picker ─────────────────────────────
   {
     slug: "mass-messenger",
+    templateId: "app-8b5af9a1",
     title: "Mass messenger",
     description: "One message, every client",
     icon: "📣",
@@ -347,6 +368,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "events-rsvps",
+    templateId: "app-5d08051f",
     title: "Events & RSVPs",
     description: "Invites, RSVPs, attendee lists",
     icon: "📅",
@@ -357,6 +379,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "design-approvals",
+    templateId: "app-ca411339",
     title: "Design approvals",
     description: "Creative sign-off, round by round",
     icon: "🎨",
@@ -367,10 +390,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "goal-tracker",
-    // The only template whose real app id exists so far (Contentful "Template
-    // Id"). Every other entry needs one filled in before its signup link can
-    // carry a templateId.
-    templateId: "app-0548119d",
+    templateId: "app-e070af55",
     title: "Goal tracking app",
     description: "Client goals with progress to target",
     icon: "🎯",
@@ -381,6 +401,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "internal-resource-library",
+    templateId: "app-9fcdabcb",
     title: "Internal resource library",
     description: "Playbooks and guides for your team",
     icon: "🗂️",
@@ -391,6 +412,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "jargon-quest",
+    templateId: "app-f33cf655",
     title: "Jargon quest",
     description: "Gamified glossary of your terms",
     icon: "🧩",
@@ -401,6 +423,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "block-builder-game",
+    templateId: "app-64a0b2a5",
     title: "Block builder game",
     description: "Drag-and-drop building game",
     icon: "🧱",
@@ -433,6 +456,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "markup-comments",
+    templateId: "app-84e48d32",
     title: "Markup & comments",
     description: "Comment directly on files",
     icon: "✍️",
@@ -443,6 +467,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "internal-ai-assistant",
+    templateId: "app-9e76d28d",
     title: "Internal AI assistant",
     description: "An assistant trained on your playbooks",
     icon: "🧠",
@@ -453,6 +478,7 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "service-request-intake",
+    templateId: "app-a687c85e",
     title: "Service request intake",
     description: "One front door for new work",
     icon: "🛠️",

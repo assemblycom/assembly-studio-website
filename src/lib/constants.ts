@@ -54,10 +54,10 @@ const MAX_URL_LENGTH = 2048;
 /** A picked template, in the shape signup expects to receive it. */
 export interface SignupTemplate {
   /**
-   * The app id signup resolves the template by, e.g. "app-0548119d". Optional:
-   * most templates have no id yet, and the slug is NOT a substitute — sending it
-   * gave signup an id it can't resolve. When it's missing the param is left out
-   * and only the display fields travel.
+   * The app id signup resolves the template by, e.g. "app-e070af55". Optional:
+   * a few templates still have no app behind them, and the slug is NOT a
+   * substitute — sending it gave signup an id it can't resolve. When it's missing
+   * the param is left out and only the display fields travel.
    */
   id?: string;
   name: string;
