@@ -234,8 +234,17 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
     onValueChange?.(v);
     if (valueProp === undefined) setInternalValue(v);
   };
-  // Drives the animated placeholder; freezes the moment the user types.
-  const typedExample = useAssemblyTypewriter(typewriter && !value);
+  // The prompt the picker is currently offering, shown in the box as ghost text
+  // while the pointer (or keyboard focus) rests on a menu item. Reading the menu
+  // as a list of inert ideas was the whole problem: previewing the insertion in
+  // the place it will land says "clicking this writes that" without a word of
+  // instruction. Only ever previewed into an empty box — a preview that painted
+  // over something already typed would read as data loss.
+  const [promptPreview, setPromptPreview] = useState<string | null>(null);
+  const previewing = !value ? promptPreview : null;
+  // Drives the animated placeholder; freezes the moment the user types, and
+  // yields to a preview so the two never animate over each other.
+  const typedExample = useAssemblyTypewriter(typewriter && !value && !previewing);
   const menuRef = useRef<HTMLDivElement>(null);
   const promptRef = useRef<HTMLDivElement>(null);
 
@@ -381,7 +390,13 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
   }, [menuOpen]);
 
   useEffect(() => {
-    if (!promptOpen) return;
+    // Whatever closes the menu — outside click, Escape, a pick — takes the
+    // preview with it, so the box never keeps offering a prompt that is no
+    // longer on screen.
+    if (!promptOpen) {
+      setPromptPreview(null);
+      return;
+    }
     const onDown = (e: MouseEvent) => {
       if (promptRef.current && !promptRef.current.contains(e.target as Node)) setPromptOpen(false);
     };
@@ -427,6 +442,9 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
       {promptOpen && (
         <div
           role="menu"
+          // One handler on the menu rather than per item: moving between items
+          // never flickers the box back to the placeholder in the gap between them.
+          onMouseLeave={() => setPromptPreview(null)}
           className={`absolute ${pickerAlign} ${pickerVert} z-40 max-h-[min(60vh,20rem)] w-[min(19rem,calc(100vw-6rem))] animate-menu-in overflow-y-auto overflow-x-hidden overscroll-contain rounded-2xl border p-1.5 shadow-[0_16px_40px_-20px_rgba(0,0,0,0.3)] ${menuSurfaceCls}`}
         >
           {promptEntries.map((entry) => (
@@ -434,8 +452,14 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
               key={entry.label}
               type="button"
               role="menuitem"
+              // Pointer and keyboard both preview: an item reached by Tab has to
+              // explain itself the same way a hovered one does.
+              onMouseEnter={() => setPromptPreview(entry.prompt)}
+              onFocus={() => setPromptPreview(entry.prompt)}
+              onBlur={() => setPromptPreview(null)}
               onClick={() => {
                 setValue(entry.prompt);
+                setPromptPreview(null);
                 setPromptOpen(false);
               }}
               className={`flex min-h-[42px] w-full items-center rounded-lg px-3 text-left text-sm leading-snug transition-colors ${menuItemCls}`}
@@ -485,16 +509,24 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
       <div className={`relative flex flex-col ${surfaceRadiusClass} ${splitFooter ? "p-2" : "p-4"} shadow-[0_1px_2px_rgba(0,0,0,0.04)] ${minHeightClass} ${surfaceClassName}`}>
         <div className={splitFooter ? `flex flex-1 flex-col ${cardCls}` : "contents"}>
         <div className="relative flex-1">
-          {/* Animated placeholder — static verb prefix + a typewritten example.
-              Only while empty; the native placeholder is suppressed in this mode. */}
-          {typewriter && !value && (
+          {/* The ghost layer: either the animated placeholder — static verb prefix
+              plus a typewritten example — or, while the picker is offering one, the
+              prompt that clicking would insert. Only while empty; the native
+              placeholder is suppressed whenever this layer is showing. The caret
+              belongs to the typewriter alone: on a preview it would claim the text
+              is already in the box. */}
+          {!value && (previewing || typewriter) && (
             <div
               aria-hidden
-              className={`pointer-events-none absolute inset-0 px-1 text-base leading-[1.5] ${dark ? "text-white/40" : "text-neutral-400"}`}
+              className={`pointer-events-none absolute inset-0 px-1 text-base leading-[1.5] transition-colors duration-150 ${dark ? "text-white/40" : "text-neutral-400"}`}
             >
-              {PH_PREFIX}
-              {typedExample}
-              <span className="ml-px inline-block w-px animate-pulse align-[-0.1em]">|</span>
+              {previewing ?? (
+                <>
+                  {PH_PREFIX}
+                  {typedExample}
+                  <span className="ml-px inline-block w-px animate-pulse align-[-0.1em]">|</span>
+                </>
+              )}
             </div>
           )}
           <textarea
@@ -515,7 +547,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
             rows={compact ? 2 : 3}
             maxLength={MAX_PROMPT_LENGTH}
             aria-label="Describe what to build"
-            placeholder={typewriter ? "" : "Describe the workflow you want to turn into an app…"}
+            placeholder={typewriter || previewing ? "" : "Describe the workflow you want to turn into an app…"}
             // Grows to fit the prompt up to MAX_TEXTAREA_H, then scrolls; the
             // mask fades whichever edge still hides text so nothing hard-clips.
             style={{

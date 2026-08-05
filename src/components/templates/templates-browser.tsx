@@ -305,10 +305,13 @@ export function TemplatesBrowser({ templates }: Props) {
         >
           {/* Selection reads as selection, not as a call to action: the filled
               chips are gone from the resting state, so the strip is a row of
-              quiet labels with the current one held on the muted surface behind a
-              hairline. The active chip used to take the foreground fill — the
-              same black pill the page's primary buttons wear — which made the
-              filter you already applied look like the thing to click. */}
+              quiet labels with the current one held on a wash of the foreground.
+              That wash is the site's own selected-state idiom — the nav and footer
+              segmented controls both mark the current option with
+              bg-foreground/[0.06–0.10] and no outline — so the strip stops being a
+              one-off. The active chip used to take the solid foreground fill, the
+              same black pill the primary buttons wear, which made the filter you
+              had already applied look like the thing to click next. */}
           {categories.map((cat) => {
             const active = cat === ALL ? selected === null : selected === cat;
             return (
@@ -320,7 +323,7 @@ export function TemplatesBrowser({ templates }: Props) {
                 onClick={() => selectCategory(cat)}
                 className={`type-caption inline-flex h-8 shrink-0 items-center whitespace-nowrap rounded-lg px-3 leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   active
-                    ? "bg-muted text-foreground ring-1 ring-inset ring-foreground/15"
+                    ? "bg-foreground/[0.10] text-foreground"
                     : "bg-transparent text-muted-foreground active:bg-foreground/[0.08] [@media(hover:hover)]:hover:bg-foreground/[0.05] [@media(hover:hover)]:hover:text-foreground"
                 }`}
               >

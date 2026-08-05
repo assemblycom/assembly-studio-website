@@ -298,7 +298,7 @@ export default async function CaseStudyPage({ params }: Props) {
 
               <a
                 href={APP_URL}
-                className="mt-14 block w-full max-w-xs rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background sm:inline-block sm:w-auto transition-opacity hover:opacity-90"
+                className="mt-14 block w-full rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background sm:inline-block sm:w-auto transition-opacity hover:opacity-90"
               >
                 Get started
               </a>
@@ -353,7 +353,7 @@ export default async function CaseStudyPage({ params }: Props) {
 
               <a
                 href={APP_URL}
-                className="mt-12 block w-full max-w-xs rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background sm:inline-block sm:w-auto transition-opacity hover:opacity-90"
+                className="mt-12 block w-full rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background sm:inline-block sm:w-auto transition-opacity hover:opacity-90"
               >
                 Get started
               </a>

@@ -2866,11 +2866,13 @@ function CardAIAssistant() {
 // card, and both the nodes and the SVG edges read from them, so an edge always
 // lands dead centre on the port it belongs to.
 const NODE_PORT_X = 42; // right edge of the question node
-const NODE_TARGET_X = 56; // left edge of the field nodes
-const NODE_ROWS = [
-  { y: 40, targetY: 31 }, // Business → the company field
-  { y: 55, targetY: 66 }, // Individual → the branch not taken
-];
+const NODE_TARGET_X = 56; // left edge of the field node
+// Only the taken branch is drawn. The unanswered one used to run to an empty
+// dashed node, which read as a placeholder someone had forgotten to fill in.
+// Dropped from 40/31 when the second branch came out: with one pair left, the
+// old coordinates hung the whole graph in the top-left corner of the card.
+const NODE_ROW_Y = 48; // the Business row, and the edge that leaves it
+const NODE_TARGET_Y = 39; // the field that row reveals
 // The canvas the nodes sit on: the reference's dot grid, at an alpha where it
 // reads as paper rather than as pattern. Literal rgba — the mock's dark skin
 // remaps --color-white.
@@ -2894,24 +2896,21 @@ function CardConditionalForms() {
         fill="none"
         aria-hidden
       >
-        {NODE_ROWS.map((row, i) => (
-          <path
-            key={row.y}
-            d={`M ${NODE_PORT_X} ${row.y} C ${NODE_PORT_X + 7} ${row.y} ${NODE_TARGET_X - 7} ${row.targetY} ${NODE_TARGET_X} ${row.targetY}`}
-            stroke={NODE_ACCENT}
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            opacity={i === 0 ? 0.9 : 0.28}
-            vectorEffect="non-scaling-stroke"
-          />
-        ))}
+        <path
+          d={`M ${NODE_PORT_X} ${NODE_ROW_Y} C ${NODE_PORT_X + 7} ${NODE_ROW_Y} ${NODE_TARGET_X - 7} ${NODE_TARGET_Y} ${NODE_TARGET_X} ${NODE_TARGET_Y}`}
+          stroke={NODE_ACCENT}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          opacity="0.9"
+          vectorEffect="non-scaling-stroke"
+        />
       </svg>
 
       {/* The question node: one row per answer, the chosen one carrying the ink
           and a lit port, the other left muted. */}
       <div
         className={`absolute left-[6%] flex w-[36%] flex-col ${NODE_SURFACE}`}
-        style={{ top: `${NODE_ROWS[0].y - 7.5}%`, height: "30%" }}
+        style={{ top: `${NODE_ROW_Y - 7.5}%`, height: "30%" }}
       >
         {["Business", "Individual"].map((answer, i) => (
           <span
@@ -2930,40 +2929,25 @@ function CardConditionalForms() {
       {/* The field the taken branch reveals. */}
       <div
         className={`absolute right-[6%] flex w-[38%] items-center truncate whitespace-nowrap px-2.5 text-[11px] font-normal text-[var(--v69-ink)] ${NODE_SURFACE}`}
-        style={{ top: `${NODE_ROWS[0].targetY - 7}%`, height: "14%" }}
+        style={{ top: `${NODE_TARGET_Y - 7}%`, height: "14%" }}
       >
         Oakwood
       </div>
 
-      {/* The branch not taken: a node with nothing in it yet, so the rule reads as
-          two outcomes without a second line of copy. */}
-      <div
-        className={`absolute right-[6%] w-[38%] rounded-xl border border-dashed border-[rgba(16,24,40,0.18)] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.18)]`}
-        style={{ top: `${NODE_ROWS[1].targetY - 7}%`, height: "14%" }}
-      />
-
-      {/* Ports last: they cap the edges where they meet each node. */}
-      {NODE_ROWS.map((row, i) => (
-        <span key={row.y}>
-          <span
-            className="absolute size-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-[var(--v69-card)]"
-            style={{
-              left: `${NODE_PORT_X}%`,
-              top: `${row.y}%`,
-              background: NODE_ACCENT,
-              opacity: i === 0 ? 1 : 0.35,
-            }}
-          />
-          <span
-            className="absolute size-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-[var(--v69-card)]"
-            style={{
-              left: `${NODE_TARGET_X}%`,
-              top: `${row.targetY}%`,
-              background: NODE_ACCENT,
-              opacity: i === 0 ? 1 : 0.35,
-            }}
-          />
-        </span>
+      {/* Ports last: they cap the edge where it meets each node. */}
+      {[
+        { x: NODE_PORT_X, y: NODE_ROW_Y },
+        { x: NODE_TARGET_X, y: NODE_TARGET_Y },
+      ].map((port) => (
+        <span
+          key={`${port.x}-${port.y}`}
+          className="absolute size-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-[var(--v69-card)]"
+          style={{
+            left: `${port.x}%`,
+            top: `${port.y}%`,
+            background: NODE_ACCENT,
+          }}
+        />
       ))}
     </div>
   );

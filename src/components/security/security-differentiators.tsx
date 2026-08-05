@@ -4,6 +4,10 @@ import { useState } from "react";
 
 export interface Differentiator {
   title: string;
+  // Used in place of `title` below md, where a title that wraps to two lines
+  // pushes the chevron out of line with the rest of the column. Optional: rows
+  // whose title already fits on one line don't need one.
+  shortTitle?: string;
   description: string;
 }
 
@@ -18,6 +22,10 @@ export interface Differentiator {
  * One DOM tree serves both: the drawer is forced open from md up and its control
  * stops taking pointer events there, rather than rendering the list twice.
  * Single-open, matching the FAQ — opening one row closes the other.
+ *
+ * On a phone the rows are also boxed: hairline rules alone left four tap targets
+ * floating in the page margin, and an outline around the set says "these are rows
+ * of one table" the way the rules can't at that width.
  */
 export function SecurityDifferentiators({
   items,
@@ -27,13 +35,13 @@ export function SecurityDifferentiators({
   const [openTitle, setOpenTitle] = useState<string | null>(null);
 
   return (
-    <ul>
+    <ul className="overflow-hidden rounded-xl border border-border md:rounded-none md:border-0">
       {items.map((card, i) => {
         const open = openTitle === card.title;
         return (
           <li
             key={card.title}
-            className="border-t border-border py-8 first:border-t-0 first:pt-0 md:grid md:grid-cols-[auto_1fr] md:gap-x-6"
+            className="border-t border-border px-4 py-4 first:border-t-0 md:grid md:grid-cols-[auto_1fr] md:gap-x-6 md:px-0 md:py-8 md:first:pt-0"
           >
             {/* Zero-padded, no brackets: the number is a position in a list,
                 and the brackets read as notation on top of it. */}
@@ -45,9 +53,14 @@ export function SecurityDifferentiators({
                 type="button"
                 onClick={() => setOpenTitle(open ? null : card.title)}
                 aria-expanded={open}
-                className="group flex w-full cursor-pointer items-center justify-between gap-6 text-left md:pointer-events-none md:cursor-default"
+                className="group flex w-full cursor-pointer items-center justify-between gap-4 text-left md:gap-6 md:pointer-events-none md:cursor-default"
               >
-                <h3 className="text-base font-medium">{card.title}</h3>
+                {/* One line, always: the short title below md, the full one from
+                    md up where the column is wide enough for it. */}
+                <h3 className="min-w-0 truncate text-base font-normal md:whitespace-normal">
+                  <span className="md:hidden">{card.shortTitle ?? card.title}</span>
+                  <span className="hidden md:inline">{card.title}</span>
+                </h3>
                 {/* Rests pointing right and swings down as the row opens, the
                     direction the copy arrives from, timed to the drawer so the
                     two read as one gesture. Same turn the FAQ rows use. */}

@@ -4,21 +4,26 @@ import { FAQ, type FAQEntry } from "@/components/home/faq";
 import { GridRails } from "@/components/ui/grid-lines";
 import { SecurityTestimonials } from "@/components/security/security-testimonials";
 import { SecurityCompliance } from "@/components/security/security-compliance";
-import { SecurityDifferentiators } from "@/components/security/security-differentiators";
+import {
+  SecurityDifferentiators,
+  type Differentiator,
+} from "@/components/security/security-differentiators";
 import { SecurityCta } from "@/components/security/security-cta";
 import { DEMO_URL, SIGNUP_URL, TRUST_CENTER_URL } from "@/lib/constants";
 import { PAGE_SEO, pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata(PAGE_SEO.security);
 
-const DIFFERENTIATORS: { title: string; description: string }[] = [
+const DIFFERENTIATORS: Differentiator[] = [
   {
     title: "Authentication, managed by the platform",
+    shortTitle: "Managed authentication",
     description:
       "Clients sign in with magic links, Google, or a password. You control which methods are allowed, and MFA can be enforced on top. Login is platform infrastructure, so no app generates its own.",
   },
   {
     title: "Access, defined by the Assembly CRM",
+    shortTitle: "Access from your CRM",
     description:
       "Who sees what is decided by Assembly's contact and company model. Clients see only their own data, and apps can be limited to specific clients.",
   },
@@ -29,6 +34,7 @@ const DIFFERENTIATORS: { title: string; description: string }[] = [
   },
   {
     title: "Secrets are handled securely",
+    shortTitle: "Secrets handled securely",
     description:
       "When an app needs a third-party service, you provide the key through a secure form and the platform stores it. Credentials are injected at runtime, never hardcoded into what the AI generates.",
   },
