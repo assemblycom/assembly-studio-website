@@ -309,7 +309,6 @@ export function StudioNav({
   const menuInk = darkTop ? "text-white" : "text-foreground";
   const menuCta = darkTop ? "bg-white text-neutral-900" : "bg-foreground text-background";
   const menuDemo = darkTop ? "border-white/20 text-white" : "border-foreground/20 text-foreground";
-  const menuLogoInvert = darkTop ? "brightness-0 invert" : "";
   // The selected segment of the in-menu Appearance switch — a soft fill that
   // reads on either menu ground, mirroring the desktop toggle's knob.
   const menuSegActive = darkTop ? "bg-white/10 text-white" : "bg-foreground/[0.06] text-foreground";
@@ -349,19 +348,30 @@ export function StudioNav({
       {/* Mobile header — mirrors the desktop nav: transparent with light
           contents over the dark hero, settling into the same dark glass pill on
           scroll. Logo on the left, grid menu button on the right. */}
-      {/* `invisible` rather than unmounted while the menu is open: the overlay
-          covers this bar anyway, and leaving a backdrop-filter layer painting
-          underneath a fixed overlay is a reliable way to get a flicker on iOS.
-          Keeping it in the DOM preserves the layout and the trigger we owe
-          focus back to. */}
-      <header className={`${position} z-50 transition-colors ${ease} lg:hidden ${mobileMenuOpen ? "invisible" : ""}`}>
+      {/* This bar stays MOUNTED AND VISIBLE while the menu is open, and rises
+          above the overlay, so its logo is the only logo: the menu row is pixel-
+          aligned to this one and used to redraw the same mark itself, which meant
+          every open and close swapped one img element for another and the mark
+          visibly blinked. Only the parts the menu replaces are hidden — the
+          backdrop-filter layer (painting one under a fixed overlay flickers on
+          iOS) and the trigger, whose place the close button takes.
+          pointer-events pass through to the menu underneath; only the logo
+          itself stays tappable. */}
+      <header className={`${position} transition-colors ${ease} lg:hidden ${mobileMenuOpen ? "pointer-events-none z-[70]" : "z-50"}`}>
         <div
           aria-hidden
-          className={`pointer-events-none absolute inset-x-0 top-0 h-[135%] transition-opacity ${ease} ${scrolled ? "opacity-100" : "opacity-0"}`}
+          className={`pointer-events-none absolute inset-x-0 top-0 h-[135%] transition-opacity ${ease} ${scrolled ? "opacity-100" : "opacity-0"} ${mobileMenuOpen ? "invisible" : ""}`}
           style={navBlurStyle}
         />
         <div className={`relative z-10 flex items-center justify-between px-5 transition-[height] ${ease} ${scrolled ? "h-12" : "h-14"}`}>
-          <Link href="/" onClick={onLogoClick} className="flex items-center">
+          <Link
+            href="/"
+            onClick={(e) => {
+              if (mobileMenuOpen) closeMenu();
+              onLogoClick(e);
+            }}
+            className="pointer-events-auto flex items-center"
+          >
             {logoMark}
           </Link>
           {/* The minimal bar carries nothing on mobile: at 375px the full-width
@@ -375,7 +385,7 @@ export function StudioNav({
             aria-label="Open menu"
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-menu"
-            className={`flex size-9 items-center justify-center transition-[color,opacity] ${ease} active:opacity-60 ${lightContent ? "text-white" : "text-foreground"}`}
+            className={`flex size-9 items-center justify-center transition-[color,opacity] ${ease} active:opacity-60 ${lightContent ? "text-white" : "text-foreground"} ${mobileMenuOpen ? "invisible" : ""}`}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <circle cx="5" cy="5" r="1.6" />
@@ -523,27 +533,10 @@ export function StudioNav({
               content box to 55px and lifted both glyphs half a pixel against
               the header they're meant to replace. */}
           <div className={`flex shrink-0 items-center justify-between px-5 ${scrolled ? "h-12" : "h-14"}`}>
-            <Link
-              href="/"
-              onClick={(e) => {
-                closeMenu();
-                onLogoClick(e);
-              }}
-              className="flex items-center"
-            >
-              {/* eager, not lazy: this mounts already on screen, replacing the
-                  header's copy of the same mark. Left to lazy-load it defers a
-                  frame through the observer/decode path before first paint, and
-                  the logo visibly blinks on every open and close. */}
-              <Image
-                src="/images/logo-mark.svg"
-                alt="Assembly Studio"
-                width={22}
-                height={22}
-                loading="eager"
-                className={menuLogoInvert}
-              />
-            </Link>
+            {/* No logo here — the header's own one shows through from above (see
+                the header comment). This just reserves its 22px so the close
+                button lands exactly where the trigger was. */}
+            <div aria-hidden className="w-[22px]" />
             <div className="flex items-center gap-4">
               <button
                 // detail === 0 means the click came from Enter/Space rather
