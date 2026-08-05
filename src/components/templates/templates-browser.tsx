@@ -59,17 +59,32 @@ function ScrollArrow({
 // Masking the scroller fades the chip itself, pill and text together, to nothing
 // before it ever reaches that line: there is no edge left to see. Only the side
 // that actually has more content is masked, so a row that fits is never touched.
-const FADE_PX = 56;
-
+// The ramp is set in CSS vars on the scroller so it can differ where the arrows
+// exist: --chip-fade-start holds the mask fully transparent for that distance
+// before it begins ramping to opaque at --chip-fade-end. On a hover device the
+// hold clears the arrow's own 32px footprint, so a chip never shows through from
+// behind the button — a single ramp from 0 left it ~57% opaque at the arrow's
+// edge, and the label read through it.
 function edgeFade(left: boolean, right: boolean) {
   if (!left && !right) return undefined;
-  const stops = [
-    left ? "transparent 0px" : "#000 0px",
-    `#000 ${FADE_PX}px`,
-    `#000 calc(100% - ${right ? FADE_PX : 0}px)`,
-    right ? "transparent 100%" : "#000 100%",
-  ].join(",");
-  const image = `linear-gradient(to right,${stops})`;
+  const start = "var(--chip-fade-start)";
+  const end = "var(--chip-fade-end)";
+  const stops: string[] = [];
+  if (left) {
+    stops.push("transparent 0px", `transparent ${start}`, `#000 ${end}`);
+  } else {
+    stops.push("#000 0px");
+  }
+  if (right) {
+    stops.push(
+      `#000 calc(100% - ${end})`,
+      `transparent calc(100% - ${start})`,
+      "transparent 100%",
+    );
+  } else {
+    stops.push("#000 100%");
+  }
+  const image = `linear-gradient(to right,${stops.join(",")})`;
   return { maskImage: image, WebkitMaskImage: image };
 }
 
@@ -275,7 +290,7 @@ export function TemplatesBrowser({ templates }: Props) {
           role="group"
           aria-label="Filter templates by category"
           style={edgeFade(canScroll.left, canScroll.right)}
-          className="flex flex-nowrap items-center gap-2 overflow-x-auto scroll-pl-12 scroll-pr-12 py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex flex-nowrap items-center gap-2 overflow-x-auto scroll-pl-12 scroll-pr-12 py-0.5 [--chip-fade-end:56px] [--chip-fade-start:0px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [@media(hover:hover)]:[--chip-fade-end:104px] [@media(hover:hover)]:[--chip-fade-start:44px]"
         >
           {categories.map((cat) => {
             const active = cat === ALL ? selected === null : selected === cat;
