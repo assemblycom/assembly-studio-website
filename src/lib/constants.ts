@@ -7,9 +7,10 @@ export const SITE_NAME = "Assembly Studio";
 export const INVALID_EMAIL_ERROR =
   "Enter a complete email address, like jane@company.com.";
 
-// Canonical host for metadata, sitemap, and robots. Currently the Vercel host;
-// on cutover to studio.assembly.com, change this one line.
-export const SITE_URL = "https://assembly-studio-website.vercel.app";
+// Canonical host for metadata, sitemap, and robots. The Vercel host still
+// serves the site and always will; this is the address we want indexed and
+// linked, so it names the domain rather than the deployment.
+export const SITE_URL = "https://studio.assembly.com";
 
 export interface NavLink {
   label: string;
