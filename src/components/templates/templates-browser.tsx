@@ -303,6 +303,12 @@ export function TemplatesBrowser({ templates }: Props) {
           style={edgeFade(canScroll.left, canScroll.right)}
           className="flex flex-nowrap items-center gap-2 overflow-x-auto scroll-pl-12 scroll-pr-12 py-0.5 [--chip-fade-end:56px] [--chip-fade-start:0px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [@media(hover:hover)]:[--chip-fade-end:104px] [@media(hover:hover)]:[--chip-fade-start:44px]"
         >
+          {/* Selection reads as selection, not as a call to action: the filled
+              chips are gone from the resting state, so the strip is a row of
+              quiet labels with the current one held on the muted surface behind a
+              hairline. The active chip used to take the foreground fill — the
+              same black pill the page's primary buttons wear — which made the
+              filter you already applied look like the thing to click. */}
           {categories.map((cat) => {
             const active = cat === ALL ? selected === null : selected === cat;
             return (
@@ -314,8 +320,8 @@ export function TemplatesBrowser({ templates }: Props) {
                 onClick={() => selectCategory(cat)}
                 className={`type-caption inline-flex h-8 shrink-0 items-center whitespace-nowrap rounded-lg px-3 leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   active
-                    ? "bg-foreground text-background"
-                    : "bg-muted text-foreground active:bg-foreground/15 [@media(hover:hover)]:hover:bg-foreground/10"
+                    ? "bg-muted text-foreground ring-1 ring-inset ring-foreground/15"
+                    : "bg-transparent text-muted-foreground active:bg-foreground/[0.08] [@media(hover:hover)]:hover:bg-foreground/[0.05] [@media(hover:hover)]:hover:text-foreground"
                 }`}
               >
                 {cat}

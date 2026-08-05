@@ -947,42 +947,34 @@ function CardDocuments() {
   );
 }
 
-// PDF to digital intake — a source PDF chip that flows into a guided web form;
-// the fields type in and a signature line draws itself on hover.
+// The PDF file mark she supplied: a filled document with the PDF letterforms cut
+// out of its foot. Filled rather than stroked, which is what gives the tile the
+// weight of an app icon.
+const PDF_GLYPH_PATH =
+  "M6.875 1.875H2.5C2.15625 1.875 1.875 2.15625 1.875 2.5V17.5C1.875 17.8438 2.15625 18.125 2.5 18.125H5.625V20H2.5C1.12109 20 0 18.8789 0 17.5V2.5C0 1.12109 1.12109 0 2.5 0H7.71484C8.37891 0 9.01562 0.261719 9.48437 0.730469L14.2695 5.51953C14.7383 5.98828 15 6.625 15 7.28906V13.1289H13.125V8.12891H9.6875C8.13281 8.12891 6.875 6.87109 6.875 5.31641V1.87891V1.875ZM12.3477 6.25L8.75 2.65234V5.3125C8.75 5.83203 9.16797 6.25 9.6875 6.25H12.3477ZM8.125 14.8438H9.375C10.668 14.8438 11.7188 15.8945 11.7188 17.1875C11.7188 18.4805 10.668 19.5312 9.375 19.5312H8.90625V20.625C8.90625 21.0547 8.55469 21.4062 8.125 21.4062C7.69531 21.4062 7.34375 21.0547 7.34375 20.625V15.625C7.34375 15.1953 7.69531 14.8438 8.125 14.8438ZM9.375 17.9688C9.80469 17.9688 10.1562 17.6172 10.1562 17.1875C10.1562 16.7578 9.80469 16.4062 9.375 16.4062H8.90625V17.9688H9.375ZM13.125 14.8438H14.375C15.4961 14.8438 16.4062 15.7539 16.4062 16.875V19.375C16.4062 20.4961 15.4961 21.4062 14.375 21.4062H13.125C12.6953 21.4062 12.3438 21.0547 12.3438 20.625V15.625C12.3438 15.1953 12.6953 14.8438 13.125 14.8438ZM14.375 19.8438C14.6328 19.8438 14.8438 19.6328 14.8438 19.375V16.875C14.8438 16.6172 14.6328 16.4062 14.375 16.4062H13.9062V19.8438H14.375ZM17.3438 15.625C17.3438 15.1953 17.6953 14.8438 18.125 14.8438H20C20.4297 14.8438 20.7812 15.1953 20.7812 15.625C20.7812 16.0547 20.4297 16.4062 20 16.4062H18.9062V17.3438H20C20.4297 17.3438 20.7812 17.6953 20.7812 18.125C20.7812 18.5547 20.4297 18.9062 20 18.9062H18.9062V20.625C18.9062 21.0547 18.5547 21.4062 18.125 21.4062C17.6953 21.4062 17.3438 21.0547 17.3438 20.625V15.625Z";
+
+// The tile the glyph sits in: a squircle app-icon block with a flat face and a
+// hairline edge — no bevel, no drop — so it reads as an icon rather than as a
+// raised object.
+const PDF_TILE =
+  "flex size-[86px] shrink-0 items-center justify-center rounded-[24px] bg-[#FFFFFF] [[data-theme=dark]_&]:bg-[#2F2F2F] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.08)] ring-1 ring-[rgba(16,24,40,0.07)]";
+
+// PDF to digital intake — the source document as a single app-icon block in
+// Assembly blue. The lime form tile that used to sit beside it made the card read
+// as two apps rather than as one file about to become something else.
 function CardPdf() {
   return (
-    <div className="flex h-full flex-col justify-center gap-2.5 bg-[var(--v69-card)] p-4">
-      {/* The static PDF being converted */}
-      <div
-        className={`flex items-center gap-2.5 rounded-xl bg-[var(--v69-well)] p-2.5 ${MOCK_OUTLINE}`}
-      >
-        <span
-          className={`flex size-8 items-center justify-center rounded-md bg-[var(--v69-card)] ${MOCK_OUTLINE}`}
+    <div className="flex h-full items-center justify-center bg-[var(--v69-card)] p-5">
+      <span className={PDF_TILE}>
+        <svg
+          viewBox="0 0 21 22"
+          className="size-11 text-[#7DA4FF]"
+          fill="currentColor"
+          aria-hidden
         >
-          <svg
-            viewBox="0 0 24 24"
-            className="size-4 text-[var(--v69-ink)]"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            aria-hidden
-          >
-            <path
-              d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"
-              strokeLinejoin="round"
-            />
-            <path d="M14 3v5h5" strokeLinejoin="round" />
-          </svg>
-        </span>
-        <div className="min-w-0">
-          <div className="truncate text-[11px] font-normal text-[var(--v69-ink)]">
-            Intake form.pdf
-          </div>
-          <div className="text-[9px] font-normal text-muted-foreground">
-            Scanned &middot; 3 pages
-          </div>
-        </div>
-      </div>
+          <path d={PDF_GLYPH_PATH} />
+        </svg>
+      </span>
     </div>
   );
 }
@@ -1097,73 +1089,69 @@ function DotField({
   );
 }
 
-// The unit a hero number is measured against, set as a tag rather than as a run
-// of prose next to it: mono, so the figure inside it lines up with the number it
-// qualifies.
-function MockTag({ children }: { children: React.ReactNode }) {
-  return (
-    <span
-      className="rounded-sm bg-[var(--v69-well)] px-1.5 py-[5px] text-[11px] leading-none tabular-nums text-muted-foreground shadow-[inset_0_0_0_1px_rgba(16,24,40,0.05)] [[data-theme=dark]_&]:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]"
-      style={{ fontFamily: MONO }}
-    >
-      {children}
-    </span>
-  );
-}
-
 // Retainer usage overview — the month as a spectrum: one bar per logged session,
 // so the shape says when the work actually happened, not just how much of the
 // retainer is gone. A dot per hour counted the total but flattened the month into
 // one undifferentiated block.
-// Bar heights as a percentage of the plot. Weeks of eight, and the third one is
-// where most of this retainer went.
+// Bar heights as a percentage of the plot. Five sessions a week rather than
+// eight: at eight the bars came out three pixels wide and the month read as a
+// sparkline, where the point of the card is the shape of the month. The third
+// week is where most of this retainer went.
 const RETAINER_WEEKS = [
-  [18, 12, 22, 14, 10, 16, 12, 20],
-  [14, 26, 18, 12, 30, 16, 10, 22],
-  [46, 72, 58, 100, 64, 40, 86, 52],
-  [24, 18, 30, 14, 22, 12, 16, 10],
+  [16, 24, 13, 20, 11],
+  [22, 14, 30, 17, 26],
+  [58, 84, 100, 62, 90],
+  [26, 17, 31, 15, 21],
 ];
 // The busiest week carries the accent; the rest of the month stays neutral, so
 // the spike is the thing you see first.
 const RETAINER_PEAK_WEEK = 2;
+// The accent bars are filled with the send-badge's own blue ramp — full-strength
+// at the cap falling to the deeper step at the baseline. The depth is in the fill
+// and nothing else: a bloom around the lit week read as a light source on a card
+// that has none.
+const RETAINER_PEAK_FILL = "linear-gradient(180deg,#9CBAFF 0%,#7DA4FF 45%,#6A92F2 100%)";
 
 function CardRetainer() {
   return (
-    <div className="flex h-full flex-col justify-between bg-[var(--v69-card)] p-5">
+    // The figure at the head with the month as a band along the foot, after the
+    // reference: the two used to sit at opposite edges with the bars stranded in
+    // the middle, which left a void through the centre of the card and nothing
+    // holding the number and the shape together.
+    <div className="flex h-full flex-col justify-between bg-[var(--v69-card)] px-5 pb-5 pt-5">
+      <span className="text-[52px] font-normal leading-[0.78] tracking-tight tabular-nums text-[var(--v69-ink)]">
+        33.5
+      </span>
       {/* Bars sit on a shared baseline with a faint full-height tick between the
-          weeks — the ticks are what turn a row of bars into a calendar. */}
-      <div className="flex h-[108px] items-end gap-[7px]">
-        {RETAINER_WEEKS.map((week, w) => (
-          <div key={w} className="flex h-full flex-1 items-end gap-[3px]">
-            {w > 0 && (
-              <span
-                aria-hidden
-                className="mr-[4px] h-full w-px shrink-0"
-                style={{ background: ink(10) }}
-              />
-            )}
-            {week.map((h, i) => (
-              <span
-                key={i}
-                className="min-w-[3px] flex-1 rounded-full"
-                style={{
-                  height: `${h}%`,
-                  background:
-                    w === RETAINER_PEAK_WEEK ? "#7DA4FF" : INK_MID,
-                }}
-              />
-            ))}
-          </div>
-        ))}
-      </div>
-
-      <div className="flex items-end gap-2.5">
-        <span className="text-[52px] font-normal leading-[0.78] tracking-tight tabular-nums text-[var(--v69-ink)]">
-          33.5
-        </span>
-        <span className="mb-1.5">
-          <MockTag>40h</MockTag>
-        </span>
+          weeks — the ticks are what turn a row of bars into a calendar. The plot
+          is a third taller than it was and runs further past the card's padding on
+          both sides, so it carries the card instead of hanging under the figure;
+          the card's own gutters are untouched. */}
+      <div className="-mx-3 flex h-[148px] items-end gap-[9px]">
+        {RETAINER_WEEKS.map((week, w) => {
+          const peak = w === RETAINER_PEAK_WEEK;
+          return (
+            <div key={w} className="flex h-full flex-1 items-end gap-[5px]">
+              {w > 0 && (
+                <span
+                  aria-hidden
+                  className="mr-[5px] h-full w-px shrink-0"
+                  style={{ background: ink(10) }}
+                />
+              )}
+              {week.map((h, i) => (
+                <span
+                  key={i}
+                  className="min-w-[6px] flex-1 rounded-[3px]"
+                  style={{
+                    height: `${h}%`,
+                    background: peak ? RETAINER_PEAK_FILL : INK_MID,
+                  }}
+                />
+              ))}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -1555,10 +1543,10 @@ function CardBooking() {
             {/* Dark puts the card's one colour on its one action: the brand lime,
                 with the arrow on the dark ground, so send reads as a control
                 rather than a third grey surface. It also gets the only elevation on
-                the card — a short drop, a held-in top highlight, and a low glow in
-                its own hue, which is what makes it read as pressable.
+                the card — a short drop and a held-in top highlight, which is what
+                makes it read as pressable.
                 Squarish rather than round, matching the markup composer's send. */}
-            <span className="flex size-7 items-center justify-center rounded-[9px] bg-[var(--v69-ink)] [[data-theme=dark]_&]:bg-[#D9ED92] [[data-theme=dark]_&]:shadow-[0_1px_2px_rgba(0,0,0,0.5),0_4px_14px_-4px_rgba(217,237,146,0.35),inset_0_1px_0_rgba(255,255,255,0.55)]">
+            <span className="flex size-7 items-center justify-center rounded-[9px] bg-[var(--v69-ink)] [[data-theme=dark]_&]:bg-[#D9ED92] [[data-theme=dark]_&]:shadow-[0_1px_2px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.55)]">
               <svg
                 viewBox="0 0 24 24"
                 className={`size-4 ${ON_INK} [[data-theme=dark]_&]:text-[#1B1B1B]`}
@@ -1732,7 +1720,7 @@ function CardCaseStatus() {
           className="pointer-events-none absolute inset-0 hidden rounded-2xl [[data-theme=light]_.template-mock_&]:block"
           style={{
             boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.2), inset 0 0 0 1px rgba(16,24,40,0.055), inset 0 9px 14px -11px rgba(16,24,40,0.22), inset 0 -10px 16px -12px rgba(16,24,40,0.26)",
+              "inset 0 1px 0 rgba(255,255,255,0.2), inset 0 0 0 1px rgba(16,24,40,0.035), inset 0 10px 16px -13px rgba(16,24,40,0.11), inset 0 -11px 18px -14px rgba(16,24,40,0.13)",
           }}
         />
       </div>
@@ -1949,9 +1937,10 @@ function CardTodo() {
     { title: "Send recap", time: "6:30 – 7:00 pm" },
   ];
   return (
-    // The day caption is gone and the panel hugs its tasks, so the list sits
-    // centred in the card rather than hanging from the top.
-    <div className="flex h-full flex-col justify-center bg-[var(--v69-well)] p-3 [[data-theme=light]_&]:bg-[var(--v69-card)]">
+    // Narrower side gutters than the rest of the card's padding: the panel used to
+    // run to within a hair of the card's edge, which left the rows floating in more
+    // width than three short titles need.
+    <div className="flex h-full flex-col justify-center bg-[var(--v69-well)] px-5 py-3 [[data-theme=light]_&]:bg-[var(--v69-card)]">
       {/* The panel has to be a step *up* from the ground in both skins. Light's
           --v69-card is the same F5F5F0 the outer ground uses there, so it needs
           its own near-white fill; dark lifts by a white wash, which lands the
@@ -1959,17 +1948,44 @@ function CardTodo() {
           hard-coding a value per context. The wash is literal rgba: the dark mock
           skin flips --color-white to near-black, so bg-white/x was darkening the
           panel to within a level of the ground and the two merged. */}
-      <div className="flex flex-col overflow-hidden rounded-2xl bg-[var(--v69-card)] p-3.5 [[data-theme=light]_&]:bg-[#FCFCF8] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.08)]">
-        {/* Reads as a tag rather than a heading: the mono caps treatment the
-            gallery's own category chips use, on a wash of the card's ink. */}
-        <span className="self-start rounded-md bg-[var(--v69-ink)]/[0.07] px-1.5 py-[3px] font-mono text-[10px] uppercase leading-none tracking-wide text-muted-foreground">
-          To do
-        </span>
-        <div className="-mx-3.5 my-3 h-px bg-black/[0.06] [[data-theme=dark]_&]:bg-white/[0.1]" />
-        <div className="flex flex-col gap-4">
+      <div className="flex flex-col overflow-hidden rounded-2xl bg-[var(--v69-card)] [[data-theme=light]_&]:bg-[#FCFCF8] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.08)]">
+        {/* A filled bar across the head of the panel rather than a tag floating
+            above a rule: it takes a lighter step than the panel itself in both
+            themes, so the list reads as content held under a header. Its fill and
+            the hairline under it are literal rgba — the mock's dark skin remaps
+            --color-white, so white/x would go dark here. */}
+        <div className="flex items-center px-3.5 py-2.5 [[data-theme=light]_&]:bg-[#FFFFFF] [[data-theme=light]_&]:shadow-[inset_0_-1px_0_rgba(16,24,40,0.06)] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.10)] [[data-theme=dark]_&]:shadow-[inset_0_-1px_0_rgba(255,255,255,0.10)]">
+          <span className="text-[11px] font-normal leading-none text-muted-foreground">
+            To do
+          </span>
+        </div>
+        <div className="flex flex-col gap-4 p-3.5">
           {tasks.map((t) => (
             <div key={t.title} className="flex items-center gap-3">
-              <div className="size-9 shrink-0 rounded-lg bg-[var(--v69-well-2)]" />
+              {/* The thumbnails carry the image mark the other galleries use, so
+                  an empty square reads as a picture yet to load rather than as a
+                  blank swatch. */}
+              {/* Light only: the shared well-2 step is the heaviest thing on a
+                  near-white panel, so the three squares read as grey weight
+                  rather than as placeholders. Dark is untouched. */}
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--v69-well-2)] [[data-theme=light]_&]:bg-[#EAEAE2]">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="size-[18px] text-[var(--v69-ink)]/30"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  aria-hidden
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="3" />
+                  <circle cx="8.5" cy="8.5" r="1.6" />
+                  <path
+                    d="M21 14l-4.5-4.5L6 20"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </div>
               <div className="min-w-0 flex-1">
                 <div className="truncate text-[13px] font-normal leading-tight text-[var(--v69-ink)]">
                   {t.title}
@@ -2209,7 +2225,9 @@ function CardDeliverable({
   heading?: string;
   label?: string;
   value?: string;
-  delta?: string;
+  // null drops the pill entirely — the resource library counts guides read, which
+  // has no week-on-week delta worth showing.
+  delta?: string | null;
 } = {}) {
   return (
     <div className="flex h-full flex-col bg-[var(--v69-card)] p-3">
@@ -2218,12 +2236,18 @@ function CardDeliverable({
           {heading}
         </span>
       </div>
-      {/* Dark lifts the panel and everything on it. The well token it shares with
-          light is DARKER than the card face in dark, so the panel sank into the
-          card and the bloom and delta pill went with it — all three now step up
-          from the face instead of down. */}
-      <div className="relative flex flex-1 flex-col justify-end overflow-hidden rounded-2xl bg-[var(--v69-well)] p-3.5 [[data-theme=light]_&]:ring-1 [[data-theme=light]_&]:ring-black/[0.06] [[data-theme=dark]_&]:bg-[#323232]">
-        <span className="pointer-events-none absolute -bottom-4 -right-4 size-20 rounded-full bg-[var(--v69-well-2)] blur-xl [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.06)]" />
+      {/* The panel runs the shared brand wash — the same lime-into-periwinkle ramp
+          the client-calendar tile is built on — in both themes, so the two covers
+          read as the same material. The tokens the panel's contents draw from are
+          pinned: the caption in both themes, since the shared muted grey is a
+          mid-tone and so is the periwinkle it sits on, and ink, card and well in
+          dark, where near-white type has nothing left to hold on a colour. The
+          neutral bloom that used to sit in the bottom corner is gone with the flat
+          fill it was there to lift; over a ramp it read as a smudge. */}
+      <div
+        className="relative flex flex-1 flex-col justify-end overflow-hidden rounded-2xl bg-[image:var(--v69-panel-wash)] p-3.5 [--muted-foreground:#3F444C] [[data-theme=light]_&]:ring-1 [[data-theme=light]_&]:ring-black/[0.06] [[data-theme=dark]_&]:[--v69-card:#F7F7F2] [[data-theme=dark]_&]:[--v69-ink:#262626] [[data-theme=dark]_&]:[--v69-well:#F7F7F2]"
+        style={{ "--v69-panel-wash": brandWash(0) } as React.CSSProperties}
+      >
         <span className="absolute right-3 top-3 flex size-7 items-center justify-center rounded-full bg-[var(--v69-ink)] text-[var(--v69-well)]">
           <svg
             viewBox="0 0 16 16"
@@ -2243,9 +2267,11 @@ function CardDeliverable({
           <span className="text-[34px] font-normal leading-none tracking-tight tabular-nums text-[var(--v69-ink)]">
             {value}
           </span>
-          <span className="mb-1 rounded-full bg-[var(--v69-card)] px-2 py-0.5 text-[11px] font-normal text-[var(--v69-ink)] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.12)]">
-            {delta}
-          </span>
+          {delta ? (
+            <span className="mb-1 rounded-full bg-[var(--v69-card)] px-2 py-0.5 text-[11px] font-normal text-[var(--v69-ink)]">
+              {delta}
+            </span>
+          ) : null}
         </div>
       </div>
     </div>
@@ -2291,7 +2317,10 @@ function CardDataRoom() {
       // bevel around the edge so each one reads as sculpted into the face. The
       // labels and figures are children, so the bevel passes under them and they
       // stay perfectly flat. Light is untouched.
-      className="flex h-full flex-col bg-[#D9ED92] p-3.5 [--v69-card:color-mix(in_srgb,#ffffff_60%,#D9ED92)] [--v69-inner:color-mix(in_srgb,#ffffff_60%,#D9ED92)] [&_[data-slot=engagement-bar]]:border-0 [[data-theme=dark]_.template-mock_&_[data-slot=engagement-bar]]:border-0 [[data-theme=dark]_&]:[--muted-foreground:#6b7079] [[data-theme=dark]_&]:[--v69-ink:#262626] [[data-theme=dark]_&_[data-slot=engagement-bar]]:shadow-[inset_0_1px_0_rgba(255,255,255,0.8),inset_1px_0_0_rgba(255,255,255,0.5),inset_-1px_0_0_rgba(16,24,40,0.05),inset_0_-1px_0_rgba(16,24,40,0.07),-3px_-3px_8px_-4px_rgba(255,255,255,0.55),3px_5px_12px_-5px_rgba(16,24,40,0.22)] [[data-theme=dark]_&_[data-slot=engagement-hatch]]:bg-[repeating-linear-gradient(45deg,rgba(16,24,40,0.035)_0,rgba(16,24,40,0.035)_1.5px,transparent_1.5px,transparent_9px)]"
+      // Dark swaps the lime face for the brand blue, so this card carries the
+      // cooler hue there while light keeps the lime. The column wash is mixed
+      // from whichever face is active, so the two stay in step.
+      className="flex h-full flex-col bg-[#D9ED92] p-3.5 [--v69-card:color-mix(in_srgb,#ffffff_60%,#D9ED92)] [--v69-inner:color-mix(in_srgb,#ffffff_60%,#D9ED92)] [[data-theme=dark]_&]:bg-[#7DA4FF] [[data-theme=dark]_&]:[--v69-card:color-mix(in_srgb,#ffffff_60%,#7DA4FF)] [[data-theme=dark]_&]:[--v69-inner:color-mix(in_srgb,#ffffff_60%,#7DA4FF)] [&_[data-slot=engagement-bar]]:border-0 [[data-theme=dark]_.template-mock_&_[data-slot=engagement-bar]]:border-0 [[data-theme=dark]_&]:[--muted-foreground:#6b7079] [[data-theme=dark]_&]:[--v69-ink:#262626] [[data-theme=dark]_&_[data-slot=engagement-bar]]:shadow-[inset_0_1px_0_rgba(255,255,255,0.8),inset_1px_0_0_rgba(255,255,255,0.5),inset_-1px_0_0_rgba(16,24,40,0.05),inset_0_-1px_0_rgba(16,24,40,0.07),-3px_-3px_8px_-4px_rgba(255,255,255,0.55),3px_5px_12px_-5px_rgba(16,24,40,0.22)] [[data-theme=dark]_&_[data-slot=engagement-hatch]]:bg-[repeating-linear-gradient(45deg,rgba(16,24,40,0.035)_0,rgba(16,24,40,0.035)_1.5px,transparent_1.5px,transparent_9px)]"
     >
       <div className="flex flex-1 items-end gap-2.5">
         {bars.map((b, i) => (
@@ -2325,6 +2354,27 @@ const TRACKER_DONE = 7;
 const GAUGE_SWEEP = 75;
 const GAUGE_VALUE = (GAUGE_SWEEP * TRACKER_DONE) / TRACKER_STAGES;
 
+// The stripe on the value arc. Three concentric sub-bands share one dash period
+// and each is offset by a third of it, so the bands shear across the width of the
+// stroke: the result runs diagonally but is drawn along the path, so it curves
+// with the ring instead of with the canvas. A canvas-space <pattern> would have
+// read as a texture laid over the card.
+// Widths overlap slightly so the sub-bands leave no seam between them.
+// Half the dash period, in pathLength units: band and gap are equal.
+const GAUGE_STRIPE_PERIOD = 3.6;
+// Twelve slices across the 9-unit stroke, each stepped along the path by about
+// its own height, which lands the bands near 45°. Coarser slices stepped further
+// read as a staircase up close, and as a checkerboard when the step approaches
+// the dash length.
+const GAUGE_STRIPE_SHEAR = 0.285;
+const GAUGE_STRIPES = Array.from({ length: 12 }, (_, i) => ({
+  r: 37.9 + i * 0.75,
+  offset: i * GAUGE_STRIPE_SHEAR,
+}));
+// Cut from the value arc itself, round caps included, so the stripe can never
+// spill a pixel onto the grey track.
+const GAUGE_MASK_ID = "v69-gauge-value-mask";
+
 function CardProgressTracker() {
   return (
     <div className="flex h-full flex-col bg-[var(--v69-card)] p-5">
@@ -2333,6 +2383,21 @@ function CardProgressTracker() {
             bottom-left, where the sweep begins. The readout can't ride along, so
             it sits in an upright overlay. */}
         <svg viewBox="0 0 100 100" className="size-[208px] rotate-[135deg]">
+          <defs>
+            <mask id={GAUGE_MASK_ID}>
+              <circle
+                cx="50"
+                cy="50"
+                r="42"
+                fill="none"
+                stroke="#fff"
+                strokeWidth="9"
+                strokeLinecap="round"
+                pathLength={100}
+                strokeDasharray={`${GAUGE_VALUE} ${100 - GAUGE_VALUE}`}
+              />
+            </mask>
+          </defs>
           {/* Dial face, drawn to the outer edge so the track sits on it rather
               than on the card. */}
           <circle cx="50" cy="50" r="46.5" fill="var(--v69-inner)" />
@@ -2358,6 +2423,22 @@ function CardProgressTracker() {
             pathLength={100}
             strokeDasharray={`${GAUGE_VALUE} ${100 - GAUGE_VALUE}`}
           />
+          <g mask={`url(#${GAUGE_MASK_ID})`}>
+            {GAUGE_STRIPES.map((band) => (
+              <circle
+                key={band.r}
+                cx="50"
+                cy="50"
+                r={band.r}
+                fill="none"
+                stroke="rgba(255,255,255,0.13)"
+                strokeWidth="0.95"
+                pathLength={100}
+                strokeDasharray={`${GAUGE_STRIPE_PERIOD} ${GAUGE_STRIPE_PERIOD}`}
+                strokeDashoffset={band.offset}
+              />
+            ))}
+          </g>
         </svg>
         {/* The readout is set to the dial, not to the card: the value sits above
             the middle, its unit right under it, and the total low in the face
@@ -2393,15 +2474,19 @@ const SEND_BADGE = `bg-[linear-gradient(150deg,#E4F5A8_0%,#D9ED92_40%,#C4DE7A_10
 
 function CardMassMessenger() {
   return (
-    <div className="flex h-full items-center justify-center bg-[var(--v69-card)] p-5">
+    // Light runs the card inverted — a dark face carrying a pale pill — so the
+    // action reads as lit rather than as a black slab dropped onto an off-white
+    // tile. Dark is untouched: there the card is already dark and the pill is
+    // already the pale thing on it, which is the same picture.
+    <div className="flex h-full items-center justify-center bg-[var(--v69-card)] p-5 [[data-theme=light]_&]:bg-[#262626]">
       {/* A badge-and-label pill rather than a plain block: the lime disc gives
           the action a face, and the send glyph lives in it instead of trailing
           the text. Asymmetric padding — tight on the badge side, open on the
           label side — is what keeps it from reading as a centred button.
-          No cast shadow: the ink face is already the highest-contrast thing on
-          the card, and a shadow under it read as a lifted sticker. */}
+          No cast shadow: the pill is already the highest-contrast thing on the
+          card, and a shadow under it read as a lifted sticker. */}
       <div
-        className={`flex h-16 w-full items-center gap-3 rounded-full bg-[var(--v69-ink)] pl-2 pr-5 text-[14px] font-normal ${ON_INK}`}
+        className={`flex h-16 w-full items-center gap-3 rounded-full bg-[var(--v69-ink)] pl-2 pr-5 text-[14px] font-normal ${ON_INK} [[data-theme=light]_&]:bg-[#FBFBF7] [[data-theme=light]_&]:text-[#262626]`}
       >
         <span
           className={`flex size-12 shrink-0 items-center justify-center rounded-full text-[#262626] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] ${SEND_BADGE}`}
@@ -2425,130 +2510,97 @@ function CardMassMessenger() {
   );
 }
 
-// Deals pipeline — the open deals as a funnel: a column per stage, one chip per
-// deal, brightening as they get closer to closed. Which column a deal sits in is
-// the whole story, so the only other thing on the card is what the pipeline is
-// worth. Bottom-aligned columns are what make it read as narrowing rather than as
-// four unrelated stacks.
-// One labelled row per stage: the stage, how far its bar runs, and how many deals
-// sit in it. The board of record chips this replaced put four columns, twelve
-// chips, an avatar and a name line on a 288px square — at cover size it was a
-// field of grey blocks with the stage names truncated to "Qualifi…", which is
-// more widget than the concept needs. A funnel of four bars says "deals by
-// stage" in one read.
-// `lightFill` is light mode only: the two brand hues and nothing else — the lime
-// washed out, then at full strength, then the periwinkle washed out, then at full
-// strength on the closed row. Dark runs the ink ladder and spends the lime on the
-// close instead.
-const PIPELINE_STAGES = [
-  {
-    label: "Lead",
-    deals: 12,
-    width: "100%",
-    fill: INK_FAINT,
-    lightFill: "linear-gradient(180deg,#EDF6CF,#E4F0B9)",
-  },
-  {
-    label: "Qualified",
-    deals: 8,
-    width: "68%",
-    fill: ink(26),
-    lightFill: "linear-gradient(180deg,#E0F1A8,#D9ED92)",
-  },
-  {
-    label: "Proposal",
-    deals: 5,
-    width: "44%",
-    fill: INK_STRONG,
-    lightFill: "linear-gradient(180deg,#BACDFF,#A8BFFF)",
-  },
-  {
-    label: "Won",
-    deals: 3,
-    width: "26%",
-    fill: "var(--v69-ink)",
-    lightFill: "linear-gradient(180deg,#8FB0FF,#7DA4FF)",
-  },
-];
-// Dark only, and only depth: the card face is milled out — a shadow ring just
-// inside the perimeter, a hairline of light on the top edge, and a whisper of it
-// along the bottom wall. Light keeps its flat face; nothing here moves a pixel of
-// the layout.
-const PIPELINE_DARK_CARVE =
-  "[[data-theme=dark]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),inset_0_0_0_1px_rgba(0,0,0,0.4),inset_0_16px_28px_-22px_rgba(0,0,0,0.8),inset_0_-14px_26px_-22px_rgba(255,255,255,0.035)]";
-// Light's counterpart, an order of magnitude softer: light separates on value,
-// so the recess only has to be suggested — a lit top edge where the rim catches
-// the light, a whisper of a ring inside the perimeter, and a shallow falloff
-// from the top wall with a slightly deeper one at the bottom.
-const PIPELINE_LIGHT_CARVE =
-  "[[data-theme=light]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.9),inset_0_0_0_1px_rgba(16,24,40,0.045),inset_0_12px_20px_-16px_rgba(16,24,40,0.12),inset_0_-12px_20px_-16px_rgba(16,24,40,0.07)]";
-// Each block gets a lit top edge and a one-pixel drop, so it sits just above the
-// recessed face rather than being painted into it.
-const PIPELINE_DARK_BLOCK =
-  "[[data-theme=dark]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_1px_2px_rgba(0,0,0,0.55)]";
-// Same idea in light, tuned down: a highlight held along the block's top edge
-// and one soft contact shadow under it. Enough to feel tactile at cover size,
-// not enough to read as a stack of buttons.
-const PIPELINE_LIGHT_BLOCK =
-  "[[data-theme=light]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_1px_1.5px_rgba(16,24,40,0.10)]";
+// Deals pipeline — the pipeline's value as a trend rather than as a funnel: the
+// figure set large at the head of the card over a rising line that bleeds to the
+// card's edges, after the stock-app reference. The four labelled stage bars it
+// replaced spent the whole card explaining the split, when what the cover has to
+// carry is that the number is going up.
+// Sampled monthly, y measured downward from the top of the plot: a climb with two
+// pullbacks in it, so the line reads as a real series rather than a swoosh.
+const PIPELINE_SERIES = [34, 30, 26, 29, 25, 31, 22, 18, 24, 20, 14, 16, 11, 13, 8, 6, 3];
+const PIPELINE_PLOT_W = 100;
+const PIPELINE_PLOT_H = 40;
+
+// Rounded-corner polyline rather than a fully smoothed curve: each leg is drawn
+// straight up to PIPELINE_CORNER of the way into the vertex, then a quadratic
+// turns the corner. At 0.5 this is plain midpoint smoothing, which rounded every
+// peak into the swoosh it started as; a third keeps the segments reading as
+// straight runs between real samples.
+const PIPELINE_CORNER = 0.33;
+
+function pipelineLinePath() {
+  const step = PIPELINE_PLOT_W / (PIPELINE_SERIES.length - 1);
+  const pt = (i: number) => [i * step, PIPELINE_SERIES[i]] as const;
+  // A point PIPELINE_CORNER of the way from sample `i` toward sample `j`.
+  const toward = (i: number, j: number) => {
+    const [ax, ay] = pt(i);
+    const [bx, by] = pt(j);
+    return [ax + (bx - ax) * PIPELINE_CORNER, ay + (by - ay) * PIPELINE_CORNER] as const;
+  };
+  let d = `M ${pt(0)[0]} ${pt(0)[1]}`;
+  for (let i = 1; i < PIPELINE_SERIES.length - 1; i += 1) {
+    const entry = toward(i, i - 1);
+    const exit = toward(i, i + 1);
+    d += ` L ${entry[0]} ${entry[1]} Q ${pt(i)[0]} ${pt(i)[1]} ${exit[0]} ${exit[1]}`;
+  }
+  const last = pt(PIPELINE_SERIES.length - 1);
+  return `${d} L ${last[0]} ${last[1]}`;
+}
+
+const PIPELINE_LINE_D = pipelineLinePath();
+// The same line closed down the two ends to the foot of the plot, which is the
+// shape the fade fills.
+const PIPELINE_AREA_D = `${PIPELINE_LINE_D} L ${PIPELINE_PLOT_W} ${PIPELINE_PLOT_H} L 0 ${PIPELINE_PLOT_H} Z`;
+const PIPELINE_GRADIENT_ID = "v69-pipeline-fade";
+// One hue per theme, both from the brand pair and neither of them stepped: the
+// lime carries on the near-black card, the periwinkle on the off-white one, where
+// lime has almost nothing to hold against the face.
+const PIPELINE_HUE =
+  "[--pipe-line:#7DA4FF] [[data-theme=dark]_&]:[--pipe-line:#D9ED92]";
 
 function CardDealsPipeline() {
   return (
     <div
-      // The board and its metric are centred as a pair rather than pushed to the
-      // card's two edges: with the value no longer set as a headline, splitting
-      // them left a void through the middle of the card.
-      className={`flex h-full flex-col justify-center gap-6 bg-[var(--v69-card)] p-5 ${PIPELINE_DARK_CARVE} ${PIPELINE_LIGHT_CARVE}`}
+      className={`relative flex h-full flex-col overflow-hidden bg-[var(--v69-card)] ${PIPELINE_HUE}`}
     >
-      {/* The funnel: stage, bar, count, one row each. The bars share a track so
-          the row lengths read against the same full width, and the count sits at
-          the end of the row rather than inside the bar. */}
-      <div className="flex flex-col gap-3.5">
-        {PIPELINE_STAGES.map((stage, s) => (
-          <div key={stage.label} className="flex items-center gap-3">
-            <span className="w-[62px] shrink-0 truncate text-[11px] font-normal leading-none text-muted-foreground">
-              {stage.label}
-            </span>
-            <span className="relative h-2 flex-1 rounded-full bg-[var(--v69-ink)]/[0.08]">
-              <span
-                // The light ramp has to win over the inline `background` that
-                // carries the theme-agnostic ink fill, hence the !important.
-                className={`absolute inset-y-0 left-0 rounded-full [[data-theme=light]_&]:!bg-[image:var(--pipeline-light-fill)] ${PIPELINE_DARK_BLOCK} ${PIPELINE_LIGHT_BLOCK} ${
-                  // The close takes the brand lime in dark, where the ink ladder's
-                  // top step is just the brightest of four greys.
-                  s === PIPELINE_STAGES.length - 1
-                    ? "[[data-theme=dark]_&]:!bg-[#D9ED92]"
-                    : ""
-                }`}
-                style={
-                  {
-                    width: stage.width,
-                    background: stage.fill,
-                    "--pipeline-light-fill": stage.lightFill,
-                  } as React.CSSProperties
-                }
-              />
-            </span>
-            <span className="w-[17px] shrink-0 text-right text-[11px] font-normal tabular-nums text-[var(--v69-ink)]">
-              {stage.deals}
-            </span>
-          </div>
-        ))}
-      </div>
-
-      {/* The value is a footnote to the funnel, not the card's headline: it was
-          set at 44px, which read as the point of the widget. Still bedded into the
-          face rather than laid on it — one very soft ambient shadow under the
-          glyphs, and in light a hairline of the card's own light under the strokes,
-          which is what stops the number floating over the surface. */}
-      <div className="flex items-baseline gap-1.5">
-        <span className="text-[28px] font-normal leading-none tracking-tight tabular-nums text-[var(--v69-ink)] [[data-theme=dark]_&]:[text-shadow:0_2px_12px_rgba(0,0,0,0.55)] [[data-theme=light]_&]:[text-shadow:0_1px_0_rgba(255,255,255,0.85),0_2px_10px_rgba(16,24,40,0.13)]">
+      {/* The figure sits at the head of the card with the plot under it, so the
+          number is read first and the line explains it. */}
+      <div className="flex items-baseline gap-2 px-5 pt-5">
+        <span className="text-[42px] font-normal leading-none tracking-tight tabular-nums text-[var(--v69-ink)]">
           $248k
         </span>
-        <span className="text-[11px] font-normal text-muted-foreground">
+        <span className="text-[13px] font-normal text-muted-foreground">
           open
         </span>
       </div>
+      {/* The plot bleeds to the card's edges and past its foot — a chart cropped
+          by the card reads as a window onto a longer series, where one inset into
+          a panel reads as a diagram of it. preserveAspectRatio is off so the line
+          fills whatever box the cover gives it; the stroke opts out of that
+          scaling so it keeps one weight at every card size. */}
+      <svg
+        viewBox={`0 0 ${PIPELINE_PLOT_W} ${PIPELINE_PLOT_H}`}
+        preserveAspectRatio="none"
+        className="mt-auto h-[58%] w-full"
+        aria-hidden
+      >
+        <defs>
+          <linearGradient id={PIPELINE_GRADIENT_ID} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="var(--pipe-line)" stopOpacity="0.30" />
+            <stop offset="100%" stopColor="var(--pipe-line)" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path d={PIPELINE_AREA_D} fill={`url(#${PIPELINE_GRADIENT_ID})`} />
+        <path
+          d={PIPELINE_LINE_D}
+          fill="none"
+          stroke="var(--pipe-line)"
+          strokeWidth="3.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+        />
+      </svg>
     </div>
   );
 }
@@ -2805,49 +2857,114 @@ function CardAIAssistant() {
   );
 }
 
-// Conditional forms — shows the adaptation itself: an answered question, a
-// branch connector, and a follow-up field revealed by that answer. Monochrome;
-// the chosen option is ink-filled, the branch reads through a faint elbow.
-// Conditional forms — two elements and the line between them: the answer, and the
-// field that answer reveals. It used to carry a label over each of them, which
-// read as a miniature form; the value carries its own context now ("Northwind Co."
-// only exists because Business was chosen), so the labels are gone.
-// The flow indicator is a single stroke dropping from the chosen chip into one
-// node on the field. Its 256-unit viewBox matches the card's content width in the
-// mock's own px, so x=66 lands on the selected chip's centre.
+// Conditional forms — the branch drawn as a node graph, after the flow-builder
+// references: the question node on the left with a port per answer, and the field
+// each answer leads to on the right. The segmented control it replaced showed one
+// answer and one follow-up; a graph shows the rule itself, which is what the
+// template actually builds.
+// Geometry lives in one place: the ports below are stated as percentages of the
+// card, and both the nodes and the SVG edges read from them, so an edge always
+// lands dead centre on the port it belongs to.
+const NODE_PORT_X = 42; // right edge of the question node
+const NODE_TARGET_X = 56; // left edge of the field nodes
+const NODE_ROWS = [
+  { y: 40, targetY: 31 }, // Business → the company field
+  { y: 55, targetY: 66 }, // Individual → the branch not taken
+];
+// The canvas the nodes sit on: the reference's dot grid, at an alpha where it
+// reads as paper rather than as pattern. Literal rgba — the mock's dark skin
+// remaps --color-white.
+const NODE_CANVAS =
+  "[background-image:radial-gradient(rgba(16,24,40,0.10)_1px,transparent_1px)] [background-size:12px_12px] [[data-theme=dark]_&]:[background-image:radial-gradient(rgba(255,255,255,0.10)_1px,transparent_1px)]";
+// One skin for every node: a surface lifted off the canvas behind a hairline.
+const NODE_SURFACE =
+  "rounded-xl bg-[#FBFBF7] shadow-[0_1px_2px_rgba(16,24,40,0.08),0_6px_14px_-8px_rgba(16,24,40,0.18)] ring-1 ring-[rgba(16,24,40,0.07)] [[data-theme=dark]_&]:bg-[#323232] [[data-theme=dark]_&]:shadow-[0_1px_3px_rgba(0,0,0,0.5)] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.10)]";
+const NODE_ACCENT = "#7DA4FF";
+
 function CardConditionalForms() {
   return (
-    <div className="flex h-full flex-col justify-center bg-[var(--v69-card)] p-5">
-      {/* Selected chip lifts out of the track rather than filling with ink: the
-          solid ink block read as a submit button, not a chosen option. */}
-      <div className="flex gap-1 rounded-full bg-[var(--v69-well)] p-1 [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.08)]">
-        <span className="flex-1 rounded-full bg-[#FBFBF7] py-2 text-center text-[12px] font-normal text-[var(--v69-ink)] shadow-[0_1px_2px_rgba(16,24,40,0.1)] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.22)] [[data-theme=dark]_&]:shadow-none">
-          Business
-        </span>
-        <span className="flex-1 py-2 text-center text-[12px] font-normal text-muted-foreground">
-          Individual
-        </span>
-      </div>
-
+    <div className={`relative h-full bg-[var(--v69-card)] ${NODE_CANVAS}`}>
+      {/* Edges first, so the nodes sit on top of where the curves terminate. The
+          taken branch runs at full strength in the accent; the other is the same
+          curve held back, which is what makes one of the two read as live. */}
       <svg
-        viewBox="0 0 256 40"
-        className="h-10 w-full text-[#6A92F2] [[data-theme=dark]_&]:text-[#7DA4FF]"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        className="absolute inset-0 size-full"
         fill="none"
         aria-hidden
       >
-        <path
-          d="M66 0 V 34"
-          stroke="currentColor"
-          strokeWidth="1.25"
-          strokeLinecap="round"
-          opacity="0.55"
-        />
-        <circle cx="66" cy="35" r="2.5" fill="currentColor" />
+        {NODE_ROWS.map((row, i) => (
+          <path
+            key={row.y}
+            d={`M ${NODE_PORT_X} ${row.y} C ${NODE_PORT_X + 7} ${row.y} ${NODE_TARGET_X - 7} ${row.targetY} ${NODE_TARGET_X} ${row.targetY}`}
+            stroke={NODE_ACCENT}
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            opacity={i === 0 ? 0.9 : 0.28}
+            vectorEffect="non-scaling-stroke"
+          />
+        ))}
       </svg>
 
-      <div className="rounded-xl bg-[var(--v69-well)] px-3.5 py-3 text-[13px] font-normal text-[var(--v69-ink)] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.08)]">
-        Northwind Co.
+      {/* The question node: one row per answer, the chosen one carrying the ink
+          and a lit port, the other left muted. */}
+      <div
+        className={`absolute left-[6%] flex w-[36%] flex-col ${NODE_SURFACE}`}
+        style={{ top: `${NODE_ROWS[0].y - 7.5}%`, height: "30%" }}
+      >
+        {["Business", "Individual"].map((answer, i) => (
+          <span
+            key={answer}
+            className={`flex flex-1 items-center truncate px-2.5 text-[11px] font-normal ${
+              i === 0
+                ? "text-[var(--v69-ink)]"
+                : "text-muted-foreground"
+            } ${i === 1 ? "border-t border-[rgba(16,24,40,0.07)] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.10)]" : ""}`}
+          >
+            {answer}
+          </span>
+        ))}
       </div>
+
+      {/* The field the taken branch reveals. */}
+      <div
+        className={`absolute right-[6%] flex w-[38%] items-center truncate whitespace-nowrap px-2.5 text-[11px] font-normal text-[var(--v69-ink)] ${NODE_SURFACE}`}
+        style={{ top: `${NODE_ROWS[0].targetY - 7}%`, height: "14%" }}
+      >
+        Oakwood
+      </div>
+
+      {/* The branch not taken: a node with nothing in it yet, so the rule reads as
+          two outcomes without a second line of copy. */}
+      <div
+        className={`absolute right-[6%] w-[38%] rounded-xl border border-dashed border-[rgba(16,24,40,0.18)] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.18)]`}
+        style={{ top: `${NODE_ROWS[1].targetY - 7}%`, height: "14%" }}
+      />
+
+      {/* Ports last: they cap the edges where they meet each node. */}
+      {NODE_ROWS.map((row, i) => (
+        <span key={row.y}>
+          <span
+            className="absolute size-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-[var(--v69-card)]"
+            style={{
+              left: `${NODE_PORT_X}%`,
+              top: `${row.y}%`,
+              background: NODE_ACCENT,
+              opacity: i === 0 ? 1 : 0.35,
+            }}
+          />
+          <span
+            className="absolute size-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full ring-2 ring-[var(--v69-card)]"
+            style={{
+              left: `${NODE_TARGET_X}%`,
+              top: `${row.targetY}%`,
+              background: NODE_ACCENT,
+              opacity: i === 0 ? 1 : 0.35,
+            }}
+          />
+        </span>
+      ))}
     </div>
   );
 }
@@ -2903,25 +3020,23 @@ function CardCourse() {
 // nearly vanished on the light one, so light takes deeper members of the same
 // families. Passed as two custom properties per cell, because an inline
 // background can't switch on the theme.
-// Five piece colours, drawn from the two brand hues and nothing else: three
-// steps of the lime and two of the periwinkle. The olive, sage and neutral the
-// board used to carry were the only places on the gallery where a third and
-// fourth hue turned up. Pieces still separate — the steps are far enough apart
-// that two neighbouring shapes never merge.
-const BLOCK_HUES_DARK: Record<string, string> = {
-  Y: "#E4F5A8",
-  G: "#C4DE7A",
-  T: "#A9BFF7",
-  P: "#7DA4FF",
-  O: "#EDF6CC",
+// Two piece colours: the brand lime and the brand periwinkle, at full strength,
+// with no tints or steps between them. The five codes below stay so the board
+// layout doesn't have to be re-laid, but they resolve to only those two values —
+// and to the same value in both themes, since a lighter or darker step per theme
+// is exactly the sub-shade this palette rules out. Neighbouring pieces of the
+// same colour separate on the cell gap and the lit top edge instead.
+const BLOCK_LIME = "#D9ED92";
+const BLOCK_BLUE = "#7DA4FF";
+const BLOCK_HUES: Record<string, string> = {
+  Y: BLOCK_LIME,
+  G: BLOCK_LIME,
+  O: BLOCK_LIME,
+  T: BLOCK_BLUE,
+  P: BLOCK_BLUE,
 };
-const BLOCK_HUES_LIGHT: Record<string, string> = {
-  Y: "#D9ED92",
-  G: "#CFE682",
-  T: "#B9CDFF",
-  P: "#7DA4FF",
-  O: "#EBF4C6",
-};
+const BLOCK_HUES_DARK = BLOCK_HUES;
+const BLOCK_HUES_LIGHT = BLOCK_HUES;
 const BLOCK_FILL =
   "bg-[var(--blk-light)] [[data-theme=dark]_&]:bg-[var(--blk-dark)]";
 const blockVars = (code: string) =>
@@ -3080,59 +3195,78 @@ function CardServiceRequest() {
 // The day's blocks as fractions of the 9–1 window the rail draws, so a block's
 // position is stated the way it reads: where it starts, how long it runs. The
 // first two share a row; the third drops so its overlap with the second shows.
+// Hierarchy is carried by fill rather than alpha: the block running now takes
+// the brand lime, the rest are solid neutrals stepping down in weight. Opaque
+// pills sit ON the rail instead of dissolving into it, which is what let the
+// hour lines show straight through them before.
 const EVENT_BLOCKS = [
-  { left: "17%", width: "24%", top: "26%", weight: 0.32 },
-  { left: "45%", width: "22%", top: "26%", weight: 1 },
-  { left: "58%", width: "26%", top: "52%", weight: 0.55 },
+  {
+    left: "17%",
+    width: "24%",
+    top: "26%",
+    fill: "bg-[#C9C9C1] [[data-theme=dark]_&]:bg-[#5A5A5A]",
+  },
+  {
+    left: "45%",
+    width: "22%",
+    top: "26%",
+    fill: "bg-[#D9ED92] [[data-theme=dark]_&]:bg-[#D9ED92]",
+  },
+  {
+    left: "58%",
+    width: "26%",
+    top: "52%",
+    fill: "bg-[#B0B0A8] [[data-theme=dark]_&]:bg-[#7E7E7E]",
+  },
 ];
+
+// Flat and fully opaque, the way a calendar rail draws them: no gradient and no
+// drop. The gradient-and-shadow version read as embossed plastic, where the
+// reference gets its polish from clean solid fills and nothing else.
 
 const EVENT_HOURS = ["9 AM", "10 AM", "11 AM", "12 PM"];
 
 // Events & RSVPs — the day as a rail: the block running now named at the top,
 // then the day's events laid against the hours they occupy, with the headcount
 // on the invite. A single-invite card said nothing about a day filling up, which
-// is the thing the app is for. Monotone: the current block is full ink and the
-// rest step down in weight, so "now" reads without a second hue.
+// is the thing the app is for. The block running now takes the brand lime and
+// the rest stay neutral, so "now" is the one thing carrying colour.
 function CardEvents() {
   return (
     // No inner panel: the rail owns the whole square, so the hour lines run the
     // full height of the card and the day reads as the widget rather than as a
     // chip sitting inside it.
     <div className="flex h-full flex-col bg-[var(--v69-card)] p-5">
-      {/* No clock beside the title: the rail below already says when the event
-          runs, and a second time in the corner only competed with it. */}
-      <div className="flex items-baseline justify-between gap-2">
-        <div className="flex min-w-0 items-baseline gap-1.5">
-          <span className="truncate text-[13px] font-normal text-[var(--v69-ink)]">
-            Client workshop
-          </span>
-        </div>
-        <span className="shrink-0 text-[11px] font-normal tabular-nums text-muted-foreground">
-          12 going
+      {/* Title only: neither a clock nor a headcount in the corner, since the
+          rail below already carries everything the cover has to say. */}
+      <div className="flex min-w-0 items-baseline">
+        <span className="truncate text-[13px] font-normal text-[var(--v69-ink)]">
+          Client workshop
         </span>
       </div>
 
       <div className="relative mt-4 flex-1">
         {/* Hour ticks, drawn as a row of hairlines rather than a background
             gradient so they land exactly where the labels below do. */}
+        {/* A hair over a pixel wide, so the gutter reads as ruled rather than as
+            a set of near-invisible seams. */}
         <div className="absolute inset-0 flex justify-between">
           {EVENT_HOURS.map((hour) => (
             <span
               key={hour}
-              className="w-px bg-[var(--v69-ink)] opacity-[0.14]"
+              className="w-[1.5px] bg-[var(--v69-ink)] opacity-[0.18]"
             />
           ))}
-          <span className="w-px bg-[var(--v69-ink)] opacity-[0.14]" />
+          <span className="w-[1.5px] bg-[var(--v69-ink)] opacity-[0.18]" />
         </div>
         {EVENT_BLOCKS.map((block) => (
           <span
             key={block.left}
-            className="absolute h-[7px] rounded-full bg-[var(--v69-ink)]"
+            className={`absolute h-[9px] rounded-full ${block.fill}`}
             style={{
               left: block.left,
               width: block.width,
               top: block.top,
-              opacity: block.weight,
             }}
           />
         ))}
@@ -3172,10 +3306,15 @@ function CardDesignApprovals() {
     // sit straight on the card face, so the widget IS the folder view. The frame
     // clips the band to the card radius, so it needs no rounding of its own.
     <div className="flex h-full flex-col bg-[var(--v69-card)]">
-      <div className="flex items-center gap-2 bg-[var(--v69-ink)] px-5 py-4">
+      {/* Neither theme runs the inverted band any more: at this size a slab of
+          near-black in light or near-white in dark is a hard edge across the top
+          of the card rather than a header. Both are now a soft step off the panel
+          — a warm grey in light, a lifted grey in dark — with the type in the
+          theme's own ink and a hairline closing the band. */}
+      <div className="flex items-center gap-2 bg-[var(--v69-ink)] px-5 py-4 [[data-theme=light]_&]:bg-[#EDEDE6] [[data-theme=light]_&]:shadow-[inset_0_-1px_0_rgba(16,24,40,0.07)] [[data-theme=dark]_&]:bg-[#343434] [[data-theme=dark]_&]:shadow-[inset_0_-1px_0_rgba(255,255,255,0.08)]">
         <svg
           viewBox="0 0 16 16"
-          className={`size-4 ${ON_INK}`}
+          className={`size-4 ${ON_INK} [[data-theme=light]_&]:text-[var(--v69-ink)] [[data-theme=dark]_&]:text-[#EDEDED]`}
           fill="none"
           stroke="currentColor"
           strokeWidth="1.4"
@@ -3184,7 +3323,7 @@ function CardDesignApprovals() {
         >
           <path d="M2 4.5A1.5 1.5 0 0 1 3.5 3h2.2l1.3 1.6h5.5A1.5 1.5 0 0 1 14 6.1v5.4A1.5 1.5 0 0 1 12.5 13h-9A1.5 1.5 0 0 1 2 11.5z" />
         </svg>
-        <span className={`text-[13px] font-normal ${ON_INK}`}>
+        <span className={`text-[13px] font-normal ${ON_INK} [[data-theme=light]_&]:text-[var(--v69-ink)] [[data-theme=dark]_&]:text-[#EDEDED]`}>
           Design reviews
         </span>
       </div>
@@ -3194,13 +3333,14 @@ function CardDesignApprovals() {
           breathe under a filled slab.
           Every row carries a rail below it, the last one included: the list stops
           short of the card's foot, and without that line it ended in mid-air.
-          Dark runs the rails at more than double the light alpha — at 10% white on
-          the near-black face they were in the markup and not on the screen. */}
+          Dark states its rail as a literal rgba: the mock's dark skin remaps
+          --color-white to a near-black, so `border-white/x` drew a dark line on a
+          dark face and the rails vanished. */}
       <div className="pt-2">
         {APPROVAL_ROWS.map((row) => (
           <div
             key={row.title}
-            className="border-b px-5 py-3.5 [[data-theme=light]_&]:border-black/[0.07] [[data-theme=dark]_&]:border-white/[0.22]"
+            className="border-b px-5 py-3.5 [[data-theme=light]_&]:border-black/[0.07] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.14)]"
           >
             <div className="truncate text-[13px] font-normal text-[var(--v69-ink)]">
               {row.title}
@@ -3268,7 +3408,7 @@ export function V69CardMock({ slug }: { slug: string }) {
         heading="Team guides"
         label="Read this week"
         value="18/24"
-        delta="+5"
+        delta={null}
       />
     );
   if (slug === "block-builder-game") return <CardBlockGame />;
