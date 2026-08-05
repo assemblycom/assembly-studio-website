@@ -15,6 +15,8 @@ import { useAuthState } from "@/lib/use-auth";
 // Slim, serializable slice of a template the modal needs.
 export interface ModalTemplate {
   slug: string;
+  /** The product's app id, when the template has one — see Template.templateId. */
+  templateId?: string;
   title: string;
   description: string;
   longDescription: string;

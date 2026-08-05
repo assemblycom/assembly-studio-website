@@ -1,5 +1,14 @@
 export interface Template {
   slug: string;
+  /**
+   * The app id the product resolves this template by, e.g. "app-0548119d" — NOT
+   * the slug, which is only this site's URL handle. Signup receives this as
+   * `templateId`, so a wrong value silently starts the visitor on the wrong app.
+   * Optional because most templates have no id yet: where it's missing, the
+   * param is omitted rather than guessed. Contentful's "Template Id" field wins
+   * over anything set here.
+   */
+  templateId?: string;
   title: string;
   description: string;
   icon: string;
@@ -358,6 +367,10 @@ const BASE_TEMPLATES: Template[] = [
   },
   {
     slug: "goal-tracker",
+    // The only template whose real app id exists so far (Contentful "Template
+    // Id"). Every other entry needs one filled in before its signup link can
+    // carry a templateId.
+    templateId: "app-0548119d",
     title: "Goal tracking app",
     description: "Client goals with progress to target",
     icon: "🎯",

@@ -53,8 +53,13 @@ const MAX_URL_LENGTH = 2048;
 
 /** A picked template, in the shape signup expects to receive it. */
 export interface SignupTemplate {
-  /** The app id signup resolves the template by. */
-  id: string;
+  /**
+   * The app id signup resolves the template by, e.g. "app-0548119d". Optional:
+   * most templates have no id yet, and the slug is NOT a substitute — sending it
+   * gave signup an id it can't resolve. When it's missing the param is left out
+   * and only the display fields travel.
+   */
+  id?: string;
   name: string;
   /** The one-liner, not the long description. */
   description: string;
@@ -73,7 +78,7 @@ export function buildSignupUrl(
     const params = new URLSearchParams({ referrer: SIGNUP_REFERRER });
     if (promptValue) params.set("prompt", promptValue);
     if (template) {
-      params.set("templateId", template.id);
+      if (template.id) params.set("templateId", template.id);
       params.set("templateName", template.name);
       params.set("templateDescription", template.description);
     }
@@ -96,14 +101,12 @@ export function buildSignupUrl(
 // sign-up sheet on this site, which collected an account this side of the
 // hand-off and then again on the far side.
 export function templateSignupUrl(template: {
-  slug: string;
+  templateId?: string;
   title: string;
   description: string;
 }): string {
   return buildSignupUrl(undefined, {
-    // The slug is our only stable handle on a template; signup resolves the real
-    // app id from it.
-    id: template.slug,
+    id: template.templateId,
     name: template.title,
     description: template.description,
   });

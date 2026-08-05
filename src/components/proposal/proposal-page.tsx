@@ -845,7 +845,7 @@ function ProposalContent() {
   // and onboarding asked again on the far side.
   const startHref = template
     ? templateSignupUrl({
-        slug: template.slug,
+        templateId: template.templateId,
         title: template.title,
         description: template.description,
       })

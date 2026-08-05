@@ -25,6 +25,12 @@ export interface AppTemplateEntry {
   overview?: Document;
   /** "Image List" — the detail gallery. */
   images: { url: string; title: string; width?: number; height?: number }[];
+  /**
+   * Contentful "Template Id" — the app id the product resolves this template
+   * by, e.g. "app-0548119d". Not every entry carries one yet, so it's optional
+   * and callers must handle its absence rather than substituting the slug.
+   */
+  templateId?: string;
   featured: boolean;
   order?: number;
 }
@@ -69,6 +75,7 @@ function toAppTemplate(entry: Entry<never>): AppTemplateEntry | null {
     category: categories[0],
     overview: (f.appOverview as Document) ?? undefined,
     images: imageList.map(toImage).filter((i): i is NonNullable<typeof i> => Boolean(i)),
+    templateId: typeof f.templateId === "string" ? f.templateId : undefined,
     featured: f.isFeatured === true,
     order: typeof f.order === "number" ? f.order : undefined,
   };

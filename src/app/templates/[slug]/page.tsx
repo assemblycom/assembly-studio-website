@@ -106,6 +106,10 @@ export default async function TemplateDetailPage({ params }: Props) {
         ...local,
         title: entry.name,
         description: entry.subtitle ?? local.description,
+        // Contentful's "Template Id" is the product's own app id and the only
+        // authoritative source for it; the committed value is the fallback for
+        // templates the CMS doesn't hold yet.
+        templateId: entry.templateId ?? local.templateId,
         category: entry.category ?? local.category,
         images: entry.images.length
           ? entry.images.map((image) => image.url)
