@@ -14,8 +14,8 @@ interface Props {
 
 const ALL = "All";
 
-/** Edge affordance for the chip strip: a round button sitting on a fade that
- *  blends the clipped chips into the page background. */
+/** Edge affordance for the chip strip: just the button. The fade itself lives on
+ *  the scroller (see EDGE_FADE) rather than in an overlay here. */
 function ScrollArrow({
   direction,
   onClick,
@@ -26,32 +26,51 @@ function ScrollArrow({
   const isLeft = direction === "left";
   return (
     <div
-      className={`pointer-events-none absolute inset-y-0 flex items-center ${
-        isLeft
-          ? "left-0 justify-start bg-gradient-to-r pr-8"
-          : "right-0 justify-end bg-gradient-to-l pl-8"
-      } from-background via-background to-transparent`}
+      className={`pointer-events-none absolute inset-y-0 hidden items-center [@media(hover:hover)]:flex ${
+        isLeft ? "left-0" : "right-0"
+      }`}
     >
-      <button
-        type="button"
-        onClick={onClick}
-        aria-label={isLeft ? "Scroll categories left" : "Scroll categories right"}
-        className="pointer-events-auto flex size-9 items-center justify-center rounded-full border border-border bg-background text-foreground outline-none transition-colors hover:bg-muted active:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-      >
-        <svg
-          viewBox="0 0 24 24"
-          className="size-4"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+        <button
+          type="button"
+          onClick={onClick}
+          aria-label={isLeft ? "Scroll categories left" : "Scroll categories right"}
+          className="pointer-events-auto flex size-8 items-center justify-center rounded-lg border border-border bg-background text-foreground outline-none transition-colors hover:bg-muted active:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
         >
-          <path d={isLeft ? "m14 6-6 6 6 6" : "m10 6 6 6-6 6"} />
-        </svg>
-      </button>
+          <svg
+            viewBox="0 0 24 24"
+            className="size-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d={isLeft ? "m14 6-6 6 6 6" : "m10 6 6 6-6 6"} />
+          </svg>
+        </button>
     </div>
   );
+}
+
+// The edge fade, applied to the SCROLLER itself rather than drawn over it. An
+// overlay — a gradient to the page colour, or a blur veil — still sits on top of
+// the hard edge where overflow clips the strip, so the last chip's fill and its
+// label both stop dead on a straight vertical line and the row reads as cut off.
+// Masking the scroller fades the chip itself, pill and text together, to nothing
+// before it ever reaches that line: there is no edge left to see. Only the side
+// that actually has more content is masked, so a row that fits is never touched.
+const FADE_PX = 56;
+
+function edgeFade(left: boolean, right: boolean) {
+  if (!left && !right) return undefined;
+  const stops = [
+    left ? "transparent 0px" : "#000 0px",
+    `#000 ${FADE_PX}px`,
+    `#000 calc(100% - ${right ? FADE_PX : 0}px)`,
+    right ? "transparent 100%" : "#000 100%",
+  ].join(",");
+  const image = `linear-gradient(to right,${stops})`;
+  return { maskImage: image, WebkitMaskImage: image };
 }
 
 // Widgets are drawn at one design size and scaled into the card they're framed
@@ -61,17 +80,13 @@ export function TemplatesBrowser({ templates }: Props) {
   // Widget covers (shared with the home hero) reskin to the dark surface.
   const { theme } = useTheme();
   const dark = theme === "dark";
-  // Multi-select category filter. Empty = "All" (show everything). Clicking a
-  // selected chip again removes it (toggle off); "All" clears the whole set.
-  const [selected, setSelected] = useState<string[]>([]);
-  const toggleCategory = (cat: string) => {
-    if (cat === ALL) {
-      setSelected([]);
-      return;
-    }
-    setSelected((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
-    );
+  // One category at a time. It used to be a multi-select, and two or three dark
+  // chips at once read as a broken toggle rather than as a union — nothing on the
+  // row said the selection added up. null = "All" (show everything); picking the
+  // selected chip again clears back to All.
+  const [selected, setSelected] = useState<string | null>(null);
+  const selectCategory = (cat: string) => {
+    setSelected((prev) => (cat === ALL || prev === cat ? null : cat));
   };
   // Free-text search across title, description, category, and industries.
   const [query, setQuery] = useState("");
@@ -91,7 +106,7 @@ export function TemplatesBrowser({ templates }: Props) {
     // A template shows if it matches any selected category (union, empty = all)
     // AND matches the search text across its title/description/category/industry.
     const matched = templates.filter((t) => {
-      if (selected.length > 0 && !selected.includes(t.category)) return false;
+      if (selected && t.category !== selected) return false;
       if (!q) return true;
       const haystack = [t.title, t.description, t.category, ...(t.industries ?? [])]
         .join(" ")
@@ -169,7 +184,7 @@ export function TemplatesBrowser({ templates }: Props) {
   useEffect(() => {
     const el = scrollerRef.current;
     if (!el) return;
-    const target = selected.length > 0 ? selected[selected.length - 1] : ALL;
+    const target = selected ?? ALL;
     const chip = el.querySelector<HTMLElement>(
       `[data-category="${CSS.escape(target)}"]`,
     );
@@ -200,14 +215,21 @@ export function TemplatesBrowser({ templates }: Props) {
       <div className="sticky top-0 z-30 -mx-6 bg-background px-6 pb-3 pt-16 lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:pb-0 lg:pt-0">
       {/* Search + filters share one row on desktop (filters left, search
           right), à la Linear; they stack on mobile with search on top. */}
-      <div className="flex flex-col gap-3 lg:flex-row-reverse lg:items-center lg:gap-6">
+      {/* The desktop gap is wide on purpose: when the chips overflow, the strip's
+          clipped edge and its scroll arrow both land right beside the search, and
+          at a 24px gap the three ran together into one dense block at the end of
+          the row. */}
+      <div className="flex flex-col gap-3 lg:flex-row-reverse lg:items-center lg:gap-10">
       {/* Search — filters the grid live across title/description/category/
-          industry. On top on mobile; right-aligned, fixed-width on desktop. */}
-      <div className="relative lg:w-64 lg:shrink-0">
+          industry. Full-width on top on mobile; a fixed 256px field at the end of
+          the chip row on desktop. It stays open rather than collapsing to its
+          icon: the field says what it does without being clicked, and the chips
+          scroll, so they don't need the width back. */}
+      <div className="relative shrink-0 lg:w-64">
         <svg
           aria-hidden
           viewBox="0 0 24 24"
-          className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+          className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
           fill="none"
           stroke="currentColor"
           strokeWidth="1.7"
@@ -223,7 +245,7 @@ export function TemplatesBrowser({ templates }: Props) {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search templates…"
           aria-label="Search templates"
-          className="w-full rounded-lg border border-border bg-transparent py-2.5 pl-9 pr-9 text-[15px] text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/30"
+          className="type-caption h-10 w-full rounded-lg border border-border bg-transparent pl-9 pr-9 text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/30 lg:h-8"
         />
         {query && (
           <button
@@ -244,28 +266,30 @@ export function TemplatesBrowser({ templates }: Props) {
           than the space beside the search field. The arrows overlay the strip
           rather than reserving room for it, so nothing shifts when they appear;
           the right one is gone by the time you reach the last chip, so it never
-          sits on top of it. */}
+          sits on top of it. The overflowing edge dissolves via a mask on the
+          scroller itself (see edgeFade). */}
       <div className="relative min-w-0 lg:flex-1">
         <div
           ref={scrollerRef}
           onScroll={measure}
           role="group"
           aria-label="Filter templates by category"
+          style={edgeFade(canScroll.left, canScroll.right)}
           className="flex flex-nowrap items-center gap-2 overflow-x-auto scroll-pl-12 scroll-pr-12 py-0.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {categories.map((cat) => {
-            const active = cat === ALL ? selected.length === 0 : selected.includes(cat);
+            const active = cat === ALL ? selected === null : selected === cat;
             return (
               <button
                 key={cat}
                 type="button"
                 data-category={cat}
                 aria-pressed={active}
-                onClick={() => toggleCategory(cat)}
-                className={`inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded-full px-4 text-[14px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                onClick={() => selectCategory(cat)}
+                className={`type-caption inline-flex h-8 shrink-0 items-center whitespace-nowrap rounded-lg px-3 leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
                   active
                     ? "bg-foreground text-background"
-                    : "bg-muted text-foreground hover:bg-foreground/10 active:bg-foreground/15"
+                    : "bg-muted text-foreground active:bg-foreground/15 [@media(hover:hover)]:hover:bg-foreground/10"
                 }`}
               >
                 {cat}
@@ -337,14 +361,35 @@ export function TemplatesBrowser({ templates }: Props) {
           ))}
         </div>
       ) : (
-        <div className="mt-10 rounded-xl border border-dashed border-border py-20 text-center">
-          <p className="text-sm text-muted-foreground">
+        // Empty state on the page's own terms: a hairline rule and the type
+        // scale, like every other section boundary here. The dashed box it used
+        // to be was the only dashed border on the site, and it framed the one
+        // moment the page has nothing to show.
+        <div className="mt-10 border-t border-border py-20 text-center md:py-24">
+          <p className="type-body text-foreground">
             {query.trim()
-              ? `No templates match “${query.trim()}”.`
-              : selected.length === 0
-                ? "No templates yet."
-                : "No templates in the selected categories yet."}
+              ? `No templates match “${query.trim()}”`
+              : selected === null
+                ? "No templates yet"
+                : `Nothing in ${selected} yet`}
           </p>
+          {(query.trim() || selected) && (
+            <>
+              <p className="type-caption mt-2 text-muted-foreground">
+                Try another word, or start from the full set.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  setSelected(null);
+                }}
+                className="type-caption mt-7 rounded-lg border border-border px-4 py-1.5 text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground"
+              >
+                Show all templates
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>

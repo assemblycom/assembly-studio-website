@@ -337,7 +337,20 @@ function GetStartedContent({
     >
       {/* Hand-off to signup — mirrors the app's own signup: Google, or an
           email. Carries the prompt/template (and email) along. */}
-      <SignupHandoff prompt={prompt} template={template?.slug} />
+      <SignupHandoff
+        prompt={prompt}
+        template={
+          template
+            ? {
+                // The slug is our only stable handle on a template; signup
+                // resolves the real app id from it.
+                id: template.slug,
+                name: template.title,
+                description: template.description,
+              }
+            : undefined
+        }
+      />
     </GetStartedShell>
   );
 }

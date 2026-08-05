@@ -32,7 +32,21 @@ export interface SelectOption {
  * placeholder for a missing file so much as what shows while the photo loads,
  * and what stays if a photo was never added for that person.
  */
-function OptionAvatar({ option, size }: { option: SelectOption; size: number }) {
+export function OptionAvatar({
+  option,
+  size,
+  tone = "default",
+}: {
+  option: SelectOption;
+  size: number;
+  /**
+   * `field` is for the proposal masthead, where the circle sits on a printed
+   * colour rather than on a page surface: the themed muted fill read as a grey
+   * disc pasted onto the band, and its muted-foreground initials all but
+   * vanished on it. On the band it's drawn in the band's own ink.
+   */
+  tone?: "default" | "field";
+}) {
   const [failed, setFailed] = useState(false);
   const initials = option.label
     .split(/\s+/)
@@ -44,8 +58,19 @@ function OptionAvatar({ option, size }: { option: SelectOption; size: number }) 
   return (
     <span
       aria-hidden
-      style={{ width: size, height: size }}
-      className="relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted text-[10px] text-muted-foreground [[data-theme=dark]_&]:bg-white/[0.08]"
+      // Initials scale with the circle instead of sitting at a fixed 10px: two
+      // wide caps at that size ran edge to edge in a 22px avatar. 38% of the
+      // diameter keeps a margin around them at every size we draw.
+      style={{
+        width: size,
+        height: size,
+        fontSize: Math.round(size * 0.38),
+      }}
+      className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-full leading-none tracking-tight ${
+        tone === "field"
+          ? "bg-[var(--proposal-ink-fill)] text-[color:var(--proposal-ink)]"
+          : "bg-muted text-muted-foreground [[data-theme=dark]_&]:bg-white/[0.08]"
+      }`}
     >
       {initials}
       {option.avatar && !failed && (
@@ -120,6 +145,20 @@ function IconCheck() {
   );
 }
 
+/**
+ * The mark on a label whose field has to be filled in. Exported so a plain
+ * <label> and this control's own label carry the same one — a form where the
+ * requirement is drawn two ways reads as two forms.
+ */
+export function RequiredMark() {
+  return (
+    <span aria-hidden className="text-muted-foreground">
+      {" "}
+      *
+    </span>
+  );
+}
+
 export function SelectMenu({
   label,
   value,
@@ -127,6 +166,7 @@ export function SelectMenu({
   options,
   placeholder = "Select…",
   name,
+  required = false,
   searchable = false,
   searchPlaceholder = "Search…",
 }: {
@@ -137,6 +177,8 @@ export function SelectMenu({
   placeholder?: string;
   /** Renders a hidden input so the control works inside a plain form post. */
   name?: string;
+  /** Marks the label, for a field the form won't submit without. */
+  required?: boolean;
   searchable?: boolean;
   searchPlaceholder?: string;
 }) {
@@ -231,7 +273,10 @@ export function SelectMenu({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-sm text-foreground">{label}</span>
+      <span className="text-sm text-foreground">
+        {label}
+        {required && <RequiredMark />}
+      </span>
       <div ref={ref} className="relative">
         <button
           type="button"
@@ -290,10 +335,19 @@ export function SelectMenu({
                   Nothing matches that.
                 </li>
               )}
-              {groups.map((group) => (
-                <li key={group.key || "_"}>
+              {/* A category heading has to read as a different kind of thing
+                  from the options under it. At 13px next to a 14px label it
+                  didn't: same colour family, same weight, same indent. It's now
+                  a step smaller, and every group after the first opens with a
+                  hairline rule, so the list reads as sections rather than one
+                  run of entries. */}
+              {groups.map((group, i) => (
+                <li
+                  key={group.key || "_"}
+                  className={i > 0 ? "mt-1.5 border-t border-border pt-1.5" : ""}
+                >
                   {group.key && (
-                    <p className="type-caption px-3 pb-1 pt-2.5 text-muted-foreground">
+                    <p className="px-3 pb-1.5 pt-2 text-[12px] leading-none tracking-[0.01em] text-muted-foreground">
                       {group.key}
                     </p>
                   )}

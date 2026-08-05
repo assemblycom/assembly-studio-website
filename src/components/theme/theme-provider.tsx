@@ -46,12 +46,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [preference, setPreferenceState] =
     useState<ThemePreference>(DEFAULT_PREFERENCE);
   const [theme, setThemeState] = useState<Theme>("light");
+  // Whether the stored preference has been read yet. Until it has, this
+  // component's idea of the theme is just its initial "light" — and writing that
+  // to <html> is exactly the flash: the pre-paint script had already resolved
+  // dark correctly, this effect painted over it with light, and the effect below
+  // then put dark back a frame later. So the attribute is left alone until this
+  // component actually knows which theme it is.
+  const [adopted, setAdopted] = useState(false);
   // The one place <html data-theme> is kept in step with the state above.
   // setPreference writes the attribute too, but only so the swap can be
   // captured inside a view transition.
   useEffect(() => {
+    if (!adopted) return;
     document.documentElement.dataset.theme = theme;
-  }, [theme]);
+  }, [theme, adopted]);
 
   // Adopt the persisted preference, and resolve the theme from it rather than
   // from <html data-theme>. The attribute is not a safe source here: the sync
@@ -73,6 +81,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setPreferenceState(p);
 
     setThemeState(p === "system" ? systemTheme() : p);
+    setAdopted(true);
   }, []);
 
   // While on "system", track OS changes live so the site follows the setting.

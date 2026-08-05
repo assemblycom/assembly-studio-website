@@ -29,10 +29,10 @@ const STRIP_ORDER = [
   "onboarding-wizard",
   "client-project-tracker",
   "client-support-requests",
-  "client-ai-assistant",
   // Retainer usage overview is deliberately not here — it stays a gallery-only
   // card. This slot replaces the engagement dashboard, which left the gallery.
   "time-tracker",
+  "client-ai-assistant",
   "document-collection",
   "proposal-builder",
   "content-approval-flow",

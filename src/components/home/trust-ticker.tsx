@@ -157,27 +157,40 @@ export function TrustTicker() {
             rest of the page). At 1200 this band sat 22px wider on each side, so
             the first figure started left of the heading under it and the row
             read as misaligned rather than as the same column. */}
-        <div className="mx-auto max-w-[1100px]">
-          {/* The column gutter is explicit below sm. Every horizontal inset here
-              is an sm: class (they pair with the dividers), so on a phone the
-              two columns butted straight together and the second one's label
-              started where the first one's figure ended — which read as the
-              whole block shoved against the left rail. */}
-          <div className="grid grid-cols-2 gap-x-6 gap-y-9 sm:grid-cols-4 sm:gap-x-0 sm:gap-y-0 sm:divide-x sm:divide-border [[data-theme=dark]_&]:sm:divide-[#383838]">
+        {/* Nudged right on desktop so the row is centred by eye, not just by the
+            box: every figure is left-aligned in an equal column, so the last one
+            stops short of where its column ends and all of that slack piled up
+            on the right. 44px is half the difference, which lands the first and
+            last figures the same distance from the page rails. A transform, not a
+            margin — the geometry stays put, only the optical centre moves.
+            Held until 1280, which is the first width where the band has 44px of
+            slack beside it; nudging earlier pushed the last figure out past the
+            page padding. */}
+        <div className="mx-auto max-w-[1100px] min-[1280px]:translate-x-11">
+          {/* Phone: a 2x2 of outlined tiles, each figure centred in its own tile.
+              The gutter is the gap between tiles now, so it's tighter than the
+              36px that used to separate two unframed rows. From sm up the tiles
+              dissolve back into one divided row (see the cell classes). */}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-x-0 sm:gap-y-0 sm:divide-x sm:divide-border [[data-theme=dark]_&]:sm:divide-[#383838]">
             {STATS.map((s) => (
               // The outer cells drop their outer padding so the first figure
               // starts exactly on the rail and the last ends on it — flush with
               // the copy above and below. The inner padding stays, so the
-              // dividers keep their breathing room.
+              // dividers keep their breathing room. Every cell aligns left,
+              // including the last: right-aligning it closed the gap to the rail
+              // but broke the one thing the row has going for it, which is that
+              // all four figures start at the same offset from their own column.
               //
-              // No vertical padding below sm, where the cells stack: py on each
-              // one bled 24px above and below the whole block and stacked into a
-              // 56px trench between the two rows, against the 6px holding a label
-              // to its own figure. The pairs came apart. The row gap spaces them
-              // there instead.
+              // Below sm each cell is its own outlined, centred tile; every one of
+              // those properties is reset at sm so the row goes back to being four
+              // columns of a single band separated by hairlines.
+              //
+              // The tile outline is a RING, not a border: the row's dividers are
+              // drawn by divide-x, which is itself a border, so resetting a border
+              // at sm to undo the tile took the dividers with it.
               <div
                 key={s.label}
-                className="sm:py-9 sm:first:pl-0 sm:last:pr-0 sm:[&:not(:first-child)]:pl-7 sm:[&:not(:last-child)]:pr-7"
+                className="rounded-xl px-4 py-5 text-center ring-1 ring-border [[data-theme=dark]_&]:ring-[#383838] sm:rounded-none sm:p-0 sm:py-9 sm:text-left sm:ring-0 sm:first:pl-0 sm:last:pr-0 sm:[&:not(:first-child)]:pl-7 sm:[&:not(:last-child)]:pr-7"
               >
                 <p className="text-[13px] leading-snug text-muted-foreground">
                   {s.label}

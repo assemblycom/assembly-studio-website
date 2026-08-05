@@ -38,9 +38,12 @@ export const NAV_LINKS: NavLink[] = [
 ];
 // The app lives at dashboard.assembly.com (app.assembly.com does not resolve).
 export const APP_URL = "https://dashboard.assembly.com";
-// referrer=studio-pricing tags signups that originate from this marketing site.
-export const SIGNUP_URL =
-  "https://dashboard.assembly.com/signup?referrer=studio-pricing";
+const SIGNUP_PATH = "https://dashboard.assembly.com/signup";
+// referrer=studio-pricing tags signups that originate from this marketing site,
+// and is what tells the app to create the workspace on the new pricing model.
+export const SIGNUP_REFERRER = "studio-pricing";
+// The plain CTA case: no prompt, no template, just the referrer.
+export const SIGNUP_URL = `${SIGNUP_PATH}?referrer=${SIGNUP_REFERRER}`;
 export const LOGIN_URL = "https://dashboard.assembly.com/login";
 
 // The composer prompt rides along to signup as a query param. Cap it so the
@@ -48,26 +51,42 @@ export const LOGIN_URL = "https://dashboard.assembly.com/login";
 export const MAX_PROMPT_LENGTH = 2000;
 const MAX_URL_LENGTH = 2048;
 
-// Build the signup URL, carrying the visitor's composer prompt when they have
-// one. SIGNUP_URL already holds ?referrer=studio-pricing, so the prompt appends
-// with &.
+/** A picked template, in the shape signup expects to receive it. */
+export interface SignupTemplate {
+  /** The app id signup resolves the template by. */
+  id: string;
+  name: string;
+  /** The one-liner, not the long description. */
+  description: string;
+}
+
+// Build the signup URL, carrying whatever the visitor arrived with: their
+// composer prompt, or a picked template, plus the address they typed.
 // The prompt is trimmed until the full URL fits MAX_URL_LENGTH, so oddly long
 // or heavily-encoded input can never produce an over-length URL.
 export function buildSignupUrl(
   prompt?: string,
-  template?: string,
+  template?: SignupTemplate,
   email?: string,
 ): string {
-  const tmpl = template ? `&template=${encodeURIComponent(template)}` : "";
-  // Carried so the "Continue with email" hand-off can prefill the signup field.
-  const mail = email ? `&email=${encodeURIComponent(email)}` : "";
-  const extra = tmpl + mail;
+  const compose = (promptValue: string) => {
+    const params = new URLSearchParams({ referrer: SIGNUP_REFERRER });
+    if (promptValue) params.set("prompt", promptValue);
+    if (template) {
+      params.set("templateId", template.id);
+      params.set("templateName", template.name);
+      params.set("templateDescription", template.description);
+    }
+    // Carried so the "Continue with email" hand-off can prefill the field.
+    if (email) params.set("email", email);
+    return `${SIGNUP_PATH}?${params.toString()}`;
+  };
+
   let value = prompt?.trim().slice(0, MAX_PROMPT_LENGTH) ?? "";
-  if (!value) return `${SIGNUP_URL}${extra}`;
-  let url = `${SIGNUP_URL}&prompt=${encodeURIComponent(value)}${extra}`;
+  let url = compose(value);
   while (url.length > MAX_URL_LENGTH && value.length > 0) {
     value = value.slice(0, Math.floor(value.length * 0.9));
-    url = `${SIGNUP_URL}&prompt=${encodeURIComponent(value)}${extra}`;
+    url = compose(value);
   }
   return url;
 }
@@ -93,6 +112,10 @@ export const PROPOSAL_CREATOR_PATH = "/proposal-creator";
 // well inside the ~2048-char URL limit alongside the prompt.
 export const MAX_PROPOSAL_NOTE_LENGTH = 280;
 
+// The app name sits in the headline at display size, where anything longer than
+// a few words stops being a name and starts being the prompt again.
+export const MAX_APP_NAME_LENGTH = 40;
+
 export interface ProposalInput {
   /** Who it's for — the name that leads the page. */
   recipient: string;
@@ -102,6 +125,13 @@ export interface ProposalInput {
   note?: string;
   /** The refined prompt, when the proposal is a custom build. */
   prompt?: string;
+  /**
+   * What the prompt builds, in two or three words — "Client onboarding wizard".
+   * The prompt variant's headline has no template title to name the app with, so
+   * without this it can only open on the recipient. Suggested from the prompt in
+   * the creator and editable there, so it's the sender's words that ship.
+   */
+  appName?: string;
   /** A template slug, when a template is the better fit. */
   template?: string;
 }
@@ -115,8 +145,12 @@ export function buildProposalUrl(input: ProposalInput, origin = ""): string {
   const params = new URLSearchParams();
   if (input.recipient.trim()) params.set("for", input.recipient.trim());
   if (input.template) params.set("template", input.template);
-  else if (input.prompt?.trim())
+  else if (input.prompt?.trim()) {
     params.set("prompt", input.prompt.trim().slice(0, MAX_PROMPT_LENGTH));
+    // Only ever alongside a prompt: a template names itself.
+    if (input.appName?.trim())
+      params.set("name", input.appName.trim().slice(0, MAX_APP_NAME_LENGTH));
+  }
   if (input.from?.trim()) params.set("from", input.from.trim());
   if (input.note?.trim())
     params.set("note", input.note.trim().slice(0, MAX_PROPOSAL_NOTE_LENGTH));

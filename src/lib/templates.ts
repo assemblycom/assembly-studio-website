@@ -88,6 +88,13 @@ const INDUSTRY_BY_SLUG: Record<string, string[]> = {
   "internal-resource-library": ["Consulting", "Accounting", "Legal", "Technology"],
   "jargon-quest": ["Legal", "Accounting", "Financial services", "Healthcare"],
   "block-builder-game": ["Education", "Marketing", "Technology"],
+  // From the template DB list.
+  "booking-app": ["Consulting", "Healthcare", "Legal", "Real estate"],
+  "pdf-to-digital-intake": ["Legal", "Healthcare", "Accounting", "Financial services"],
+  "markup-comments": ["Marketing", "Consulting", "Technology"],
+  "internal-ai-assistant": ["Consulting", "Technology", "Accounting", "Legal"],
+  "service-request-intake": ["Technology", "Consulting", "Marketing"],
+  "internal-ticketing": ["Technology", "Consulting", "Healthcare"],
 };
 
 const BASE_TEMPLATES: Template[] = [
@@ -389,6 +396,68 @@ const BASE_TEMPLATES: Template[] = [
       "A playful drag-and-drop builder that runs in the portal, for onboarding warm-ups, workshops, or simply showing clients what an interactive app can be.",
     features: ["Drag-and-drop board", "Saved layouts", "Shareable results", "Works on mobile"],
   },
+  // ── Added from the template DB list ──────────────────────────────────────
+  // Copy here is a first draft, written from each name; review before launch.
+  {
+    slug: "booking-app",
+    title: "Booking app",
+    description: "Clients book time from your availability",
+    icon: "📆",
+    category: "Requests",
+    longDescription:
+      "Let clients request a meeting and book it against the times you actually have open, with the confirmation and anything they submitted kept in their portal.",
+    features: ["Availability windows", "Meeting requests", "Confirmations & reminders", "Booking history"],
+  },
+  {
+    slug: "pdf-to-digital-intake",
+    title: "PDF to digital intake",
+    description: "Turn a static PDF into a real form",
+    icon: "📄",
+    category: "Onboarding",
+    longDescription:
+      "Replace the PDF you email clients with a proper digital form. Answers come back structured and searchable instead of as a scan someone has to retype.",
+    features: ["Import from PDF", "Structured fields", "Saved progress", "Export back to PDF"],
+  },
+  {
+    slug: "markup-comments",
+    title: "Markup & comments",
+    description: "Comment directly on files",
+    icon: "✍️",
+    category: "Approvals",
+    longDescription:
+      "Let clients mark up a document or design and pin comments to the exact spot, so feedback arrives in context rather than as a long email thread.",
+    features: ["Pinned comments", "Markup tools", "Threaded replies", "Resolve & track"],
+  },
+  {
+    slug: "internal-ai-assistant",
+    title: "Internal AI assistant",
+    description: "An assistant trained on your playbooks",
+    icon: "🧠",
+    category: "AI assistants",
+    longDescription:
+      "The same assistant your clients get, pointed inward: it answers from your own policies, playbooks, and past work so the team stops asking the same questions twice.",
+    features: ["Answers from your docs", "Cited sources", "Team-only access", "Chat history"],
+  },
+  {
+    slug: "service-request-intake",
+    title: "Service request intake",
+    description: "One front door for new work",
+    icon: "🛠️",
+    category: "Requests",
+    longDescription:
+      "Give clients one place to ask for new work, with the questions you need answered up front so a request arrives ready to scope instead of needing three follow-ups.",
+    features: ["Request types", "Required details", "Status per request", "Assign an owner"],
+  },
+  {
+    slug: "internal-ticketing",
+    title: "Internal ticketing",
+    description: "Track team requests through to done",
+    icon: "🎫",
+    category: "Requests",
+    longDescription:
+      "A queue for the requests your own team raises, each with an owner, a priority, and a status, so nothing sits unclaimed in someone's inbox.",
+    features: ["Ticket queue", "Owners & priority", "Status workflow", "Activity log"],
+  },
 
 ];
 
@@ -425,6 +494,13 @@ const PREVIEW_BY_SLUG: Record<string, { previewCount?: number; hasVideo?: boolea
   "internal-resource-library": { previewCount: 2 },
   "jargon-quest": { previewCount: 3 },
   "block-builder-game": { previewCount: 2 },
+  // Video leads the ones best shown in motion (scheduling, markup, AI).
+  "booking-app": { previewCount: 3, hasVideo: true },
+  "pdf-to-digital-intake": { previewCount: 3 },
+  "markup-comments": { previewCount: 3, hasVideo: true },
+  "internal-ai-assistant": { previewCount: 3, hasVideo: true },
+  "service-request-intake": { previewCount: 2 },
+  "internal-ticketing": { previewCount: 2 },
 };
 
 // Templates that sort AFTER the featured set on the index. Empty since the
@@ -436,6 +512,7 @@ const LOWER_PRIORITY = new Set<string>();
 const AI_SLUGS = new Set([
   "client-ai-assistant",
   "voice-ai-integration",
+  "internal-ai-assistant",
 ]);
 
 // Merge industry tags + preview shape onto each template from the maps above.

@@ -217,10 +217,9 @@ function CardOnboarding() {
       {/* The glass edge is a white hairline, which vanishes on a light face —
           light mode borrows the ink hairline the widget mocks use instead. */}
       <div className="v69-glass-tile flex items-center gap-2.5 rounded-xl border border-[rgba(255,255,255,0.6)] p-3 [[data-theme=light]_&]:border-black/[0.08] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.1)]">
-        {/* Hairline around the avatar so it reads as its own element on a tile
-            whose fill is only a step away. Explicit rgba — the `white` token
-            inverts with the theme. */}
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--v69-well)] text-[10px] leading-none text-[var(--v69-ink)] ring-1 ring-[rgba(16,24,40,0.07)] [[data-theme=light]_&]:bg-[#E7E7DE] [[data-theme=light]_&]:text-[#5B5C53] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.09)]">
+        {/* No ring — the fill alone carries the avatar; a hairline on a shape
+            this small only thickened its edge. */}
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--v69-well)] text-[10px] leading-none text-[var(--v69-ink)] [[data-theme=light]_&]:bg-[#E7E7DE] [[data-theme=light]_&]:text-[#5B5C53]">
           {initials}
         </span>
         {/* On the translucent tile the shared well tone lands within a step of
@@ -489,14 +488,20 @@ function CardDataViz() {
 // Steps toward `target` one minute per beat (matching the clock's colon
 // blink), instead of a smooth eased sweep — a real clock's digits jump once
 // per minute, they don't animate through the minutes in between.
+// The resting readout is the tick's FIRST minute, not its last: sitting on the
+// target meant the first hover snapped the display backwards three minutes
+// before counting forward again.
+const TICK_MINUTES = 3;
+
 function useMinuteTick(target: number, play: number, beatMs = 1000) {
-  const [val, setVal] = useState(target);
+  const start = Math.max(0, target - TICK_MINUTES);
+  const [val, setVal] = useState(start);
   useEffect(() => {
     if (!play) {
-      setVal(target);
+      setVal(start);
       return;
     }
-    let cur = Math.max(0, target - 3);
+    let cur = start;
     setVal(cur);
     const id = setInterval(() => {
       cur += 1;
@@ -504,7 +509,7 @@ function useMinuteTick(target: number, play: number, beatMs = 1000) {
       if (cur >= target) clearInterval(id);
     }, beatMs);
     return () => clearInterval(id);
-  }, [play, target, beatMs]);
+  }, [play, target, start, beatMs]);
   return val;
 }
 
@@ -698,9 +703,13 @@ function CardProposal() {
           the frame casts inward at the seam, and a two-step outer shadow. The
           gradient rides as a background-image over the token colour, so the middle
           is plain panel fill and reads matte.
-          Light stays flat — the panel's own fill and hairline are enough there, and
-          the same treatment read as a moulded 3D slab on the pale face. */}
-      <div className="flex flex-1 flex-col rounded-2xl bg-[var(--v69-inner)] p-4 ring-1 ring-black/[0.04] [[data-theme=dark]_&]:bg-[linear-gradient(180deg,rgba(255,255,255,0.07)_0%,rgba(255,255,255,0.025)_14%,rgba(255,255,255,0)_36%,rgba(0,0,0,0.05)_74%,rgba(0,0,0,0.13)_100%)] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.10)] [[data-theme=dark]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.10),inset_1px_0_0_rgba(255,255,255,0.05),inset_-1px_0_0_rgba(255,255,255,0.05),inset_0_-1px_0_rgba(255,255,255,0.06),inset_0_9px_14px_-12px_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.45),0_12px_26px_-16px_rgba(0,0,0,0.6)]">
+          Light gets its own much quieter version of the same idea: the panel sits
+          recessed in the card rather than raised on it, so the shadow falls from
+          the TOP inner edge and the catch-light runs along the bottom and sides.
+          Values an order of magnitude lighter than dark's — on a pale face
+          anything stronger reads as a moulded 3D slab. The outer card stays
+          flat; only this surface is carved. */}
+      <div className="flex flex-1 flex-col rounded-2xl bg-[var(--v69-inner)] p-4 ring-1 ring-black/[0.04] [[data-theme=light]_&]:shadow-[inset_0_1px_1px_rgba(16,24,40,0.05),inset_0_7px_12px_-9px_rgba(16,24,40,0.10),inset_0_-1px_0_rgba(255,255,255,0.9),inset_1px_0_0_rgba(255,255,255,0.5),inset_-1px_0_0_rgba(255,255,255,0.5)] [[data-theme=dark]_&]:bg-[linear-gradient(180deg,rgba(255,255,255,0.07)_0%,rgba(255,255,255,0.025)_14%,rgba(255,255,255,0)_36%,rgba(0,0,0,0.05)_74%,rgba(0,0,0,0.13)_100%)] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.10)] [[data-theme=dark]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.10),inset_1px_0_0_rgba(255,255,255,0.05),inset_-1px_0_0_rgba(255,255,255,0.05),inset_0_-1px_0_rgba(255,255,255,0.06),inset_0_9px_14px_-12px_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.45),0_12px_26px_-16px_rgba(0,0,0,0.6)]">
         <div className="text-[9px] text-muted-foreground">Proposal</div>
         <div className="mt-1.5 text-[26px] font-normal leading-none tracking-tight tabular-nums text-[var(--v69-ink)]">
           ${total.toLocaleString("en-US")}

@@ -194,7 +194,9 @@ export function HowItWorks() {
             rows are a tall list to scroll past before you see anything, so the
             visual comes first (right under the intro) and the steps read as its
             legend. sm+ keeps tabs-then-visual, where they're one 4-across row. */}
-        <div className="mx-auto mt-10 flex max-w-[1100px] flex-col overflow-hidden rounded-2xl border border-border [[data-theme=dark]_&]:border-white/15 [[data-theme=dark]_&]:bg-white/[0.04] md:mt-12">
+        {/* 20px, so the blue panel inside it (12px, inset 8px) is concentric with
+            it rather than a third unrelated curve. */}
+        <div className="mx-auto mt-10 flex max-w-[1100px] flex-col overflow-hidden rounded-[20px] border border-border [[data-theme=dark]_&]:border-white/15 [[data-theme=dark]_&]:bg-white/[0.04] md:mt-12">
           {/* Tabs — divided by hairlines; each carries a progress track on its
               top edge that fills over the dwell on the active tab. */}
           <div

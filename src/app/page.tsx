@@ -7,6 +7,7 @@ import { CTA } from "@/components/home/cta";
 import { ProductionGap } from "@/components/home/production-gap";
 import { WholeStack } from "@/components/home/whole-stack";
 import { Reveal } from "@/components/ui/reveal";
+import { GridDivider, GridRails } from "@/components/ui/grid-lines";
 
 export default function HomePage() {
   return (
@@ -16,14 +17,12 @@ export default function HomePage() {
           canvas. */}
       <HeroV76 />
 
-      {/* Content region. The grid is gone entirely — the vertical rails that
-          framed this column and the horizontal rules between sections. Together
-          they implied a system the rest of the page never honoured, and against
-          the hero's full bleed they competed with the centred column they were
-          meant to define. Sections are separated by their own vertical rhythm.
-          (The TrustTicker still carries its own bottom rule; that one belongs to
-          the band, not to the grid.) */}
+      {/* Content region — framed by vertical rails aligned to the 1200px
+          content column. The rails start below the hero and run down through
+          the sections (the wide footer sits outside this wrapper). Drawn on top
+          as thin lines in the column gutter so section fills never hide them. */}
       <div className="relative">
+        <GridRails />
 
         {/* The "how it works" walkthrough comes first, then the three platform
             points (left-rail menu + visual). */}
@@ -33,14 +32,20 @@ export default function HomePage() {
           <Reveal variant="fade">
             <TrustTicker />
           </Reveal>
+          {/* The boundary into the content sits here rather than above the stats
+              band: the band reads as part of the hero, so a rule above its
+              numbers cut it off from what it belongs to. */}
+          <GridDivider />
           <Reveal>
             <HowItWorks />
           </Reveal>
+          <GridDivider />
           <Reveal>
             <ProductionGap />
           </Reveal>
         </div>
 
+        <GridDivider />
 
         {/* The lower half stays on the light hero surface too, so the whole page
             reads as one continuous light canvas until the dark CTA + footer.
@@ -49,14 +54,17 @@ export default function HomePage() {
           <Reveal>
             <Testimonials />
           </Reveal>
+          <GridDivider />
           <Reveal>
             <WholeStack />
           </Reveal>
+          <GridDivider />
           <Reveal>
             <HomeFAQ />
           </Reveal>
         </div>
 
+        <GridDivider />
 
         <div className="relative z-20">
           <CTA />

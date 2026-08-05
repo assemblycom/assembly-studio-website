@@ -410,7 +410,10 @@ function PhoneScreen({
       // Corners well past what concentricity with the 12px frame would ask for:
       // this has to read as a handset, and a phone's radius is the first thing
       // that says so. The status bar above the app's own chrome does the rest.
-      className="mock-ui flex h-[calc(100%+20px)] w-full shrink-0 flex-col overflow-hidden rounded-t-[22px] bg-[var(--mk-surface)] sm:hidden"
+      // At the outer shell's own 20px, though — three nested edges at 16, 12 and
+      // 22 read as three arbitrary curves; repeating the outermost value makes
+      // the set a rhythm instead.
+      className="mock-ui flex h-[calc(100%+20px)] w-full shrink-0 flex-col overflow-hidden rounded-t-[20px] bg-[var(--mk-surface)] sm:hidden"
       style={{ boxShadow: PHONE_CUT_SHADOW }}
     >
       <PhoneStatusBar />
@@ -832,9 +835,12 @@ export function DescribeVisual() {
 
 // ── 2. PLAN — chat: request → thinking → reply types in → questions card. ────
 const ASSISTANT_REPLY = "Got it. A few quick questions before I build this.";
+// `short` is the phone wording, swapped in the same way the card's header title
+// is: at the phone composition's width the full second answer ran past the row
+// and truncated mid-word, and an answer you can't read isn't an answer.
 const PLAN_OPTIONS = [
-  "No, this is internal-only",
-  "Yes, this will show in my client portal",
+  { label: "No, this is internal-only" },
+  { label: "Yes, this will show in my client portal", short: "Yes, clients will see it" },
 ];
 // No answer pre-selected — both options read as unpicked (numbered 1 and 2).
 const PLAN_SELECTED = -1;
@@ -905,7 +911,7 @@ function PlanQuestionsCard() {
           // cut by the screen's bottom edge and a highlight on it reads as a
           // stuck state rather than as an answer being considered.
           <div
-            key={option}
+            key={option.label}
             className={`pointer-events-auto flex items-center gap-2.5 px-3 py-2.5 transition-colors duration-150 max-sm:pointer-events-none motion-reduce:transition-none ${
               selected
                 ? "bg-[var(--mk-elevated)]"
@@ -923,7 +929,14 @@ function PlanQuestionsCard() {
               {selected ? <IconCheck className="size-[11px]" /> : i + 1}
             </span>
             <p className="truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
-              {option}
+              {option.short ? (
+                <>
+                  <span className="sm:hidden">{option.short}</span>
+                  <span className="hidden sm:inline">{option.label}</span>
+                </>
+              ) : (
+                option.label
+              )}
             </p>
           </div>
         );
@@ -1042,6 +1055,10 @@ export function BuildAppVisual() {
 // ── 3. BUILD — the deployed Time tracker: a cursor logs time, a row slides in. ─
 type Entry = {
   description: string;
+  // Phone wording. The phone screen gives the description a single narrow line,
+  // where the longer entries truncated mid-word; the desktop screens have the
+  // room for the full text and keep it.
+  short?: string;
   client: string;
   date: string;
   duration: string;
@@ -1051,6 +1068,7 @@ type Entry = {
 const BUILD_ENTRIES: Entry[] = [
   {
     description: "Q1 financial review & reporting",
+    short: "Q1 financial review",
     client: "Meridian Corp",
     date: "Apr 10",
     duration: "3h 45m",
@@ -1065,6 +1083,7 @@ const BUILD_ENTRIES: Entry[] = [
   },
   {
     description: "Reconcile accounts receivable",
+    short: "Reconcile accounts",
     client: "Meridian Corp",
     date: "Apr 9",
     duration: "2h 15m",
@@ -1079,6 +1098,7 @@ const BUILD_ENTRIES: Entry[] = [
   },
   {
     description: "Payroll processing & review",
+    short: "Payroll processing",
     client: "Bloom Studios",
     date: "Apr 8",
     duration: "4h 00m",
@@ -1124,6 +1144,7 @@ const ITERATE_ENTRIES: Entry[] = [
   },
   {
     description: "Quarterly forecast model",
+    short: "Quarterly forecast",
     client: "Meridian Corp",
     date: "Apr 4",
     duration: "2h 45m",
@@ -1296,7 +1317,7 @@ function BuildPhoneContent() {
           >
             <div className="min-w-0 flex-1">
               <p className="truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
-                {entry.description}
+                {entry.short ?? entry.description}
               </p>
               <p className="mt-1.5 text-[11px] leading-none text-[var(--mk-muted)]">
                 {entry.date} · {entry.duration}

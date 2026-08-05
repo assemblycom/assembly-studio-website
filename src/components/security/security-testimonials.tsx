@@ -12,7 +12,10 @@ import Link from "next/link";
 const STORY = {
   slug: "metta-health",
   company: "Metta Health",
-  industry: "Healthcare",
+  // Not the sector: "Metta Health · Healthcare" said the same word twice, and the
+  // headline under it already places the story in healthcare. Tenure is the fact
+  // this page's reader actually wants from an attribution line.
+  context: "On Assembly since 2023",
   title:
     "How Metta Health scales HIPAA-compliant patient authorizations with Assembly",
   stats: [
@@ -29,10 +32,11 @@ const BAR_HEIGHTS = ["md:h-[280px]", "md:h-[228px]", "md:h-[186px]"];
 export function SecurityTestimonials() {
   return (
     <div className="relative">
-      {/* Attribution leads — company, then industry in a colour shift. */}
+      {/* Attribution leads — company, then how long they've run on it, in a
+          colour shift. */}
       <p className="type-eyebrow text-foreground">
         {STORY.company}
-        <span className="ml-3 text-muted-foreground">{STORY.industry}</span>
+        <span className="ml-3 text-muted-foreground">{STORY.context}</span>
       </p>
 
       {/* Case-study title — the hero of the section. type-h2 (28 → 36px),

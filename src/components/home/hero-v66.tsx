@@ -236,8 +236,21 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
     { label: "Attach file", icon: "attach" as const },
     { label: "Migrate from a tool", icon: "transfer" as const },
   ];
+  // The composer's two menus ("+" and the prompt picker) are mutually exclusive:
+  // opening one closes the other. The outside-pointerdown handlers below mostly
+  // achieve that on their own, but they depend on the trigger counting as
+  // "outside" the other menu, which is a property of the DOM rather than of the
+  // rule — so the rule is stated here instead.
   const [menuOpen, setMenuOpen] = useState(false);
   const [promptOpen, setPromptOpen] = useState(false);
+  const toggleMenu = () => {
+    setPromptOpen(false);
+    setMenuOpen((o) => !o);
+  };
+  const togglePrompt = () => {
+    setMenuOpen(false);
+    setPromptOpen((o) => !o);
+  };
   // Controlled when `value`/`onValueChange` are supplied (so the hero can seed
   // the box from a suggested-prompt chip); otherwise self-managed.
   const [internalValue, setInternalValue] = useState("");
@@ -426,7 +439,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
     <div ref={promptRef} className="relative">
       <button
         type="button"
-        onClick={() => setPromptOpen((o) => !o)}
+        onClick={togglePrompt}
         aria-haspopup="menu"
         aria-expanded={promptOpen}
         className={`flex ${ctrlH} items-center rounded-lg ${pillPad} ${pillText} ${squishCls} ${pillCls} ${pillTextCls}`}
@@ -615,7 +628,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
                   type="button"
                   aria-label="More options"
                   aria-expanded={menuOpen}
-                  onClick={() => setMenuOpen((o) => !o)}
+                  onClick={toggleMenu}
                   className={`flex ${plusSize} items-center justify-center rounded-lg ${squishCls} ${plusBgCls} ${pillTextCls}`}
                 >
                   <IconPlus />
@@ -693,7 +706,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
             <div ref={menuRef} className="relative">
               <button
                 type="button"
-                onClick={() => setMenuOpen((o) => !o)}
+                onClick={toggleMenu}
                 aria-label="Add"
                 aria-expanded={menuOpen}
                 className={`flex ${plusSize} items-center justify-center rounded-lg ${squishCls} ${plusBgCls} ${pillTextCls}`}
@@ -759,10 +772,13 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
                   : dark
                     ? "bg-white/10 text-white/40"
                     : "bg-neutral-200/70 text-neutral-400"
-              } ${submitLabel && submitActive ? `${submitW} sm:w-auto sm:pl-3.5 sm:pr-2.5` : submitW}`}
+              } ${submitLabel && submitActive ? "w-auto pl-3.5 pr-2.5" : submitW}`}
               style={submitActive ? { backgroundColor: submitDark ? "#171717" : accent } : undefined}
             >
-              {submitLabel && submitActive && <span className="hidden whitespace-nowrap sm:inline">{submitLabel}</span>}
+              {/* The words at every width. They used to appear from sm up only, so
+                  on a phone the one action on the page was a bare arrow — the
+                  composer read as a box with no way out of it. */}
+              {submitLabel && submitActive && <span className="whitespace-nowrap">{submitLabel}</span>}
               <IconArrow className="size-4" />
             </button>
               );

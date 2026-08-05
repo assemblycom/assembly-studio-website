@@ -5,6 +5,7 @@ import {
   buildSignupUrl,
   INVALID_EMAIL_ERROR,
   LOGIN_URL,
+  type SignupTemplate,
 } from "@/lib/constants";
 import { GoogleIcon } from "@/components/ui/google-icon";
 
@@ -23,7 +24,7 @@ export function SignupHandoff({
   inputRef,
 }: {
   prompt?: string;
-  template?: string;
+  template?: SignupTemplate;
   emailCtaLabel?: string;
   /** Lets the page put the cursor here (e.g. after a CTA elsewhere on it). */
   inputRef?: React.RefObject<HTMLInputElement | null>;

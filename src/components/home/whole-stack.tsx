@@ -1002,20 +1002,14 @@ function MockToggle({ on = true }: { on?: boolean }) {
   );
 }
 
-const AUTH_SETTINGS: { title: string; body: string; accent?: boolean }[] = [
-  {
-    title: "Magic links",
-    body: "One-time links that expire after 3 days.",
-  },
-  {
-    title: "Google SSO",
-    body: "White-labeled Google sign-in.",
-  },
-  {
-    title: "Multi-factor authentication",
-    body: "A verification code every time they log in.",
-    accent: true,
-  },
+// Names only. The mock is a picture of three switches in a workspace's settings,
+// and the description line under each one turned it into a page to read: the copy
+// beside the visual already says what MFA enforced means, so repeating it here in
+// smaller grey type only competed with it.
+const AUTH_SETTINGS: { title: string; accent?: boolean }[] = [
+  { title: "Magic links" },
+  { title: "Google SSO" },
+  { title: "Multi-factor authentication", accent: true },
 ];
 
 function MfaSettingVisual() {
@@ -1026,23 +1020,16 @@ function MfaSettingVisual() {
           key={setting.title}
           // The MFA row sits on the well so the eye lands on the switch this
           // section is about; the methods above it are context, not the claim.
-          className={`flex items-start gap-3 px-3.5 py-3 ${
+          className={`flex items-center gap-3 px-3.5 py-3.5 ${
             i < AUTH_SETTINGS.length - 1
               ? "border-b border-[var(--mk-hairline)]"
               : ""
           } ${setting.accent ? "bg-[var(--mk-well)]" : ""}`}
         >
-          <span className="min-w-0 flex-1">
-            <span className="block truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
-              {setting.title}
-            </span>
-            <span className="mt-1.5 block text-[11px] leading-[1.4] text-[var(--mk-muted)]">
-              {setting.body}
-            </span>
+          <span className="min-w-0 flex-1 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
+            {setting.title}
           </span>
-          <span className="pt-[2px]">
-            <MockToggle />
-          </span>
+          <MockToggle />
         </div>
       ))}
     </div>
@@ -1237,17 +1224,13 @@ function ClientScopeVisual() {
   );
 }
 
-// The app's visibility setting — three choices, one chosen, and the audience
-// listed underneath. A radio group rather than a toggle: "hidden" and "everyone"
-// are both real answers, and the middle one is the interesting one.
-const VISIBILITY_OPTIONS = [
-  { label: "All clients", on: false },
-  { label: "Specific clients and companies", on: true },
-  { label: "Hidden from clients", on: false },
-];
-
 const VISIBILITY_AUDIENCE = ["Meridian Corp", "Bloom Studios", "Ava Ellis"];
 
+// One app, and who can see it. This used to be the settings screen itself: a
+// three-option radio group with two answers nobody had chosen and a selected
+// third holding the audience. Redrawing the form made the reader parse a control
+// to reach a fact — the app is scoped to these three — so the form is gone and
+// only that fact is left. The app name in the header is what makes it per-app.
 function AppVisibilityVisual() {
   return (
     <div className={SETTINGS_CARD}>
@@ -1255,45 +1238,18 @@ function AppVisibilityVisual() {
         Onboarding wizard
       </div>
 
-      <div className="flex flex-col gap-2.5 px-3.5 py-3">
-        {VISIBILITY_OPTIONS.map((option) => (
-          <div key={option.label}>
-            <span className="flex items-center gap-2">
-              <span
-                className={`flex size-[13px] shrink-0 items-center justify-center rounded-full ${
-                  option.on
-                    ? "bg-[var(--mk-invert-bg)]"
-                    : "ring-1 ring-inset ring-[var(--mk-border)]"
-                }`}
-              >
-                {option.on && (
-                  <span className="size-[4px] rounded-full bg-[var(--mk-invert-fg)]" />
-                )}
-              </span>
-              <span
-                className={`truncate text-[12px] leading-none ${
-                  option.on ? "text-[var(--mk-fg)]" : "text-[var(--mk-muted)]"
-                }`}
-              >
-                {option.label}
-              </span>
+      <div className="px-3.5 py-3.5">
+        <span className="block text-[11px] leading-none text-[var(--mk-muted)]">
+          Visible to
+        </span>
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
+          {VISIBILITY_AUDIENCE.map((name) => (
+            <span key={name} className={MOCK_TAG}>
+              {name}
             </span>
-
-            {/* The chosen audience belongs to the option that opened it, so it
-                sits under that row rather than at the bottom of the group. */}
-            {option.on && (
-              <div className="ml-[21px] mt-2 flex flex-wrap gap-1.5">
-                {VISIBILITY_AUDIENCE.map((name) => (
-                  <span key={name} className={MOCK_TAG}>
-                    {name}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-
     </div>
   );
 }
@@ -1308,7 +1264,10 @@ function BrandedEmailVisual() {
     <div className={SETTINGS_CARD}>
       <div className="flex items-center gap-2 border-b border-[var(--mk-hairline)] bg-[var(--mk-well)] px-3.5 py-2.5">
         <BrandMark className="size-[20px] text-[10px]" />
-        <span className="shrink-0 text-[12px] leading-none text-[var(--mk-fg)]">
+        {/* Phone: the sender name drops and the address carries the line on its
+            own. The mark already says whose brand this is, so at this width the
+            name only crowded the address it belongs to. */}
+        <span className="hidden shrink-0 text-[12px] leading-none text-[var(--mk-fg)] sm:inline">
           Your brand
         </span>
         <span className="min-w-0 truncate pb-[3px] -mb-[3px] text-[11px] leading-none text-[var(--mk-muted)]">
@@ -1574,9 +1533,13 @@ function AppEventsVisual() {
 
       <div className="flex flex-col gap-2 px-3.5 py-3">
         {TRIGGER_ROWS.map((label) => (
+          // The same row treatment the automation steps above use: --mk-well on
+          // a hairline. These were on --mk-fill inside a --mk-border, a step too
+          // dark for a row on a white card, and two visuals in the same panel
+          // drawing the same kind of row two different values apart.
           <div
             key={label}
-            className="rounded-[6px] border border-[var(--mk-border)] bg-[var(--mk-fill)] px-2.5 py-2"
+            className="rounded-[6px] border border-[var(--mk-hairline)] bg-[var(--mk-well)] px-2.5 py-2"
           >
             <span className="block min-w-0 truncate pb-[3px] -mb-[3px] text-[12px] leading-none text-[var(--mk-fg)]">
               {label}
@@ -1924,10 +1887,14 @@ function ApiRequestVisual() {
 // The four ways to charge, each with the shape of a real record beside it. The
 // amounts differ per row on purpose: four identical-looking rows would read as
 // one billing type listed four ways.
-const BILLING_MODES: { name: string; detail: string }[] = [
-  { name: "Invoice", detail: "1042 · $2,400" },
-  { name: "Subscription", detail: "Monthly books · $850/mo" },
-  { name: "Service", detail: "Tax filing · $1,200 fixed" },
+// `short` is the phone version: just the amount. The reference and the work it's
+// for are what the detail adds on a wide row, and on a phone they turned the
+// right-hand column into a second line of copy to read for every row, when the
+// name on the left is what the visual is actually listing.
+const BILLING_MODES: { name: string; detail: string; short?: string }[] = [
+  { name: "Invoice", detail: "1042 · $2,400", short: "$2,400" },
+  { name: "Subscription", detail: "Monthly books · $850/mo", short: "$850/mo" },
+  { name: "Service", detail: "Tax filing · $1,200 fixed", short: "$1,200" },
   { name: "Payment link", detail: "yourbrand.com/pay" },
 ];
 
@@ -1951,7 +1918,14 @@ function BillingModesVisual() {
             {mode.name}
           </span>
           <span className="min-w-0 flex-1 truncate pb-[3px] -mb-[3px] text-right text-[11px] leading-none text-[var(--mk-muted)]">
-            {mode.detail}
+            {mode.short ? (
+              <>
+                <span className="sm:hidden">{mode.short}</span>
+                <span className="hidden sm:inline">{mode.detail}</span>
+              </>
+            ) : (
+              mode.detail
+            )}
           </span>
         </div>
       ))}
@@ -2002,7 +1976,11 @@ function ClientBillingVisual() {
           <span className="shrink-0 text-[12px] leading-none text-[var(--mk-fg)]">
             {invoice.meta}
           </span>
-          <span className="w-[62px] shrink-0 text-right text-[11px] leading-none text-[var(--mk-muted)]">
+          {/* The due/paid date drops on a phone. Three columns in that width left
+              the row as name, reference, amount and date all competing, and the
+              claim here is that the client sees their invoices in one place, not
+              what any single one is due. */}
+          <span className="hidden w-[62px] shrink-0 text-right text-[11px] leading-none text-[var(--mk-muted)] sm:block">
             {invoice.status}
           </span>
         </div>
@@ -2467,6 +2445,17 @@ function DetailPanel({
   useEffect(() => setMounted(true), []);
   const panelRef = useRef<HTMLDivElement>(null);
 
+  // Every open starts at the top. The panel is mounted once and only its content
+  // swaps, so its scroller kept whatever position the last pillar was left at —
+  // read one to the end, open the next, and it opened halfway down someone else's
+  // section. Reset on open rather than on close: on close the panel is still
+  // visible for the length of the slide-out, and jumping its content mid-exit is
+  // the same bug seen from the other side.
+  useEffect(() => {
+    if (!open) return;
+    panelRef.current?.scrollTo({ top: 0 });
+  }, [open, pillar.short]);
+
   // Close on Escape and hold the page still while the panel is open.
   //
   // This used to pin <body> with position:fixed, which locks scrolling but takes
@@ -2704,8 +2693,15 @@ export function WholeStack() {
                   A plus only says there is more here, which is the one thing
                   that's true. No hover nudge, for the same reason — movement
                   would put the direction back. It brightens instead. */}
+              {/* Phone: pulled 6px in so the plus lines up with the nav's menu
+                  glyph directly above it. The plus already sits exactly on the
+                  content rail; the nav mark stops 6px short of it, because its
+                  22px icon is centred in a 36px tap target and the dots carry
+                  their own bearing inside that. Two marks on the same edge of
+                  the same screen have to agree, and the nav is the one the
+                  reader sees on every page. */}
               <IconRowPlus
-                className="size-3.5 shrink-0 text-muted-foreground transition-colors duration-200 group-hover:text-foreground"
+                className="size-3.5 shrink-0 text-muted-foreground transition-colors duration-200 group-hover:text-foreground max-sm:mr-1.5"
               />
             </button>
           ))}

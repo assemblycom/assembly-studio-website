@@ -9,12 +9,13 @@ import {
   TEMPLATE_FEATURE_DETAILS,
   type Template,
 } from "@/lib/templates";
+import { MAX_APP_NAME_LENGTH } from "@/lib/constants";
 import { FooterAurora } from "@/components/layout/footer";
 import { useTheme } from "@/components/theme/theme-provider";
-import { TemplateGallery } from "@/components/templates/template-gallery";
 import { MockFit, MOCK_DESIGN_SIZE } from "@/components/templates/mock-fit";
 import { TemplateDetailPanel } from "@/components/proposal/template-detail-panel";
 import { V69CardMock } from "@/components/home/hero-v71";
+import { OptionAvatar } from "@/components/ui/select-menu";
 
 // ─────────────────────────────────────────────────────────────────────────
 // PROPOSAL — a page made for one person. Someone on the team refined a prompt
@@ -57,15 +58,63 @@ function SectionRule({ className = "" }: { className?: string }) {
 // field (without it the turn is a flat squash), preserve-3d on the rotating
 // element so its faces keep their own depth, and backface-visibility on each face
 // so the one pointing away is hidden instead of showing through mirrored.
-const CARD_FIELD = "#7DA4FF";
+// Light prints the band in the brand blue, dark in the brand lime, with the ink
+// on it flipping to black — see --proposal-* in globals.css.
+const CARD_FIELD = "var(--proposal-field)";
+
+// The card's parts, shared by the template's flip card and the prompt's card so
+// the two arrivals are the same object with different contents.
+// The face: the page's own surface, so it stays legible in either theme against
+// the one fixed colour on the block.
+//
+// Whatever uses this MUST position the face itself (`relative`, or the flip
+// card's `absolute inset-0`). `.card-sheen`'s shading and specular are laid on
+// with `position:absolute; inset:0`, so on a static face they resolve against
+// the field behind it and paint the sheen across the whole blue panel — which
+// showed up as a faintly lighter rectangle around the card.
+const CARD_FACE =
+  "card-sheen flex flex-col overflow-hidden rounded-2xl bg-background p-4 shadow-[0_18px_40px_-24px_rgba(16,24,40,0.35)] md:p-5 [[data-theme=dark]_&]:bg-[#151515]";
+// The framed area the face fills — the cover, the words, or the prompt.
+const CARD_WELL =
+  "mt-3 min-h-0 flex-1 overflow-hidden rounded-xl border border-black/[0.06] bg-[#FAFAFA] [[data-theme=dark]_&]:border-white/[0.06] [[data-theme=dark]_&]:bg-white/[0.03]";
+// The card's one action, in the brand colour the band isn't: lime on the light
+// band's blue, blue on the dark band's lime. Matching the field it sits on would
+// make the button read as a hole in the card rather than as a control.
+const CARD_ACTION =
+  "mt-4 flex h-10 shrink-0 items-center justify-center rounded-lg bg-[#D9ED92] text-sm text-[#262626] [[data-theme=dark]_&]:bg-[#7DA4FF]";
+// The field the card sits on, at the proportions the cover is drawn for.
+const CARD_FIELD_CLS =
+  "relative aspect-square w-full rounded-[20px] px-[19%] py-[9%]";
+// The mark on the masthead. On a phone it sits centred in a rounded tile of the
+// band's own ink: alone on a full-width colour field it read as a stray glyph
+// rather than as the thing signing the page. On desktop it goes back to the bare
+// mark in the corner, where the band's width gives it that position instead.
+const MARK_TILE_CLS =
+  // md:w-fit is load-bearing: without it the tile is a full-width flex row and
+  // `justify-center` keeps centring the mark on desktop, where it belongs in the
+  // corner.
+  "mx-auto flex size-11 items-center justify-center rounded-xl bg-[var(--proposal-ink-fill)] md:mx-0 md:size-auto md:w-fit md:rounded-none md:bg-transparent";
+
+// The prompt's field, on a phone only. The square and its deep insets are drawn
+// for a cover — a picture that wants air around it — and they left the prompt
+// being typed into a column about twenty characters wide, with the sentence
+// running off the bottom. Here the card takes nearly the full width and a set
+// height instead, so the writing has a line to sit on. From `sm` up there's
+// width to spare and both cards go back to being the same object.
+const PROMPT_FIELD_CLS =
+  "relative h-[26rem] w-full rounded-[20px] px-[3%] py-[5%] sm:aspect-square sm:h-auto sm:px-[19%] sm:py-[9%]";
+
+// How far the masthead draws in as it leaves: how much of a screen the move
+// takes, how much it shrinks by, and the radius it ends on.
+const BAND_INSET_DISTANCE = 520;
+const BAND_INSET_SCALE = 0.06;
+const BAND_INSET_RADIUS = 32;
+
 // How far the card leans at full reach, and how far away "full reach" is —
 // measured in the card's own widths, so the lean maxes out about a card away and
 // holds there rather than growing with the size of the window.
 const CARD_TILT_DEG = 7;
 const CARD_TILT_REACH = 1.4;
-
-// The open-row key for "Built for", which shares its state with the feature rows.
-const BUILT_FOR = "Built for";
 
 /**
  * A template's name as the opening sentence says it. Gallery names can carry a
@@ -81,29 +130,45 @@ function headlineTitle(title: string) {
     : trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
 }
 
-function TemplateFlipCard({
-  template,
-  dark,
-  startHref,
-}: {
-  template: Template;
-  dark: boolean;
-  startHref: string;
-}) {
-  const [flipped, setFlipped] = useState(false);
+/**
+ * The lean and the light, shared by both cards: a picked template and a typed
+ * prompt are the same object, so they behave the same under the pointer even
+ * though only one of them turns over.
+ *
+ * The lean follows the pointer anywhere on the page, not just over the card.
+ * Written straight to the style rather than through state: this fires on every
+ * pointer move, and re-rendering the card each time would be the whole page.
+ * The tilt sits on its own wrapper so it composes with a flip instead of
+ * fighting it for the transform.
+ *
+ * `frozen` settles the card flat and stops it following the pointer — for the
+ * prompt card while its text is being edited. A surface you're typing on that
+ * leans away every time the pointer moves is the one place the effect works
+ * against the thing it's decorating.
+ */
+function useCardTilt(frozen = false) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const tiltRef = useRef<HTMLDivElement | null>(null);
 
-  // The lean follows the pointer anywhere on the page, not just over the card.
-  // Written straight to the style rather than through state: this fires on every
-  // pointer move, and re-rendering the card each time would be the whole page.
-  // The tilt sits on its own wrapper so it composes with the flip instead of
-  // fighting it for the transform.
   useEffect(() => {
     if (
       window.matchMedia("(hover: none)").matches ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) {
+      return;
+    }
+
+    // Clearing the transform rather than writing 0deg lets the wrapper's own
+    // transition carry it back to flat, so the card settles instead of snapping.
+    if (frozen) {
+      const host = hostRef.current;
+      const tilt = tiltRef.current;
+      if (tilt) tilt.style.transform = "";
+      if (host) {
+        host.style.removeProperty("--sheen-pos");
+        host.style.removeProperty("--sheen-x");
+        host.style.removeProperty("--sheen-y");
+      }
       return;
     }
 
@@ -129,19 +194,31 @@ function TemplateFlipCard({
 
     window.addEventListener("pointermove", onMove, { passive: true });
     return () => window.removeEventListener("pointermove", onMove);
-  }, []);
-  // The inner card: the page's own surface, so it stays legible in either theme
-  // against the one fixed colour on the block.
-  const faceCls =
-    "card-sheen absolute inset-0 flex flex-col overflow-hidden rounded-2xl bg-background p-4 shadow-[0_18px_40px_-24px_rgba(16,24,40,0.35)] [backface-visibility:hidden] [-webkit-backface-visibility:hidden] md:p-5 [[data-theme=dark]_&]:bg-[#151515]";
-  // The framed area each face fills — the cover on one side, the words on the
-  // other — so the two faces are the same composition with different contents.
-  const wellCls =
-    "mt-3 min-h-0 flex-1 overflow-hidden rounded-xl border border-black/[0.06] bg-[#FAFAFA] [[data-theme=dark]_&]:border-white/[0.06] [[data-theme=dark]_&]:bg-white/[0.03]";
-  // The card's one action, in the brand lime. It looks like the control it is:
-  // the lime panel opens signup, and the rest of the card turns over.
-  const actionCls =
-    "mt-4 flex h-10 shrink-0 items-center justify-center rounded-lg bg-[#D9ED92] text-sm text-[#262626]";
+  }, [frozen]);
+
+  return { hostRef, tiltRef };
+}
+
+// The wrapper the lean is written to. Perspective belongs on the host; without
+// it the turn is a flat squash.
+const CARD_TILT_CLS =
+  "h-full w-full transition-transform duration-300 ease-out [transform-style:preserve-3d] motion-reduce:transition-none";
+
+function TemplateFlipCard({
+  template,
+  dark,
+  startHref,
+}: {
+  template: Template;
+  dark: boolean;
+  startHref: string;
+}) {
+  const [flipped, setFlipped] = useState(false);
+  const { hostRef, tiltRef } = useCardTilt();
+
+  const faceCls = `${CARD_FACE} absolute inset-0 [backface-visibility:hidden] [-webkit-backface-visibility:hidden]`;
+  const wellCls = CARD_WELL;
+  const actionCls = CARD_ACTION;
   // The whole field is the control, as a transparent button laid over it. The
   // rotating element itself can't be the button: the cover mock contains buttons
   // of its own, and a button inside a button is invalid — the parser hoists the
@@ -152,13 +229,10 @@ function TemplateFlipCard({
   return (
     <div
       ref={hostRef}
-      className="relative aspect-square w-full rounded-[20px] px-[19%] py-[9%] [perspective:1400px]"
+      className={`${CARD_FIELD_CLS} [perspective:1400px]`}
       style={{ backgroundColor: CARD_FIELD }}
     >
-      <div
-        ref={tiltRef}
-        className="h-full w-full transition-transform duration-300 ease-out [transform-style:preserve-3d] motion-reduce:transition-none"
-      >
+      <div ref={tiltRef} className={CARD_TILT_CLS}>
         <div
           className="relative h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] [transform-style:preserve-3d] motion-reduce:transition-none"
           style={{ transform: flipped ? "rotateY(180deg)" : undefined }}
@@ -283,186 +357,174 @@ function TemplateFlipCard({
 }
 
 /**
- * Template variant — the point is to see the thing, so the app takes the wide
- * column and the specifics sit in a rail beside it: the title and what it does
- * lead, the app fills the frame, and what's included reads as a list of rows
- * rather than a paragraph. Real screenshots when the template has them;
- * otherwise the same widget cover the gallery cards use, because a designed mock
- * reads as the app and an empty placeholder frame reads as a missing image.
+ * A section's name, and the only label step on the page. Every block of the
+ * proposal opens with one of these, so the reader always knows which of the three
+ * questions — what it is, how it works, how to sign up — they're in.
  */
-function TemplateBuild({
-  template,
-  onSeeDetails,
-  startHref,
+// Article typography, lifted wholesale from the customer stories
+// (app/customers/[slug]) so the two long-form pages on the site read as the same
+// kind of document. Sections are headings rather than grey captions: a caption
+// over a panel reads as a form label, and the page stopped being something you
+// read top to bottom.
+//
+// Prose is held to a reading measure rather than the column's full width. The
+// rail leaves ~700px here, which runs past 90 characters a line at this size —
+// long enough that the eye loses the return. The card and the headings still
+// span the column; only the running text is capped.
+const MEASURE = "max-w-[37.5rem]";
+
+// One body setting for the whole article, and no exceptions to it — every
+// paragraph, run-in entry and numbered step is this size, this leading, this
+// measure. A standfirst step on the opening paragraph was tried and it was the
+// thing that made the page look assembled from parts: with sections this short,
+// a second body size reads as an inconsistency rather than as emphasis.
+// 16px at 1.6 on a 600px measure, in solid ink: the setting long-form pages that
+// read well use. Ours was 17px at 1.85 in a 80%-strength grey, which is the
+// combination that made the writing look faint and loosely stacked rather than
+// set.
+const BODY = "text-base leading-[1.6] text-foreground";
+
+// Headings sit close to what follows them — 20px, so the sentence reads as the
+// heading's own rather than as the next thing down the page — and far from what
+// came before.
+function ArticleHeading({ children }: { children: React.ReactNode }) {
+  return <h2 className="type-h3 mt-14 first:mt-0 md:mt-16">{children}</h2>;
+}
+
+function ArticleText({
+  children,
+  muted = false,
 }: {
-  template: Template;
-  onSeeDetails: () => void;
-  startHref: string;
+  children: React.ReactNode;
+  muted?: boolean;
 }) {
-  const { theme } = useTheme();
-  const hasScreenshots = Boolean(template.images?.length);
-  const industries = template.industries ?? [];
-  // One row open at a time, as in the prompt rail. "Built for" shares the state
-  // with the features, so opening it closes whichever feature was open.
-  const [openFeature, setOpenFeature] = useState<string | null>(null);
-
   return (
-    <>
-      {/* The app wide on the left, the specifics in a rail on the right, split by
-          a rule. The section's vertical padding lives on the two columns rather
-          than on the section, so the rule between them runs the full height of
-          the block and meets the page-width rules above and below it — as a
-          border on the rail alone it started and stopped with the rail's own
-          content, floating between the two horizontals. */}
-      <div className="grid lg:grid-cols-[1.55fr_1fr]">
-        <div className="min-w-0 pb-10 pt-14 max-md:pb-0 max-md:pt-0 md:pt-20 lg:pb-20 lg:pr-14">
-          {/* No heading over the card at any width: the page opens on the app's
-              name and what it does, and repeating both above the cover said the
-              same two things twice on one screen. The card carries its own title
-              anyway, as part of the picture of the app. */}
-          <div>
-            {hasScreenshots ? (
-              <TemplateGallery
-                title={template.title}
-                images={template.images}
-                previewCount={template.previewCount}
-              />
-            ) : (
-              <TemplateFlipCard
-                template={template}
-                dark={theme === "dark"}
-                startHref={startHref}
-              />
-            )}
-          </div>
-        </div>
-
-        {/* The rail: what's in it, who it's for, and the way into the detail —
-            rows on hairlines rather than bulleted prose, so it scans. */}
-        {/* On a phone the rail follows the title it belongs to, so the two columns'
-            own padding stacked into a gap wider than the block itself. Mobile pulls
-            them together and lets the card's outline do the separating. */}
-        <aside className="min-w-0 pb-14 pt-10 max-md:pt-5 md:pb-20 lg:border-l lg:border-border lg:pl-14 lg:pt-20">
-          {/* On a phone these two facts are loose blocks on the page, a screen
-              below the card they describe. One outline around the pair holds them
-              together as the app's spec — the same card the prompt variant's rail
-              sits in. Wide layouts keep them open against the column rule. */}
-          {/* With the label gone on mobile the card's own top padding sat on top of
-              the first row's, so the list started low; the rows carry their own
-              space, so the card only keeps a little. A tighter radius too — at 20px
-              the corners read as a card of their own rather than as a frame around
-              a table. */}
-          <div className="max-md:rounded-[14px] max-md:border max-md:border-border max-md:p-4 max-md:pb-0 max-md:pt-1.5">
-            {template.features.length > 0 && (
-              <>
-                {/* Desktop only, like the prompt rail's own label: inside the card
-                    the rows sit under the title they answer and read without being
-                    announced. */}
-                <p className="type-caption text-muted-foreground max-md:hidden">
-                  What&rsquo;s included
-                </p>
-                {/* Body rather than a heading step: these are the answers to the
-                    label above them, not headings of their own — at 18px each row
-                    competed with the section's own title. Inside the card the rows
-                    run the full width, and the closing hairline is what separates
-                    them from the "Built for" row under them.
-                    The rows open, the same as the prompt rail's: a feature name
-                    alone is a promise, and the line under it is what makes the
-                    promise mean something. Same component, so the two variants
-                    behave identically. A feature with no detail written yet still
-                    reads as a row, it just doesn't open. */}
-                {/* Inside the card the label already has the outline above it, so
-                    the list's own opening hairline is a second line a few pixels
-                    under it. Dropped on mobile, and the rows pull up to sit with
-                    the label the way "Built for" does with its value. */}
-                <ul className="mt-3 border-t border-border max-md:-mx-4 max-md:mt-0 max-md:border-t-0">
-                  {template.features.map((feature) => {
-                    const detail = TEMPLATE_FEATURE_DETAILS[feature];
-                    return detail ? (
-                      <PromptStep
-                        key={feature}
-                        label={feature}
-                        detail={detail}
-                        open={openFeature === feature}
-                        onToggle={() =>
-                          setOpenFeature(
-                            openFeature === feature ? null : feature,
-                          )
-                        }
-                      />
-                    ) : (
-                      <li
-                        key={feature}
-                        className="type-body border-b border-border py-3 text-foreground max-md:px-4"
-                      >
-                        {feature}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </>
-            )}
-
-            {/* Who it's for, as one more row that opens: a label with its answer
-                underneath behaves the same as every row above it, and on a phone
-                the card reads as one continuous table rather than a list with a
-                labelled block bolted under it. Its own list, so it stays a fact
-                about the firm rather than another thing that's included, and on
-                mobile it picks up where the features left off. */}
-            {industries.length > 0 && (
-              // No top margin and no opening hairline of its own: the features
-              // list already closes with one, so on desktop this added a second
-              // line with an empty band between them. It just carries on from the
-              // rows above, at both widths.
-              <ul className="max-md:-mx-4 max-md:[&>li:last-child]:border-b-0">
-                <PromptStep
-                  label="Built for"
-                  detail={`${industries.join(", ")} firms.`}
-                  open={openFeature === BUILT_FOR}
-                  onToggle={() =>
-                    setOpenFeature(openFeature === BUILT_FOR ? null : BUILT_FOR)
-                  }
-                />
-              </ul>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={onSeeDetails}
-            className="mt-8 flex h-11 items-center gap-2 rounded-lg border border-foreground/20 px-5 text-sm text-foreground transition-colors hover:bg-foreground/5"
-          >
-            See full details
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 16 16"
-              fill="none"
-              aria-hidden
-              className="text-muted-foreground"
-            >
-              <path
-                d="M6 4l4 4-4 4"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        </aside>
-      </div>
-    </>
+    <p
+      className={`${MEASURE} mt-5 ${BODY} ${muted ? "!text-muted-foreground" : ""}`}
+    >
+      {children}
+    </p>
   );
 }
 
-// What signing up does, for the prompt variant's rail — the counterpart to the
-// template's "What's included". A prompt has no feature list, but it does have a
-// sequence, and saying it in three rows fills the rail the same way. Each row
-// opens: three labels alone are a promise, and the sentence under them is what
-// makes the promise mean something. The template rail stays flat, since its rows
-// are features that say themselves.
-const PROMPT_NEXT = [
+/**
+ * Run-in paragraphs: the name opens the sentence rather than sitting on a line
+ * of its own. Stacked name-over-sentence pairs read as a spec sheet however the
+ * rules are removed — each entry is two blocks and the section is a grid of
+ * them. As a run-in it's a paragraph like any other, and the name carries its
+ * weight in ink rather than in position.
+ *
+ * Both variants hang their marker in the margin — a numeral where the order is
+ * the point, a bullet where it isn't — so the paragraphs still start on the
+ * column's edge and a run of them reads as one list rather than as four
+ * paragraphs that happen to be near each other.
+ */
+function RunInList({
+  items,
+  className = "",
+  ordered = false,
+}: {
+  items: { label: string; detail?: string }[];
+  className?: string;
+  // Numbered, for the steps, where the order is the point.
+  ordered?: boolean;
+}) {
+  const List = ordered ? "ol" : "ul";
+  return (
+    <List className={`${MEASURE} space-y-5 ${className}`}>
+      {items.map((item, i) => (
+        // A bullet is a mark, a numeral is two or three characters: they don't
+        // want the same margin. Given the numeral's, a bullet floats a long way
+        // off the sentence it belongs to.
+        <li key={item.label} className={`flex ${ordered ? "gap-3" : "gap-2"}`}>
+          <span
+            aria-hidden
+            className={`${BODY} shrink-0 !text-muted-foreground ${
+              ordered ? "w-4" : "w-1.5"
+            }`}
+          >
+            {ordered ? `${i + 1}.` : "•"}
+          </span>
+          {/* One colour, the article's own: the name opened the sentence in
+              solid ink over a lighter one, and two greys in a line read as a
+              rendering fault rather than as emphasis. The name still leads —
+              it's where the sentence starts. */}
+          <p className={BODY}>
+            {item.label}. {item.detail}
+          </p>
+        </li>
+      ))}
+    </List>
+  );
+}
+
+/**
+ * The lead image on the masthead — a post's opening picture, at the size one is
+ * printed at. It's capped rather than full-bleed only because the mock is a
+ * square composition: past this width the page opens on a screen of picture with
+ * no words on it at all.
+ */
+function ProposalLeadImage({
+  template,
+  startHref,
+}: {
+  template: Template;
+  startHref: string;
+}) {
+  const { theme } = useTheme();
+  return (
+    <div className="w-full">
+      <TemplateFlipCard
+        template={template}
+        dark={theme === "dark"}
+        startHref={startHref}
+      />
+    </div>
+  );
+}
+
+/**
+ * Template variant — the writing: the template's own paragraph
+ * (`longDescription`, the same one its catalogue page opens with) rather than
+ * anything written for this page, so the proposal isn't a second, drifting
+ * description of the same app, then what comes in it.
+ */
+function TemplateBuild({ template }: { template: Template }) {
+  return (
+    <div>
+      <ArticleHeading>What we&rsquo;d build</ArticleHeading>
+      {/* The template's own paragraph, so the proposal and the catalogue say the
+          same thing about the same app. The sectors it's drawn for aren't
+          repeated here: the masthead carries them as chips and the rail lists
+          them again, which was three statements of the same fact in one page. */}
+      <ArticleText>{template.longDescription}</ArticleText>
+
+      {template.features.length > 0 && (
+        <>
+          <ArticleHeading>What comes in it</ArticleHeading>
+          <RunInList
+            className="mt-5"
+            items={template.features.map((feature) => ({
+              label: feature,
+              detail: TEMPLATE_FEATURE_DETAILS[feature],
+            }))}
+          />
+        </>
+      )}
+      {/* The way into the full spec used to hang here as a quiet link. It sits
+          in the rail now, under the page's action, where the two things you can
+          do next are one pair rather than one at the end of the writing and one
+          off to the side. */}
+    </div>
+  );
+}
+
+// How the thing above actually gets built, in three steps. Both variants show
+// this: it used to be the prompt variant's side rail only, where it read as
+// unrelated trivia parked next to the prompt, and the template variant answered
+// "how does this work" nowhere at all. It's the middle of the page's three
+// questions — what it is, how it works, how to sign up.
+const HOW_IT_WORKS = [
   {
     label: "Built in your workspace",
     detail:
@@ -480,235 +542,205 @@ const PROMPT_NEXT = [
   },
 ];
 
-// One row of that sequence, built to the same shape as the site's divided FAQ
-// rows: a hairline list, a chevron that turns a quarter rather than flipping, and
-// a drawer that animates on grid-rows so nothing has to be measured.
-function PromptStep({
-  label,
-  detail,
-  open,
-  onToggle,
-}: {
-  label: string;
-  detail: string;
-  open: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <li className="border-b border-border max-md:px-4">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        className="group flex w-full cursor-pointer items-center justify-between gap-6 py-3 text-left"
-      >
-        <span className="type-body text-foreground">{label}</span>
-        <svg
-          width="18"
-          height="18"
-          viewBox="0 0 20 20"
-          fill="none"
-          aria-hidden
-          className={`shrink-0 text-muted-foreground transition-[transform,color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:text-foreground motion-reduce:transition-none ${
-            open ? "rotate-0" : "-rotate-90"
-          }`}
-        >
-          <path
-            d="M5 8l5 5 5-5"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-      <div
-        className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none ${
-          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-        }`}
-      >
-        <div className="overflow-hidden">
-          {/* Body, not caption: this is a sentence to read, and the site's own
-              accordion (the FAQ) sets question and answer at the same step,
-              separating them by colour rather than by size. */}
-          <p className="type-body pb-4 pr-8 text-muted-foreground">{detail}</p>
-        </div>
-      </div>
-    </li>
-  );
-}
-
 /**
- * Prompt variant — the same two-column shape as the template variant, so the two
- * proposals read as one page with different contents: the idea on the left where
- * the app screen would be, the sequence in the rail where the feature list would
- * be. The idea is a real field — nothing here is saved anywhere, but being able
- * to touch the words is what says the build isn't fixed, and whatever it says at
- * signup is what rides along. It's drawn as a field (a bordered panel that
- * lightens on focus, like the site's other inputs) rather than as a rule down the
- * left edge, which read as a pull quote — something to admire, not edit.
+ * Prompt variant — the same card the template arrives as, with the prompt in the
+ * well instead of a cover. A typed idea should look as much like a thing as a
+ * picked template does; before this it was a paragraph in a box below the fold
+ * while a template got the masthead.
+ *
+ * The prompt stays editable in place — nothing here is saved anywhere, but being
+ * able to touch the words is what says the build isn't fixed, and whatever it
+ * says at signup is what rides along.
  */
-function PromptBuild({
+function PromptHeroCard({
   value,
   onChange,
+  startHref,
 }: {
   value: string;
   onChange: (next: string) => void;
+  startHref: string;
 }) {
-  // Both cues are for someone who hasn't touched the field yet, so they both go
-  // once the caret is in it. Tracked in state rather than with peer-focus: the
-  // tooltip shows on hover and hides on focus, and leaving which of those two
-  // utilities wins to Tailwind's class order is how that ends up flickering.
+  // The hint is for someone who hasn't touched the field yet, so it goes once
+  // the caret is in it.
   const [editing, setEditing] = useState(false);
-  const [hovering, setHovering] = useState(false);
-  // One row of the sequence open at a time, so opening one closes the last.
-  const [openStep, setOpenStep] = useState<string | null>(null);
-  const fieldRef = useRef<HTMLDivElement | null>(null);
-  const tipRef = useRef<HTMLSpanElement | null>(null);
-
-  // The tooltip rides next to the cursor rather than sitting above the box, so
-  // it answers where you're already looking. Only its visibility goes through
-  // state; the position is written to the node, since it moves every frame.
-  const trackTip = (event: React.PointerEvent<HTMLTextAreaElement>) => {
-    const field = fieldRef.current;
-    const tip = tipRef.current;
-    if (!field || !tip) return;
-    const box = field.getBoundingClientRect();
-    tip.style.left = `${event.clientX - box.left + 14}px`;
-    tip.style.top = `${event.clientY - box.top + 18}px`;
-  };
+  // The same lean and specular the template's card has: it doesn't turn over,
+  // but it's the same object and should sit in the same light — until the caret
+  // is in it, at which point the card settles flat and holds still to be typed
+  // on, and picks the lean back up when you leave the field.
+  const { hostRef, tiltRef } = useCardTilt(editing);
 
   return (
-    // On a phone the two columns stack, and two separately outlined blocks read
-    // as two unrelated things. One outline around the pair holds them together as
-    // the proposal: the prompt, then what happens to it. The field drops its own
-    // border inside that (its fill is enough) so there is only ever one edge.
-    // Wide layouts keep the two columns and the rule between them.
-    <div className="grid max-md:my-10 max-md:rounded-[20px] max-md:border max-md:border-border max-md:p-4 lg:grid-cols-[1.55fr_1fr]">
-      <div className="min-w-0 pb-10 pt-14 max-md:pb-6 max-md:pt-0 md:pt-20 lg:pb-20 lg:pr-14">
-        {/* Desktop only. On a phone the field is the whole screen the moment you
-            scroll past the name, so a heading and a line above it are two thirds
-            of the first view spent saying what the field plainly is. */}
-        <div className="hidden md:block">
-          <h2 className="type-h2">Here&rsquo;s your prompt</h2>
-          <p className="type-lead mt-3 max-w-xl text-muted-foreground">
-            Make any edits before we build it.
-          </p>
-        </div>
+    // No fill on the field: this card only ever sits on the masthead, which is
+    // already that colour. Painting it again put a second layer of the same blue
+    // over the band, and the two rendered a hair apart.
+    <div ref={hostRef} className={`${PROMPT_FIELD_CLS} [perspective:1400px]`}>
+      <div ref={tiltRef} className={CARD_TILT_CLS}>
+        <div className={`${CARD_FACE} relative h-full`}>
+          <div className="flex shrink-0 items-baseline justify-between gap-3">
+            <p className="type-caption text-muted-foreground">
+              You&rsquo;re building
+            </p>
+            {/* Says in words what the well only implies. It's the affordance the
+              card would otherwise be missing: a cover is something to look at,
+              and this has to read as something to type in. */}
+            <p
+              className={`type-caption text-muted-foreground transition-opacity ${
+                editing ? "opacity-0" : "opacity-100"
+              }`}
+            >
+              Click to edit
+            </p>
+          </div>
 
-        {/* Mobile only. The heading above is desktop-only, so on a phone the
-            field arrives with nothing naming it: one caption line says what the
-            box is and that it's editable, which is the part touch can't get
-            from the hover tooltip. */}
-        <p className="type-caption text-muted-foreground md:hidden">
-          Your prompt, yours to edit
-        </p>
+          <div className={CARD_WELL}>
+            <label className="sr-only" htmlFor="proposal-prompt">
+              The app idea, yours to edit
+            </label>
+            <textarea
+              id="proposal-prompt"
+              value={value}
+              onChange={(event) => onChange(event.target.value)}
+              onFocus={() => setEditing(true)}
+              onBlur={() => setEditing(false)}
+              spellCheck={false}
+              className="scrollbar-slim type-body h-full w-full cursor-text resize-none bg-transparent p-4 text-foreground outline-none md:p-5 md:text-[1.0625rem] md:leading-[1.6]"
+            />
+          </div>
 
-        <div ref={fieldRef} className="group relative max-md:mt-2 md:mt-10">
-          <label className="sr-only" htmlFor="proposal-prompt">
-            The app idea, yours to edit
-          </label>
-          {/* Framed like the template's app panel so the two variants sit at the
-              same weight. What says "editable" is the field itself: a surface
-              lifted off the page the way an input is, and a border that steps up
-              on hover and again on focus. Inside the mobile card the border is
-              gone (it read as a second edge a few pixels off the card's own), so
-              being active is said with the fill instead: one step of tone, which
-              is as much as it needs when the caret is already in there. The pencil sits with the label above
-              instead of inside the corner, where it had to be paid for with a
-              wide right padding that ragged every line of the prompt.
-              field-sizing grows the box with the words rather than trapping a
-              short prompt behind a scrollbar, but it grows without limit, and a
-              long prompt turned the field into a wall of text that pushed the
-              signup off the screen. So it grows to a cap and scrolls inside after
-              that: a fixed 28rem on desktop, and a share of the viewport on
-              mobile, where 28rem would be most of the screen. */}
-          <textarea
-            id="proposal-prompt"
-            value={value}
-            onChange={(event) => onChange(event.target.value)}
-            onFocus={() => setEditing(true)}
-            onBlur={() => setEditing(false)}
-            // Touch has no hover and no cursor to hang a tooltip off, so the
-            // pointer type decides whether the hint exists at all.
-            onPointerEnter={(event) => {
-              if (event.pointerType === "touch") return;
-              trackTip(event);
-              setHovering(true);
-            }}
-            onPointerMove={trackTip}
-            onPointerLeave={() => setHovering(false)}
-            spellCheck={false}
-            className="type-h4 min-h-[13rem] w-full cursor-text resize-none scrollbar-slim overflow-y-auto rounded-[20px] border border-foreground/20 bg-[#FAFAFA] p-6 pb-12 text-foreground outline-none transition-colors [field-sizing:content] hover:border-foreground/30 focus:border-foreground/40 max-md:max-h-[55vh] max-md:rounded-2xl max-md:border-0 max-md:p-4 max-md:pb-10 max-md:text-base max-md:focus:bg-[#F2F2F2] md:max-h-[28rem] md:p-7 md:pb-14 [[data-theme=dark]_&]:bg-[#161616] [[data-theme=dark]_&]:max-md:focus:bg-[#1F1F1F]"
-          />
-          {/* Says in words what the field only implies, in the same tooltip the
-              pricing table uses (bordered, on the page surface) but tracking the
-              cursor. Pointer-only by nature, so the sr-only label above carries
-              the same fact for anyone not using one. */}
-          <span
-            ref={tipRef}
-            role="tooltip"
-            className={`pointer-events-none absolute left-0 top-0 z-30 whitespace-nowrap rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs text-muted-foreground shadow-md ${
-              hovering && !editing ? "block" : "hidden"
-            }`}
-          >
-            Feel free to edit this
-          </span>
-          {/* A prompt longer than the cap scrolls inside the field, and the last
-              visible line was sliced clean through by the bottom edge, which
-              reads as broken rather than as "there is more". This fades it into
-              the field's own fill instead. Both ends of the gradient are the fill
-              colour, one at zero alpha: fading to `transparent` interpolates
-              through a different tone, and the edge of this box showed up as a
-              second border along the bottom. On desktop it sits a pixel inside the
-              field so it covers the fill and not the border, with a radius a pixel
-              under the field's to match the curve there; on mobile the field has no
-              border, so it goes flush to the edge. The field carries extra
-              bottom padding so a short prompt never ends underneath it. */}
-          <div className="pointer-events-none absolute inset-x-px bottom-px h-14 rounded-b-[19px] bg-[linear-gradient(to_top,#FAFAFA_0%,#FAFAFA00_100%)] max-md:inset-x-0 max-md:bottom-0 max-md:h-12 max-md:rounded-b-2xl [[data-theme=dark]_&]:bg-[linear-gradient(to_top,#161616_0%,#16161600_100%)]" />
+          <Link href={startHref} className={CARD_ACTION}>
+            Build
+          </Link>
         </div>
       </div>
-
-      <aside className="min-w-0 pb-14 pt-10 max-md:pb-0 max-md:pt-0 md:pb-20 lg:border-l lg:border-border lg:pl-14 lg:pt-20">
-        {/* Mobile drops the label: inside one outlined card the rows sit
-            directly under the prompt, and the sequence reads without being
-            announced. */}
-        <p className="type-caption max-md:hidden text-muted-foreground">
-          What happens next
-        </p>
-        <ul className="mt-3 border-t border-border max-md:-mx-4 max-md:mt-0 max-md:[&>li:last-child]:border-b-0">
-          {PROMPT_NEXT.map((step) => (
-            <PromptStep
-              key={step.label}
-              label={step.label}
-              detail={step.detail}
-              open={openStep === step.label}
-              onToggle={() =>
-                setOpenStep(openStep === step.label ? null : step.label)
-              }
-            />
-          ))}
-        </ul>
-      </aside>
     </div>
   );
 }
 
-function ProposalHeader() {
+/**
+ * The second rail: the facts panel the customer stories carry (app/customers/
+ * [slug] MetaCard) — who it's for, who sent it, what it is — with the page's
+ * action under it. It's the same shape and the same sticky behaviour, so the
+ * proposal and a case study are recognisably the same kind of page.
+ *
+ * Desktop only. On a phone this would be a second block of the same facts under
+ * the ones the hero already gives, and the floating bar carries the action.
+ */
+function ProposalAside({
+  template,
+  recipient,
+  from,
+  startHref,
+  onSeeDetails,
+}: {
+  template?: Template;
+  recipient: string;
+  from: string;
+  startHref: string;
+  /** Opens the full spec. Only a template has one. */
+  onSeeDetails?: () => void;
+}) {
+  const industries = template?.industries ?? [];
+
+  const rows = [
+    ...(recipient ? [{ label: "Prepared for", value: recipient }] : []),
+    ...(from ? [{ label: "From", value: from }] : []),
+    template
+      ? { label: "Template", value: headlineTitle(template.title) }
+      : { label: "Build", value: "From your own prompt" },
+    ...(industries.length > 0
+      ? [{ label: "Built for", value: `${industries.join(", ")} firms` }]
+      : []),
+  ];
+
   return (
-    // The mark, and nothing else. It isn't a link: this page has no navigation
-    // by design, and a logo that quietly leaves the proposal is the one exit we
-    // don't want to build. Nothing on the right either — a "Proposal" label
-    // there only named what the page already says in full underneath it.
-    <header className="flex h-16 items-center px-6 md:h-20 md:px-10">
-      <Image
-        src="/images/logo-mark.svg"
-        alt="Assembly Studio"
-        width={22}
-        height={22}
-        priority
-        className="[[data-theme=dark]_&]:brightness-0 [[data-theme=dark]_&]:invert"
-      />
+    <aside className="hidden h-fit flex-col gap-4 md:sticky md:top-28 md:flex">
+      <div className="overflow-hidden rounded-lg border border-border bg-card [[data-theme=dark]_&]:border-[#383838]">
+        <div className="flex flex-col items-center px-6 pb-6 pt-8">
+          <div className="flex size-16 items-center justify-center rounded-full bg-background ring-1 ring-border [[data-theme=dark]_&]:ring-[#383838]">
+            <Image
+              src="/images/logo-mark.svg"
+              alt=""
+              width={22}
+              height={22}
+              className="[[data-theme=dark]_&]:brightness-0 [[data-theme=dark]_&]:invert"
+            />
+          </div>
+          <p className="mt-4 text-center font-medium tracking-tight">
+            {template ? headlineTitle(template.title) : "A new app"}
+          </p>
+          <p className="type-caption mt-1 text-center text-muted-foreground">
+            Built on Assembly
+          </p>
+        </div>
+
+        <dl className="border-t border-border/70 [[data-theme=dark]_&]:border-[#383838]">
+          {rows.map((row, i) => (
+            <div
+              key={row.label}
+              className={`px-6 py-4 ${
+                i < rows.length - 1
+                  ? "border-b border-border/70 [[data-theme=dark]_&]:border-[#383838]"
+                  : ""
+              }`}
+            >
+              <dt className="text-sm text-foreground">{row.label}</dt>
+              <dd className="mt-0.5 flex items-center gap-2 text-sm text-muted-foreground">
+                {row.label === "From" && (
+                  <OptionAvatar
+                    option={{ value: row.value, label: row.value }}
+                    size={20}
+                  />
+                )}
+                {row.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+
+      <Link
+        href={startHref}
+        className="rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background transition-opacity hover:opacity-90"
+      >
+        Get started
+      </Link>
+
+      {/* The site's outline button, under the solid one: the same pair the rest
+          of the site uses for "do the thing" and "read more first". */}
+      {template && onSeeDetails && (
+        <button
+          type="button"
+          onClick={onSeeDetails}
+          className="rounded-lg border border-foreground/20 bg-transparent px-5 py-2.5 text-center text-sm text-foreground transition-colors hover:bg-foreground/5"
+        >
+          See full details
+        </button>
+      )}
+    </aside>
+  );
+}
+
+// The loading shell: the top of the masthead and nothing in it yet, so a real
+// load paints the band rather than a white screen that then turns blue. The mark
+// isn't a link — this page has no navigation by design, and a logo that quietly
+// leaves the proposal is the one exit we don't want to build.
+function ProposalHeaderShell() {
+  return (
+    <header
+      style={{ backgroundColor: CARD_FIELD }}
+      className="flex h-32 items-start px-6 pt-6 md:h-40 md:px-10 md:pt-8"
+    >
+      <span className={MARK_TILE_CLS}>
+        <Image
+          src="/images/logo-mark.svg"
+          alt="Assembly Studio"
+          width={22}
+          height={22}
+          priority
+          className="brightness-0 invert [[data-theme=dark]_&]:invert-0"
+        />
+      </span>
     </header>
   );
 }
@@ -752,6 +784,12 @@ function ProposalContent() {
     ? TEMPLATES.find((t) => t.slug === templateSlug)
     : undefined;
 
+  // What the headline calls the thing being built: a template's own title, or
+  // the name the sender gave the prompt. Capped here as well as in the creator —
+  // the query is hand-editable, and a headline is not a place to put a sentence.
+  const headline = template
+    ? headlineTitle(template.title)
+    : (params.get("name") ?? "").trim().slice(0, MAX_APP_NAME_LENGTH);
 
   // The prompt variant is editable, so what signup receives is whatever the
   // field says now — not what the link was written with. Seeded once: this page
@@ -761,8 +799,40 @@ function ProposalContent() {
   );
 
   const [panelOpen, setPanelOpen] = useState(false);
-  const startRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
+
+  // The masthead starts full-bleed and draws itself in as you leave it: it
+  // scales down from its top edge and takes a radius, so the page's own white
+  // comes up the sides and the band becomes a panel sitting on it. Same move as
+  // the waitlist hero — a transform and a radius written straight to the node on
+  // scroll, rather than a pinned section, so the page never stops scrolling
+  // normally. Reduced motion gets the band as it is, full width, and nothing
+  // moves.
+  const bandRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const el = bandRef.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let frame = 0;
+    const draw = () => {
+      frame = 0;
+      // Over the first screenful: past that it's off-view and the numbers hold.
+      const t = Math.min(1, window.scrollY / BAND_INSET_DISTANCE);
+      el.style.transform = `scale(${1 - BAND_INSET_SCALE * t})`;
+      el.style.borderRadius = `${BAND_INSET_RADIUS * t}px`;
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(draw);
+    };
+
+    draw();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, []);
 
   // Signing up is the same sheet the landing page and the templates gallery
   // open: /get-started intercepted as a modal over whatever you were reading,
@@ -775,21 +845,6 @@ function ProposalContent() {
   if (recipient) startParams.set("for", recipient);
   const startHref = `/get-started?${startParams.toString()}`;
 
-  // The floating CTA is only useful while the closing one is off screen; once
-  // it's in view the bar is a second copy of the button sitting on top of the
-  // first one.
-  const [startInView, setStartInView] = useState(false);
-  useEffect(() => {
-    const el = startRef.current;
-    if (!el || !("IntersectionObserver" in window)) return;
-    const io = new IntersectionObserver(
-      ([entry]) => setStartInView(entry.isIntersecting),
-      { rootMargin: "0px 0px -25% 0px" },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
   // Every other CTA on the page opens the same sheet. Pushed rather than
   // linked so the details panel can close itself on the way out.
   const goToSignup = () => {
@@ -799,69 +854,173 @@ function ProposalContent() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <ProposalHeader />
+      {/* The opening is one coloured band, the way a post's masthead is: the mark
+          and the byline on it, the title, what it's for, and the app itself
+          sitting on the same field its cover is drawn on — so the card reads as
+          the artwork of the masthead rather than as a picture pasted under it.
+          Everything on the band is drawn in one ink — white on the light band,
+          black on the dark one's lime: it's a printed surface, not a themed
+          one, so nothing on it uses the page's own text tokens. */}
+      {/* The band takes its colour from CARD_FIELD itself rather than from a
+          matching utility: Tailwind compiles an arbitrary hex through a
+          different colour space, and the card's own field showed up as a
+          slightly-off rectangle sitting on the band. */}
+      <header
+        ref={bandRef}
+        style={{ backgroundColor: CARD_FIELD }}
+        className="relative origin-top overflow-hidden px-6 pb-14 pt-6 text-center will-change-[transform,border-radius] md:px-10 md:pb-16 md:pt-8"
+      >
+        <span className={MARK_TILE_CLS}>
+          <Image
+            src="/images/logo-mark.svg"
+            alt="Assembly Studio"
+            width={22}
+            height={22}
+            priority
+            // Drawn in the band's ink: white on the black band, black on the lime.
+            className="brightness-0 invert [[data-theme=dark]_&]:invert-0"
+          />
+        </span>
 
-      {/* Who it's for. It opens on the name alone — no "Prepared for" label above
-          it; a page addressed to one person doesn't need to announce that it is.
-          Each step down from there is a clear step: the name is the only
-          display-scale thing on the page, the note sits under it, and the sender
-          is one quiet line. */}
-      <section className="px-6 pb-12 pt-10 text-center md:px-10 md:pb-20 md:pt-20">
-        <div className="mx-auto w-full max-w-2xl">
-          {/* One sentence: what it is and who it's for. The template variant knows
-              the app's name, so the opening says it rather than making the reader
-              scroll to the build section to find out; the prompt variant has no
-              name to say, so it opens on the recipient alone. Balanced and capped
-              at the column, since a long template name plus a long name is two
-              lines. */}
-          <h1 className="type-display text-balance">
-            {template
-              ? recipient
-                ? `${headlineTitle(template.title)} for ${recipient}`
-                : headlineTitle(template.title)
-              : recipient || "you"}
+        <div className="mx-auto mt-12 w-full max-w-3xl md:mt-14">
+          {/* The byline leads, the way a post's date and author line does. In the
+              page's own face, not mono: a mono line at the top of a masthead set
+              in PP Mori reads as a different document's furniture. */}
+          {from && (
+            <p className="flex items-center justify-center gap-2 text-[0.9375rem] text-[color:var(--proposal-ink-soft)]">
+              <OptionAvatar
+                option={{ value: from, label: from }}
+                size={22}
+                tone="field"
+              />
+              <span>
+                From{" "}
+                <span className="text-[color:var(--proposal-ink)]">{from}</span>
+              </span>
+            </p>
+          )}
+
+          {/* One sentence: what it is and who it's for. A template knows the
+              app's name; a prompt gets one written for it in the creator, so
+              both open on what's being built rather than making the reader
+              scroll to the build section to find out. A prompt sent without a
+              name still opens on the recipient alone.
+
+              "for {name}" is held together as one unwrappable phrase, so a title
+              too long for one line breaks before it and puts the person on a
+              line of their own — rather than splitting their name across two,
+              which is what a plain string does to anyone with a long one. */}
+          <h1
+            className={`type-display text-balance text-[color:var(--proposal-ink)] ${from ? "mt-6" : ""}`}
+          >
+            {headline ? (
+              recipient ? (
+                <>
+                  {headline}{" "}
+                  <span className="whitespace-nowrap">for {recipient}</span>
+                </>
+              ) : (
+                headline
+              )
+            ) : (
+              recipient || "you"
+            )}
           </h1>
 
-          {/* The site's hero lockup: display, then a lead line at mt-6 (customers,
-              pricing, and security heroes all read this way). It was a type-h4 at
-              one point, which is a heading step doing a subtitle's job, and the
-              sender sat at mt-8, the gap the other heroes keep for their action. */}
-          {note && <p className="type-lead mt-6 text-muted-foreground">{note}</p>}
+          {/* Tags, as a post carries its subjects: the sectors this one is drawn
+              for. The site's sector-chip treatment — mono, caps, soft fill. Two
+              at most: the full list is four on some templates, which wraps into a
+              band of chips heavier than the title above it, and the rail carries
+              the complete set anyway. */}
+          {(template?.industries?.length ?? 0) > 0 && (
+            <ul className="mt-6 flex flex-wrap justify-center gap-2">
+              {template!.industries!.slice(0, 2).map((industry) => (
+                <li
+                  key={industry}
+                  className="rounded-md bg-[var(--proposal-ink-fill)] px-2.5 py-1 font-mono text-[12px] uppercase tracking-wide text-[color:var(--proposal-ink)]"
+                >
+                  {industry}
+                </li>
+              ))}
+            </ul>
+          )}
 
-          {from && (
-            <p className="type-caption mt-6 text-muted-foreground">
-              From <span className="text-foreground">{from}</span>
+          {/* The standfirst: one line on what this is, under the title. */}
+          {note && (
+            <p className="mx-auto mt-6 max-w-xl text-[0.9375rem] leading-[1.6] text-[color:var(--proposal-ink-soft)]">
+              {note}
             </p>
           )}
         </div>
-      </section>
 
-      {/* Desktop only. On a phone what follows leads with its own edge — the
-          prompt variant's outline, the template variant's card — and a page rule
-          a few pixels above it reads as a second one. */}
-      <SectionRule className="max-md:hidden" />
+        {/* The app, on the band. Its field is drawn in this same blue, so it
+            disappears into the masthead and the card floats. Both arrivals get
+            one: a picked template shows its cover, a typed prompt shows the
+            prompt, still editable.
 
-      {/* The build. Each variant gets the shape that suits it: the template one
-          runs wide with a rail of specifics, the prompt one runs narrow and
-          large. Both are ruled off above rather than labelled. */}
-      {/* No vertical padding here: both variants put it on their two columns
-          instead, so the rule between the columns runs the full height of the
-          section and meets the page-width rules above and below. */}
-      <section className="flex-1 px-6 md:px-10">
-        <div className="mx-auto max-w-6xl">
+            The gap above it is smaller than the one under the byline, because
+            the card's field carries its own top padding — measured off the
+            card's width, so it grows with the card — and the two stacked read as
+            a hole between the words and the artwork. */}
+        <div className="mx-auto mt-6 w-full max-w-lg sm:max-w-2xl md:mt-8">
           {template ? (
-            <TemplateBuild
-              template={template}
-              startHref={startHref}
-              onSeeDetails={() => setPanelOpen(true)}
-            />
+            <ProposalLeadImage template={template} startHref={startHref} />
           ) : (
-            <PromptBuild value={draft} onChange={setDraft} />
+            <PromptHeroCard
+              value={draft}
+              onChange={setDraft}
+              startHref={startHref}
+            />
           )}
+        </div>
+      </header>
+
+      {/* The body, as an article with a facts rail beside it — the customer-story
+          layout (app/customers/[slug]). One reading order still: the article is
+          the page, and the rail is a card of facts that doesn't continue
+          anywhere, which is what made the earlier two-column attempt fight the
+          text. */}
+      <section className="flex-1 px-6 md:px-10">
+        <div className="mx-auto grid max-w-5xl gap-12 pb-16 pt-12 md:grid-cols-[minmax(0,1fr)_16rem] md:gap-16 md:pb-24 md:pt-16">
+          <article>
+            {/* Only the template has writing of its own here. The prompt IS the
+                idea, and it's on the masthead — repeating it under a heading was
+                the same words twice on one page. */}
+            {template && <TemplateBuild template={template} />}
+
+            {/* Who's building it. The page named the app, listed what's in it
+                and went straight into the steps, on the assumption the reader
+                knows what Assembly is — and the one person this page is written
+                for is exactly the person who doesn't yet. Two sentences, before
+                the steps, because "built in your workspace" means nothing until
+                you know there's a workspace. Headed as a question about the app
+                rather than about us — it sits in a row with what we'd build,
+                what comes in it and how it works, and "What Assembly is" was the
+                one line on the page that read like a brochure. */}
+            <ArticleHeading>Where it lives</ArticleHeading>
+            <ArticleText>
+              Assembly is the portal your clients sign into: files, messages,
+              invoices and contracts, in one place with your name on it. An app
+              like this one is built on top of that, so it opens where your
+              clients already are instead of being one more link to send them.
+            </ArticleText>
+
+            {/* Both variants answer it, in the same words and the same place. */}
+            <ArticleHeading>How it works</ArticleHeading>
+            <RunInList ordered className="mt-5" items={HOW_IT_WORKS} />
+          </article>
+
+          <ProposalAside
+            template={template}
+            recipient={recipient}
+            from={from}
+            startHref={startHref}
+            onSeeDetails={() => setPanelOpen(true)}
+          />
         </div>
       </section>
 
-      <SectionRule className={template ? "" : "max-md:hidden"} />
+      <SectionRule />
 
       {/* Closing CTA, built to the same shape as the site's other closing CTAs
           (see SecurityCta): headline, a line of body copy carrying what happens
@@ -869,7 +1028,7 @@ function ProposalContent() {
           rest of the site opens, so what used to be an inline form here is one
           button. Extra bottom padding clears the floating CTA on the way down. */}
       <section className="px-6 pb-28 pt-16 text-center md:pb-32 md:pt-24">
-        <div ref={startRef} id="start">
+        <div id="start">
           <h2 className="type-display mx-auto max-w-md text-balance text-foreground md:max-w-2xl">
             {template ? "It’s ready when you are" : "Let’s build it"}
           </h2>
@@ -894,31 +1053,10 @@ function ProposalContent() {
 
       <ProposalFooter />
 
-      {/* The signup is now at the foot of the page at every width, so the action
-          floats until you reach it on desktop too — it used to be mobile-only,
-          because a sticky rail carried it on wide screens. Same treatment as the
-          template sheet's action bar; the button is capped rather than
-          full-bleed once there's room for it. */}
-      {/* The bar separates itself from the page by blurring what's behind it
-          rather than by laying a background-coloured scrim over it: the scrim
-          landed on the footer aurora as a dark wash across the colour. The blur
-          is masked so it fades out upward instead of ending on a hard edge. */}
-      <div
-        className={`pointer-events-none fixed inset-x-0 bottom-0 z-40 pb-4 pt-12 backdrop-blur-xl transition-opacity duration-300 [mask-image:linear-gradient(to_top,#000_60%,transparent)] [-webkit-mask-image:linear-gradient(to_top,#000_60%,transparent)] ${
-          startInView ? "opacity-0" : "opacity-100"
-        }`}
-      >
-        <div className="pointer-events-auto mx-auto max-w-xs px-6 sm:max-w-sm">
-          <Link
-            href={startHref}
-            tabIndex={startInView ? -1 : 0}
-            aria-hidden={startInView}
-            className="flex h-12 w-full items-center justify-center rounded-lg bg-foreground px-5 text-sm text-background"
-          >
-            Get started
-          </Link>
-        </div>
-      </div>
+      {/* No floating action bar. The sticky rail carries the signup while you
+          read, and the closing section carries it at the end — a third copy
+          riding the bottom of the window on its own scrim was one button too
+          many, and the scrim washed whatever it passed over. */}
 
       {template && (
         <TemplateDetailPanel
@@ -939,7 +1077,7 @@ export function ProposalPage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-background">
-          <ProposalHeader />
+          <ProposalHeaderShell />
         </div>
       }
     >

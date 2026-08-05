@@ -33,6 +33,11 @@
 }
 
 :root {
+  /* Tell the browser which scheme it's rendering, not just our own tokens.
+     Without it the UA keeps its light defaults for the things CSS doesn't paint
+     — form controls, scrollbars, and the canvas behind iOS Safari's collapsing
+     toolbar — so those stayed light while the page went dark. */
+  color-scheme: light;
   /* Light palette tuned toward Linear's calm, slightly-cool neutral scale:
      a soft near-black (not pure #000), cooler mid-grays for secondary text,
      and faint hairline borders so surfaces read as layered rather than boxed. */
@@ -73,12 +78,23 @@
   --mock-warning-fg: #8f6a12;
   --mock-negative-bg: #fbeceb;
   --mock-negative-fg: #b8443a;
+
+  /* The proposal masthead: one printed colour with everything on it drawn in a
+     single ink, rather than themed surfaces. Kept as tokens so the band, the
+     field the card sits on, and the type on both stay one decision. Light prints
+     it black with white ink; dark inverts to the brand lime with black ink — see
+     the dark block below. */
+  --proposal-field: #101010;
+  --proposal-ink: #ffffff;
+  --proposal-ink-soft: rgba(255, 255, 255, 0.75);
+  --proposal-ink-fill: rgba(255, 255, 255, 0.15);
 }
 
 /* Site-wide dark theme. The theme toggle writes data-theme="dark" on <html>,
    which redefines the design tokens so every token-based surface across all
    pages flips with no per-component restyling. Light is the default (:root). */
 [data-theme="dark"] {
+  color-scheme: dark;
   /* Dark scale: strictly NEUTRAL grays (equal RGB — any blue cast reads cheap
      on OLED, à la Cursor's dark mode) stepping up from the ground in only two
      surface levels, with hairlines kept quiet. */
@@ -104,6 +120,14 @@
   --mock-warning-fg: #cdb37a;
   --mock-negative-bg: rgba(224, 122, 113, 0.14);
   --mock-negative-fg: #d9928b;
+
+  /* Dark mode inverts the masthead rather than darkening it: the band goes to
+     the brand lime and the ink to black. A near-black band on a near-black page
+     would be the one place the proposal stopped reading as a printed thing. */
+  --proposal-field: #d9ed92;
+  --proposal-ink: #101010;
+  --proposal-ink-soft: rgba(16, 16, 16, 0.7);
+  --proposal-ink-fill: rgba(16, 16, 16, 0.1);
 }
 
 @theme inline {
@@ -423,8 +447,8 @@ html[data-theme="dark"] body {
 .card-sheen::before {
   background: radial-gradient(
     150% 120% at var(--sheen-x, 50%) var(--sheen-y, 50%),
-    rgba(16, 24, 40, 0) 30%,
-    rgba(16, 24, 40, 0.1) 100%
+    rgba(0, 0, 0, 0) 30%,
+    rgba(0, 0, 0, 0.08) 100%
   );
 }
 [data-theme="dark"] .card-sheen::before {
@@ -434,21 +458,12 @@ html[data-theme="dark"] body {
     rgba(255, 255, 255, 0) 65%
   );
 }
-/* The specular. Light takes it in the field's blue rather than white — a white
-   band on a white card is nothing, where the card catching the blue it sits on
-   is what the eye expects. */
+/* The specular, dark mode only. On a near-white card there is nothing brighter
+   than the face to rake across it, so every light-mode version of this band was
+   a *darker* one — and a highlight you can only draw in grey reads as a smear on
+   the surface, not as light. Light mode keeps the shading above and no band. */
 .card-sheen::after {
-  background-image: linear-gradient(
-    103deg,
-    rgba(125, 164, 255, 0) 34%,
-    rgba(125, 164, 255, 0.08) 43%,
-    rgba(125, 164, 255, 0.15) 46.5%,
-    rgba(125, 164, 255, 0.08) 50%,
-    rgba(125, 164, 255, 0) 58%,
-    rgba(125, 164, 255, 0) 64%,
-    rgba(125, 164, 255, 0.05) 68%,
-    rgba(125, 164, 255, 0) 73%
-  );
+  background-image: none;
   background-size: 240% 100%;
   background-position: var(--sheen-pos, 50%) 0;
   background-repeat: no-repeat;

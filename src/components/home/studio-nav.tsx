@@ -531,11 +531,16 @@ export function StudioNav({
               }}
               className="flex items-center"
             >
+              {/* eager, not lazy: this mounts already on screen, replacing the
+                  header's copy of the same mark. Left to lazy-load it defers a
+                  frame through the observer/decode path before first paint, and
+                  the logo visibly blinks on every open and close. */}
               <Image
                 src="/images/logo-mark.svg"
                 alt="Assembly Studio"
                 width={22}
                 height={22}
+                loading="eager"
                 className={menuLogoInvert}
               />
             </Link>
@@ -581,7 +586,11 @@ export function StudioNav({
                       target={link.newTab ? "_blank" : undefined}
                       rel={link.newTab ? "noopener noreferrer" : undefined}
                       onClick={() => closeMenu()}
-                      className={`block py-3 text-lg ${menuInk}`}
+                      // Muted like every other non-current row, and like the
+                      // desktop nav renders it: an off-site link is never the
+                      // page you're on, so at full ink it read as a second
+                      // current page beside the real one.
+                      className={`block py-3 text-lg ${menuMuted}`}
                     >
                       {link.label}
                     </a>
@@ -594,8 +603,14 @@ export function StudioNav({
                       href={link.href}
                       aria-current={isCurrent(link.href) ? "page" : undefined}
                       onClick={() => closeMenu()}
-                      className={`block py-3 text-lg ${menuInk} ${
-                        isCurrent(link.href) ? "font-medium" : ""
+                      // The current page is marked the way the desktop nav marks
+                      // it: full-strength ink against muted siblings, not a
+                      // heavier weight. `font-medium` maps to PP Mori SemiBold
+                      // here, so the active row was the only bold text on the
+                      // site, and every other row was already at full ink, which
+                      // left weight doing the work alone.
+                      className={`block py-3 text-lg ${
+                        isCurrent(link.href) ? menuInk : menuMuted
                       }`}
                     >
                       {link.label}

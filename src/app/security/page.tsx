@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Section } from "@/components/ui/section";
 import { FAQ, type FAQEntry } from "@/components/home/faq";
+import { GridRails } from "@/components/ui/grid-lines";
 import { SecurityTestimonials } from "@/components/security/security-testimonials";
 import { SecurityCompliance } from "@/components/security/security-compliance";
 import { SecurityCta } from "@/components/security/security-cta";
@@ -135,9 +136,9 @@ export default function SecurityPage() {
       </div>
 
       {/* Content region — the "different" section down through the customer
-          story. The vertical guide rails that used to frame it are gone; the
-          horizontal rules still separate the sections. */}
+          story, framed by the shared vertical rails. */}
       <div className="relative">
+        <GridRails />
 
         {/* Full-bleed line above the first section. */}
         <div className="border-t border-border [[data-theme=dark]_&]:border-[#383838]" />
@@ -166,8 +167,10 @@ export default function SecurityPage() {
                 key={card.title}
                 className="border-t border-border py-8 first:border-t-0 first:pt-0 md:grid md:grid-cols-[auto_1fr] md:gap-x-6"
               >
+                {/* Zero-padded, no brackets: the number is a position in a list,
+                    and the brackets read as notation on top of it. */}
                 <span className="mb-3 block font-mono text-sm tabular-nums text-muted-foreground md:mb-0 md:pt-0.5">
-                  [{i + 1}]
+                  {String(i + 1).padStart(2, "0")}
                 </span>
                 <div>
                   <h3 className="text-base font-medium">{card.title}</h3>
@@ -194,6 +197,7 @@ export default function SecurityPage() {
           and bottom, which left the last row sitting closer to the closing rule
           than the heading sits to the section above it. */}
       <div className="relative pb-10 md:pb-16">
+        <GridRails />
 
         <FAQ
           heading="Frequently asked questions"

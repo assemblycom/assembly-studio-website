@@ -40,8 +40,8 @@ export interface CaseStudy {
   body?: ContentBlock[];
   // Given more visual weight on the customers index (spans a wider card).
   featured?: boolean;
-  // Featured stories lead with a video on the detail page. When a URL is set
-  // it plays inline; otherwise a video-style placeholder is shown.
+  // Set only when a story has a real video: the detail page then leads with the
+  // player. Without it the page opens straight into the copy.
   videoUrl?: string;
   // Card thumbnail / video poster image.
   image?: string;
@@ -1120,15 +1120,12 @@ export const CASE_STUDIES: CaseStudy[] = [
     ],
   },
   {
-    // Placeholder story — copy and real assets pending. Carries a videoUrl so its
-    // detail page leads with the video player.
+    // Placeholder story — copy and real assets pending.
     slug: "sargent-cpa",
     company: "Sargent CPA",
     seoDescription:
       "How Sargent CPA modernized its client experience for accounting clients using Assembly Studio.",
     industry: "Accounting & Advisory",
-    videoUrl:
-      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
     headline: "How Sargent CPA modernized its client experience",
     summary:
       "Placeholder summary — real copy coming soon. Sargent CPA replaced a patchwork of tools with a single Assembly client portal.",
@@ -1170,15 +1167,12 @@ export const CASE_STUDIES: CaseStudy[] = [
     ],
   },
   {
-    // Placeholder story — copy and real assets pending. Carries a videoUrl so its
-    // detail page leads with the video player.
+    // Placeholder story — copy and real assets pending.
     slug: "advertai-marketing",
     company: "Advertai Marketing",
     seoDescription:
       "How Advertai Marketing scales client delivery for marketing campaigns on its Assembly Studio client experience.",
     industry: "Marketing & Design",
-    videoUrl:
-      "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
     headline: "How Advertai Marketing scaled client delivery",
     summary:
       "Placeholder summary — real copy coming soon. Advertai Marketing runs client campaigns and deliverables through one Assembly workspace.",

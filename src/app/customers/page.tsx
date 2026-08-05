@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { CustomersFeatured } from "@/components/customers/customers-featured";
 import { CustomersHub } from "@/components/customers/customers-hub";
 import { CustomersCta } from "@/components/customers/customers-cta";
+import { GRID_LINE, GridDivider, GridRails } from "@/components/ui/grid-lines";
 import { CAPTERRA_URL, G2_URL } from "@/lib/constants";
 import { PAGE_SEO, pageMetadata } from "@/lib/seo";
 
@@ -75,7 +76,12 @@ export default function CustomersPage() {
       {/* Content region — framed by vertical guide rails aligned to the 1200px
           column, with a full-bleed divider under the header. */}
       <div className="relative">
+        <GridRails />
 
+        {/* Full-bleed divider under the header — the boundary into the content.
+            Desktop only: on a narrow screen the hero and the cards below already
+            read as separate blocks, and the line just added a seam. */}
+        <div className={`hidden border-t md:block ${GRID_LINE}`} />
 
         {/* Flagship stories — capped to the rail width with inner padding so the
             cards sit inset from the guide lines. */}
@@ -83,6 +89,7 @@ export default function CustomersPage() {
           <CustomersFeatured />
         </section>
 
+        <GridDivider />
 
         {/* Story table — no side padding, so the row dividers run full-bleed on
             mobile and sit flush to the guide rails on desktop. Each row keeps its

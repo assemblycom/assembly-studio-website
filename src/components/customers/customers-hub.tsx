@@ -47,7 +47,10 @@ function StoryTableRow({ study }: { study: CaseStudy }) {
         </span>
       </span>
       <span className="flex shrink-0 items-center gap-1.5 text-[15px] text-foreground">
-        Read story
+        {/* Just "Read" on a phone. The row there is the company name and this
+            link, so what you'd be reading is already named on the left. */}
+        <span className="sm:hidden">Read</span>
+        <span className="hidden sm:inline">Read story</span>
         {/* PP Mori glyph arrow (the site's face) — not a drawn SVG. */}
         <span
           aria-hidden

@@ -3,11 +3,12 @@
 import { useMemo, useRef, useState } from "react";
 import {
   buildProposalUrl,
+  MAX_APP_NAME_LENGTH,
   MAX_PROMPT_LENGTH,
   MAX_PROPOSAL_NOTE_LENGTH,
 } from "@/lib/constants";
 import { TEMPLATES, TEMPLATE_CATEGORIES } from "@/lib/templates";
-import { FIELD_CLS, SelectMenu } from "@/components/ui/select-menu";
+import { FIELD_CLS, RequiredMark, SelectMenu } from "@/components/ui/select-menu";
 import { StudioNav } from "@/components/home/studio-nav";
 import { FooterAurora } from "@/components/layout/footer";
 import { useTheme } from "@/components/theme/theme-provider";
@@ -71,6 +72,7 @@ const TEAM: { value: string; label: string; avatar: string }[] = [
   },
   { value: "jordan", label: "Jordan Wechsler", avatar: "/images/team/jordan.jpg" },
   { value: "adam", label: "Adam Schwartz", avatar: "/images/team/adam.jpg" },
+  { value: "dovid", label: "Dovid Baum", avatar: "/images/team/dovid.jpg" },
 ];
 
 // The link carries the name, not the key: the proposal page prints whatever
@@ -91,17 +93,21 @@ function Field({
   label,
   htmlFor,
   error,
+  required = false,
   children,
 }: {
   label: string;
   htmlFor: string;
   error?: string;
+  /** Marks the label, for a field the form won't submit without. */
+  required?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={htmlFor} className="text-sm text-foreground">
         {label}
+        {required && <RequiredMark />}
       </label>
       {children}
       {error && <FieldError id={`${htmlFor}-error`}>{error}</FieldError>}
@@ -131,6 +137,7 @@ const ERRORS = {
   recipient: "Enter the name this proposal is for.",
   template: "Choose the template you want to propose.",
   prompt: "Write the prompt you want to propose.",
+  appName: "Name the app. The proposal's headline opens with it.",
 } as const;
 
 type FieldErrors = Partial<Record<keyof typeof ERRORS, string>>;
@@ -143,6 +150,13 @@ export function ProposalCreator() {
   const [mode, setMode] = useState<Mode>("prompt");
   const [templateSlug, setTemplateSlug] = useState("");
   const [prompt, setPrompt] = useState("");
+  // What the proposal's headline calls the app. A template titles itself; a
+  // prompt doesn't, so this is written for it — suggested from the prompt when
+  // you leave the field, then edited like any other. `appNameTouched` is what
+  // keeps a suggestion from overwriting something typed by hand.
+  const [appName, setAppName] = useState("");
+  const [appNameTouched, setAppNameTouched] = useState(false);
+  const [naming, setNaming] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   // The finished link. Held in state rather than derived, so editing a field
   // after generating doesn't silently change a link that's already been copied.
@@ -153,15 +167,46 @@ export function ProposalCreator() {
   const clearError = (field: keyof typeof ERRORS) =>
     setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
 
-  // Switching what you're proposing drops whichever of the two that side had
-  // flagged: the field it belonged to is no longer on screen.
+  // Switching what you're proposing drops whatever that side had flagged: the
+  // fields those errors belong to are no longer on screen.
   const clearProposalError = () =>
-    setErrors((prev) => ({ ...prev, template: undefined, prompt: undefined }));
+    setErrors((prev) => ({
+      ...prev,
+      template: undefined,
+      prompt: undefined,
+      appName: undefined,
+    }));
 
   const template = useMemo(
     () => TEMPLATES.find((t) => t.slug === templateSlug),
     [templateSlug],
   );
+
+  // Names the prompt, on leaving the prompt field and only while the name field
+  // is still untouched, so it never overwrites one that was typed. A failure or
+  // a missing API key comes back empty and leaves the field alone: the name is
+  // optional, and the proposal page falls back to opening on the recipient.
+  const suggestName = async () => {
+    const text = prompt.trim();
+    if (!text || naming) return;
+    if (appNameTouched || appName) return;
+    setNaming(true);
+    try {
+      const res = await fetch("/api/name-app", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      const data = await res.json();
+      if (typeof data?.name === "string" && data.name.trim()) {
+        setAppName(data.name.trim().slice(0, MAX_APP_NAME_LENGTH));
+      }
+    } catch {
+      // Offline or the route is down — the field stays as it is.
+    } finally {
+      setNaming(false);
+    }
+  };
 
   // Every problem is reported at once, each under its own field, rather than one
   // at a time in the order they're checked.
@@ -170,9 +215,16 @@ export function ProposalCreator() {
     if (!recipient.trim()) next.recipient = ERRORS.recipient;
     if (mode === "template" && !templateSlug) next.template = ERRORS.template;
     if (mode === "prompt" && !prompt.trim()) next.prompt = ERRORS.prompt;
+    if (mode === "prompt" && !appName.trim()) next.appName = ERRORS.appName;
     setErrors(next);
     if (Object.keys(next).length > 0) {
-      document.getElementById(next.recipient ? "recipient" : "prompt")?.focus();
+      // The first field that's flagged, in the order they're read down the page.
+      const first = next.recipient
+        ? "recipient"
+        : next.appName
+          ? "app-name"
+          : "prompt";
+      document.getElementById(first)?.focus();
       return;
     }
     setLink(
@@ -183,7 +235,7 @@ export function ProposalCreator() {
           note,
           ...(mode === "template"
             ? { template: templateSlug }
-            : { prompt }),
+            : { prompt, appName }),
         },
         window.location.origin,
       ),
@@ -221,7 +273,12 @@ export function ProposalCreator() {
           started right under the lead on mobile, where there's no column width
           to separate them. */}
       <div className="mt-14 flex flex-col gap-5 md:mt-16">
-        <Field label="Prepared for" htmlFor="recipient" error={errors.recipient}>
+        <Field
+          label="Prepared for"
+          htmlFor="recipient"
+          error={errors.recipient}
+          required
+        >
           <input
             id="recipient"
             type="text"
@@ -315,6 +372,7 @@ export function ProposalCreator() {
                 clearError("template");
               }}
               options={TEMPLATE_OPTIONS}
+              required
               placeholder="Choose a template…"
               searchable
               searchPlaceholder="Search templates…"
@@ -322,7 +380,39 @@ export function ProposalCreator() {
             {errors.template && <FieldError>{errors.template}</FieldError>}
           </div>
         ) : (
-          <Field label="The prompt" htmlFor="prompt">
+          <>
+          {/* The app's name leads, the way it leads the proposal's headline. A
+              template arrives named; a prompt doesn't, and without a name that
+              page can only open on the recipient. Left empty it fills itself in
+              from the prompt below when you leave that field — naming your own
+              app in a form is the step people skip — and it's a plain text input
+              either way, so what ships is whatever reads right to the sender. */}
+          <Field
+            label="Name of the app"
+            htmlFor="app-name"
+            error={errors.appName}
+            required
+          >
+            <input
+              id="app-name"
+              type="text"
+              value={appName}
+              maxLength={MAX_APP_NAME_LENGTH}
+              aria-invalid={errors.appName ? true : undefined}
+              aria-describedby={errors.appName ? "app-name-error" : undefined}
+              onChange={(e) => {
+                setAppName(e.target.value);
+                setAppNameTouched(true);
+                clearError("appName");
+              }}
+              placeholder={
+                naming ? "Naming it…" : "Client onboarding wizard"
+              }
+              className={INVALID_FIELD_CLS}
+            />
+          </Field>
+
+          <Field label="The prompt" htmlFor="prompt" required>
             <textarea
               id="prompt"
               rows={6}
@@ -334,6 +424,7 @@ export function ProposalCreator() {
                 setPrompt(e.target.value);
                 clearError("prompt");
               }}
+              onBlur={() => suggestName()}
               placeholder={PROMPT_PLACEHOLDER}
               className={`${INVALID_FIELD_CLS} resize-none leading-relaxed`}
             />
@@ -350,6 +441,7 @@ export function ProposalCreator() {
               </p>
             </div>
           </Field>
+          </>
         )}
 
         <Field label="A line for them" htmlFor="note">
@@ -376,13 +468,10 @@ export function ProposalCreator() {
         // The result, not a confirmation screen: the form stays open above it so
         // a name typo is a two-second fix rather than a restart.
         <div className="mt-8 rounded-xl border border-border p-5">
-          {/* No summary line above the link: it restated the name and the
-              template that the URL right below it already spells out, and a long
-              name made it the widest thing in the card. */}
-          <p className="break-all rounded-lg bg-muted px-4 py-3 font-mono text-xs leading-relaxed text-foreground [[data-theme=dark]_&]:bg-white/[0.06]">
-            {link}
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2.5">
+          {/* The two things you do with a link, and not the link itself: a long
+              query string printed in full was the biggest thing on the page and
+              nobody reads it — copying it or opening it is the whole job. */}
+          <div className="flex flex-wrap gap-2.5">
             <button type="button" onClick={copy} className={primary}>
               {copied ? "Copied" : "Copy link"}
             </button>
