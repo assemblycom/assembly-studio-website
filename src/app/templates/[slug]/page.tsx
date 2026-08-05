@@ -86,7 +86,7 @@ function TemplateHeader({
       </div>
 
       <div className="mt-6">
-        <TemplateCta />
+        <TemplateCta template={template} />
       </div>
     </div>
   );

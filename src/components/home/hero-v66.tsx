@@ -728,10 +728,8 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
             <button
               type="button"
               onClick={() => {
-                // With a prompt, go via the continuation screen — a client push,
-                // so the page stays up behind the sheet instead of blanking on a
-                // document load. An empty click skips it and goes straight to
-                // signup, which is a different origin and so a real navigation.
+                // A typed prompt rides along to onboarding; an empty click just
+                // goes there with nothing to carry.
                 if (value.trim()) {
                   openGetStarted(value);
                   return;
