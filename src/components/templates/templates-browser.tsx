@@ -260,7 +260,12 @@ export function TemplatesBrowser({ templates }: Props) {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search templates…"
           aria-label="Search templates"
-          className="type-caption h-10 w-full rounded-lg border border-border bg-transparent pl-9 pr-9 text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/30 lg:h-8"
+          // max-sm:text-base is the iOS zoom guard, not a type choice: Safari
+          // zooms the whole page on focus for any input under 16px, and at the
+          // caption step this field was pulling the gallery in every time it was
+          // tapped. Only the VALUE takes the guard — the placeholder stays at the
+          // caption step so the field looks unchanged at rest.
+          className="type-caption h-10 w-full rounded-lg border border-border bg-transparent pl-9 pr-9 text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/30 max-sm:text-base max-sm:placeholder:text-[0.8125rem] lg:h-8"
         />
         {query && (
           <button
@@ -347,17 +352,32 @@ export function TemplatesBrowser({ templates }: Props) {
                     cover mock (shared with the home hero). */}
                 {/* Square at every width: the widgets are drawn square, and the
                     old 5/4 mobile frame cropped the bottom off the taller ones. */}
-                <MockFit
-                  className={`relative aspect-square overflow-hidden rounded-[20px] border border-border/60 bg-background [[data-theme=dark]_&]:border-transparent [[data-theme=dark]_&]:bg-[#151515] ${MOCK_DESIGN_SIZE[template.slug] ?? ""}`}
-                >
-                  <div
-                    className={`template-mock [font-family:var(--font-inter),system-ui,sans-serif] ${
-                      dark ? "v72-mock-dark" : ""
-                    }`}
+                {/* The outline is drawn OVER the cover, not as a border on the
+                    frame. A border takes a pixel of layout, so the widget could
+                    only ever fill the content box and stopped 1px short of the
+                    edge — with the card's white ground under a 60%-opacity
+                    hairline, that pixel read as a pale gap rather than an outline
+                    hugging the colour. No border means the cover fills the whole
+                    square and the hairline sits on its outermost pixel.
+                    It can't live inside MockFit: `.template-mock-fit > *` sizes
+                    and scales every direct child to the design size. */}
+                <div className="relative">
+                  <MockFit
+                    className={`relative aspect-square overflow-hidden rounded-[20px] bg-background [[data-theme=dark]_&]:bg-[#151515] ${MOCK_DESIGN_SIZE[template.slug] ?? ""}`}
                   >
-                    <V69CardMock slug={template.slug} />
-                  </div>
-                </MockFit>
+                    <div
+                      className={`template-mock [font-family:var(--font-inter),system-ui,sans-serif] ${
+                        dark ? "v72-mock-dark" : ""
+                      }`}
+                    >
+                      <V69CardMock slug={template.slug} />
+                    </div>
+                  </MockFit>
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 rounded-[20px] border border-border/60 [[data-theme=dark]_&]:border-transparent"
+                  />
+                </div>
                 {/* Card text on the site's own steps: body for the name, caption
                     for the line under it. Both sit at 400 — the name reads as the
                     heading through colour and the space above it, not weight.

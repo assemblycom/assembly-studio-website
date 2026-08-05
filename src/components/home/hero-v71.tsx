@@ -1504,13 +1504,20 @@ function CardCaseStatus() {
               "linear-gradient(135deg, #7DA4FF 0%, #D9ED92 100%)",
           }}
         />
-        {/* Stretched a pixel past the card on every side, and the card's own
-            overflow clip trims it back. The card renders at a fractional size,
-            so an exactly-inset viewport rounded a fraction short of its bottom
-            and side edges — and the full-bleed gradient behind showed through
-            that gap as a thin white line. Oversizing leaves no gap to show. */}
+        {/* The viewport matches the card exactly and the OVERSHOOT does the
+            covering: overflow-visible lets the path's out-of-viewBox edges paint
+            past the card, and the card's own overflow clip trims them. The card
+            renders at a fractional size, so an exactly-inset shape rounds a
+            fraction short of its bottom and side edges and the full-bleed
+            gradient behind shows through as a thin bright line.
+            This used to oversize the SVG element by a pixel instead, which
+            clipped the overshoot back to ~1px of cover AND — because the stretched
+            viewBox then mapped 100 units across card+2px — pulled every interior
+            coordinate, the folder's top edge and notch included, off position by a
+            third of a pixel. Sizing the viewport to the card keeps the interior
+            exact and leaves a full viewBox unit of cover on the edges. */}
         <svg
-          className="absolute -inset-px"
+          className="absolute inset-0 overflow-visible"
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
           aria-hidden

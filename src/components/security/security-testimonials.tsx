@@ -12,10 +12,12 @@ import Link from "next/link";
 const STORY = {
   slug: "metta-health",
   company: "Metta Health",
-  // Not the sector: "Metta Health · Healthcare" said the same word twice, and the
-  // headline under it already places the story in healthcare. Tenure is the fact
-  // this page's reader actually wants from an attribution line.
-  context: "On Assembly since 2023",
+  // The sector, but not the word "Healthcare" — beside a company already called
+  // Metta Health that said the same thing twice, which is why this line used to
+  // carry tenure instead. "Patient care" names the same sector without the echo,
+  // and reads as an attribution rather than a sentence: "On Assembly since 2023"
+  // ran nearly as wide as the company name it was qualifying.
+  context: "Patient care",
   title:
     "How Metta Health scales HIPAA-compliant patient authorizations with Assembly",
   stats: [

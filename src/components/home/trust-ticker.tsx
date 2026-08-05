@@ -167,12 +167,14 @@ export function TrustTicker() {
             slack beside it; nudging earlier pushed the last figure out past the
             page padding. */}
         <div className="mx-auto max-w-[1100px] min-[1280px]:translate-x-11">
-          {/* Phone: a 2x2 of outlined tiles, each figure centred in its own tile.
-              The gutter is the gap between tiles now, so it's tighter than the
-              36px that used to separate two unframed rows. From sm up the tiles
+          {/* Phone: ONE outline around the whole 2x2, with hairlines between the
+              cells — four separate outlined tiles read as four separate things
+              when they are one set of figures. So the frame moves out here and
+              the tiles lose their own, closing the gap so they can share the
+              divider between them. From sm up this frame is gone and the tiles
               dissolve back into one divided row (see the cell classes). */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-x-0 sm:gap-y-0 sm:divide-x sm:divide-border [[data-theme=dark]_&]:sm:divide-[#383838]">
-            {STATS.map((s) => (
+          <div className="grid grid-cols-2 max-sm:overflow-hidden max-sm:rounded-xl max-sm:ring-1 max-sm:ring-border sm:grid-cols-4 sm:gap-x-0 sm:gap-y-0 sm:divide-x sm:divide-border [[data-theme=dark]_&]:max-sm:ring-[#383838] [[data-theme=dark]_&]:sm:divide-[#383838]">
+            {STATS.map((s, i) => (
               // The outer cells drop their outer padding so the first figure
               // starts exactly on the rail and the last ends on it — flush with
               // the copy above and below. The inner padding stays, so the
@@ -181,16 +183,19 @@ export function TrustTicker() {
               // but broke the one thing the row has going for it, which is that
               // all four figures start at the same offset from their own column.
               //
-              // Below sm each cell is its own outlined, centred tile; every one of
-              // those properties is reset at sm so the row goes back to being four
-              // columns of a single band separated by hairlines.
+              // Below sm the cells are centred and divided by hairlines inside the
+              // grid's own frame; at sm every one of those properties is reset so
+              // the row goes back to four columns of a single band.
               //
-              // The tile outline is a RING, not a border: the row's dividers are
-              // drawn by divide-x, which is itself a border, so resetting a border
-              // at sm to undo the tile took the dividers with it.
+              // The mobile dividers are keyed off the index rather than divide-x:
+              // divide-* walks DOM order, which in a 2x2 puts its line on the
+              // bottom-LEFT cell's outer edge. Second column takes a left edge,
+              // second row a top edge, so only the two interior lines get drawn.
               <div
                 key={s.label}
-                className="rounded-xl px-4 py-5 text-center ring-1 ring-border [[data-theme=dark]_&]:ring-[#383838] sm:rounded-none sm:p-0 sm:py-9 sm:text-left sm:ring-0 sm:first:pl-0 sm:last:pr-0 sm:[&:not(:first-child)]:pl-7 sm:[&:not(:last-child)]:pr-7"
+                className={`px-4 py-5 text-center max-sm:border-border sm:rounded-none sm:p-0 sm:py-9 sm:text-left sm:first:pl-0 sm:last:pr-0 [[data-theme=dark]_&]:max-sm:border-[#383838] sm:[&:not(:first-child)]:pl-7 sm:[&:not(:last-child)]:pr-7 ${
+                  i % 2 === 1 ? "max-sm:border-l" : ""
+                } ${i > 1 ? "max-sm:border-t" : ""}`}
               >
                 <p className="text-[13px] leading-snug text-muted-foreground">
                   {s.label}
