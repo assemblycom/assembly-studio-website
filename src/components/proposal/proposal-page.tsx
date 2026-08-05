@@ -9,7 +9,11 @@ import {
   TEMPLATE_FEATURE_DETAILS,
   type Template,
 } from "@/lib/templates";
-import { MAX_APP_NAME_LENGTH } from "@/lib/constants";
+import {
+  MAX_APP_NAME_LENGTH,
+  buildSignupUrl,
+  templateSignupUrl,
+} from "@/lib/constants";
 import { FooterAurora } from "@/components/layout/footer";
 import { useTheme } from "@/components/theme/theme-provider";
 import { MockFit, MOCK_DESIGN_SIZE } from "@/components/templates/mock-fit";
@@ -29,7 +33,7 @@ import { OptionAvatar } from "@/components/ui/select-menu";
 //   ?from=Sean Walsh    who sent it
 //   ?note=…                one personal line under their name
 //
-// Unlike /get-started (a sheet on top of the site) this is a full page with no
+// A full page rather than a sheet on top of the site: it has no
 // navigation at all: there is one thing to do on it. The template's details open
 // in a right-hand panel rather than a link, so reading them never costs the page.
 // ─────────────────────────────────────────────────────────────────────────
@@ -834,22 +838,24 @@ function ProposalContent() {
     };
   }, []);
 
-  // Signing up is the same sheet the landing page and the templates gallery
-  // open: /get-started intercepted as a modal over whatever you were reading,
-  // carrying what you arrived with. The prompt variant is editable, so the link
-  // is built from the field as it reads now rather than from the query the page
-  // mounted with. The name rides along so the sheet greets them too.
-  const startParams = new URLSearchParams(
-    template ? { template: template.slug } : { prompt: draft },
-  );
-  if (recipient) startParams.set("for", recipient);
-  const startHref = `/get-started?${startParams.toString()}`;
+  // Signing up goes straight to onboarding on dashboard, carrying what the
+  // proposal was built from — the picked template, or the prompt as the field
+  // reads now rather than as the page mounted with it. There is no sheet on this
+  // site in between any more: it asked for an account this side of the hand-off
+  // and onboarding asked again on the far side.
+  const startHref = template
+    ? templateSignupUrl({
+        slug: template.slug,
+        title: template.title,
+        description: template.description,
+      })
+    : buildSignupUrl(draft);
 
-  // Every other CTA on the page opens the same sheet. Pushed rather than
-  // linked so the details panel can close itself on the way out.
+  // Every other CTA on the page leaves for the same place; this one also closes
+  // the details panel on the way out.
   const goToSignup = () => {
     setPanelOpen(false);
-    router.push(startHref);
+    window.location.href = startHref;
   };
 
   return (

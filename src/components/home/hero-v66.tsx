@@ -2,13 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   APP_URL,
   MAX_PROMPT_LENGTH,
   buildSignupUrl,
-  getStartedUrl,
 } from "@/lib/constants";
 import { TEMPLATES } from "@/lib/templates";
 import { IconArrow, IconFile, IconPaperclip, IconPlay, IconX } from "./icons";
@@ -182,22 +180,13 @@ function V66Nav() {
 // The prompt box. Kept top-level so its menu state doesn't remount. `tone`
 // flips the text + control colors so the same box can sit on a light panel or
 // on a dark/glass hero.
-// Opening the sign-up sheet must not move the page underneath it: the sheet is
-// an intercepted modal rendered OVER this page, and any scroll change reads as
-// the content lurching out from under the click. `scroll: false` alone doesn't
-// hold for the intercepted route, so the position is captured and reapplied on
-// the frames either side of the transition.
-function openGetStarted(
-  router: ReturnType<typeof useRouter>,
-  value: string,
-) {
-  const y = window.scrollY;
-
-  // Stamp the prompt onto the entry we're leaving. Closing the sheet is a
-  // history step back (the only thing that actually clears the intercepted
-  // slot), so the entry it returns to is this one — and the page reads
-  // ?prompt= on mount to refill the composer. Without this the composer comes
-  // back empty and you retype what you already typed.
+// Submitting goes straight to onboarding on dashboard, carrying the prompt. It
+// used to open a sign-up sheet on this site first, which asked for an account
+// twice — once here and again on the far side.
+//
+// The prompt is still stamped onto the entry we're leaving, so coming BACK from
+// onboarding refills the composer instead of making you retype it.
+function openGetStarted(value: string) {
   const trimmed = value.trim();
   if (trimmed) {
     const here = new URL(window.location.href);
@@ -205,24 +194,10 @@ function openGetStarted(
     window.history.replaceState(window.history.state, "", here);
   }
 
-  router.push(getStartedUrl(value), { scroll: false });
-
-  // Next resets scroll when the intercepted segment mounts, and it doesn't
-  // always land on the same frame — `scroll: false` doesn't hold for this route.
-  // Reassert the position briefly rather than guessing which frame to fix.
-  const restore = () => {
-    if (window.scrollY !== y) window.scrollTo(0, y);
-  };
-  const started = performance.now();
-  const hold = () => {
-    restore();
-    if (performance.now() - started < 400) requestAnimationFrame(hold);
-  };
-  requestAnimationFrame(hold);
+  window.location.href = buildSignupUrl(trimmed || undefined);
 }
 
 export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 ring-black/[0.06]", surfaceRadiusClass = "rounded-[22px]", minHeightClass = "min-h-[188px]", tone = "light", typewriter = false, mutedControls = false, submitLabel, submitDark = false, accent = LIME, hidePlus = false, hideHowTo = false, howToLabel = "How it works", howToSide = "left", promptPicker = false, promptPickerLabel = "Select a prompt", promptPickerSide = "left", promptPickerUp = false, promptItems, plusItems, compact = false, minimalControls = false, plusAsAttach = false, footerLeading, showSubmit = true, submitDisabled, textDimmed = false, splitFooter = false, value: valueProp, onValueChange, textareaRef }: { glow?: boolean; surfaceClassName?: string; surfaceRadiusClass?: string; minHeightClass?: string; tone?: "light" | "dark"; typewriter?: boolean; mutedControls?: boolean; submitLabel?: string; submitDark?: boolean; accent?: string; hidePlus?: boolean; hideHowTo?: boolean; howToLabel?: string; howToSide?: "left" | "right"; promptPicker?: boolean; promptPickerLabel?: string; promptPickerSide?: "left" | "right"; promptPickerUp?: boolean; promptItems?: (string | { label: string; prompt: string })[]; plusItems?: { label: string; icon: "attach" | "transfer" }[]; compact?: boolean; minimalControls?: boolean; plusAsAttach?: boolean; footerLeading?: React.ReactNode; showSubmit?: boolean; submitDisabled?: boolean; textDimmed?: boolean; splitFooter?: boolean; value?: string; onValueChange?: (v: string) => void; textareaRef?: React.Ref<HTMLTextAreaElement> } = {}) {
-  const router = useRouter();
 
   // Prompt-picker entries. Default: the shared "Build a …" examples. A hero can
   // pass `promptItems` as plain strings (shown and inserted verbatim) or as
@@ -532,7 +507,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 if (value.trim()) {
-                  openGetStarted(router, value);
+                  openGetStarted(value);
                 }
               }
             }}
@@ -651,7 +626,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
                         type="button"
                         onClick={() => {
                           if (value.trim()) {
-                            openGetStarted(router, value);
+                            openGetStarted(value);
                             return;
                           }
                           window.location.href = buildSignupUrl();
@@ -758,7 +733,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
                 // document load. An empty click skips it and goes straight to
                 // signup, which is a different origin and so a real navigation.
                 if (value.trim()) {
-                  openGetStarted(router, value);
+                  openGetStarted(value);
                   return;
                 }
                 window.location.href = buildSignupUrl();

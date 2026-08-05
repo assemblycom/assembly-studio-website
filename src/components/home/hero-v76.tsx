@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { memo, useEffect, useRef, useState } from "react";
-import { APP_URL } from "@/lib/constants";
+import { APP_URL, templateSignupUrl } from "@/lib/constants";
 import { TEMPLATES, type Template } from "@/lib/templates";
 import { IconArrow } from "./icons";
 import { V66Composer } from "./hero-v66";
@@ -385,7 +385,7 @@ export function HeroV76({
                     template={t}
                     index={i}
                     dark={dark}
-                    href={`/get-started?template=${t.slug}`}
+                    href={templateSignupUrl(t)}
                   />
                 ))}
 

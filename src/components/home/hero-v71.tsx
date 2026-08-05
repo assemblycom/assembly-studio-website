@@ -2591,35 +2591,80 @@ function CardBlockGame() {
 // value, which said "Round 2" loudly and left out what the request was.
 // Ink-filled: this is the composition's whole surface, which is why the card is
 // exempt from the gallery frame's pale hairline (see BLEED_COVERS).
-const INTAKE_LINES: { text: string; dim?: boolean }[][] = [
-  [{ text: "2 new" }, { text: "requests", dim: true }],
-  [{ text: "Website refresh" }],
-  [{ text: "from", dim: true }, { text: "Ava Ellis" }],
-  [{ text: "needs a quote", dim: true }],
-  [{ text: "in 2 days" }],
+// Glyphs set inline in the sentence, the way the reference sets its weather icon:
+// a bubble on the requests, a clip on the quote, a clock on the deadline. Drawn at
+// their source viewBoxes and scaled to the type, so they sit at text weight.
+const INTAKE_GLYPHS = {
+  bubble: {
+    viewBox: "0 0 20 20",
+    ratio: 1,
+    d: "M20 9.375C20 14.5508 15.5234 18.75 10 18.75C8.55078 18.75 7.17578 18.4609 5.93359 17.9414L1.30859 19.9258C0.941406 20.082 0.519531 19.9922 0.25 19.6992C-0.0195312 19.4062 -0.078125 18.9766 0.109375 18.625L2.01562 15.0234C0.75 13.4492 0 11.4961 0 9.375C0 4.19922 4.47656 0 10 0C15.5234 0 20 4.19922 20 9.375Z",
+  },
+  clip: {
+    viewBox: "0 0 19 22",
+    ratio: 19 / 22,
+    d: "M8.69434 1.64648C10.8896 -0.548828 14.4521 -0.548828 16.6475 1.64648C18.8428 3.8418 18.8428 7.4043 16.6475 9.59961L10.2412 16.0059C8.89746 17.3496 6.72168 17.3496 5.37793 16.0059C4.03418 14.6621 4.03418 12.4863 5.37793 11.1426L11.3467 5.18164C11.835 4.69336 12.6279 4.69336 13.1162 5.18164C13.6045 5.66992 13.6045 6.46289 13.1162 6.95117L7.14746 12.916C6.78027 13.2832 6.78027 13.877 7.14746 14.2402C7.51465 14.6035 8.1084 14.6074 8.47168 14.2402L14.8779 7.83398C16.0967 6.61523 16.0967 4.63477 14.8779 3.41602C13.6592 2.19727 11.6787 2.19727 10.46 3.41602L4.05371 9.82227C1.97949 11.8965 1.97949 15.2598 4.05371 17.334C6.12793 19.4082 9.49121 19.4082 11.5654 17.334L16.6514 12.252C17.1396 11.7637 17.9326 11.7637 18.4209 12.252C18.9092 12.7402 18.9092 13.5332 18.4209 14.0215L13.335 19.0996C10.2842 22.1504 5.33887 22.1504 2.28809 19.0996C-0.762695 16.0488 -0.762695 11.1035 2.28809 8.05273L8.69434 1.64648Z",
+  },
+  clock: {
+    viewBox: "0 0 20 20",
+    ratio: 1,
+    d: "M10 0C12.6522 0 15.1957 1.05357 17.0711 2.92893C18.9464 4.8043 20 7.34784 20 10C20 12.6522 18.9464 15.1957 17.0711 17.0711C15.1957 18.9464 12.6522 20 10 20C7.34784 20 4.8043 18.9464 2.92893 17.0711C1.05357 15.1957 0 12.6522 0 10C0 7.34784 1.05357 4.8043 2.92893 2.92893C4.8043 1.05357 7.34784 0 10 0ZM9.0625 4.6875V10C9.0625 10.3125 9.21875 10.6055 9.48047 10.7812L13.2305 13.2812C13.6602 13.5703 14.2422 13.4531 14.5312 13.0195C14.8203 12.5859 14.7031 12.0078 14.2695 11.7188L10.9375 9.5V4.6875C10.9375 4.16797 10.5195 3.75 10 3.75C9.48047 3.75 9.0625 4.16797 9.0625 4.6875Z",
+  },
+} as const;
+
+// One flowing sentence, not a stack of fixed lines: the words wrap to the card's
+// width on their own, so nothing trails off short of the right edge.
+type IntakePart =
+  | { text: string; dim?: boolean }
+  | { glyph: keyof typeof INTAKE_GLYPHS };
+
+const INTAKE_SENTENCE: IntakePart[] = [
+  { glyph: "bubble" },
+  { text: "2 new" },
+  { text: "requests", dim: true },
+  { text: "Website refresh" },
+  { text: "from", dim: true },
+  { text: "Ava Ellis" },
+  { glyph: "clip" },
+  { text: "needs a quote", dim: true },
+  { glyph: "clock" },
+  { text: "in 2 days" },
 ];
+
+const INTAKE_DIM = "text-[color-mix(in_srgb,var(--v69-well)_55%,transparent)]";
 
 function CardServiceRequest() {
   return (
-    <div className="flex h-full flex-col justify-center bg-[var(--v69-ink)] p-5">
-      <p className="text-[19px] font-normal leading-[1.35] tracking-tight">
-        {INTAKE_LINES.map((line, i) => (
-          <span key={i} className="block">
-            {line.map((part, j) => (
-              <span
-                key={j}
-                className={
-                  part.dim
-                    ? "text-[color-mix(in_srgb,var(--v69-well)_55%,transparent)]"
-                    : ON_INK
-                }
-              >
-                {j > 0 ? " " : ""}
-                {part.text}
-              </span>
-            ))}
-          </span>
-        ))}
+    // Top-aligned: the sentence reads from the card's first line, the way a
+    // notification does, rather than floating in the middle of the square.
+    <div className="flex h-full flex-col bg-[var(--v69-ink)] p-5">
+      <p className="flex flex-wrap items-baseline gap-x-[0.28em] text-[24px] font-normal leading-[1.28] tracking-tight">
+        {/* One flex item per WORD, not per phrase: a phrase is unbreakable, so
+            wrapping by phrase left half a line empty every time one didn't fit.
+            Word by word, the lines pack to the card's width. */}
+        {INTAKE_SENTENCE.flatMap((part, i) =>
+          "glyph" in part
+            ? [
+                <svg
+                  key={i}
+                  viewBox={INTAKE_GLYPHS[part.glyph].viewBox}
+                  className={`h-[0.72em] w-auto translate-y-[0.02em] ${ON_INK}`}
+                  style={{ aspectRatio: INTAKE_GLYPHS[part.glyph].ratio }}
+                  fill="currentColor"
+                  aria-hidden
+                >
+                  <path d={INTAKE_GLYPHS[part.glyph].d} />
+                </svg>,
+              ]
+            : part.text.split(" ").map((word, w) => (
+                <span
+                  key={`${i}-${w}`}
+                  className={part.dim ? INTAKE_DIM : ON_INK}
+                >
+                  {word}
+                </span>
+              )),
+        )}
       </p>
     </div>
   );

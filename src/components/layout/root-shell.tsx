@@ -16,13 +16,7 @@ export function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { theme, preference, setPreference } = useTheme();
   const dark = theme === "dark";
-  // /get-started is almost always an intercepted modal over the page you were
-  // on, so this shell must not re-derive the chrome from that URL — the page
-  // underneath has already rendered its own. Treating it as home keeps that
-  // layout exactly as it was: home supplies its own nav (so no second one gets
-  // added) and keeps its footer (so the document doesn't get shorter and the
-  // browser doesn't clamp the scroll). Both of those were visible jumps.
-  const isHome = pathname === "/" || pathname === "/get-started";
+  const isHome = pathname === "/";
   // Every page this shell renders gets the reveal footer. It used to be an
   // allowlist of known routes, which meant anything not on it — in practice
   // only the 404 — fell through to a plain footer that ended flat, with no
@@ -64,13 +58,6 @@ export function RootShell({ children }: { children: React.ReactNode }) {
   // Focused, chrome-light pages: a personalized proposal (one thing to do on it,
   // so no nav at all) and the internal tool that composes one. Each renders its
   // own header, if any. (Placed after all hooks so the hook order stays stable.)
-  //
-  // /get-started is deliberately NOT in this list. It is usually an intercepted
-  // modal over the page you were on, and this branch keys off the URL — so the
-  // moment the sheet opened, the page *underneath* lost its nav and footer, the
-  // document got ~500px shorter, and the browser clamped the scroll. That clamp
-  // was the content visibly lurching before the sheet appeared. Standalone, the
-  // sheet is fixed inset-0 over its own backdrop and covers this chrome anyway.
   if (pathname === "/proposal" || pathname === "/proposal-creator") {
     return <div className="min-h-screen bg-background">{children}</div>;
   }

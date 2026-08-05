@@ -8,7 +8,7 @@ import {
   IconClose,
   IconExpand,
 } from "@/components/templates/modal-icons";
-import { APP_URL } from "@/lib/constants";
+import { APP_URL, templateSignupUrl } from "@/lib/constants";
 import { TEMPLATE_CUSTOMIZATION as CUSTOMIZABLE } from "@/lib/templates";
 import { useAuthState } from "@/lib/use-auth";
 
@@ -66,7 +66,7 @@ export function TemplateModalBrowser({
   // Signed-in visitors add the app straight to their workspace; signed-out
   // visitors sign up starting from this template.
   const { authed } = useAuthState();
-  const ctaHref = authed ? APP_URL : `/get-started?template=${template.slug}`;
+  const ctaHref = authed ? APP_URL : templateSignupUrl(template);
   const ctaLabel = authed ? "Add app to workspace" : "Get started";
   const onDragStart = (e: React.TouchEvent) => {
     dragStartY.current = e.touches[0].clientY;

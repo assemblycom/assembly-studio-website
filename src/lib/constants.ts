@@ -91,14 +91,22 @@ export function buildSignupUrl(
   return url;
 }
 
-// The composer/template now route through an in-between "continuation" screen
-// (/get-started) that shows what the visitor started with before handing off to
-// the real signup on dashboard. Carries the prompt so that screen can show it.
-export function getStartedUrl(prompt?: string): string {
-  const value = prompt?.trim().slice(0, MAX_PROMPT_LENGTH) ?? "";
-  return value
-    ? `/get-started?prompt=${encodeURIComponent(value)}`
-    : "/get-started";
+// A picked template goes straight to onboarding on dashboard, carrying the
+// template so signup opens already holding it. It used to route through a
+// sign-up sheet on this site, which collected an account this side of the
+// hand-off and then again on the far side.
+export function templateSignupUrl(template: {
+  slug: string;
+  title: string;
+  description: string;
+}): string {
+  return buildSignupUrl(undefined, {
+    // The slug is our only stable handle on a template; signup resolves the real
+    // app id from it.
+    id: template.slug,
+    name: template.title,
+    description: template.description,
+  });
 }
 // ── Personalized proposals ────────────────────────────────────────────────
 // A proposal is a one-off page made for one person: their name, the build we're

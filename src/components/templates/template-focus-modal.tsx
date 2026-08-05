@@ -7,7 +7,7 @@ import {
 } from "@/components/templates/template-gallery";
 import { IconClose, IconExpand } from "@/components/templates/modal-icons";
 import type { ModalTemplate } from "@/components/templates/template-modal";
-import { APP_URL } from "@/lib/constants";
+import { APP_URL, templateSignupUrl } from "@/lib/constants";
 import { useAuthState } from "@/lib/use-auth";
 
 /**
@@ -130,7 +130,7 @@ export function TemplateFocusModal({
                 was serving; space alone separates them just as clearly. */}
             <div className="mt-7">
               <a
-                href={authed ? APP_URL : `/get-started?template=${template.slug}`}
+                href={authed ? APP_URL : templateSignupUrl(template)}
                 className="inline-block rounded-[6px] bg-foreground px-4 py-2 text-sm text-background transition-opacity hover:opacity-90"
               >
                 {authed ? "Add app to workspace" : "Get started"}

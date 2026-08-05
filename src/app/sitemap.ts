@@ -25,9 +25,6 @@ const EXCLUDED = new Set<string>([
   PROPOSAL_PATH,
   // Internal tool that writes those proposals.
   PROPOSAL_CREATOR_PATH,
-  // The sign-up sheet. It normally opens as a modal over another page, and the
-  // standalone route carries no content of its own worth ranking.
-  "/get-started",
 ]);
 
 // Per-route crawl hints. Anything not listed falls back to DEFAULT_HINT, which
