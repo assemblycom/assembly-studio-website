@@ -47,8 +47,10 @@ export default function PricingPage() {
           the rule and the CTA heading right behind it, so the two sections read
           as one block. */}
       {/* Full-bleed rule into the FAQ, edge to edge like the one before the CTA
-          below — the two rules that bracket this section are the same kind. */}
-      <div className={`border-t ${GRID_LINE}`} />
+          below, so the two rules that bracket this section are the same kind.
+          Desktop only: on mobile the comparison view and the FAQ already read as
+          separate blocks, and the line just added a seam. */}
+      <div className={`hidden border-t md:block ${GRID_LINE}`} />
       <div className="relative pb-16 md:pb-24">
         <GridRails />
         <FAQ items={PRICING_FAQS} twoColumn />
