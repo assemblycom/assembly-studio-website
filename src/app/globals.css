@@ -79,19 +79,20 @@
   --mock-negative-bg: #fbeceb;
   --mock-negative-fg: #b8443a;
 
-  /* The proposal masthead: one printed colour with everything on it drawn in a
-     single ink, rather than themed surfaces. Kept as tokens so the band, the
-     field the card sits on, and the type on both stay one decision. Light prints
-     it black with white ink; dark inverts to the brand lime with black ink — see
-     the dark block below. */
-  --proposal-field: #101010;
-  --proposal-ink: #ffffff;
-  --proposal-ink-soft: rgba(255, 255, 255, 0.75);
+  /* The proposal masthead. It carries no colour of its own in either theme: the
+     band is the page's own ground and a hairline closes it, rather than a slab in
+     a different shade. Kept as tokens so the band and every ink on it stay one
+     decision — and so the one step the page tokens don't have (--ink-faint) has
+     somewhere to live. Light is dark ink on the page's white; the dark block
+     below is the same idea inverted. */
+  --proposal-field: var(--background);
+  --proposal-ink: var(--foreground);
+  --proposal-ink-soft: rgba(16, 17, 20, 0.7);
   /* The band's chrome step: the small labels over the names and the app title,
-     which sit below the reading inks so they read as captions on the print
-     rather than as another line of the page. */
-  --proposal-ink-faint: rgba(255, 255, 255, 0.5);
-  --proposal-ink-fill: rgba(255, 255, 255, 0.15);
+     which sit below the reading inks so they read as captions rather than as
+     another line of the page. */
+  --proposal-ink-faint: rgba(16, 17, 20, 0.45);
+  --proposal-ink-fill: rgba(16, 17, 20, 0.08);
 }
 
 /* Site-wide dark theme. The theme toggle writes data-theme="dark" on <html>,
@@ -125,14 +126,17 @@
   --mock-negative-bg: rgba(224, 122, 113, 0.14);
   --mock-negative-fg: #d9928b;
 
-  /* The masthead is black with white ink in both themes — inverting it (it was
-     the brand lime, then a light neutral) put a second colour on a page that
-     reads better with none. In dark the field is the page's own ground rather
-     than the light theme's #101010: those two blacks are a visible step apart,
-     and the seam where the band ended read as a colour change. The band's
-     bottom edge is meant to disappear here; the header hairline and the space
-     around the title are what set the masthead off. */
+  /* The masthead on the dark ground: the page's own black, with the ink at full
+     white rather than the softened --foreground the body copy uses, because the
+     title and the two names are the one place on this page that should print at
+     full strength. The band's bottom edge disappears into the page in both
+     themes — the header hairline and the space around the title are what set the
+     masthead off, which is why neither theme paints a slab. */
   --proposal-field: var(--background);
+  --proposal-ink: #ffffff;
+  --proposal-ink-soft: rgba(255, 255, 255, 0.75);
+  --proposal-ink-faint: rgba(255, 255, 255, 0.5);
+  --proposal-ink-fill: rgba(255, 255, 255, 0.15);
 }
 
 @theme inline {

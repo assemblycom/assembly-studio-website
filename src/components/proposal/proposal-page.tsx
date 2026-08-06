@@ -140,7 +140,10 @@ function BandName({
     // items-center so the label sits over the pair it names rather than over the
     // full width of a stretched column — the band is centred.
     <div className="flex flex-col items-center gap-2.5">
-      <p className="type-eyebrow text-[color:var(--proposal-ink-faint)]">
+      {/* Normal case, like the eyebrow over the title: three labels in one band
+          with two of them shouting would read as a mistake, and sentence case is
+          quieter under a centred masthead either way. */}
+      <p className="type-eyebrow normal-case tracking-[0.02em] text-[color:var(--proposal-ink-faint)]">
         {label}
       </p>
       <div className="flex items-center gap-2.5">
@@ -500,7 +503,7 @@ function ProposalHeaderShell() {
             width={22}
             height={22}
             priority
-            className="brightness-0 invert"
+            className="brightness-0 [[data-theme=dark]_&]:invert"
           />
         </div>
       </div>
@@ -617,7 +620,7 @@ function ProposalContent() {
               width={22}
               height={22}
               priority
-              className="brightness-0 invert"
+              className="brightness-0 [[data-theme=dark]_&]:invert"
             />
           </div>
         </div>
@@ -642,11 +645,13 @@ function ProposalContent() {
                 labels the thing it belongs to. It also can't collide with the
                 first section's heading the way an eyebrow repeating the app's
                 own name did. */}
-            {/* Set in PP Mori rather than type-eyebrow's mono, keeping the
-                eyebrow's size, caps and tracking: this one sits directly over
-                the title, and a mono line there read as another document's
-                furniture on top of the page's own face. */}
-            <p className="type-eyebrow text-[color:var(--proposal-ink-faint)] [font-family:var(--font-pp-mori)]">
+            {/* Set in PP Mori rather than type-eyebrow's mono, and in normal
+                case rather than its caps: this one sits directly over the title,
+                where a mono line read as another document's furniture and caps
+                read as shouting a single word. The tracking comes down with the
+                caps — 0.08em is drawn to open up capitals and only looks loose on
+                lowercase. */}
+            <p className="type-eyebrow normal-case tracking-[0.02em] text-[color:var(--proposal-ink-faint)] [font-family:var(--font-pp-mori)]">
               Proposal
             </p>
             <h1 className="type-display mx-auto mt-3.5 max-w-[42rem] text-balance text-[color:var(--proposal-ink)]">
