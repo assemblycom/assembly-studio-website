@@ -1287,29 +1287,12 @@ html[data-theme="dark"] .v63-ring-solid::before {
     inset 0 -1px 0 rgba(255, 255, 255, 0.4),
     0 1px 3px rgba(16, 24, 40, 0.1);
 }
+/* Dark runs the composer flat everywhere, hero included: the brand-tinted sheen
+   and its lit lips were the only glass material left on that card, and against a
+   flat face they read as a lozenge floating over it rather than a field in it.
+   The fill comes from the element (a --v69-inner class), not from here, so the
+   gallery's inverted skin can still override it. Light has its own flat rule below. */
 [data-theme="dark"] .v69-composer-gradient {
-  background-image:
-    linear-gradient(
-      165deg,
-      rgba(255, 255, 255, 0.1) 0%,
-      rgba(255, 255, 255, 0.04) 40%,
-      rgba(255, 255, 255, 0) 64%
-    ),
-    linear-gradient(
-      100deg,
-      rgba(217, 237, 146, 0.2) 0%,
-      rgba(179, 205, 205, 0.18) 46%,
-      rgba(125, 164, 255, 0.26) 100%
-    );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.05);
-}
-/* Templates gallery, dark: the composer drops the glass and takes the mock's own
-   panel fill (set on the element). The tinted pill with its lit lips was the only
-   glass material in a card that is otherwise flat, so it read as borrowed from
-   the home hero, which keeps it. Light already runs the composer flat, below. */
-[data-theme="dark"] .template-mock .v69-composer-gradient {
   background-image: none;
   box-shadow: none;
 }
@@ -1350,6 +1333,64 @@ html[data-theme="dark"] .v63-ring-solid::before {
 .template-mock .v69-chat-status,
 .template-mock .v69-chat-shimmer {
   animation: none !important;
+}
+/* The proposal total spins into place like the pricing page's billing toggle:
+   each digit column rolls a full 0–9 cycle and lands on the numeral it started
+   on, so the figure is never briefly a different, untrue amount. --v69-roll is
+   the column's resting offset, set per digit. */
+@keyframes v69DigitRoll {
+  from {
+    transform: translateY(calc(var(--v69-roll) + 10em));
+  }
+  to {
+    transform: translateY(var(--v69-roll));
+  }
+}
+
+/* Help-desk status: the middle request loads before it resolves. The spinner only
+   exists for the middle of the sequence, so its fade in and out is part of the same
+   declaration as its rotation — a transition can't go somewhere and come back. It
+   clears as the tick arrives (1.12s), so the two cross-fade rather than cutting. */
+.v69-status-load {
+  opacity: 0;
+}
+.group:hover .v69-status-load,
+.group.is-inview .v69-status-load {
+  animation:
+    v69StatusSpin 0.85s linear 0.12s infinite,
+    v69StatusLoadFade 1.1s ease-out 0.12s both;
+}
+@keyframes v69StatusSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes v69StatusLoadFade {
+  0% {
+    opacity: 0;
+  }
+  14%,
+  76% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* The sweep gradient has to go wherever the sweep does. The label is painted by
+   clipping a 200%-wide gradient to the glyphs, so frozen at its resting position
+   the gradient's light band lands across the tail of the line and the last word
+   faded out — it read as text running off the edge. A solid colour instead: with
+   nothing sweeping across it there is nothing for the gradient to do. */
+.template-mock .v69-chat-shimmer {
+  background-image: none !important;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  color: #6e6e6e;
+}
+[data-theme="light"] .template-mock .v69-chat-shimmer {
+  color: #5b5c53;
 }
 @keyframes v69ChatSend {
   0% {
@@ -1395,6 +1436,65 @@ html[data-theme="dark"] .v63-ring-solid::before {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.16),
     inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+/* Milled well — a content area recessed into the card face rather than a panel
+   sitting on it. Four soft inner shadows do the work (heaviest at the top, where
+   the light would be occluded), a hairline rim catches the top edge, and a wide
+   centre gradient lifts the middle of the floor so it doesn't read as flat. All
+   of it deliberately under-contrast: it should register as depth on a second
+   look, not as a bevelled inset. Literal rgba — the mock skins remap --color-white. */
+.v69-inset-well {
+  background-image: radial-gradient(
+    130% 100% at 50% 38%,
+    rgba(16, 24, 40, 0.012) 0%,
+    rgba(16, 24, 40, 0.045) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 9px 16px -12px rgba(16, 24, 40, 0.22),
+    inset 0 -7px 14px -12px rgba(16, 24, 40, 0.12),
+    inset 7px 0 14px -14px rgba(16, 24, 40, 0.14),
+    inset -7px 0 14px -14px rgba(16, 24, 40, 0.14);
+}
+[data-theme="dark"] .v69-inset-well {
+  background-image: radial-gradient(
+    130% 100% at 50% 38%,
+    rgba(255, 255, 255, 0.028) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.055),
+    inset 0 10px 18px -12px rgba(0, 0, 0, 0.55),
+    inset 0 -8px 16px -12px rgba(0, 0, 0, 0.35),
+    inset 8px 0 16px -14px rgba(0, 0, 0, 0.4),
+    inset -8px 0 16px -14px rgba(0, 0, 0, 0.4);
+}
+/* The PDF tile keeps the well in light but is built as the AI assistant's disc in
+   dark (see PDF_TILE), so the well's own dark treatment comes off it — stacked
+   under the disc's carve the two read as two different recesses on one surface. */
+[data-theme="dark"] .v69-inset-well.v69-inset-well--disc-dark {
+  background-image: none;
+  box-shadow: none;
+}
+/* Softened glass for the onboarding tile: its lit rim was the brightest thing on
+   an otherwise quiet card and pulled the eye off the bar it frames. Keeps the
+   material, at roughly a third of the edge brightness. */
+[data-theme="dark"] .v69-glass-tile.v69-glass-tile--soft {
+  background-color: rgba(255, 255, 255, 0.04);
+  background-image: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.07) 0%,
+    rgba(255, 255, 255, 0.025) 45%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  /* Both fills stop at the padding edge. Under the default border-box they
+     painted UNDER the translucent border as well, so the 1px band carried fill
+     + gradient + border stacked — a halo brighter than either surface, and
+     brighter at the top-left where the gradient starts, which is what made the
+     edge look doubled and lopsided. The gallery upscales this mock, so that
+     band landed across ~2 device pixels and the unevenness was plain. */
+  background-clip: padding-box;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 /* Opt-out for tiles sitting on a card face that already carries a gradient (the
    intake card): in dark, glass over a lit face read as a second sheet of glass,
@@ -1449,12 +1549,16 @@ html[data-theme="dark"] .v63-ring-solid::before {
 [data-theme="light"] .group.is-inview .v69-preview-dot {
   animation-name: v69DotTwinkleLight;
 }
+/* The trough is well below the field's resting value and the crest is full ink,
+   so the wave passing over a dot is a change you can see rather than a flicker.
+   At the old +0.2 floor the lit and unlit states were a few percent apart and the
+   whole field read as a static texture. */
 @keyframes v69DotTwinkleLight {
   0%,
   100% {
-    opacity: calc(var(--dot-op, 0.3) + 0.2);
+    opacity: calc(var(--dot-op, 0.3) * 0.3);
   }
-  50% {
+  45% {
     opacity: 1;
   }
 }
@@ -1463,15 +1567,15 @@ html[data-theme="dark"] .v63-ring-solid::before {
 }
 .group:hover .v69-preview-dot,
 .group.is-inview .v69-preview-dot {
-  animation: v69DotTwinkle 1.4s ease-in-out infinite;
+  animation: v69DotTwinkle 1.15s ease-in-out infinite;
 }
 .group:hover .v69-preview-dots,
 .group.is-inview .v69-preview-dots {
-  animation: v69DotsRender 2.05s linear both;
+  animation: v69DotsRender 2.6s linear both;
 }
 .group:hover .v69-preview-image,
 .group.is-inview .v69-preview-image {
-  animation: v69ImageIn 0.8s ease-out 1.5s both;
+  animation: v69ImageIn 0.9s ease-out 1.75s both;
 }
 .template-mock .v69-preview-dot,
 .template-mock .v69-preview-dots,
@@ -1481,17 +1585,17 @@ html[data-theme="dark"] .v63-ring-solid::before {
 @keyframes v69DotTwinkle {
   0%,
   100% {
-    opacity: var(--dot-op, 0.3);
+    opacity: calc(var(--dot-op, 0.3) * 0.3);
   }
-  50% {
-    opacity: 0.85;
+  45% {
+    opacity: 1;
   }
 }
 /* Dots are only present while the render runs: solid from the first frame, gone
    by the time the picture has resolved. */
 @keyframes v69DotsRender {
   0%,
-  74% {
+  67% {
     opacity: 1;
   }
   100% {
@@ -1508,22 +1612,6 @@ html[data-theme="dark"] .v63-ring-solid::before {
     opacity: 1;
     filter: blur(0);
     transform: scale(1);
-  }
-}
-/* iOS notification arrival: the banner comes down from above slightly small and
-   soft, and decelerates into place — the scale and the early opacity ramp are
-   what make it read as arriving rather than sliding. */
-@keyframes v69NotifIn {
-  0% {
-    opacity: 0;
-    transform: translateY(-18px) scale(0.96);
-  }
-  45% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
   }
 }
 /* Document-collector folder: the sheet inside rises out of the folder and
@@ -1648,24 +1736,6 @@ html[data-theme="dark"] .v63-ring-solid::before {
   }
 }
 
-/* The proposal prompt's soft bottom edge, for a prompt that runs past the box.
-   Same gradient and same reasoning as .production-cut-bottom above: a hard chop
-   landing mid-line reads as a rendering fault, where a fade reads as "continues
-   below". Applied in both themes — the text dissolves into the field's own fill
-   rather than into the page, so it doesn't wash out the way an edge fade on a
-   white surface does.
-
-   The component only sets this while there is more to scroll to, and never while
-   the field is being typed in: over a live field the mask would fade the very
-   line the caret is on. */
-.prompt-fade-bottom {
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    #000 calc(100% - 2.5rem),
-    transparent
-  );
-  mask-image: linear-gradient(to bottom, #000 calc(100% - 2.5rem), transparent);
-}
 
 /* Slim overlay-style scrollbar for scroll areas inside sheets/modals, where
    the default bar reads far too heavy against the panel edge. */
@@ -1763,47 +1833,12 @@ html[data-theme="dark"] .v63-ring-solid::before {
   --v69-well-2: #cfcfc0;
 }
 
-/* Templates gallery type scale — the mocks carry many ad-hoc sizes; snap them
-   onto one small system so every widget reads consistently. Templates page
-   only (the hero keeps its own sizes). Text: 11 / 13 / 15. Numerals: 22 / 30 /
-   56. Tiny 7–8px glyph badges are left alone. */
-.template-mock .text-\[9px\],
-.template-mock .text-\[10px\],
-.template-mock .text-\[11px\] {
-  font-size: 11px !important;
-}
-
-.template-mock .text-\[12px\],
-.template-mock .text-\[13px\] {
-  font-size: 13px !important;
-}
-
-.template-mock .text-\[14px\],
-.template-mock .text-\[15px\],
-.template-mock .text-\[16px\] {
-  font-size: 15px !important;
-}
-
-.template-mock .text-\[18px\],
-.template-mock .text-\[19px\],
-.template-mock .text-\[20px\],
-.template-mock .text-\[22px\] {
-  font-size: 22px !important;
-}
-
-.template-mock .text-\[26px\],
-.template-mock .text-\[28px\],
-.template-mock .text-\[30px\],
-.template-mock .text-\[34px\] {
-  font-size: 30px !important;
-}
-
-.template-mock .text-\[40px\],
-.template-mock .text-\[50px\],
-.template-mock .text-\[60px\],
-.template-mock .text-\[68px\] {
-  font-size: 56px !important;
-}
+/* The gallery used to force every mock size onto a coarse three-step scale from
+   here with !important, back when the covers carried ad-hoc sizes. The mocks now
+   run one ladder of their own (see MOCK TYPE SCALE in hero-v71.tsx), and the
+   override was flattening it — micro labels rendered at the meta step, so dense
+   captions read a size too large, and every large figure collapsed onto one of
+   three values regardless of how much of its card it was drawn to fill. */
 
 /* Widget covers are drawn at one fixed design size (the type scale above is
    tuned for it), so letting a card stretch them re-flows the layout instead of

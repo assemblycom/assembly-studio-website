@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480" viewBox="0 0 480 480">
+  <!-- The panel spray. Deliberately NOT the cover's pattern (spray-cover.svg):
+       that one is fine dust meeting along a wandering seam, three bands deep.
+       This is a can held further back — the two brand hues spatter straight over
+       each other with no third band between them, and the grain is coarse
+       instead of fine.
+
+       Two passes per hue give the speckle a range of sizes, which is what makes
+       it read as sprayed rather than as a screen:
+       • BLOBS — low-frequency noise (features ~14px) run to three octaves, so
+         each patch has a ragged, eaten-away edge instead of a smooth one.
+       • FRINGE — a finer pass at low coverage, held to the meeting zone, that
+         throws small specks out ahead of the blobs the way overspray carries.
+
+       Where the blue lands over the lime through the middle, the two read as a
+       mixed field optically — that overlap IS the transition, so neither hue
+       needs a blend. Alpha is hard-thresholded (discrete 0/1) in every pass:
+       partial coverage would put the CSS ramp's own smooth blend back.
+
+       Coverage: the noise is mapped 1.7·R − 0.85 before it is added to the ramp and
+       thresholded at 0.5. The multiplier is the whole trick. fractalNoise's output
+       clusters tightly around 0.5, so at 1·R − 0.5 the sum only straddles the
+       threshold where the ramp is within roughly ±0.15 of 0.5 — every ramp value
+       outside that lands fully on or fully off, which collapsed the spatter into a
+       thin seam through the middle and left both fields perfectly solid no matter
+       how the stops were spread. Widening the noise to ±0.85 makes coverage fall off
+       gradually across the entire ramp, so specks carry from one end to the other.
+       It was ±1.5 with the fringes peaking at 0.2, which carried so much dust into
+       both fields that the panel read as noise rather than as spray.
+       An earlier pass had the opposite failure: fringe ramps peaking at 0.8 put
+       60%+ of their pixels through, and each fringe rendered as a solid stripe.
+
+       Every consumer paints this with `center / cover` on a box wider than it is
+       tall, which crops the artwork's top and bottom away, so the whole story has
+       to be told through the middle of the box. The ramps cross in a long, even
+       taper rather than meeting in a tight band: a steep crossing put all the
+       spatter in one thin seam, and at cover size — with the crop on top of it —
+       the panel read as a plain gradient with a smudge across the middle. Neither
+       hue reaches full solid until the very edge now, so specks carry all the way
+       into both fields.
+
+       No ground of its own — the wash underneath supplies the colour direction
+       and shows through between specks, so both themes share this artwork.
+       Rects overhang the viewBox and the gradients are in userSpaceOnUse, for the
+       same reason as the cover: the ramp stays anchored to the 480 box while alpha
+       still exists beyond it, so displaced/oversized sampling can't punch holes in
+       the solid ends. -->
+  <defs>
+    <filter id="p-lime-blob" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="61" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.7 0 0 0 -0.85" result="na"/>
+      <feComposite in="SourceAlpha" in2="na" operator="arithmetic" k2="1" k3="1" result="sum"/>
+      <feComponentTransfer in="sum" result="dots">
+        <feFuncA type="discrete" tableValues="0 1"/>
+      </feComponentTransfer>
+      <feFlood flood-color="#D9ED92" result="c"/>
+      <feComposite in="c" in2="dots" operator="in"/>
+    </filter>
+    <filter id="p-lime-fringe" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.5 0.42" numOctaves="2" seed="7" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.7 0 0 0 -0.85" result="na"/>
+      <feComposite in="SourceAlpha" in2="na" operator="arithmetic" k2="1" k3="1" result="sum"/>
+      <feComponentTransfer in="sum" result="dots">
+        <feFuncA type="discrete" tableValues="0 1"/>
+      </feComponentTransfer>
+      <feFlood flood-color="#D9ED92" result="c"/>
+      <feComposite in="c" in2="dots" operator="in"/>
+    </filter>
+    <filter id="p-blue-blob" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="19" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.7 0 0 0 -0.85" result="na"/>
+      <feComposite in="SourceAlpha" in2="na" operator="arithmetic" k2="1" k3="1" result="sum"/>
+      <feComponentTransfer in="sum" result="dots">
+        <feFuncA type="discrete" tableValues="0 1"/>
+      </feComponentTransfer>
+      <feFlood flood-color="#7DA4FF" result="c"/>
+      <feComposite in="c" in2="dots" operator="in"/>
+    </filter>
+    <filter id="p-blue-fringe" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.44 0.52" numOctaves="2" seed="43" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.7 0 0 0 -0.85" result="na"/>
+      <feComposite in="SourceAlpha" in2="na" operator="arithmetic" k2="1" k3="1" result="sum"/>
+      <feComponentTransfer in="sum" result="dots">
+        <feFuncA type="discrete" tableValues="0 1"/>
+      </feComponentTransfer>
+      <feFlood flood-color="#7DA4FF" result="c"/>
+      <feComposite in="c" in2="dots" operator="in"/>
+    </filter>
+
+    <linearGradient id="p-lime" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="480">
+      <stop offset="0" stop-color="#fff" stop-opacity="1"/>
+      <stop offset="0.1" stop-color="#fff" stop-opacity="0.94"/>
+      <stop offset="0.26" stop-color="#fff" stop-opacity="0.78"/>
+      <stop offset="0.42" stop-color="#fff" stop-opacity="0.58"/>
+      <stop offset="0.58" stop-color="#fff" stop-opacity="0.38"/>
+      <stop offset="0.74" stop-color="#fff" stop-opacity="0.18"/>
+      <stop offset="0.9" stop-color="#fff" stop-opacity="0.04"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="p-blue" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="480">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="0.1" stop-color="#fff" stop-opacity="0.04"/>
+      <stop offset="0.26" stop-color="#fff" stop-opacity="0.18"/>
+      <stop offset="0.42" stop-color="#fff" stop-opacity="0.38"/>
+      <stop offset="0.58" stop-color="#fff" stop-opacity="0.58"/>
+      <stop offset="0.74" stop-color="#fff" stop-opacity="0.78"/>
+      <stop offset="0.9" stop-color="#fff" stop-opacity="0.94"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="1"/>
+    </linearGradient>
+    <linearGradient id="p-lime-mid" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="480">
+      <stop offset="0.12" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="0.58" stop-color="#fff" stop-opacity="0.04"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="p-blue-mid" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="480">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="0.42" stop-color="#fff" stop-opacity="0.04"/>
+      <stop offset="0.88" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="-80" y="-80" width="640" height="640" fill="url(#p-lime)" filter="url(#p-lime-blob)"/>
+  <rect x="-80" y="-80" width="640" height="640" fill="url(#p-blue)" filter="url(#p-blue-blob)"/>
+  <rect x="-80" y="-80" width="640" height="640" fill="url(#p-blue-mid)" filter="url(#p-blue-fringe)"/>
+  <rect x="-80" y="-80" width="640" height="640" fill="url(#p-lime-mid)" filter="url(#p-lime-fringe)"/>
+</svg>

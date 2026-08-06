@@ -36,11 +36,11 @@ export default function HomePage() {
               band: the band reads as part of the hero, so a rule above its
               numbers cut it off from what it belongs to. */}
           <GridDivider />
-          <Reveal>
+          <Reveal variant="fade">
             <HowItWorks />
           </Reveal>
           <GridDivider />
-          <Reveal>
+          <Reveal variant="fade">
             <ProductionGap />
           </Reveal>
         </div>
@@ -51,15 +51,15 @@ export default function HomePage() {
             reads as one continuous light canvas until the dark CTA + footer.
             Order: testimonials → whole stack → FAQ. */}
         <div className="section-follow relative z-10">
-          <Reveal>
+          <Reveal variant="fade">
             <Testimonials />
           </Reveal>
           <GridDivider />
-          <Reveal>
+          <Reveal variant="fade">
             <WholeStack />
           </Reveal>
           <GridDivider />
-          <Reveal>
+          <Reveal variant="fade">
             <HomeFAQ />
           </Reveal>
         </div>

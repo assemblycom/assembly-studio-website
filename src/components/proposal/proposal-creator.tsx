@@ -111,6 +111,7 @@ const INVALID_FIELD_CLS = `${FIELD_CLS} aria-[invalid=true]:border-[var(--mock-n
 
 const ERRORS = {
   recipient: "Enter the name this proposal is for.",
+  from: "Choose who the proposal is from.",
   template: "Choose the template you want to propose.",
   prompt: "Write the prompt you want to propose.",
   appName: "Name the app. The proposal's headline opens with it.",
@@ -139,6 +140,14 @@ export function ProposalCreator() {
   const [link, setLink] = useState("");
   const [copied, setCopied] = useState(false);
   const copyTimer = useRef<number | null>(null);
+  // Pressing the button when a link already exists rewrites it in place, which
+  // changes nothing on screen — so the button says what it just did for a
+  // moment, the way Copy does. "created" vs "updated" is caught at press time,
+  // since `link` is set by the time this renders.
+  const [confirmed, setConfirmed] = useState<"created" | "updated" | null>(
+    null,
+  );
+  const confirmTimer = useRef<number | null>(null);
 
   const clearError = (field: keyof typeof ERRORS) =>
     setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
@@ -189,20 +198,30 @@ export function ProposalCreator() {
   const submit = () => {
     const next: FieldErrors = {};
     if (!recipient.trim()) next.recipient = ERRORS.recipient;
+    if (!from.trim()) next.from = ERRORS.from;
     if (mode === "template" && !templateSlug) next.template = ERRORS.template;
     if (mode === "prompt" && !prompt.trim()) next.prompt = ERRORS.prompt;
     if (mode === "prompt" && !appName.trim()) next.appName = ERRORS.appName;
     setErrors(next);
     if (Object.keys(next).length > 0) {
-      // The first field that's flagged, in the order they're read down the page.
+      // The first field that's flagged, in the order they're read down the
+      // page. The two pickers aren't in the chain — they have no input to focus
+      // — so a flag on one of them alone just shows its message and leaves the
+      // focus where it is, rather than dropping the caret into a field that is
+      // already filled in.
       const first = next.recipient
         ? "recipient"
         : next.appName
           ? "app-name"
-          : "prompt";
-      document.getElementById(first)?.focus();
+          : next.prompt
+            ? "prompt"
+            : null;
+      if (first) document.getElementById(first)?.focus();
       return;
     }
+    setConfirmed(link ? "updated" : "created");
+    if (confirmTimer.current) window.clearTimeout(confirmTimer.current);
+    confirmTimer.current = window.setTimeout(() => setConfirmed(null), 1800);
     setLink(
       buildProposalUrl(
         {
@@ -246,20 +265,14 @@ export function ProposalCreator() {
         restPaddingClass="px-6 md:px-10"
       />
       <div className="mx-auto w-full max-w-xl px-6 pb-16 pt-10 md:pb-24 md:pt-14">
-        <h1 className="type-h2">Proposal creator</h1>
-        {/* Says what the tool does and what you leave with. The old line ("A page
-            made for one person, and a link you can send them") described the
-            output as two things joined by a comma and never said what to do
-            here. */}
-        <p className="type-lead mt-4 max-w-md text-muted-foreground">
-          Write up what we&rsquo;d build for one client. You get a link that
-          opens a page addressed to them.
-        </p>
+        {/* The title alone, centred over the form. The line under it described
+            a tool its only users already know. */}
+        <h1 className="type-h2 text-center">Proposal creator</h1>
 
-        {/* Room between the title block and the first field — at mt-10 the form
-          started right under the lead on mobile, where there's no column width
-          to separate them. */}
-        <div className="mt-14 flex flex-col gap-5 md:mt-16">
+        {/* Room between the title and the first field. Shorter than it was: the
+            title used to carry a lead under it, and the same step below a lone
+            heading left the form floating. */}
+        <div className="mt-10 flex flex-col gap-5 md:mt-12">
           <Field
             label="Prepared for"
             htmlFor="recipient"
@@ -284,14 +297,25 @@ export function ProposalCreator() {
           </Field>
 
           {/* Picked from the team rather than typed: same control as the template
-            picker, with the face next to the name. */}
-          <SelectMenu
-            label="From"
-            value={from}
-            onChange={setFrom}
-            options={teamOptions}
-            placeholder="Choose who it's from"
-          />
+            picker, with the face next to the name. Required — the page prints
+            "Prepared by" from it, and a proposal with no sender reads as one
+            nobody put their name to.
+            SelectMenu draws its own label, so its error hangs below the control
+            rather than going through Field. */}
+          <div className="flex flex-col gap-1.5">
+            <SelectMenu
+              label="From"
+              value={from}
+              onChange={(value) => {
+                setFrom(value);
+                clearError("from");
+              }}
+              options={teamOptions}
+              required
+              placeholder="Choose who it's from"
+            />
+            {errors.from && <FieldError>{errors.from}</FieldError>}
+          </div>
 
           {/* What we're proposing — a template, or a prompt we refined for them.
             Same sliding-thumb toggle as the pricing billing switch. */}
@@ -454,8 +478,21 @@ export function ProposalCreator() {
             </p>
           </Field>
 
-          <button type="button" onClick={submit} className={`${primary} mt-1`}>
-            {link ? "Update link" : "Create proposal page"}
+          <button
+            type="button"
+            onClick={submit}
+            // aria-live so the confirmation is announced rather than only seen:
+            // the button's own label is the only thing that changes.
+            aria-live="polite"
+            className={`${primary} mt-1`}
+          >
+            {confirmed === "updated"
+              ? "Link updated"
+              : confirmed === "created"
+                ? "Link created"
+                : link
+                  ? "Update link"
+                  : "Create proposal page"}
           </button>
 
           {/* The one thing you do with the link, as a secondary action under the

@@ -86,15 +86,21 @@ export function CTA() {
           </div>
 
           {/* Answers the two things people weigh before typing anything, right
-              where they'd hesitate. Caption scale and muted, so it reassures
-              without competing with the submit button above it. */}
-          <p className="type-caption mt-3 text-center text-muted-foreground">
-            Free forever
-            <span aria-hidden className="px-1.5 opacity-50">
-              &middot;
-            </span>
-            No credit card required
-          </p>
+              where they'd hesitate. As two chips in the mono face rather than a
+              sentence: they're a pair of facts about the plan, which is what the
+              site sets in mono caps everywhere else, and separate pills say that
+              better than a middot between two clauses did. Muted, so they
+              reassure without competing with the submit button above them. */}
+          <ul className="mt-3 flex flex-wrap items-center justify-center gap-1.5">
+            {["Free forever", "No credit card required"].map((label) => (
+              <li
+                key={label}
+                className="rounded-md bg-muted px-2 py-1 font-mono text-[11px] uppercase leading-none tracking-wide text-muted-foreground [[data-theme=dark]_&]:bg-white/[0.06]"
+              >
+                {label}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>

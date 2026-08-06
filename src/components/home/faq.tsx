@@ -333,7 +333,12 @@ export function FAQ({
   return (
     <Section id="faq" className="py-16 md:py-24">
       <div className={`mx-auto ${widthClass}`}>
-        <h2 className="type-h2 text-center">{heading}</h2>
+        {/* Capped below sm so the heading always breaks into two lines on a
+            phone. Unconstrained it just fits on one at 430px and ran the full
+            width of the screen, hard against both gutters. */}
+        <h2 className="type-h2 mx-auto max-w-80 text-center sm:max-w-none">
+          {heading}
+        </h2>
         <Accordion items={items} twoColumn={twoColumn} variant={variant} />
       </div>
     </Section>

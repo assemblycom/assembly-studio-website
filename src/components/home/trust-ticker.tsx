@@ -212,6 +212,15 @@ export function TrustTicker() {
               </div>
             ))}
           </div>
+          {/* Below md the page has no rails, so the GridDivider that closes this
+              band on desktop is hidden — and the two guide lines inside the 2x2
+              were left running into nothing at the foot. This is that bottom
+              rule, on the same values, bleeding to the screen edges the way the
+              row rule above it does. */}
+          <div
+            aria-hidden
+            className="border-t border-border max-sm:-mx-6 md:hidden [[data-theme=dark]_&]:border-[#383838]"
+          />
         </div>
       </div>
 

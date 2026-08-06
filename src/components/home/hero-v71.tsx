@@ -43,6 +43,31 @@ const T = {
   eyebrow: "text-[12px] tracking-[0.01em]",
 };
 
+// ─────────────────────────────────────────────────────────────────────────
+// MOCK TYPE SCALE — the ladder every Card* mock below is set on. These are the
+// pictures of apps that fill the template covers (and the hero rail), drawn at
+// design size and scaled into whatever square they land in, so the sizes here
+// are design px, not screen px.
+//
+// One ladder, no in-between values. The mocks had drifted to nineteen different
+// sizes, including 10.5 and 12.5, which meant two cards side by side set the
+// same kind of label a pixel apart from each other. Every size below is one of
+// these steps; if a new mock wants something else, move it to the nearest step
+// rather than adding one.
+//
+//   CHROME AND COPY
+//   nano    8px   the compact thumbnail's chrome, and glyphs inside a ≤18px dot
+//   micro   9px   unit labels, axis ticks, dense captions
+//   meta   11px   secondary text: names, timestamps, muted supporting lines
+//   body   13px   the default — rows, values, sentences
+//   title  15px   a mock's own heading, and the value a card is built around
+//
+//   FIGURES — the one big number a mock is composed around. A ramp rather than
+//   a set of roles: which step a mock takes is a function of how much of the
+//   square the number is meant to fill.
+//   19px · 26px · 34px · 42px · 52px · 60px
+// ─────────────────────────────────────────────────────────────────────────
+
 function IconChevron({ className }: { className?: string }) {
   return (
     <svg
@@ -115,56 +140,65 @@ function CardIntake() {
   const { initials, company } = INTAKE_CLIENT;
   // Two answers, not the whole form — enough to say what kind of job it is.
   const fields: [string, string][] = [
-    ["Project type", "Brand + website"],
-    ["Budget", "$25k to $40k"],
+    ["Project type", "Website"],
+    ["Budget", "$25k"],
   ];
-  // Built on the onboarding card's composition — flat face, one centred glass
-  // tile with the same avatar and accent — so the pair reads as one family. It
-  // used to reproduce the whole four-field form, which was a screenshot of the
-  // product rather than an illustration of it, and left no air on the card.
+  // The form IS the widget: it runs on the card's own surface rather than inside a
+  // panel floating on it. A tile here meant a card drawn inside a card, and the
+  // frame around it was doing nothing the card's own edge wasn't already doing.
+  // So the parts hold their own positions instead — who's filling it in at the
+  // head, the answers through the middle, the action along the foot.
+  //
+  // Dark gallery only: the face inverts to the ink token, the same move the AI
+  // assistant cover makes, so the rail isn't an unbroken run of dark squares.
+  // Everything on it then reads off --v69-well (the dark-on-ink text token). The
+  // home hero and light mode keep their own faces.
   return (
-    <div className="flex h-full flex-col justify-center bg-[linear-gradient(160deg,#ffffff_0%,#f4f6f9_58%,#eceff3_100%)] p-3.5 [[data-theme=light]_&]:bg-none [[data-theme=light]_&]:bg-[#F5F5F0] [[data-theme=dark]_&]:bg-[linear-gradient(160deg,#232323_0%,#1b1b1b_58%,#151515_100%)]">
-      <div className="v69-glass-tile v69-glass-tile--flat flex flex-col gap-3 rounded-xl border border-[rgba(255,255,255,0.6)] p-3 [[data-theme=light]_&]:border-black/[0.08] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.1)]">
-        {/* Who's filling it in. Same avatar as the onboarding tile. */}
-        <div className="flex items-center gap-2.5">
-          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--v69-well)] text-[10px] leading-none text-[var(--v69-ink)] ring-1 ring-[rgba(16,24,40,0.07)] [[data-theme=light]_&]:bg-[#E7E7DE] [[data-theme=light]_&]:text-[#5B5C53] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.09)]">
-            {initials}
-          </span>
-          <span className="min-w-0 flex-1 truncate text-[11px] leading-none text-[var(--v69-ink)]">
-            {company}
-          </span>
-        </div>
-        {/* The answers as a summary rather than input boxes — a filled field
-            with a hairline around it is what made this read as a form. */}
-        <div className="flex flex-col gap-2">
-          {fields.map(([l, v], i) => (
-            <div
-              key={l}
-              className="flex items-baseline justify-between gap-2 group-hover:[will-change:transform,opacity] group-hover:[animation:cardRowIn_0.45s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.45s_ease-out_both]"
-              style={{ animationDelay: `${i * 0.08}s` }}
-            >
-              <span className="shrink-0 text-[9px] leading-none text-muted-foreground">
-                {l}
-              </span>
-              <span className="truncate text-[10px] leading-none text-[var(--v69-ink)]">
-                {v}
-              </span>
-            </div>
-          ))}
-        </div>
-        {/* The form's one action — the card's only coloured element, the way the
-            submit button is in the product. Both skins spend the brand lime here:
-            the periwinkle it used in dark was the same value as the accent on
-            half the other covers, so submit stopped reading as this card's. */}
-        <button
-          type="button"
-          tabIndex={-1}
-          className={`flex h-[26px] shrink-0 items-center justify-center rounded-[6px] text-[11px] font-normal group-hover:[will-change:transform,opacity] group-hover:[animation:cardRowIn_0.55s_ease-out_0.2s_both] group-[.is-inview]:[animation:cardRowIn_0.55s_ease-out_0.2s_both] [[data-theme=light]_&]:bg-[#D9ED92] [[data-theme=dark]_&]:bg-[#D9ED92] ${ACCENT_FLAT}`}
-          style={{ color: ON_ACCENT }}
-        >
-          Submit
-        </button>
+    <div className="flex h-full flex-col bg-[linear-gradient(160deg,#ffffff_0%,#f4f6f9_58%,#eceff3_100%)] p-4 [[data-theme=light]_&]:bg-none [[data-theme=light]_&]:bg-[#F5F5F0] [[data-theme=dark]_&]:bg-none [[data-theme=dark]_&]:bg-[var(--v69-card)] [[data-theme=dark]_.template-mock-gallery_&]:bg-[var(--v69-ink)]">
+      {/* Who's filling it in. Same avatar as the onboarding tile. */}
+      <div className="flex items-center gap-2.5">
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--v69-well)] text-[11px] leading-none text-[var(--v69-ink)] ring-1 ring-[rgba(16,24,40,0.07)] [[data-theme=light]_&]:bg-[#E7E7DE] [[data-theme=light]_&]:text-[#5B5C53] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.09)] [[data-theme=dark]_.template-mock-gallery_&]:bg-[color-mix(in_srgb,var(--v69-well)_9%,transparent)] [[data-theme=dark]_.template-mock-gallery_&]:text-[var(--v69-well)] [[data-theme=dark]_.template-mock-gallery_&]:ring-transparent">
+          {initials}
+        </span>
+        <span className="min-w-0 flex-1 truncate text-[11px] leading-none text-[var(--v69-ink)] [[data-theme=dark]_.template-mock-gallery_&]:text-[var(--v69-well)]">
+          {company}
+        </span>
       </div>
+      {/* The answers as a summary rather than input boxes — a filled field with a
+          hairline around it is what made this read as a form. Each row is split
+          across the full width of the card, so the labels and their values hold
+          the two edges the way a summary in the product does. */}
+      <div className="mt-4 flex flex-col gap-2.5">
+        {fields.map(([l, v], i) => (
+          <div
+            key={l}
+            className="flex items-baseline justify-between gap-2 group-hover:[will-change:transform,opacity] group-hover:[animation:cardRowIn_0.45s_ease-out_both] group-[.is-inview]:[animation:cardRowIn_0.45s_ease-out_both]"
+            style={{ animationDelay: `${i * 0.08}s` }}
+          >
+            <span className="shrink-0 text-[9px] leading-none text-muted-foreground [[data-theme=dark]_.template-mock-gallery_&]:text-[color-mix(in_srgb,var(--v69-well)_55%,transparent)]">
+              {l}
+            </span>
+            <span className="truncate text-[11px] leading-none text-[var(--v69-ink)] [[data-theme=dark]_.template-mock-gallery_&]:text-[var(--v69-well)]">
+              {v}
+            </span>
+          </div>
+        ))}
+      </div>
+      {/* The form's one action — the card's only coloured element, the way the
+          submit button is in the product. Light spends the brand lime; dark takes
+          the periwinkle, which is the stronger of the two against the near-white
+          face this cover inverts to in the gallery.
+          mt-auto parks it on the foot of the card, which is where a form's
+          submit sits; it is also what keeps the surface reading as the sheet the
+          form is on rather than as a frame with something floating in it. */}
+      <button
+        type="button"
+        tabIndex={-1}
+        className={`mt-auto flex h-[30px] shrink-0 items-center justify-center rounded-lg text-[11px] font-normal group-hover:[will-change:transform,opacity] group-hover:[animation:cardRowIn_0.55s_ease-out_0.2s_both] group-[.is-inview]:[animation:cardRowIn_0.55s_ease-out_0.2s_both] [[data-theme=light]_&]:bg-[#D9ED92] [[data-theme=dark]_&]:bg-[#7DA4FF] ${ACCENT_FLAT}`}
+        style={{ color: ON_ACCENT }}
+      >
+        Submit
+      </button>
     </div>
   );
 }
@@ -180,6 +214,49 @@ const INK_FAINT = ink(14); // lightest data fill
 const INK_MID = ink(30); // mid data fill
 const INK_STRONG = ink(50); // strongest data fill — lightened so graphs read softer, not near-black
 const INK_SOLID = ink(70); // solid surfaces: checks, bubbles, CTAs, selected radio
+
+// The mono face, used for figures and unit tags on the metric cards.
+const MOCK_MONO = {
+  fontFamily: "var(--font-diatype-mono), ui-monospace, monospace",
+} as const;
+// The unit tag beside a metric — the chip idiom the gallery's category tags use.
+// Layout (where it sits in its header) stays with the caller. The shared cool
+// grey all but disappeared on light mode's warm off-white face, so light takes a
+// warm step off that face instead.
+// Dark takes a white wash and a brighter label instead of the shared --v69-inner
+// step: at #2e2e2e on a #262626 face the chip was two values off its own ground,
+// and both the pill and the word inside it all but disappeared.
+// Both dark values are literal, not palette tokens. The dark mock skin remaps the
+// neutral scale — --color-neutral-300 resolves to #6b6f77 inside a mock — so
+// text-neutral-300 came out DARKER than the muted-foreground it was replacing.
+// Padding: 8px across and 4px down. At 6/3 the pill was drawn tight to its own
+// label on both axes — too narrow to read as a chip beside a big figure, and short
+// enough that it looked clipped rather than set.
+// Light's fill is a step lighter than the shared warm chip tone: at #E7E7DE the
+// pill was the heaviest mark on a near-white face, so the tag pulled ahead of the
+// figure it belongs to.
+const MOCK_UNIT_TAG =
+  "shrink-0 whitespace-nowrap rounded-md bg-[var(--v69-inner)] px-2 py-1 text-[11px] uppercase leading-none tracking-wide text-muted-foreground [[data-theme=light]_&]:bg-[#E4E4DA] [[data-theme=light]_&]:text-[#4E4F46] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.11)] [[data-theme=dark]_&]:text-[#C9C9C9]";
+
+// Four covers carry no large focal element, so where they're framed at size they
+// are drawn at 240px and scaled up into a 288px frame (see MOCK_DESIGN_SIZE). The
+// transform magnifies their type with everything else, which put their labels a
+// fifth above the same step on every other cover — a title on one of them came
+// out larger than any title in the rail. These step the type down by one rung
+// wherever that up-scale applies, landing it back on the rail's own sizes. The
+// home hero sizes these mocks itself, so it keeps the base step.
+const MOCK_UPSCALED_BODY = "[.template-mock_&]:text-[11px]";
+const MOCK_UPSCALED_META = "[.template-mock_&]:text-[9px]";
+
+// Ambient light on an otherwise flat cover face, for the covers whose whole
+// composition is one object on an empty ground: without it the square reads as a
+// hole cut in the page rather than as a surface the object is sitting on. Two
+// layers, both kept low enough to stay under the threshold where they'd read as
+// artwork — a lift of a few percent white settling into the top-left corner, and
+// a wide vignette that only reaches its full value at the four corners. Dark
+// only: light mode's faces already have a value step off the page.
+const MOCK_FACE_LIGHT =
+  "[[data-theme=dark]_&]:bg-[radial-gradient(115%_100%_at_8%_2%,rgba(255,255,255,0.038)_0%,rgba(255,255,255,0.014)_32%,rgba(255,255,255,0)_60%),radial-gradient(125%_125%_at_50%_46%,rgba(0,0,0,0)_50%,rgba(0,0,0,0.15)_100%)]";
 
 // The brand wash — the periwinkle/lime pair as a two-hue ramp. Both ends are
 // held for roughly a third of the run and the blend is interpolated in oklab, so
@@ -219,16 +296,24 @@ function CardOnboarding() {
   return (
     // Dark keeps the project tracker's gradient face; light takes a flat warm
     // off-white instead.
-    <div className="flex h-full flex-col justify-center bg-[linear-gradient(160deg,#ffffff_0%,#f4f6f9_58%,#eceff3_100%)] p-3.5 [[data-theme=light]_&]:bg-none [[data-theme=light]_&]:bg-[#F5F5F0] [[data-theme=dark]_&]:bg-[linear-gradient(160deg,#232323_0%,#1b1b1b_58%,#151515_100%)]">
+    <div className="flex h-full flex-col justify-center bg-[linear-gradient(160deg,#ffffff_0%,#f4f6f9_58%,#eceff3_100%)] p-3.5 [[data-theme=light]_&]:bg-none [[data-theme=light]_&]:bg-[#F5F5F0] [[data-theme=dark]_&]:bg-none [[data-theme=dark]_&]:bg-[var(--v69-card)]">
       {/* Avatar + bar + percentage on their own tile — the same glass surface the
           help-desk rows use, so the row reads as a pane sitting on the card
           rather than a filled block. */}
       {/* The glass edge is a white hairline, which vanishes on a light face —
-          light mode borrows the ink hairline the widget mocks use instead. */}
-      <div className="v69-glass-tile flex items-center gap-2.5 rounded-xl border border-[rgba(255,255,255,0.6)] p-3 [[data-theme=light]_&]:border-black/[0.08] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.1)]">
+          light mode borrows the ink hairline the widget mocks use instead. Dark's
+          8% is what the edge already measured before the tile's fill was clipped
+          off it (see .v69-glass-tile--soft), just carried by the border alone. */}
+      {/* A tighter radius than the intake tile's, on the same 12px family: this
+          row is a third of that panel's height, and at the same corner it read
+          as a lozenge rather than a tile. */}
+      <div className="v69-glass-tile v69-glass-tile--soft flex items-center gap-2.5 rounded-lg border border-[rgba(255,255,255,0.6)] p-3 [[data-theme=light]_&]:border-black/[0.08] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.08)]">
         {/* No ring — the fill alone carries the avatar; a hairline on a shape
             this small only thickened its edge. */}
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--v69-well)] text-[10px] leading-none text-[var(--v69-ink)] [[data-theme=light]_&]:bg-[#E7E7DE] [[data-theme=light]_&]:text-[#5B5C53]">
+        {/* Dark takes a brighter fill than the shared well token: at #2b2b2b on a
+            #262626 tile the disc was a step off nothing, so the initials floated
+            with no shape around them. Light's warm chip already reads. */}
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--v69-well)] text-[11px] leading-none text-[var(--v69-ink)] [[data-theme=light]_&]:bg-[#E7E7DE] [[data-theme=light]_&]:text-[#5B5C53] [[data-theme=dark]_&]:bg-[color-mix(in_srgb,var(--v69-ink)_20%,transparent)]">
           {initials}
         </span>
         {/* On the translucent tile the shared well tone lands within a step of
@@ -240,7 +325,7 @@ function CardOnboarding() {
             style={{ width: `${pct}%` }}
           />
         </span>
-        <span className="w-[26px] shrink-0 text-right text-[10px] leading-none tabular-nums text-[var(--v69-ink)]">
+        <span className="w-[26px] shrink-0 text-right text-[11px] leading-none tabular-nums text-[var(--v69-ink)]">
           {pct}%
         </span>
       </div>
@@ -363,7 +448,7 @@ function EngagementBar({
       )}
       <span
         className={`absolute font-mono font-normal uppercase tracking-wide text-muted-foreground ${
-          compact ? "left-1.5 top-1.5 text-[7px]" : "left-3 top-2.5 text-[10px]"
+          compact ? "left-1.5 top-1.5 text-[8px]" : "left-3 top-2.5 text-[11px]"
         }`}
         style={{ opacity: op }}
       >
@@ -384,7 +469,7 @@ function EngagementBar({
         </span>
         <span
           className={`font-normal leading-none text-muted-foreground ${
-            compact ? "text-[8px]" : "mb-0.5 text-[14px]"
+            compact ? "text-[8px]" : "mb-0.5 text-[15px]"
           }`}
         >
           %
@@ -619,7 +704,7 @@ function CardTimeTracker() {
           className="pointer-events-none absolute inset-0 rounded-full [[data-theme=dark]_&]:hidden"
           style={{
             boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -1px 0 rgba(16,24,40,0.06), inset 0 8px 14px -8px rgba(16,24,40,0.09), inset 0 -10px 16px -10px rgba(16,24,40,0.11)",
+              "inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -1px 0 rgba(16,24,40,0.03), inset 0 8px 14px -8px rgba(16,24,40,0.045), inset 0 -10px 16px -10px rgba(16,24,40,0.055)",
           }}
         />
         <div
@@ -654,6 +739,60 @@ function CardTimeTracker() {
   );
 }
 
+/**
+ * One odometer digit for a card total: a 0–9 strip printed twice, resting on the
+ * target digit in the second cycle. The animation starts it one full cycle
+ * earlier, so a single roll upward spins through all ten digits and lands back
+ * on the target — the same effect the pricing page's billing toggle uses, minus
+ * its dependence on the value actually changing.
+ */
+function V69RollingDigit({ digit, index }: { digit: number; index: number }) {
+  const rest = `-${digit + 10}em`;
+  return (
+    <span
+      className="relative inline-flex h-[1em] overflow-hidden"
+      style={{ "--v69-roll": rest } as React.CSSProperties}
+    >
+      {/* Invisible copy of the target digit sizes the column to that digit's own
+          width, so a narrow "1" doesn't sit in a box as wide as an "8". */}
+      <span aria-hidden className="invisible">
+        {digit}
+      </span>
+      <span
+        className="absolute inset-0 flex flex-col group-hover:[animation:v69DigitRoll_1.5s_cubic-bezier(0.16,1,0.3,1)_both] group-[.is-inview]:[animation:v69DigitRoll_1.5s_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:[animation:none!important]"
+        style={{
+          transform: `translateY(${rest})`,
+          animationDelay: `${index * 85}ms`,
+        }}
+      >
+        {Array.from({ length: 20 }, (_, n) => (
+          <span
+            key={n}
+            className="flex h-[1em] items-center justify-center leading-none"
+          >
+            {n % 10}
+          </span>
+        ))}
+      </span>
+    </span>
+  );
+}
+
+/** Money figure whose digits roll into place; separators stay put. */
+function V69RollingTotal({ value }: { value: string }) {
+  let digitIndex = 0;
+  return (
+    <span className="inline-flex items-baseline tabular-nums">
+      {value.split("").map((char, i) => {
+        if (char < "0" || char > "9") return <span key={i}>{char}</span>;
+        return (
+          <V69RollingDigit key={i} digit={Number(char)} index={digitIndex++} />
+        );
+      })}
+    </span>
+  );
+}
+
 // Goal tracker — visual removed for now (the donut read poorly at card size);
 // the card face stays blank until a better composition lands.
 // Static (non-animated) filling mocks for the remaining featured cards — rows
@@ -661,67 +800,42 @@ function CardTimeTracker() {
 // Proposal builder — banking-widget composition (à la the iOS wallet card):
 // a white panel carrying the proposal total up top, page dots, then a row of
 // circular actions beneath. The chip/well tokens keep it dark-skin safe.
-// Counts a number up to its target on an easeOut curve while `play` is truthy;
-// rests on the final value when idle so the card always reads correctly.
-function useCountUp(target: number, play: number) {
-  const [val, setVal] = useState(target);
-  useEffect(() => {
-    if (!play) {
-      setVal(target);
-      return;
-    }
-    let raf = 0;
-    let start = 0;
-    const DUR = 1600;
-    const tick = (t: number) => {
-      if (!start) start = t;
-      const p = Math.min(1, (t - start) / DUR);
-      // easeOutExpo — a long, smooth glide that settles gently rather than snapping.
-      const eased = p >= 1 ? 1 : 1 - Math.pow(2, -10 * p);
-      setVal(Math.round(target * eased));
-      if (p < 1) raf = requestAnimationFrame(tick);
-    };
-    setVal(0);
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [play, target]);
-  return val;
-}
-
 function CardProposal() {
   const rows = ["Pricing", "Terms & e-sign"];
-  const [play, setPlay] = useState(0);
-  const total = useCountUp(18500, play);
-  const inViewRef = useInViewReplay(() => setPlay((p) => p + 1));
   return (
-    // One light card. Its only motion is a single quiet count-up on the total —
-    // a considered "value reveal" on hover, no rise or stagger.
-    <div
-      ref={inViewRef}
-      onMouseEnter={(e) => {
-        // Templates gallery is static — don't replay the count-up there.
-        if (e.currentTarget.closest(".template-mock")) return;
-        setPlay((p) => p + 1);
-      }}
-      onMouseLeave={() => setPlay(0)}
-      className="flex h-full flex-col bg-[var(--v69-card)] p-3"
-    >
+    // One light card. Its only motion is the total revealing itself once — see
+    // v69TotalIn. It used to count up from zero, which needed a play counter, a
+    // rAF loop and an in-view observer; the reveal is a single declaration and
+    // restarts on its own each time the card is hovered.
+    <div className="flex h-full flex-col bg-[var(--v69-card)] p-3">
       {/* Dark runs the panel as a pane of smoked glass seated in the card: a
           specular band across the top under 8%, a vertical fall from faintly lit
-          to slightly darker, hairline highlights on all four edges, a short shadow
+          to slightly darker, one faint highlight along the top edge, a short shadow
           the frame casts inward at the seam, and a two-step outer shadow. The
           gradient rides as a background-image over the token colour, so the middle
           is plain panel fill and reads matte.
+          The edge used to be a 10% ring with a lit hairline inset on all four
+          sides on top of it. Doubled up like that they read as one bright outline
+          drawn around the panel, and the frame took the eye before the total did.
+          On the hero the edge is now the ring alone, at the same 9% white as the
+          document-collector folder's border, so the two cards next to each other
+          outline identically — the lit hairline on top of it made this panel's top
+          edge read brighter than the folder's. The gallery, where the cards don't
+          sit side by side, keeps the hairline and its quieter half-strength ring.
           Light gets its own much quieter version of the same idea: the panel sits
           recessed in the card rather than raised on it, so the shadow falls from
           the TOP inner edge and the catch-light runs along the bottom and sides.
           Values an order of magnitude lighter than dark's — on a pale face
           anything stronger reads as a moulded 3D slab. The outer card stays
           flat; only this surface is carved. */}
-      <div className="flex flex-1 flex-col rounded-2xl bg-[var(--v69-inner)] p-4 ring-1 ring-black/[0.04] [[data-theme=light]_&]:shadow-[inset_0_1px_1px_rgba(16,24,40,0.05),inset_0_7px_12px_-9px_rgba(16,24,40,0.10),inset_0_-1px_0_rgba(255,255,255,0.9),inset_1px_0_0_rgba(255,255,255,0.5),inset_-1px_0_0_rgba(255,255,255,0.5)] [[data-theme=dark]_&]:bg-[linear-gradient(180deg,rgba(255,255,255,0.07)_0%,rgba(255,255,255,0.025)_14%,rgba(255,255,255,0)_36%,rgba(0,0,0,0.05)_74%,rgba(0,0,0,0.13)_100%)] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.10)] [[data-theme=dark]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.10),inset_1px_0_0_rgba(255,255,255,0.05),inset_-1px_0_0_rgba(255,255,255,0.05),inset_0_-1px_0_rgba(255,255,255,0.06),inset_0_9px_14px_-12px_rgba(255,255,255,0.08),0_1px_2px_rgba(0,0,0,0.45),0_12px_26px_-16px_rgba(0,0,0,0.6)]">
+      <div className="flex flex-1 flex-col rounded-2xl bg-[var(--v69-inner)] p-4 ring-1 ring-black/[0.04] [[data-theme=light]_&]:shadow-[inset_0_1px_1px_rgba(16,24,40,0.05),inset_0_7px_12px_-9px_rgba(16,24,40,0.10),inset_0_-1px_0_rgba(255,255,255,0.9),inset_1px_0_0_rgba(255,255,255,0.5),inset_-1px_0_0_rgba(255,255,255,0.5)] [[data-theme=dark]_&]:bg-[linear-gradient(180deg,rgba(255,255,255,0.07)_0%,rgba(255,255,255,0.025)_14%,rgba(255,255,255,0)_36%,rgba(0,0,0,0.05)_74%,rgba(0,0,0,0.13)_100%)] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.09)] [[data-theme=dark]_.template-mock_&]:ring-[rgba(255,255,255,0.05)] [[data-theme=dark]_&]:shadow-[inset_0_9px_14px_-12px_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.45),0_12px_26px_-16px_rgba(0,0,0,0.6)] [[data-theme=dark]_.template-mock_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),inset_0_9px_14px_-12px_rgba(255,255,255,0.06),0_1px_2px_rgba(0,0,0,0.45),0_12px_26px_-16px_rgba(0,0,0,0.6)]">
         <div className="text-[9px] text-muted-foreground">Proposal</div>
-        <div className="mt-1.5 text-[26px] font-normal leading-none tracking-tight tabular-nums text-[var(--v69-ink)]">
-          ${total.toLocaleString("en-US")}
+        {/* A hair of vertical padding so descender room isn't shaved off the
+            digit columns, which clip themselves as they roll. */}
+        <div className="mt-1.5 -my-0.5 py-0.5">
+          <div className="text-[26px] font-normal leading-none tracking-tight text-[var(--v69-ink)]">
+            <V69RollingTotal value="$18,500" />
+          </div>
         </div>
         {/* Build sections with chevrons, pinned low so they clear the total. */}
         <div className="mt-auto flex flex-col gap-2">
@@ -772,7 +886,11 @@ function CardChat() {
     // Light mode rides the same warm off-white face as the tracker and
     // onboarding cards; the cool grey skin read as a different family next to
     // them, so the bubble and status text take warm steps off it below.
-    <div className="flex h-full flex-col gap-2 bg-[var(--v69-card)] p-3.5 [[data-theme=light]_&]:bg-[#F5F5F0]">
+    // Dark gallery only: the card inverts to the ink face the service-request
+    // card uses, so the rail isn't four dark squares in a row. Everything on it
+    // then reads off --v69-well (the dark-on-ink text token) the way that card
+    // does. The home hero and light mode keep their own faces.
+    <div className="flex h-full flex-col gap-2 bg-[var(--v69-card)] p-3.5 [[data-theme=light]_&]:bg-[#F5F5F0] [[data-theme=dark]_.template-mock-gallery_&]:bg-[var(--v69-ink)]">
       {/* The card plays out an exchange on hover: the question flies up out of
           the composer as a sent bubble, and only once it lands does the
           assistant start working. Timings live in the v69-chat-* classes. */}
@@ -784,8 +902,10 @@ function CardChat() {
           around the question. Kept in dark, where the fill alone isn't enough.
           border-transparent rather than border-0 so the two skins stay the same
           size. */}
-      <div className="v69-chat-send max-w-[86%] self-end rounded-2xl border border-black/[0.08] bg-[var(--v69-inner)] px-3 py-2 [[data-theme=dark]_&]:border-white/[0.12] [.template-mock_&]:border-black/15 [[data-theme=light]_&]:border-transparent [[data-theme=light]_&]:bg-[#E7E7DE] [[data-theme=dark]_.template-mock_&]:border-white/20 [[data-theme=dark]_.template-mock_&]:bg-[#3A3A3A] [[data-theme=light]_.template-mock_&]:border-transparent">
-        <p className="text-[12px] leading-snug text-[var(--v69-ink)] [[data-theme=light]_&]:text-[#3B3C34]">
+      <div className="v69-chat-send max-w-[86%] self-end rounded-2xl border border-black/[0.08] bg-[var(--v69-inner)] px-3 py-2 [[data-theme=dark]_&]:border-white/[0.12] [.template-mock_&]:border-black/15 [[data-theme=light]_&]:border-transparent [[data-theme=light]_&]:bg-[#E7E7DE] [[data-theme=dark]_.template-mock_&]:border-transparent [[data-theme=dark]_.template-mock-gallery_&]:bg-[color-mix(in_srgb,var(--v69-well)_9%,transparent)] [[data-theme=light]_.template-mock_&]:border-transparent">
+        <p
+          className={`text-[13px] leading-snug text-[var(--v69-ink)] [[data-theme=light]_&]:text-[#3B3C34] [[data-theme=dark]_.template-mock-gallery_&]:text-[var(--v69-well)] ${MOCK_UPSCALED_BODY}`}
+        >
           {CHAT_QUESTION}
         </p>
       </div>
@@ -798,21 +918,30 @@ function CardChat() {
             card's chip text uses on this palette, so the loading state reads
             as part of the same surface rather than a neutral grey dropped on
             top of it. */}
-        <span className="v69-chat-shimmer bg-[linear-gradient(90deg,#a3a3a3,#a3a3a3_35%,#e5e5e5_50%,#a3a3a3_65%,#a3a3a3)] bg-[length:200%_100%] bg-clip-text text-[11px] leading-none text-transparent [[data-theme=light]_&]:bg-[linear-gradient(90deg,#5B5C53,#5B5C53_35%,#C7C7B4_50%,#5B5C53_65%,#5B5C53)]">
+        {/* On the inverted gallery face the sweep has to run the other way —
+            a dark base with a lighter band, or the label vanishes into the ink. */}
+        <span className="v69-chat-shimmer bg-[linear-gradient(90deg,#a3a3a3,#a3a3a3_35%,#e5e5e5_50%,#a3a3a3_65%,#a3a3a3)] bg-[length:200%_100%] bg-clip-text text-[11px] leading-none text-transparent [.template-mock_&]:text-[9px] [[data-theme=light]_&]:bg-[linear-gradient(90deg,#5B5C53,#5B5C53_35%,#C7C7B4_50%,#5B5C53_65%,#5B5C53)] [[data-theme=dark]_.template-mock-gallery_&]:bg-[linear-gradient(90deg,#6E6E6E,#6E6E6E_35%,#B9B9B9_50%,#6E6E6E_65%,#6E6E6E)]">
           Searching the web…
         </span>
       </div>
       {/* Composer — the input clients type their question into. In the templates
-          gallery it drops the glass entirely (sheen, brand wash and lift) and
-          takes the mock's own panel fill: the pill was the only glass material in
-          a card that is otherwise flat, so it read as borrowed from elsewhere.
-          The home hero keeps the glass. */}
-      <div className="v69-composer-gradient mt-auto flex items-center overflow-hidden rounded-full border border-white/50 px-3 py-2 [[data-theme=dark]_&]:border-white/[0.14] [.template-mock_&]:border-white/50 [.template-mock_&]:bg-[var(--v69-inner)] [[data-theme=dark]_.template-mock_&]:border-white/20 [[data-theme=light]_&]:border-black/[0.09] [[data-theme=light]_.template-mock_&]:border-black/[0.09]">
+          gallery it drops the glass entirely (sheen, brand wash, lift and lit
+          rim) and takes the mock's own panel fill: the pill was the only glass
+          material in a card that is otherwise flat, so it read as borrowed from
+          elsewhere. Its rim goes with the rest of it — a lit white edge on a
+          flat fill is the last thing making it read as a lozenge sitting on the
+          card rather than a field recessed into it. The home hero keeps the
+          glass. */}
+      <div className="v69-composer-gradient mt-auto flex items-center overflow-hidden rounded-full border border-white/50 px-3 py-2 [[data-theme=dark]_&]:border-white/[0.14] [[data-theme=dark]_&]:bg-[var(--v69-inner)] [.template-mock_&]:border-transparent [.template-mock_&]:bg-[var(--v69-inner)] [[data-theme=dark]_.template-mock_&]:border-transparent [[data-theme=dark]_.template-mock-gallery_&]:bg-[color-mix(in_srgb,var(--v69-well)_9%,transparent)] [[data-theme=light]_&]:border-black/[0.09] [[data-theme=light]_.template-mock_&]:border-transparent">
         <span
           aria-hidden
           className="mr-0.5 h-3 w-px shrink-0 bg-neutral-500 opacity-0 group-hover:[animation:caret_1s_step-end_infinite]"
         />
-        <span className="whitespace-nowrap text-[11px] leading-none text-muted-foreground [[data-theme=light]_&]:text-[#5B5C53]">
+        {/* Placeholder weight on the ink face matches the service-request card's
+            dim words: the text token held back, not a grey dropped on top. */}
+        <span
+          className={`whitespace-nowrap text-[11px] leading-none text-muted-foreground [[data-theme=light]_&]:text-[#5B5C53] [[data-theme=dark]_.template-mock-gallery_&]:text-[color-mix(in_srgb,var(--v69-well)_55%,transparent)] ${MOCK_UPSCALED_META}`}
+        >
           Ask a question
         </span>
       </div>
@@ -841,13 +970,14 @@ function CardApproval() {
     // bg-none is what actually drops the ramp — the card-face override only sets
     // a background *color*, which paints behind the gradient image.
     <div className="flex h-full flex-col bg-[var(--v69-card)] [[data-theme=light]_&]:bg-[#F5F5F0] [[data-theme=dark]_&]:bg-[linear-gradient(160deg,#232323_0%,#1b1b1b_58%,#151515_100%)] [[data-theme=dark]_.template-mock_&]:bg-[var(--v69-card)] [[data-theme=dark]_.template-mock_&]:bg-none">
-      {/* Title stays put on hover — the render in the preview is the only motion
-          this card needs, and animating the text with it read as jitter. */}
-      <div className="px-3.5 pb-2.5 pt-3.5">
-        <div className="text-[11px] font-normal leading-tight text-[var(--v69-ink)]">
-          March newsletter
-        </div>
-        <div className="mt-0.5 text-[9px] text-muted-foreground">Draft</div>
+      {/* The status tag alone in the corner, no item name: the preview under it is
+          the thing being approved, and naming it as well made the cover read as a
+          list row with a thumbnail. Stays put on hover — the render in the preview
+          is the only motion this card needs. */}
+      <div className="flex items-center px-3.5 pb-2.5 pt-3.5">
+        <span className={MOCK_UNIT_TAG} style={MOCK_MONO}>
+          Draft
+        </span>
       </div>
       {/* Content preview — the image rendering: a dot matrix twinkles while it
           works, then the picture resolves in over it out of a blur. */}
@@ -858,7 +988,7 @@ function CardApproval() {
           reads as a foreign colour on this palette's warm face. The ring is
           redundant now that the panel has its own fill, and only stays for
           dark, where the panel is a near-black fill close to the card behind it. */}
-      <div className="relative mx-3.5 mb-3.5 flex-1 overflow-hidden rounded-xl ring-1 ring-[rgba(16,24,40,0.14)] [[data-theme=light]_&]:bg-[#E7E7DE] [[data-theme=light]_&]:ring-0 [[data-theme=dark]_&]:bg-[#1B1B1B] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.22)] [.v72-mock-dark_&]:ring-[rgba(255,255,255,0.22)] [[data-theme=dark]_.template-mock_&]:bg-[var(--v69-well)]">
+      <div className="relative mx-3.5 mb-3.5 flex-1 overflow-hidden rounded-xl ring-1 ring-[rgba(16,24,40,0.14)] [[data-theme=light]_&]:bg-[#E7E7DE] [[data-theme=light]_&]:ring-0 [[data-theme=dark]_&]:bg-[#1B1B1B] [[data-theme=dark]_&]:ring-0 [.v72-mock-dark_&]:ring-0 [[data-theme=dark]_.template-mock_&]:bg-[var(--v69-well)]">
         <div
           className="v69-preview-dots absolute inset-0 grid place-items-center gap-[2px] p-2.5 text-muted-foreground"
           style={{
@@ -871,12 +1001,22 @@ function CardApproval() {
               key={i}
               aria-hidden
               className="v69-preview-dot aspect-square w-[2px] rounded-full bg-current"
-              // Deterministic so server and client paint the same grid — a
-              // random field would differ across the hydration boundary.
+              // The delay is the dot's own position, so the twinkle crosses the
+              // field as a wave instead of firing everywhere at once — a scan
+              // travelling over the picture is what reads as work being done;
+              // scattered delays only read as noise. A small deterministic
+              // jitter on top keeps the wave from being a ruled diagonal line,
+              // and deterministic is the requirement either way: a random field
+              // would differ across the hydration boundary.
               style={
                 {
                   "--dot-op": 0.2 + ((i * 37) % 11) / 22,
-                  animationDelay: `${(((i * 53) % 17) / 17) * 1.4}s`,
+                  animationDelay: `${
+                    (((i % PREVIEW_COLS) + Math.floor(i / PREVIEW_COLS)) /
+                      (PREVIEW_COLS + PREVIEW_ROWS - 2)) *
+                      1.1 +
+                    (((i * 53) % 17) / 17) * 0.16
+                  }s`,
                 } as React.CSSProperties
               }
             />
@@ -937,7 +1077,7 @@ function CardDocuments() {
             <div className="truncate text-[13px] font-medium leading-tight text-[var(--fld-ink)]">
               {FOLDER_LABEL}
             </div>
-            <div className="mt-0.5 text-[10px] text-[color-mix(in_srgb,var(--fld-ink)_60%,transparent)]">
+            <div className="mt-0.5 text-[11px] text-[color-mix(in_srgb,var(--fld-ink)_60%,transparent)]">
               {FOLDER_META}
             </div>
           </div>
@@ -953,26 +1093,66 @@ function CardDocuments() {
 const PDF_GLYPH_PATH =
   "M6.875 1.875H2.5C2.15625 1.875 1.875 2.15625 1.875 2.5V17.5C1.875 17.8438 2.15625 18.125 2.5 18.125H5.625V20H2.5C1.12109 20 0 18.8789 0 17.5V2.5C0 1.12109 1.12109 0 2.5 0H7.71484C8.37891 0 9.01562 0.261719 9.48437 0.730469L14.2695 5.51953C14.7383 5.98828 15 6.625 15 7.28906V13.1289H13.125V8.12891H9.6875C8.13281 8.12891 6.875 6.87109 6.875 5.31641V1.87891V1.875ZM12.3477 6.25L8.75 2.65234V5.3125C8.75 5.83203 9.16797 6.25 9.6875 6.25H12.3477ZM8.125 14.8438H9.375C10.668 14.8438 11.7188 15.8945 11.7188 17.1875C11.7188 18.4805 10.668 19.5312 9.375 19.5312H8.90625V20.625C8.90625 21.0547 8.55469 21.4062 8.125 21.4062C7.69531 21.4062 7.34375 21.0547 7.34375 20.625V15.625C7.34375 15.1953 7.69531 14.8438 8.125 14.8438ZM9.375 17.9688C9.80469 17.9688 10.1562 17.6172 10.1562 17.1875C10.1562 16.7578 9.80469 16.4062 9.375 16.4062H8.90625V17.9688H9.375ZM13.125 14.8438H14.375C15.4961 14.8438 16.4062 15.7539 16.4062 16.875V19.375C16.4062 20.4961 15.4961 21.4062 14.375 21.4062H13.125C12.6953 21.4062 12.3438 21.0547 12.3438 20.625V15.625C12.3438 15.1953 12.6953 14.8438 13.125 14.8438ZM14.375 19.8438C14.6328 19.8438 14.8438 19.6328 14.8438 19.375V16.875C14.8438 16.6172 14.6328 16.4062 14.375 16.4062H13.9062V19.8438H14.375ZM17.3438 15.625C17.3438 15.1953 17.6953 14.8438 18.125 14.8438H20C20.4297 14.8438 20.7812 15.1953 20.7812 15.625C20.7812 16.0547 20.4297 16.4062 20 16.4062H18.9062V17.3438H20C20.4297 17.3438 20.7812 17.6953 20.7812 18.125C20.7812 18.5547 20.4297 18.9062 20 18.9062H18.9062V20.625C18.9062 21.0547 18.5547 21.4062 18.125 21.4062C17.6953 21.4062 17.3438 21.0547 17.3438 20.625V15.625Z";
 
-// The tile the glyph sits in: a squircle app-icon block with a flat face and a
-// hairline edge — no bevel, no drop — so it reads as an icon rather than as a
-// raised object.
+// The square the glyph sits in. Light keeps the milled well: it takes the card's
+// own face and reads only through the well's inner shadows, top rim and centre
+// gradient. Dark is built as the AI assistant's disc instead — the same step down
+// off the face, the same carve, key light and sheen — so the two cards read as the
+// same material next to each other; at the well's near-invisible dark step this
+// one all but disappeared beside it. The well's own dark treatment is cleared so
+// the disc's layers are the only thing on the surface.
 const PDF_TILE =
-  "flex size-[86px] shrink-0 items-center justify-center rounded-[24px] bg-[#FFFFFF] [[data-theme=dark]_&]:bg-[#2F2F2F] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.08)] ring-1 ring-[rgba(16,24,40,0.07)]";
+  "v69-inset-well v69-inset-well--disc-dark relative flex size-[108px] shrink-0 items-center justify-center overflow-hidden rounded-[28px] bg-[var(--v69-card)] [[data-theme=dark]_&]:bg-[#1B1B1B] [[data-theme=dark]_.template-mock_&]:bg-[var(--v69-well)]";
 
-// PDF to digital intake — the source document as a single app-icon block in
-// Assembly blue. The lime form tile that used to sit beside it made the card read
-// as two apps rather than as one file about to become something else.
+// The mark's one value per skin. Flat and a clear step off the recessed floor —
+// depth is the panel's job now, so the glyph carries none of it and only has to be
+// readable. Both skins take a warm grey rather than a cool one, and dark's sits
+// around 70% brightness: at #B8B8B8 the mark was the brightest thing on a very
+// quiet card and read as lit from within rather than as part of the tile.
+// Light runs lighter than it did (#8A8B80): on a near-white card the mark was
+// carrying more weight than anything else in the rail's quietest cover.
+const PDF_GLYPH_TOKENS =
+  "[--pdf-ink:#A3A497] [[data-theme=dark]_&]:[--pdf-ink:#B2AEA6]";
+
+// PDF to digital intake — the source document as a single mark, framed by a square
+// carved into the card. The glyph itself is flat: it was embossed, which spent its
+// contrast on edge slivers and left the shape hard to read at cover size. The
+// hierarchy is the panel recedes, the mark reads.
 function CardPdf() {
   return (
-    <div className="flex h-full items-center justify-center bg-[var(--v69-card)] p-5">
+    <div
+      // Dark only: a catch-light down the right wall and along the foot, so the
+      // card has an edge to be read against the near-black page. Kept at 4% —
+      // the shape only needs to be findable, and anything stronger reads as a
+      // frame drawn around the tile. The parent's rounded clip trims the two
+      // lines at the corners, so they stay edges rather than a full outline.
+      className={`flex h-full items-center justify-center bg-[var(--v69-card)] p-5 ${MOCK_FACE_LIGHT} [[data-theme=dark]_&]:shadow-[inset_-1px_0_0_rgba(255,255,255,0.04),inset_0_-1px_0_rgba(255,255,255,0.04)]`}
+    >
       <span className={PDF_TILE}>
+        {/* The disc's three dark-only layers, on a rounded square instead of a
+            circle: the perimeter carve, the key light, and the sheen that makes
+            the surface read as covered rather than as raw material. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-[28px] [[data-theme=light]_&]:hidden"
+          style={{ boxShadow: DISC_DARK_CARVE }}
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-[28px] [[data-theme=light]_&]:hidden"
+          style={{ background: DISC_DARK_KEY }}
+        />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-[12%] top-[6%] h-[26%] rounded-[50%] bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0))] blur-[8px] [[data-theme=light]_&]:hidden"
+        />
         <svg
           viewBox="0 0 21 22"
-          className="size-11 text-[#7DA4FF]"
-          fill="currentColor"
+          // Grown with the square rather than left at its old size, so the mark
+          // keeps the same optical ratio to the frame around it.
+          className={`relative size-11 ${PDF_GLYPH_TOKENS}`}
           aria-hidden
         >
-          <path d={PDF_GLYPH_PATH} />
+          <path d={PDF_GLYPH_PATH} fill="var(--pdf-ink)" />
         </svg>
       </span>
     </div>
@@ -1048,12 +1228,12 @@ function CardMetrics() {
           aria-hidden
           className="pointer-events-none absolute inset-0 m-auto size-[149px] rounded-full [[data-theme=dark]_&]:shadow-[inset_0_3px_7px_-2px_rgba(0,0,0,0.38),inset_0_-1px_0_rgba(255,255,255,0.05)] [[data-theme=light]_&]:shadow-[inset_0_3px_7px_-2px_rgba(16,24,40,0.13),inset_0_-1px_0_rgba(255,255,255,0.5)]"
         />
+        {/* The figure alone. The target under it ("/ 3,000") was a second,
+            smaller number inside a ring whose filled arc already says how far
+            along the goal is. */}
         <div className="absolute flex flex-col items-center leading-none">
           <span className="text-[34px] font-normal tracking-tight text-[var(--v69-ink)]">
             2.4k
-          </span>
-          <span className="mt-2 text-[11px] tabular-nums text-muted-foreground">
-            / 3,000
           </span>
         </div>
       </div>
@@ -1089,69 +1269,110 @@ function DotField({
   );
 }
 
-// Retainer usage overview — the month as a spectrum: one bar per logged session,
-// so the shape says when the work actually happened, not just how much of the
-// retainer is gone. A dot per hour counted the total but flattened the month into
-// one undifferentiated block.
-// Bar heights as a percentage of the plot. Five sessions a week rather than
-// eight: at eight the bars came out three pixels wide and the month read as a
-// sparkline, where the point of the card is the shape of the month. The third
-// week is where most of this retainer went.
-const RETAINER_WEEKS = [
-  [16, 24, 13, 20, 11],
-  [22, 14, 30, 17, 26],
-  [58, 84, 100, 62, 90],
-  [26, 17, 31, 15, 21],
+// Retainer usage overview — one bar per client, against the allowance they share.
+// It has been through two wrong shapes: twenty thin bars at unrelated heights (an
+// audio equaliser), then four week-groups of three (a real chart, but twelve bars
+// still land ~14px wide at cover size, and a grouped series is more structure than
+// a thumbnail can carry).
+//
+// Six bars is the version that fits. They come out well over twice as wide, which
+// is the only way a bar reads as a measured quantity rather than as a tick, and the
+// card matches what its own caption says — hours used against each client's
+// retainer, one bar each, sorted heaviest first.
+//
+// The card is now built after the reference chart: a labelled scale down the left,
+// the series' own labels along the foot, and the limit as a solid rule with a dot
+// at its head. It carried a 52px "33.5" instead, which asked the eye to read a
+// figure and a shape as one thing and left the bars with no scale to be measured
+// against — an axis says what the heights mean, which a headline number can't.
+// Hours per client, against a 40-hour retainer.
+const RETAINER_CLIENTS: [string, number][] = [
+  ["NC", 48],
+  ["RH", 42],
+  ["PL", 29],
+  ["DV", 26],
+  ["SM", 17],
+  ["KT", 13],
 ];
-// The busiest week carries the accent; the rest of the month stays neutral, so
-// the spike is the thing you see first.
-const RETAINER_PEAK_WEEK = 2;
-// The accent bars are filled with the send-badge's own blue ramp — full-strength
-// at the cap falling to the deeper step at the baseline. The depth is in the fill
-// and nothing else: a bloom around the lit week read as a light source on a card
-// that has none.
-const RETAINER_PEAK_FILL = "linear-gradient(180deg,#9CBAFF 0%,#7DA4FF 45%,#6A92F2 100%)";
+// The scale: labelled every 10 hours, topping out at the heaviest client so the
+// first tick sits level with the tallest bar's cap. It used to top out at 50 for
+// headroom, which left the top label floating in a band of empty plot with
+// nothing beside it to read against.
+const RETAINER_TICKS = [40, 30, 20, 10, 0];
+const RETAINER_MAX = RETAINER_CLIENTS[0][1];
+// Where the allowance runs out, in hours.
+const RETAINER_LIMIT = 40;
+// Colour encodes one thing: whether the client went over. The two bars that cross
+// the line take the accent and the rest stay neutral, so the exception is what you
+// read first and the fill means something rather than marking a group.
+// Flat, not a ramp — the bars used to carry the send-badge's vertical blue gradient,
+// which put a lighter cap and a deeper foot on each one. That is shading, and the
+// only thing a bar's fill should carry is its value.
+const RETAINER_OVER_FILL = "#7DA4FF";
 
 function CardRetainer() {
   return (
-    // The figure at the head with the month as a band along the foot, after the
-    // reference: the two used to sit at opposite edges with the bars stranded in
-    // the middle, which left a void through the centre of the card and nothing
-    // holding the number and the shape together.
-    <div className="flex h-full flex-col justify-between bg-[var(--v69-card)] px-5 pb-5 pt-5">
-      <span className="text-[52px] font-normal leading-[0.78] tracking-tight tabular-nums text-[var(--v69-ink)]">
-        33.5
-      </span>
-      {/* Bars sit on a shared baseline with a faint full-height tick between the
-          weeks — the ticks are what turn a row of bars into a calendar. The plot
-          is a third taller than it was and runs further past the card's padding on
-          both sides, so it carries the card instead of hanging under the figure;
-          the card's own gutters are untouched. */}
-      <div className="-mx-3 flex h-[148px] items-end gap-[9px]">
-        {RETAINER_WEEKS.map((week, w) => {
-          const peak = w === RETAINER_PEAK_WEEK;
-          return (
-            <div key={w} className="flex h-full flex-1 items-end gap-[5px]">
-              {w > 0 && (
-                <span
-                  aria-hidden
-                  className="mr-[5px] h-full w-px shrink-0"
-                  style={{ background: ink(10) }}
-                />
-              )}
-              {week.map((h, i) => (
-                <span
-                  key={i}
-                  className="min-w-[6px] flex-1 rounded-[3px]"
-                  style={{
-                    height: `${h}%`,
-                    background: peak ? RETAINER_PEAK_FILL : INK_MID,
-                  }}
-                />
-              ))}
-            </div>
-          );
-        })}
+    // A plotted chart rather than a figure over a shape: the scale runs down the
+    // left, the clients label the foot, and the plot fills what is left. Inset on
+    // all four sides — with an axis on it the chart is a figure the card holds, not
+    // a graphic bled to its edges.
+    // The top inset carries the foot labels' row as well as the padding, so the
+    // plot sits the same distance off the card at both ends — matched on the
+    // padding alone, the labelled foot made the chart look bottom-heavy.
+    // --retainer-bar is the neutral clients' fill. Light runs it lighter than
+    // dark's: the same 30% of ink that reads as a mid grey on a near-black face
+    // is a heavy slab on a near-white one, and the two accented bars are what
+    // the card is about.
+    <div className="flex h-full flex-col bg-[var(--v69-card)] p-4 pt-8 [[data-theme=dark]_&]:[--retainer-bar:color-mix(in_srgb,var(--v69-ink)_30%,transparent)] [[data-theme=light]_&]:[--retainer-bar:color-mix(in_srgb,var(--v69-ink)_17%,transparent)]">
+      <div className="flex min-h-0 flex-1 gap-2">
+        {/* Tick labels only. The gridlines they'd anchor are left off: at six rules
+            across a cover-size plot the chart turns into ledger paper and the bars
+            stop being the thing you read. */}
+        {/* The ticks sit inside the plot at both ends. They used to be hoisted
+            half a label past it (-my-1) so each one centred exactly on its own
+            gridline, but that left the top of the scale hanging above the plot,
+            reading as though it had slipped out of the panel. */}
+        <div
+          aria-hidden
+          className="flex flex-col justify-between pb-4 text-right text-[9px] leading-none tabular-nums text-muted-foreground"
+        >
+          {RETAINER_TICKS.map((t) => (
+            <span key={t}>{t}</span>
+          ))}
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col">
+          {/* No rule across the plot. The limit still reads — the two clients past
+              it take the accent — and with a labelled scale beside the bars the
+              line was restating a number the axis already gives. */}
+          <div className="flex min-h-0 flex-1 items-end gap-1.5">
+            {RETAINER_CLIENTS.map(([label, hours]) => (
+              <span
+                key={label}
+                className="flex-1 rounded-[5px]"
+                style={{
+                  height: `${(hours / RETAINER_MAX) * 100}%`,
+                  background:
+                    hours > RETAINER_LIMIT
+                      ? RETAINER_OVER_FILL
+                      : "var(--retainer-bar)",
+                }}
+              />
+            ))}
+          </div>
+          {/* The clients label the foot, one under each bar, on the same track so
+              a label can't drift off the bar it belongs to. Set in the mono face,
+              which is what the site uses for figures and data labels. */}
+          <div
+            className="flex h-4 shrink-0 items-end gap-1.5 text-[9px] leading-none text-muted-foreground"
+            style={{ fontFamily: MONO }}
+          >
+            {RETAINER_CLIENTS.map(([label]) => (
+              <span key={label} className="flex-1 text-center">
+                {label}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1331,7 +1552,7 @@ function CardTracker() {
       <div className="flex items-end gap-1 px-0.5">
         {/* Primary metric — clean, unstretched Inter (soft off-white, not pure). */}
         <span
-          className="text-[32px] font-medium leading-none tracking-tight text-[var(--v69-ink)] [[data-theme=dark]_&]:text-[#ededed]"
+          className="text-[34px] font-medium leading-none tracking-tight text-[var(--v69-ink)] [[data-theme=dark]_&]:text-[#ededed]"
           style={{
             fontFamily: "var(--font-diatype-mono), ui-monospace, monospace",
           }}
@@ -1341,12 +1562,8 @@ function CardTracker() {
         {/* What the count is counting, as a tag in the corner — same chip idiom
             as the gallery's category tags. */}
         <span
-          // The shared cool grey chip all but disappeared on light mode's warm
-          // off-white face, so light takes a warm step off that face instead.
-          className="ml-auto shrink-0 self-start whitespace-nowrap rounded-md bg-[var(--v69-inner)] px-1.5 py-[3px] text-[10px] uppercase leading-none tracking-wide text-muted-foreground [[data-theme=light]_&]:bg-[#E7E7DE] [[data-theme=light]_&]:text-[#5B5C53]"
-          style={{
-            fontFamily: "var(--font-diatype-mono), ui-monospace, monospace",
-          }}
+          className={`ml-auto self-start ${MOCK_UNIT_TAG}`}
+          style={MOCK_MONO}
         >
           Tasks
         </span>
@@ -1374,7 +1591,14 @@ function CardTracker() {
                     // wells, which is what gives the surface its depth.
                     className={`flex-1 rounded-[2px] border border-black/[0.03] [[data-theme=dark]_&]:border-transparent group-hover:[animation:v69Shimmer_0.6s_ease-in-out_both] group-[.is-inview]:[animation:v69Shimmer_0.6s_ease-in-out_both] ${
                       hit
-                        ? `${ACCENT} shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_1px_0_rgba(78,110,205,0.95),0_2px_3px_rgba(16,24,40,0.22)]`
+                        ? // Light softens the extrude: the hard 1px block of #4E6ECD
+                          // under every cell was a drawn bottom face, and with the
+                          // 50% top lip and a 22% cast shadow over it the grid read
+                          // as a tray of plastic buttons on a flat page. A quiet lip
+                          // and one diffuse shadow instead. Dark keeps the full
+                          // extrude — it needs that much to lift off a near-black
+                          // ground.
+                          `${ACCENT} shadow-[inset_0_1px_0_rgba(255,255,255,0.5),0_1px_0_rgba(78,110,205,0.95),0_2px_3px_rgba(16,24,40,0.22)] [[data-theme=light]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.26),0_1px_2px_rgba(16,24,40,0.10)]`
                         : ""
                     }`}
                     style={{
@@ -1404,9 +1628,51 @@ const SUPPORT_REQUESTS: {
   { title: "Invoice question", meta: "In progress", state: "progress" },
   { title: "Password reset", meta: "Resolved", state: "done" },
 ];
+// The row whose status resolves on hover — the middle one, so the change happens
+// at the centre of the card rather than at an edge.
+const SUPPORT_RESOLVING_ROW = 1;
+// The three states cross-fade inside one grid cell: in progress leaves right away,
+// the spinner holds the middle of the sequence (see .v69-status-load in
+// globals.css), and the tick lands as the spinner clears. Transitions rather than
+// keyframes on the two ends, so they play backwards on their own when the pointer
+// leaves; the delays only exist in the hover state.
+// The transitioned properties are spelled out because scale-75 sets the `scale`
+// property, not `transform` — transitioning transform here animated nothing.
+// (The gallery zeroes every transition-duration under .template-mock, so the swap
+// is static there by design and only plays on the hero.)
+const STATUS_LAYER =
+  "col-start-1 row-start-1 duration-300 [transition-property:opacity,scale] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]";
+const STATUS_LEAVING = `${STATUS_LAYER} group-hover:scale-75 group-hover:opacity-0 group-[.is-inview]:scale-75 group-[.is-inview]:opacity-0`;
+const STATUS_ARRIVING = `${STATUS_LAYER} scale-75 opacity-0 group-hover:scale-100 group-hover:opacity-100 group-hover:[transition-delay:1120ms] group-[.is-inview]:scale-100 group-[.is-inview]:opacity-100 group-[.is-inview]:[transition-delay:1120ms]`;
+
+const SUPPORT_ICON_CLS =
+  // On the gallery's blue face a neutral grey was the one thing on the card not
+  // drawn from the palette, so it read as a stray UI glyph rather than part of the
+  // tile. The mark is the face's own hue taken down to an ink instead.
+  "size-3.5 shrink-0 text-muted-foreground [[data-theme=light]_&]:text-[#5B5C53] [[data-theme=light]_.template-mock-gallery_&]:text-[color-mix(in_srgb,#7DA4FF_42%,#1B1B1B)]";
+
+// The loading state: a ring with a gap, spun by v69-status-load. An arc rather
+// than a ring of dots so it reads at 14px, where dots close up into a solid ring.
+function SupportSpinnerIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className={SUPPORT_ICON_CLS} aria-hidden>
+      <circle
+        cx="8"
+        cy="8"
+        r="6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        pathLength={100}
+        strokeDasharray="72 28"
+      />
+    </svg>
+  );
+}
+
 function SupportStatusIcon({ state }: { state: "open" | "progress" | "done" }) {
-  const cls =
-    "size-3.5 shrink-0 text-muted-foreground [[data-theme=light]_&]:text-[#5B5C53]";
+  const cls = SUPPORT_ICON_CLS;
   if (state === "done") {
     return (
       <svg viewBox="0 0 16 16" className={cls} aria-hidden>
@@ -1453,18 +1719,51 @@ function SupportStatusIcon({ state }: { state: "open" | "progress" | "done" }) {
 function CardSupport() {
   return (
     // Light rides the same warm beige face and inner step as the chat card, so
-    // the row of mocks reads as one family. Dark is unchanged.
-    <div className="flex h-full flex-col justify-center gap-2 bg-[var(--v69-card)] p-4 [[data-theme=light]_&]:bg-[#F5F5F0]">
+    // the row of mocks reads as one family. The hero is unchanged in both themes.
+    // The gallery is the exception: there the face takes a brand hue so the rail
+    // isn't an unbroken run of neutral squares — periwinkle in light, the lime in
+    // dark. Both are pale, so the card restates itself on them the same way, and
+    // it does that by remapping the mock tokens rather than by restyling each
+    // part: the ink goes dark, the row fill becomes a white wash of the hue
+    // underneath, and --v69-well (which the resolved tick is cut out of) becomes
+    // the face itself, so the tick reads as a hole punched through to the card.
+    <div className="flex h-full flex-col justify-center gap-2 bg-[var(--v69-card)] p-4 [[data-theme=light]_&]:bg-[#F5F5F0] [[data-theme=light]_.template-mock-gallery_&]:bg-[#7DA4FF] [[data-theme=dark]_.template-mock-gallery_&]:bg-[#D9ED92] [[data-theme=dark]_.template-mock-gallery_&]:[--v69-ink:#1B1B1B] [[data-theme=dark]_.template-mock-gallery_&]:[--v69-inner:rgba(255,255,255,0.28)] [[data-theme=dark]_.template-mock-gallery_&]:[--v69-well:#D9ED92] [[data-theme=dark]_.template-mock-gallery_&]:[--muted-foreground:rgba(27,27,27,0.7)]">
       {SUPPORT_REQUESTS.map((r, i) => (
         <div
           key={r.title}
-          // Rows drop in one after another like notifications arriving on a
-          // phone: a decelerating glide down, no bounce at the end.
-          className="flex items-center gap-2.5 rounded-lg border border-black/[0.05] bg-[var(--v69-inner)] px-3 py-2.5 [[data-theme=dark]_&]:border-[rgba(255,255,255,0.1)] [[data-theme=light]_&]:bg-[#E7E7DE] group-hover:[will-change:transform,opacity] group-hover:[animation:v69NotifIn_0.66s_cubic-bezier(0.22,1,0.36,1)_both] group-[.is-inview]:[animation:v69NotifIn_0.66s_cubic-bezier(0.22,1,0.36,1)_both]"
-          style={{ animationDelay: `${i * 0.13}s` }}
+          // The rows are just there now. They used to drop in one after another
+          // like arriving notifications, which said the queue was filling up —
+          // but the app is about working a queue down, and three rows landing in
+          // sequence is a lot of motion for a thing that only illustrates a list.
+          // No hairline in either skin — the fill is a clear enough step off the
+          // card, and the outline drew a box around every row. border-transparent
+          // rather than border-0 so the rows keep the size they were laid out at.
+          // The dark gallery's face is the pale lime, so the rows wash down into
+          // it rather than up: a white veil has no room to separate on a light
+          // hue, an ink one does.
+          className="flex items-center gap-2.5 rounded-lg border border-transparent bg-[var(--v69-inner)] px-3 py-2.5 [[data-theme=light]_&]:bg-[#E7E7DE] [[data-theme=light]_.template-mock-gallery_&]:bg-[rgba(255,255,255,0.5)] [[data-theme=dark]_.template-mock-gallery_&]:bg-[rgba(27,27,27,0.13)]"
         >
-          <SupportStatusIcon state={r.state} />
-          <p className="min-w-0 truncate text-[13px] leading-tight text-[var(--v69-ink)] [[data-theme=light]_&]:text-[#3B3C34]">
+          {/* One request resolves instead: the middle row's status crosses from in
+              progress to done, which is the single thing this app does. It loads on
+              the way — the spinner is the beat that says work happened, rather than
+              the tick simply replacing the half-circle. All three states are stacked
+              in one grid cell so none of them moves the row. */}
+          {i === SUPPORT_RESOLVING_ROW ? (
+            <span className="grid size-3.5 shrink-0 place-items-center">
+              <span className={STATUS_LEAVING}>
+                <SupportStatusIcon state="progress" />
+              </span>
+              <span className={`${STATUS_LAYER} v69-status-load`}>
+                <SupportSpinnerIcon />
+              </span>
+              <span className={STATUS_ARRIVING}>
+                <SupportStatusIcon state="done" />
+              </span>
+            </span>
+          ) : (
+            <SupportStatusIcon state={r.state} />
+          )}
+          <p className="min-w-0 truncate text-[13px] leading-tight text-[var(--v69-ink)] [[data-theme=light]_&]:text-[#3B3C34] [[data-theme=light]_.template-mock-gallery_&]:text-[#1B1B1B]">
             {r.title}
           </p>
         </div>
@@ -1492,12 +1791,15 @@ function CardBooking() {
     // Both themes: the card is a frame and the composer sits on a smaller
     // recessed square inside it, so the negative space around the field is what
     // makes it read as the focal point rather than as the whole tile.
-    <div className="flex h-full flex-col bg-[var(--v69-card)] p-4">
+    <div
+      className={`flex h-full flex-col bg-[var(--v69-card)] p-4 ${MOCK_FACE_LIGHT}`}
+    >
       {/* The field itself: a rounded square set into the card. Dark carves it
-          with a hairline of light on the top edge over a held-in falloff, the same
-          hairline answered faintly along the bottom inside edge, and — instead of
-          a drop — two wide, low-contrast layers of ambient occlusion that gather
-          where the panel meets the frame and fade out with no edge to them.
+          with a hairline of light on the top edge over a held-in falloff, and the
+          light the floor of the recess bounces back answering it along the bottom
+          — a wide, edgeless gradient rather than the crisp lit line and pair of
+          drop shadows it used to carry. Those two read as a panel sitting on the
+          card casting a shadow down onto it, which is the opposite of carved.
           Light runs the same carve under its own lighting: the light comes from
           the top-left, so the lit hairline rides the top and left walls and the
           shadow gathers on the bottom and right, over the same wide occlusion at
@@ -1506,7 +1808,7 @@ function CardBooking() {
           the footer row's small type needs the value.
           The panel stays lighter than the frame in both themes, so that type
           keeps its contrast. */}
-      <div className="flex flex-1 flex-col justify-between rounded-[20px] p-4 [[data-theme=dark]_&]:border [[data-theme=dark]_&]:border-white/[0.07] [[data-theme=dark]_&]:bg-white/[0.035] [[data-theme=dark]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),inset_0_14px_28px_-20px_rgba(0,0,0,0.9),inset_0_-1px_0_rgba(255,255,255,0.05),inset_0_-12px_20px_-18px_rgba(255,255,255,0.06),0_1px_3px_rgba(0,0,0,0.18),0_5px_11px_rgba(0,0,0,0.13)] [[data-theme=light]_&]:bg-[rgba(255,255,255,0.6)] [[data-theme=light]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.95),inset_1px_0_0_rgba(255,255,255,0.75),inset_0_10px_16px_-14px_rgba(16,24,40,0.10),inset_0_-1px_0_rgba(16,24,40,0.05),inset_-1px_0_0_rgba(16,24,40,0.04),inset_-10px_-10px_18px_-16px_rgba(16,24,40,0.10),0_1px_2px_rgba(16,24,40,0.05),0_5px_12px_rgba(16,24,40,0.045)]">
+      <div className="flex flex-1 flex-col justify-between rounded-[20px] p-4 [[data-theme=dark]_&]:border [[data-theme=dark]_&]:border-white/[0.07] [[data-theme=dark]_&]:bg-white/[0.035] [[data-theme=dark]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.07),inset_0_14px_28px_-20px_rgba(0,0,0,0.9),inset_0_-20px_30px_-22px_rgba(255,255,255,0.09)] [[data-theme=light]_&]:bg-[rgba(255,255,255,0.6)] [[data-theme=light]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.95),inset_1px_0_0_rgba(255,255,255,0.75),inset_0_10px_16px_-14px_rgba(16,24,40,0.10),inset_0_-1px_0_rgba(16,24,40,0.05),inset_-1px_0_0_rgba(16,24,40,0.04),inset_-10px_-10px_18px_-16px_rgba(16,24,40,0.10),0_1px_2px_rgba(16,24,40,0.05),0_5px_12px_rgba(16,24,40,0.045)]">
         {/* Dark lifts the placeholder off the floor of the muted scale: it has to
             be readable at cover size without pulling rank on the send button. */}
         <p className="text-[13px] font-normal text-muted-foreground [[data-theme=dark]_&]:text-neutral-400">
@@ -1532,21 +1834,21 @@ function CardBooking() {
               unit, so the row reads as "what is being asked for" then "send"
               rather than three items at equal weight. */}
           <div className="flex items-center gap-2 [[data-theme=dark]_&]:gap-3.5">
-            <span className="flex items-center gap-2 [[data-theme=dark]_&]:gap-1.5">
-              <span className="text-[11px] font-normal tabular-nums text-[var(--v69-ink)]">
-                30 min
-              </span>
-              <span className="text-[11px] font-normal text-muted-foreground [[data-theme=dark]_&]:text-neutral-300">
-                Discovery
-              </span>
+            {/* The duration as the unit tag the metric cards use, not a pair of
+                loose labels. The meeting's name went with it: at cover size two
+                labels beside each other read as one runover line, and the length
+                is the only thing the row needs to say. */}
+            <span className={MOCK_UNIT_TAG} style={MOCK_MONO}>
+              30 min
             </span>
             {/* Dark puts the card's one colour on its one action: the brand lime,
                 with the arrow on the dark ground, so send reads as a control
-                rather than a third grey surface. It also gets the only elevation on
-                the card — a short drop and a held-in top highlight, which is what
-                makes it read as pressable.
+                rather than a third grey surface. It keeps the short drop that seats
+                it on the panel, but not the held-in white rim it used to wear — a
+                lit top edge on a lime chip read as a bevel, and it was the only
+                thing on the card pretending to be moulded.
                 Squarish rather than round, matching the markup composer's send. */}
-            <span className="flex size-7 items-center justify-center rounded-[9px] bg-[var(--v69-ink)] [[data-theme=dark]_&]:bg-[#D9ED92] [[data-theme=dark]_&]:shadow-[0_1px_2px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.55)]">
+            <span className="flex size-7 items-center justify-center rounded-[9px] bg-[var(--v69-ink)] [[data-theme=dark]_&]:bg-[#D9ED92] [[data-theme=dark]_&]:shadow-[0_1px_2px_rgba(0,0,0,0.5)]">
               <svg
                 viewBox="0 0 24 24"
                 className={`size-4 ${ON_INK} [[data-theme=dark]_&]:text-[#1B1B1B]`}
@@ -1608,7 +1910,7 @@ function CardCalendar() {
       {/* The neutral grey secondary read as a foreign colour on the blue, and a
           deeper blue sat too close to the face to read, so light softens the
           card's own ink instead. Dark does the same against the lime. */}
-      <span className="relative mt-auto text-[14px] font-normal leading-snug text-muted-foreground [[data-theme=light]_&]:text-[var(--v69-ink)]/65 [[data-theme=dark]_&]:text-[#1B1B1B]/65">
+      <span className="relative mt-auto text-[15px] font-normal leading-snug text-muted-foreground [[data-theme=light]_&]:text-[var(--v69-ink)]/65 [[data-theme=dark]_&]:text-[#1B1B1B]/65">
         No events today
       </span>
     </div>
@@ -1634,13 +1936,14 @@ function CardCaseStatus() {
       {/* Dark gallery only: a soft two-step shadow does the separating, so the
           inner card reads as sitting above the tile rather than being cut into
           it. Diffuse and low-contrast — a contact shadow plus a wide falloff, no
-          hard edge. */}
+          hard edge. Kept faint: at full strength the panel read as lifted off
+          the card by an inch, which is more depth than a cover needs. */}
       {/* Light only: the inner panel is milled into the card rather than laid on
           it — a shadow ring just inside its perimeter, a hairline of light along
           the top edge, and no drop at all, since a contact shadow is the thing
           that makes a panel read as sitting on top of a surface rather than sunk
           into one. Felt more than seen. */}
-      <div className="absolute inset-0 [.template-mock_&]:inset-3 [.template-mock_&]:overflow-hidden [.template-mock_&]:rounded-2xl [[data-theme=dark]_.template-mock_&]:bg-[#323232] [[data-theme=dark]_.template-mock_&]:shadow-[0_2px_6px_rgba(0,0,0,0.4),0_16px_34px_-16px_rgba(0,0,0,0.7)]">
+      <div className="absolute inset-0 [.template-mock_&]:inset-3 [.template-mock_&]:overflow-hidden [.template-mock_&]:rounded-2xl [[data-theme=dark]_.template-mock_&]:bg-[#323232] [[data-theme=dark]_.template-mock_&]:shadow-[0_1px_3px_rgba(0,0,0,0.22),0_10px_24px_-16px_rgba(0,0,0,0.4)]">
         {/* Brand gradient fills the space behind the folder's top (templates only).
             It stops just below the fold instead of running the full panel: with a
             pale fill behind the folder front, every edge where the panel's rounded
@@ -1652,7 +1955,14 @@ function CardCaseStatus() {
         <div
           aria-hidden
           className="absolute inset-x-0 top-0 hidden h-[46%] [.template-mock_&]:block"
-          style={{ background: brandWash(135) }}
+          // The sprayed artwork over the wash, the same treatment the content
+          // approval cover's preview runs: the dither is what makes the colour read
+          // as a rendered surface rather than as a CSS ramp. The spray has no ground
+          // of its own, so the wash under it supplies the diagonal hue direction and
+          // shows through between the specks.
+          style={{
+            background: `url("/images/spray-cover.svg") center / cover no-repeat, ${brandWash(135)}`,
+          }}
         />
         {/* The viewport matches the card exactly and the OVERSHOOT does the
             covering: overflow-visible lets the path's out-of-viewBox edges paint
@@ -1693,10 +2003,10 @@ function CardCaseStatus() {
           />
         </svg>
         <div className="absolute left-4 top-[41%] leading-tight">
-          <div className="text-[14px] font-normal text-white [.template-mock_&]:text-[var(--v69-ink)]">
+          <div className="text-[15px] font-normal text-white [.template-mock_&]:text-[var(--v69-ink)]">
             Case status
           </div>
-          <div className="text-[12px] font-normal text-neutral-400 [.template-mock_&]:text-muted-foreground">
+          <div className="text-[13px] font-normal text-neutral-400 [.template-mock_&]:text-muted-foreground">
             In review
           </div>
         </div>
@@ -1736,14 +2046,35 @@ function CardCaseStatus() {
 // panel below matches its padding and depth. Hierarchy runs
 // message → thread → metadata.
 
-// Dark-mode tints for the thread's participant discs, matching the seen-by
-// stack in CardCommsApp: light mode's solid ink discs read fine there, but in
-// dark mode ink is white, so three white dots sat on the panel with no
-// identity. Tints are set as a variable and only consumed under data-theme=dark.
+// Tints for the thread's participant discs, the same treatment the seen-by stack
+// in CardCommsApp runs — the two cards sit in the same rail and now read as one
+// component family. Both themes take them: light used to fill the discs with solid
+// ink, which put three near-black dots on a near-white panel, and hold each one on
+// a 1.5px ring in the shared well token — a value that no longer matched the panel
+// behind it, so the ring read as an outline drawn around every avatar rather than
+// as the gap between them. The tints separate themselves, so there is no ring in
+// either theme now.
+// Light runs the stack monotone — the tints are for telling four discs apart,
+// and on the pale card three hues in a row read as a colour accent the card
+// hasn't earned. Dark keeps them: there the neutral ladder collapses. Each disc
+// also takes a ring in its own surface's colour, so an overlap reads as one disc
+// in front of another rather than two shapes fused at the edge.
 const THREAD_PEOPLE = [
-  { initial: "A", tint: "color-mix(in srgb, #7DA4FF 52%, #ffffff)" },
-  { initial: "M", tint: "color-mix(in srgb, #C4DE7A 56%, #ffffff)" },
-  { initial: "T", tint: "color-mix(in srgb, #A9C3E4 62%, #ffffff)" },
+  {
+    initial: "AE",
+    tint: "color-mix(in srgb, #7DA4FF 52%, #ffffff)",
+    mono: "#DEDED6",
+  },
+  {
+    initial: "MA",
+    tint: "color-mix(in srgb, #C4DE7A 56%, #ffffff)",
+    mono: "#D2D2C9",
+  },
+  {
+    initial: "TR",
+    tint: "color-mix(in srgb, #A9C3E4 62%, #ffffff)",
+    mono: "#C6C6BC",
+  },
 ];
 
 function CardDiscussion() {
@@ -1753,7 +2084,7 @@ function CardDiscussion() {
         {/* Dark gives the sender a tinted disc like the thread's participants,
             using the one seen-by tint they don't take, so it reads as a person
             rather than as an empty hole in the card. */}
-        <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--v69-well)] text-[10px] font-normal text-[var(--v69-ink)] [[data-theme=dark]_&]:bg-[color-mix(in_srgb,#E7E7DE_88%,#ffffff)] [[data-theme=dark]_&]:text-[#262626]">
+        <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--v69-well)] text-[11px] font-normal text-[var(--v69-ink)] [[data-theme=dark]_&]:bg-[color-mix(in_srgb,#E7E7DE_88%,#ffffff)] [[data-theme=dark]_&]:text-[#262626]">
           KM
         </div>
         {/* Shimmer: a single diagonal sheen across the bubble, as if a light
@@ -1785,28 +2116,31 @@ function CardDiscussion() {
           the card face there, so the panel sank into it. */}
       <div className="rounded-2xl bg-[var(--v69-well)] px-3.5 py-3 [[data-theme=light]_&]:bg-[color-mix(in_srgb,#ffffff_28%,var(--v69-well))] [[data-theme=light]_&]:ring-1 [[data-theme=light]_&]:ring-black/[0.04] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.12)] [[data-theme=dark]_&]:ring-1 [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.2)]">
         <div className="flex items-center justify-between">
-          <span className="text-[12.5px] font-normal text-[var(--v69-ink)]">
+          {/* A step down where the cover is framed at size. See MOCK_UPSCALED. */}
+          <span
+            className={`text-[13px] font-normal text-[var(--v69-ink)] ${MOCK_UPSCALED_BODY}`}
+          >
             Launch timeline
           </span>
         </div>
         <div className="mt-2.5 flex items-center gap-2">
-          {/* In light mode these are all the same ink fill, so they need a
-              hairline separator in the panel colour; the dark-mode tints
-              separate themselves, so the ring comes off there. */}
-          <div className="flex -space-x-1.5">
-            {THREAD_PEOPLE.map(({ initial, tint }) => (
+          <div className="flex -space-x-0.5">
+            {THREAD_PEOPLE.map(({ initial, tint, mono }) => (
               <span
                 key={initial}
-                style={{ "--tint": tint } as React.CSSProperties}
-                className="flex size-[18px] items-center justify-center rounded-full bg-[var(--v69-ink)] text-[7px] text-[var(--v69-well)] ring-[1.5px] ring-[var(--v69-well)] [[data-theme=dark]_&]:bg-[var(--tint)] [[data-theme=dark]_&]:text-[#262626] [[data-theme=dark]_&]:ring-0"
+                style={
+                  {
+                    "--av": tint,
+                    "--av-mono": mono,
+                  } as React.CSSProperties
+                }
+                className="flex size-[26px] items-center justify-center rounded-full bg-[var(--av)] text-[8px] text-[#262626] [[data-theme=light]_&]:bg-[var(--av-mono)] border-2 border-transparent [[data-theme=light]_&]:border-[color-mix(in_srgb,#ffffff_28%,var(--v69-well))]"
               >
                 {initial}
               </span>
             ))}
           </div>
-          <span className="text-[10.5px] text-muted-foreground">
-            20 replies
-          </span>
+          <span className="text-[11px] text-muted-foreground">20 replies</span>
         </div>
       </div>
     </div>
@@ -1845,14 +2179,17 @@ function CardMarkup() {
         className="absolute right-[16%] top-[30%] size-8 rounded-full rounded-bl-[5px] bg-[rgba(255,255,255,0.2)] shadow-[inset_0_1px_0_rgba(255,255,255,0.5),inset_1px_0_0_rgba(255,255,255,0.32),inset_0_-1px_0_rgba(255,255,255,0.14),0_1px_3px_rgba(16,24,40,0.07)]"
       />
 
-      {/* The composer, floated over the file on its own contact shadow — the one
-          elevated thing on the card, since it is the only part that isn't the
-          document. */}
-      <div className="relative flex items-center gap-2 rounded-full bg-[var(--v69-card)] py-1.5 pl-4 pr-1.5 shadow-[0_1px_2px_rgba(16,24,40,0.10),0_8px_20px_-8px_rgba(16,24,40,0.28)] [[data-theme=dark]_.template-mock_&]:bg-[#F7F7F5]">
+      {/* The composer sits flat on the file. It used to float on a contact shadow
+          as the one elevated thing on the card, but a cast shadow on a pale pill
+          over a bright wash only muddies the wash under it — the pill's own value
+          is already a clear step off the artwork. */}
+      {/* The send square gets the same air on its right as the field's type has
+          on its left — at the pill's own vertical padding it sat on the edge. */}
+      <div className="relative flex items-center gap-2 rounded-full bg-[var(--v69-card)] py-1.5 pl-4 pr-3 [[data-theme=dark]_.template-mock_&]:bg-[#F7F7F5]">
         <span aria-hidden className="h-3.5 w-px bg-[#7DA4FF]" />
         {/* The field sits on the artwork in both themes, so its type is pinned to
             the light ink rather than following the skin. */}
-        <span className="text-[12px] font-normal text-[#101828]/45">
+        <span className="text-[13px] font-normal text-[#101828]/45">
           Add a comment
         </span>
         {/* Squarish rather than round: the pill it sits in is already a full
@@ -1884,7 +2221,7 @@ function CardResourceLibrary() {
   return (
     <div className="flex h-full flex-col bg-[var(--v69-card)] p-4">
       <div>
-        <div className="text-[14px] font-normal leading-none text-[var(--v69-ink)]">
+        <div className="text-[15px] font-normal leading-none text-[var(--v69-ink)]">
           Brand guides
         </div>
         <div className="mt-1 text-[11px] font-normal text-muted-foreground">
@@ -1931,72 +2268,67 @@ function CardResourceLibrary() {
 // the day's tasks, each a thumbnail, title, time range, and a duration pill.
 // Monochrome; the panel separates from the light-gray card by brightness.
 function CardTodo() {
+  // Three rows: with the list running the whole card rather than a panel inset
+  // into it, two left most of the square empty.
   const tasks = [
     { title: "Design review", time: "3:00 – 3:30 pm" },
     { title: "Client call", time: "4:00 – 6:00 pm" },
-    { title: "Send recap", time: "6:30 – 7:00 pm" },
+    { title: "Send recap", time: "6:15 – 6:45 pm" },
   ];
   return (
-    // Narrower side gutters than the rest of the card's padding: the panel used to
-    // run to within a hair of the card's edge, which left the rows floating in more
-    // width than three short titles need.
-    <div className="flex h-full flex-col justify-center bg-[var(--v69-well)] px-5 py-3 [[data-theme=light]_&]:bg-[var(--v69-card)]">
-      {/* The panel has to be a step *up* from the ground in both skins. Light's
-          --v69-card is the same F5F5F0 the outer ground uses there, so it needs
-          its own near-white fill; dark lifts by a white wash, which lands the
-          same step over either dark ground (hero rail or templates page) without
-          hard-coding a value per context. The wash is literal rgba: the dark mock
-          skin flips --color-white to near-black, so bg-white/x was darkening the
-          panel to within a level of the ground and the two merged. */}
-      <div className="flex flex-col overflow-hidden rounded-2xl bg-[var(--v69-card)] [[data-theme=light]_&]:bg-[#FCFCF8] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.08)]">
-        {/* A filled bar across the head of the panel rather than a tag floating
-            above a rule: it takes a lighter step than the panel itself in both
-            themes, so the list reads as content held under a header. Its fill and
-            the hairline under it are literal rgba — the mock's dark skin remaps
-            --color-white, so white/x would go dark here. */}
-        <div className="flex items-center px-3.5 py-2.5 [[data-theme=light]_&]:bg-[#FFFFFF] [[data-theme=light]_&]:shadow-[inset_0_-1px_0_rgba(16,24,40,0.06)] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.10)] [[data-theme=dark]_&]:shadow-[inset_0_-1px_0_rgba(255,255,255,0.10)]">
-          <span className="text-[11px] font-normal leading-none text-muted-foreground">
-            To do
-          </span>
-        </div>
-        <div className="flex flex-col gap-4 p-3.5">
-          {tasks.map((t) => (
-            <div key={t.title} className="flex items-center gap-3">
-              {/* The thumbnails carry the image mark the other galleries use, so
+    // The list owns the square. It used to sit on a panel inset into the card,
+    // which is a card inside a card: two rounded surfaces and two edges for one
+    // list. The header rule is the only division left, and it runs edge to edge.
+    <div className="flex h-full flex-col bg-[var(--v69-card)]">
+      {/* The head is a rule, not a bar. With no panel under it a filled strip
+          would be the one shaded block on the card and read as a leftover
+          fragment of the surface that used to be there. The hairline is literal
+          rgba because the mock's dark skin remaps --color-white. */}
+      <div className="flex items-center px-4 py-3.5 shadow-[inset_0_-1px_0_rgba(16,24,40,0.06)] [[data-theme=dark]_&]:shadow-[inset_0_-1px_0_rgba(255,255,255,0.10)]">
+        <span className="text-[11px] font-normal leading-none text-muted-foreground">
+          To do
+        </span>
+      </div>
+      {/* Top-aligned under the header, the way a list is read. Centred in the
+          leftover height, the rows floated in the middle of the square with a
+          band of empty card above and below them. */}
+      <div className="flex flex-col gap-6 p-4">
+        {tasks.map((t) => (
+          <div key={t.title} className="flex items-center gap-3">
+            {/* The thumbnails carry the image mark the other galleries use, so
                   an empty square reads as a picture yet to load rather than as a
                   blank swatch. */}
-              {/* Light only: the shared well-2 step is the heaviest thing on a
+            {/* Light only: the shared well-2 step is the heaviest thing on a
                   near-white panel, so the three squares read as grey weight
                   rather than as placeholders. Dark is untouched. */}
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--v69-well-2)] [[data-theme=light]_&]:bg-[#EAEAE2]">
-                <svg
-                  viewBox="0 0 24 24"
-                  className="size-[18px] text-[var(--v69-ink)]/30"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  aria-hidden
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="3" />
-                  <circle cx="8.5" cy="8.5" r="1.6" />
-                  <path
-                    d="M21 14l-4.5-4.5L6 20"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--v69-well-2)] [[data-theme=light]_&]:bg-[#EAEAE2]">
+              <svg
+                viewBox="0 0 24 24"
+                className="size-[18px] text-[var(--v69-ink)]/30"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                aria-hidden
+              >
+                <rect x="3" y="3" width="18" height="18" rx="3" />
+                <circle cx="8.5" cy="8.5" r="1.6" />
+                <path
+                  d="M21 14l-4.5-4.5L6 20"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-[13px] font-normal leading-tight text-[var(--v69-ink)]">
+                {t.title}
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="truncate text-[13px] font-normal leading-tight text-[var(--v69-ink)]">
-                  {t.title}
-                </div>
-                <div className="mt-0.5 text-[11px] font-normal leading-tight text-muted-foreground">
-                  {t.time}
-                </div>
+              <div className="mt-0.5 text-[11px] font-normal leading-tight text-muted-foreground">
+                {t.time}
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -2010,7 +2342,7 @@ function CardTodo() {
 function CardCommunityQA() {
   return (
     <div className="flex h-full flex-col bg-[var(--v69-card)] p-4">
-      <p className="text-[16px] font-normal leading-snug text-[var(--v69-ink)]">
+      <p className="text-[15px] font-normal leading-snug text-[var(--v69-ink)]">
         How do I reset a client&rsquo;s portal password?
       </p>
       <span className="mt-2 text-[11px] font-normal text-muted-foreground">
@@ -2032,6 +2364,42 @@ function CardCommunityQA() {
           />
         </svg>
         Write a response
+      </div>
+    </div>
+  );
+}
+
+// Jargon quest — the glossary as the game it is: one term up top, the round it
+// belongs to under it, and the answer the client picks as the card's one
+// action. Built on the community Q&A card's composition (a statement over a
+// full-width pill) because the two are the same shape of thing — a prompt and
+// the one thing to do about it — but the words are this template's own: it was
+// showing a support question, which is a different app.
+function CardJargonQuest() {
+  return (
+    <div className="flex h-full flex-col bg-[var(--v69-card)] p-3">
+      {/* The round is milled into the card rather than printed on it, so the
+          question and its action read as one recessed panel and the pill sits
+          inside that surface instead of floating over the face. */}
+      <div className="v69-inset-well flex h-full flex-col rounded-[14px] p-3.5">
+        <p className="text-[15px] font-normal leading-snug text-[var(--v69-ink)]">
+          What does &ldquo;retainer&rdquo; mean?
+        </p>
+        {/* The round as the rail's own unit tag — same chip, mono face and caps as
+            TICKETS / OPEN / DRAFT — so the one piece of metadata on this card is
+            set the way metadata is set everywhere else on the rail. */}
+        <span className={`mt-2 self-start ${MOCK_UNIT_TAG}`} style={MOCK_MONO}>
+          Round 2 of 5
+        </span>
+        {/* On the gallery's dark face the full ink token read as a lit bar across
+            the card, so the pill takes the held-back INK_SOLID step (70% ink) the
+            rail's other solid CTAs use. Light runs it monochrome on the card's own
+            ink, the way the site's primary button does in that skin — the brand
+            periwinkle was the only hue on an otherwise neutral card and pulled
+            harder than the question above it. */}
+        <div className="mt-auto flex h-10 w-full items-center justify-center rounded-full bg-[#262626] text-[13px] font-normal text-white [.template-mock_&]:bg-[color-mix(in_srgb,var(--v69-ink)_70%,transparent)] [[data-theme=light]_&]:bg-[#262626] [[data-theme=light]_&]:text-[rgba(255,255,255,0.95)] [[data-theme=light]_.template-mock_&]:bg-[#262626] [[data-theme=dark]_&]:bg-[#D9ED92] [[data-theme=dark]_&]:text-[#1B1B1B] [[data-theme=dark]_.template-mock_&]:bg-[#D9ED92] [[data-theme=dark]_.template-mock_&]:text-[#1B1B1B]">
+          Submit answer
+        </div>
       </div>
     </div>
   );
@@ -2100,7 +2468,7 @@ function CardVoiceAI() {
         // no offset to speak of. It used to carry four lit edges, an inner glow
         // and a 26px falloff, which lifted it off the frame like a tile laid on
         // top; the recess should only be noticeable close up.
-        className={`relative flex flex-1 flex-col overflow-hidden rounded-[20px] border border-transparent bg-[var(--v69-well)] px-4 pb-4 pt-3 [[data-theme=light]_&]:bg-[rgba(247,247,243,0.88)] [[data-theme=light]_&]:backdrop-blur-[6px] [[data-theme=light]_&]:ring-1 [[data-theme=light]_&]:ring-white/50 [[data-theme=light]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.9),inset_0_-1px_0_rgba(255,255,255,0.45),inset_0_7px_14px_-9px_rgba(16,24,40,0.1),0_1px_2px_rgba(16,24,40,0.05),0_10px_24px_-14px_rgba(16,24,40,0.2)] [[data-theme=dark]_&]:border-white/[0.07] [[data-theme=dark]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.09),inset_0_0_0_1px_rgba(0,0,0,0.3),inset_0_8px_14px_-14px_rgba(0,0,0,0.55),0_1px_1px_rgba(0,0,0,0.3)] [[data-theme=dark]_.template-mock_&]:border-white/[0.1]`}
+        className={`relative flex flex-1 flex-col overflow-hidden rounded-[20px] border border-transparent bg-[var(--v69-well)] px-4 pb-4 pt-3 [[data-theme=light]_&]:bg-[rgba(247,247,243,0.88)] [[data-theme=light]_&]:backdrop-blur-[6px] [[data-theme=light]_&]:ring-1 [[data-theme=light]_&]:ring-[rgba(255,255,255,0.22)] [[data-theme=light]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.18),inset_0_-1px_0_rgba(255,255,255,0.14),inset_0_7px_14px_-9px_rgba(16,24,40,0.1),0_1px_2px_rgba(16,24,40,0.05),0_10px_24px_-14px_rgba(16,24,40,0.2)] [[data-theme=dark]_&]:border-white/[0.07] [[data-theme=dark]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.09),inset_0_0_0_1px_rgba(0,0,0,0.3),inset_0_8px_14px_-14px_rgba(0,0,0,0.55),0_1px_1px_rgba(0,0,0,0.3)] [[data-theme=dark]_.template-mock_&]:border-white/[0.1]`}
       >
         {/* Dark-only: the panel as a piece of smoked glass seated in the frame.
             The blurred well-2 bloom that used to sit here read as haze behind
@@ -2124,10 +2492,10 @@ function CardVoiceAI() {
             left edge stays fully opaque: the start of a recording isn't
             trailing off, and any ramp there just dimmed the first bars. */}
         <div
-          // Pulls out of the panel's px-4 so the waveform starts a few px off
-          // the recessed face's edge — the full inset read as a wide gutter
-          // against the trailing edge, which has no padding of its own.
-          className="relative -ml-3 mt-8 flex h-[68px] items-center gap-[3px]"
+          // Cancels the panel's px-4 exactly, so the first bar starts flush with
+          // the recessed face's edge. Any inset here read as a gutter, since the
+          // trailing edge has no padding of its own to balance it.
+          className="relative -ml-4 mt-8 flex h-[68px] items-center gap-[3px]"
           style={{
             WebkitMaskImage:
               "linear-gradient(90deg, #000 0%, #000 92%, transparent 100%)",
@@ -2151,6 +2519,11 @@ function CardVoiceAI() {
             className="block shrink-0"
           >
             {bars.map((h, i) => {
+              // The bar sitting on the panel's edge is dropped, so the wave starts
+              // a pitch in. Flush, it read as a rule down the side of the panel
+              // rather than as the first sample of the recording. The rest keep
+              // their own x, so nothing shifts to fill the space.
+              if (i === 0) return null;
               const barH = (WAVE_H * h) / 100;
               return (
                 <rect
@@ -2172,7 +2545,10 @@ function CardVoiceAI() {
             chrome sitting in the middle of an otherwise calm waveform. */}
 
         <div className="relative mt-auto flex items-center justify-center">
-          <span className="text-[19px] leading-none tabular-nums text-[var(--v69-ink)]">
+          {/* Light holds the timecode and the glyph back off full ink. At #262626
+              on a near-white panel they were the two darkest marks on the card and
+              took the eye before the waveform, which is what the cover is of. */}
+          <span className="text-[19px] leading-none tabular-nums text-[var(--v69-ink)] [[data-theme=light]_&]:text-[#4E4F46]">
             00:17:56
           </span>
         </div>
@@ -2183,10 +2559,10 @@ function CardVoiceAI() {
               flips to the dark ground there — near-white bars on lime had no
               contrast left. Flat fill, no ramp or lip: the moulded treatment
               read as a 3D button against an otherwise matte panel. */}
-          {/* Light lifts the control off the recessed face: a highlight along
-              its top edge, a contact shadow, and a wider soft falloff — the
-              opposite direction of travel from the trough above it. */}
-          <div className="flex h-9 w-28 items-center justify-center rounded-full bg-[var(--v69-card)] [[data-theme=light]_&]:bg-white/85 [[data-theme=light]_&]:backdrop-blur-[6px] [[data-theme=light]_&]:ring-1 [[data-theme=light]_&]:ring-black/[0.04] [[data-theme=light]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_1px_2px_rgba(16,24,40,0.08),0_6px_14px_-6px_rgba(16,24,40,0.18)] [[data-theme=dark]_&]:bg-[#D9ED92]">
+          {/* Light keeps only the highlight along its top edge and its hairline —
+              the cast shadow under it made the control read as a raised object
+              floating over the panel rather than as part of it. */}
+          <div className="flex h-9 w-28 items-center justify-center rounded-full bg-[var(--v69-card)] [[data-theme=light]_&]:bg-[rgba(255,255,255,0.85)] [[data-theme=light]_&]:backdrop-blur-[6px] [[data-theme=light]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.95)] [[data-theme=dark]_&]:bg-[#D9ED92]">
             {/* One SVG rather than two divs: the gallery scales these mocks by a
                 fractional factor, and Chrome pixel-snaps element boxes, so the
                 two bars rounded to different widths. SVG geometry antialiases
@@ -2197,7 +2573,7 @@ function CardVoiceAI() {
               viewBox="0 0 12 14"
               fill="currentColor"
               aria-hidden
-              className="text-[var(--v69-ink)] [[data-theme=dark]_&]:text-[#1B1B1B]"
+              className="text-[var(--v69-ink)] [[data-theme=light]_&]:text-[#4E4F46] [[data-theme=dark]_&]:text-[#1B1B1B]"
             >
               <rect x="0" y="0" width="3" height="14" rx="1.5" />
               <rect x="9" y="0" width="3" height="14" rx="1.5" />
@@ -2223,8 +2599,9 @@ function CardDeliverable({
   delta = "+3",
 }: {
   heading?: string;
-  label?: string;
-  value?: string;
+  // null on both drops the stat block, leaving the panel as plain artwork.
+  label?: string | null;
+  value?: string | null;
   // null drops the pill entirely — the resource library counts guides read, which
   // has no week-on-week delta worth showing.
   delta?: string | null;
@@ -2245,8 +2622,15 @@ function CardDeliverable({
           neutral bloom that used to sit in the bottom corner is gone with the flat
           fill it was there to lift; over a ramp it read as a smudge. */}
       <div
-        className="relative flex flex-1 flex-col justify-end overflow-hidden rounded-2xl bg-[image:var(--v69-panel-wash)] p-3.5 [--muted-foreground:#3F444C] [[data-theme=light]_&]:ring-1 [[data-theme=light]_&]:ring-black/[0.06] [[data-theme=dark]_&]:[--v69-card:#F7F7F2] [[data-theme=dark]_&]:[--v69-ink:#262626] [[data-theme=dark]_&]:[--v69-well:#F7F7F2]"
-        style={{ "--v69-panel-wash": brandWash(0) } as React.CSSProperties}
+        className="relative flex flex-1 flex-col justify-end overflow-hidden rounded-2xl p-3.5 [--muted-foreground:#3F444C] [[data-theme=dark]_&]:[--v69-card:#F7F7F2] [[data-theme=dark]_&]:[--v69-ink:#262626] [[data-theme=dark]_&]:[--v69-well:#F7F7F2]"
+        // Sprayed, like the case-status cover, but on its own artwork: the panel
+        // is one long blend rather than stacked bands, so it takes the coarse
+        // two-hue spatter (spray-panel.svg) instead of the cover's fine dust.
+        // The spray has no ground, so the wash under it still supplies the
+        // lime-to-periwinkle direction and shows through between the specks.
+        style={{
+          background: `url("/images/spray-panel.svg") center / cover no-repeat, ${brandWash(0)}`,
+        }}
       >
         <span className="absolute right-3 top-3 flex size-7 items-center justify-center rounded-full bg-[var(--v69-ink)] text-[var(--v69-well)]">
           <svg
@@ -2260,19 +2644,23 @@ function CardDeliverable({
             <path d="M8 3v10M3 8h10" strokeLinecap="round" />
           </svg>
         </span>
-        <span className="relative text-[11px] font-normal text-muted-foreground">
-          {label}
-        </span>
-        <div className="relative mt-1 flex items-end gap-2">
-          <span className="text-[34px] font-normal leading-none tracking-tight tabular-nums text-[var(--v69-ink)]">
-            {value}
+        {label ? (
+          <span className="relative text-[11px] font-normal text-muted-foreground">
+            {label}
           </span>
-          {delta ? (
-            <span className="mb-1 rounded-full bg-[var(--v69-card)] px-2 py-0.5 text-[11px] font-normal text-[var(--v69-ink)]">
-              {delta}
+        ) : null}
+        {value ? (
+          <div className="relative mt-1 flex items-end gap-2">
+            <span className="text-[34px] font-normal leading-none tracking-tight tabular-nums text-[var(--v69-ink)]">
+              {value}
             </span>
-          ) : null}
-        </div>
+            {delta ? (
+              <span className="mb-1 rounded-full bg-[var(--v69-card)] px-2 py-0.5 text-[11px] font-normal text-[var(--v69-ink)]">
+                {delta}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </div>
   );
@@ -2311,16 +2699,14 @@ function CardDataRoom() {
       // colour changed with the theme. It now runs the light treatment, so the
       // three text tokens that invert in dark are pinned back to their light
       // values here — otherwise white type landed on the pale columns.
-      // Dark only, and only depth: the columns are extruded from the lime rather
-      // than laid on it — light from the top-left, so the highlight sits on that
-      // side and the ambient shadow gathers at the bottom-right, plus a shallow
-      // bevel around the edge so each one reads as sculpted into the face. The
-      // labels and figures are children, so the bevel passes under them and they
-      // stay perfectly flat. Light is untouched.
+      // Dark gives the columns one soft ambient shadow and nothing else. They used
+      // to carry lit lips on the top and left, dark ones opposite, and a white
+      // outer glow up-left — a full extrusion, which on a saturated face read as
+      // glass with bright reflections down its edges rather than as two panels.
       // Dark swaps the lime face for the brand blue, so this card carries the
       // cooler hue there while light keeps the lime. The column wash is mixed
       // from whichever face is active, so the two stay in step.
-      className="flex h-full flex-col bg-[#D9ED92] p-3.5 [--v69-card:color-mix(in_srgb,#ffffff_60%,#D9ED92)] [--v69-inner:color-mix(in_srgb,#ffffff_60%,#D9ED92)] [[data-theme=dark]_&]:bg-[#7DA4FF] [[data-theme=dark]_&]:[--v69-card:color-mix(in_srgb,#ffffff_60%,#7DA4FF)] [[data-theme=dark]_&]:[--v69-inner:color-mix(in_srgb,#ffffff_60%,#7DA4FF)] [&_[data-slot=engagement-bar]]:border-0 [[data-theme=dark]_.template-mock_&_[data-slot=engagement-bar]]:border-0 [[data-theme=dark]_&]:[--muted-foreground:#6b7079] [[data-theme=dark]_&]:[--v69-ink:#262626] [[data-theme=dark]_&_[data-slot=engagement-bar]]:shadow-[inset_0_1px_0_rgba(255,255,255,0.8),inset_1px_0_0_rgba(255,255,255,0.5),inset_-1px_0_0_rgba(16,24,40,0.05),inset_0_-1px_0_rgba(16,24,40,0.07),-3px_-3px_8px_-4px_rgba(255,255,255,0.55),3px_5px_12px_-5px_rgba(16,24,40,0.22)] [[data-theme=dark]_&_[data-slot=engagement-hatch]]:bg-[repeating-linear-gradient(45deg,rgba(16,24,40,0.035)_0,rgba(16,24,40,0.035)_1.5px,transparent_1.5px,transparent_9px)]"
+      className="flex h-full flex-col bg-[#D9ED92] p-3.5 [--v69-card:color-mix(in_srgb,#ffffff_60%,#D9ED92)] [--v69-inner:color-mix(in_srgb,#ffffff_60%,#D9ED92)] [[data-theme=dark]_&]:bg-[#7DA4FF] [[data-theme=dark]_&]:[--v69-card:color-mix(in_srgb,#ffffff_60%,#7DA4FF)] [[data-theme=dark]_&]:[--v69-inner:color-mix(in_srgb,#ffffff_60%,#7DA4FF)] [&_[data-slot=engagement-bar]]:border-0 [[data-theme=dark]_.template-mock_&_[data-slot=engagement-bar]]:border-0 [[data-theme=dark]_&]:[--muted-foreground:#6b7079] [[data-theme=dark]_&]:[--v69-ink:#262626] [[data-theme=dark]_&_[data-slot=engagement-bar]]:shadow-[0_2px_8px_-4px_rgba(16,24,40,0.16)] [[data-theme=dark]_&_[data-slot=engagement-hatch]]:bg-[repeating-linear-gradient(45deg,rgba(16,24,40,0.035)_0,rgba(16,24,40,0.035)_1.5px,transparent_1.5px,transparent_9px)]"
     >
       <div className="flex flex-1 items-end gap-2.5">
         {bars.map((b, i) => (
@@ -2447,10 +2833,10 @@ function CardProgressTracker() {
           <span className="text-[52px] font-normal tracking-tight tabular-nums text-[var(--v69-ink)]">
             {TRACKER_DONE}
           </span>
-          <span className="mt-2.5 text-[14px] font-normal text-muted-foreground">
+          <span className="mt-2.5 text-[15px] font-normal text-muted-foreground">
             stages
           </span>
-          <span className="mt-9 text-[14px] font-normal tabular-nums text-[var(--v69-ink)]">
+          <span className="mt-9 text-[15px] font-normal tabular-nums text-[var(--v69-ink)]">
             {TRACKER_STAGES}
             <span className="text-muted-foreground"> total</span>
           </span>
@@ -2486,10 +2872,12 @@ function CardMassMessenger() {
           No cast shadow: the pill is already the highest-contrast thing on the
           card, and a shadow under it read as a lifted sticker. */}
       <div
-        className={`flex h-16 w-full items-center gap-3 rounded-full bg-[var(--v69-ink)] pl-2 pr-5 text-[14px] font-normal ${ON_INK} [[data-theme=light]_&]:bg-[#FBFBF7] [[data-theme=light]_&]:text-[#262626]`}
+        className={`flex h-16 w-full items-center gap-3 rounded-full bg-[var(--v69-ink)] pl-2 pr-5 text-[15px] font-normal ${ON_INK} [[data-theme=light]_&]:bg-[#FBFBF7] [[data-theme=light]_&]:text-[#262626]`}
       >
+        {/* Flat, with no lit rim — the badge is a face on the pill, not a raised
+            button on it. */}
         <span
-          className={`flex size-12 shrink-0 items-center justify-center rounded-full text-[#262626] shadow-[inset_0_1px_0_rgba(255,255,255,0.6)] ${SEND_BADGE}`}
+          className={`flex size-12 shrink-0 items-center justify-center rounded-full text-[#262626] ${SEND_BADGE}`}
         >
           <svg
             viewBox="0 0 24 24"
@@ -2515,27 +2903,48 @@ function CardMassMessenger() {
 // card's edges, after the stock-app reference. The four labelled stage bars it
 // replaced spent the whole card explaining the split, when what the cover has to
 // carry is that the number is going up.
-// Sampled monthly, y measured downward from the top of the plot: a climb with two
-// pullbacks in it, so the line reads as a real series rather than a swoosh.
-const PIPELINE_SERIES = [34, 30, 26, 29, 25, 31, 22, 18, 24, 20, 14, 16, 11, 13, 8, 6, 3];
+// Sampled monthly, y measured downward from the top of the plot. Three or four
+// months climbing, then one month that gives back most of the run, then the next
+// climb from a higher floor. The drawdowns are deliberately bigger than any single
+// up-month (about 5 against 3 to 4): a chart is read by its corrections, and many
+// small pullbacks instead of a few large ones just made the line look jagged.
+// A pipeline filling up over a quarter: y is measured from the top of the plot,
+// so falling numbers are a rising line. It climbs steadily, flattens twice where
+// deals sat in a stage, and accelerates through the last third.
+//
+// It used to run 36→33→30→27 then jump back to 32, four times over — a sawtooth.
+// Every leg fell by the same amount and every recovery spiked by the same amount,
+// which is what made the line read as scribbled by hand rather than plotted: real
+// series don't repeat an interval that exactly, and the eye picks the repetition
+// up immediately. The two pullbacks here are small and unequal, and nothing else
+// reverses.
+const PIPELINE_SERIES = [
+  34, 33, 31.5, 30.5, 28, 26.5, 26.8, 25, 22.5, 20, 20.5, 17.5, 14.5, 12, 10.5,
+  7, 4,
+];
 const PIPELINE_PLOT_W = 100;
 const PIPELINE_PLOT_H = 40;
 
-// Rounded-corner polyline rather than a fully smoothed curve: each leg is drawn
-// straight up to PIPELINE_CORNER of the way into the vertex, then a quadratic
-// turns the corner. At 0.5 this is plain midpoint smoothing, which rounded every
-// peak into the swoosh it started as; a third keeps the segments reading as
-// straight runs between real samples.
-const PIPELINE_CORNER = 0.33;
+// Rounded-corner polyline: each leg is drawn straight up to PIPELINE_CORNER of the
+// way into the vertex, then a quadratic turns the corner. 0.5 is plain midpoint
+// smoothing — every sample becomes a curve and no straight line survives.
+// 0.12 was the other extreme: the legs ran almost the whole segment and every one
+// of the seventeen samples landed as its own visible kink, which is half of why the
+// line read as drawn by hand. At 0.42 the turns are properly radiused while the
+// legs between them stay straight, so it plots rather than wobbles.
+const PIPELINE_CORNER = 0.42;
 
-function pipelineLinePath() {
+function pipelineLinePath(yOffset = 0) {
   const step = PIPELINE_PLOT_W / (PIPELINE_SERIES.length - 1);
-  const pt = (i: number) => [i * step, PIPELINE_SERIES[i]] as const;
+  const pt = (i: number) => [i * step, PIPELINE_SERIES[i] + yOffset] as const;
   // A point PIPELINE_CORNER of the way from sample `i` toward sample `j`.
   const toward = (i: number, j: number) => {
     const [ax, ay] = pt(i);
     const [bx, by] = pt(j);
-    return [ax + (bx - ax) * PIPELINE_CORNER, ay + (by - ay) * PIPELINE_CORNER] as const;
+    return [
+      ax + (bx - ax) * PIPELINE_CORNER,
+      ay + (by - ay) * PIPELINE_CORNER,
+    ] as const;
   };
   let d = `M ${pt(0)[0]} ${pt(0)[1]}`;
   for (let i = 1; i < PIPELINE_SERIES.length - 1; i += 1) {
@@ -2548,6 +2957,11 @@ function pipelineLinePath() {
 }
 
 const PIPELINE_LINE_D = pipelineLinePath();
+const PIPELINE_HIGHLIGHT_D = pipelineLinePath(-0.4);
+// The lit top edge: the same line lifted a fraction of a plot unit (~1.5px at the
+// size the cover renders) and drawn narrower, so it sits inside the top of the
+// stroke rather than beside it. Offsetting the geometry rather than transforming
+// the element keeps it correct under preserveAspectRatio="none".
 // The same line closed down the two ends to the foot of the plot, which is the
 // shape the fade fills.
 const PIPELINE_AREA_D = `${PIPELINE_LINE_D} L ${PIPELINE_PLOT_W} ${PIPELINE_PLOT_H} L 0 ${PIPELINE_PLOT_H} Z`;
@@ -2565,12 +2979,12 @@ function CardDealsPipeline() {
     >
       {/* The figure sits at the head of the card with the plot under it, so the
           number is read first and the line explains it. */}
-      <div className="flex items-baseline gap-2 px-5 pt-5">
+      <div className="flex items-center gap-2.5 px-5 pt-5">
         <span className="text-[42px] font-normal leading-none tracking-tight tabular-nums text-[var(--v69-ink)]">
           $248k
         </span>
-        <span className="text-[13px] font-normal text-muted-foreground">
-          open
+        <span className={MOCK_UNIT_TAG} style={MOCK_MONO}>
+          Open
         </span>
       </div>
       {/* The plot bleeds to the card's edges and past its foot — a chart cropped
@@ -2586,19 +3000,44 @@ function CardDealsPipeline() {
       >
         <defs>
           <linearGradient id={PIPELINE_GRADIENT_ID} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--pipe-line)" stopOpacity="0.30" />
+            <stop offset="0%" stopColor="var(--pipe-line)" stopOpacity="0.42" />
+            <stop
+              offset="55%"
+              stopColor="var(--pipe-line)"
+              stopOpacity="0.14"
+            />
             <stop offset="100%" stopColor="var(--pipe-line)" stopOpacity="0" />
           </linearGradient>
         </defs>
         <path d={PIPELINE_AREA_D} fill={`url(#${PIPELINE_GRADIENT_ID})`} />
+        {/* The line sits off the fill on a tight drop shadow rather than a glow:
+            a blur wide enough to read as light would haze the area under it, and
+            the point is weight, not luminance. CSS filter, not feDropShadow —
+            an SVG filter is in user space, which this viewBox scales unevenly. */}
         <path
           d={PIPELINE_LINE_D}
           fill="none"
           stroke="var(--pipe-line)"
-          strokeWidth="3.2"
+          strokeWidth="4.8"
           strokeLinecap="round"
           strokeLinejoin="round"
           vectorEffect="non-scaling-stroke"
+          className="[filter:drop-shadow(0_1px_1.5px_rgba(16,24,40,0.18))] [[data-theme=dark]_&]:[filter:drop-shadow(0_1.5px_2px_rgba(0,0,0,0.45))]"
+        />
+        {/* A specular running along the top of the stroke. Dark only: against a
+            near-black ground it's the light catching the line, but on light's
+            pale face it separated from the blue and read as a second white line
+            drawn over the first — most visibly at phone width, where the plot is
+            scaled widest. */}
+        <path
+          d={PIPELINE_HIGHLIGHT_D}
+          fill="none"
+          stroke="rgba(255,255,255,0.34)"
+          strokeWidth="1.2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+          className="[[data-theme=light]_&]:hidden"
         />
       </svg>
     </div>
@@ -2629,11 +3068,16 @@ function CardTicketing() {
         ]}
       />
 
-      {/* No unit tag: the dots above already say what is being counted, and the
-          label was the third thing in a card that only needs two. */}
-      <span className="text-[52px] font-normal leading-[0.78] tracking-tight tabular-nums text-[var(--v69-ink)]">
-        {TICKETS_RESOLVED + TICKETS_IN_PROGRESS + TICKETS_OPEN}
-      </span>
+      {/* The unit sits beside the figure, baseline-aligned to its foot rather than
+          pinned to the card's corner, so the two read as one measurement. */}
+      <div className="flex items-end gap-2">
+        <span className="text-[52px] font-normal leading-[0.78] tracking-tight tabular-nums text-[var(--v69-ink)]">
+          {TICKETS_RESOLVED + TICKETS_IN_PROGRESS + TICKETS_OPEN}
+        </span>
+        <span className={`mb-1 ${MOCK_UNIT_TAG}`} style={MOCK_MONO}>
+          Tickets
+        </span>
+      </div>
     </div>
   );
 }
@@ -2646,10 +3090,26 @@ function CardTicketing() {
 // identity, not emphasis — and every disc carries the same dark label, since
 // all four fills are light in both themes.
 const SEEN_BY = [
-  { initials: "AS", fill: "color-mix(in srgb, #7DA4FF 52%, #ffffff)" },
-  { initials: "JD", fill: "color-mix(in srgb, #C4DE7A 56%, #ffffff)" },
-  { initials: "MK", fill: "color-mix(in srgb, #A9C3E4 62%, #ffffff)" },
-  { initials: "LP", fill: "color-mix(in srgb, #7DA4FF 72%, #ffffff)" },
+  {
+    initials: "AS",
+    fill: "color-mix(in srgb, #7DA4FF 52%, #ffffff)",
+    mono: "#DEDED6",
+  },
+  {
+    initials: "JD",
+    fill: "color-mix(in srgb, #C4DE7A 56%, #ffffff)",
+    mono: "#D5D5CC",
+  },
+  {
+    initials: "MK",
+    fill: "color-mix(in srgb, #A9C3E4 62%, #ffffff)",
+    mono: "#CBCBC2",
+  },
+  {
+    initials: "LP",
+    fill: "color-mix(in srgb, #7DA4FF 72%, #ffffff)",
+    mono: "#C1C1B7",
+  },
 ];
 
 function CardCommsApp() {
@@ -2663,12 +3123,24 @@ function CardCommsApp() {
           colour the way its siblings do. Everything on it flips to the dark
           ground — the same move the calendar tile makes on its lime — since dark's
           near-white ink and grey secondary have no contrast left on the blue. */}
-      <div className="rounded-2xl bg-[var(--v69-well)] px-3.5 py-4 [[data-theme=light]_&]:bg-[color-mix(in_srgb,#ffffff_52%,var(--v69-well))] [[data-theme=light]_&]:ring-1 [[data-theme=light]_&]:ring-black/[0.04] [[data-theme=dark]_&]:bg-[#7DA4FF]">
+      {/* The announcement carries the card's one colour in both skins now — the
+          periwinkle it already wore in dark, mixed back toward white for light so
+          it sits at the weight the discussion card's lime bubble does rather than
+          as a saturated slab. Not the lime: these two covers sit side by side in
+          the rail, and the bubble is what tells the discussion card apart.
+          No hairline with a fill this definite; it only drew a box round it. The
+          corner is squarer than the thread panel's for the same reason it looks
+          rounder than it is: this is one short row, and a 16px radius on a block
+          this shallow turns the whole thing into a lozenge. */}
+      <div className="rounded-lg bg-[var(--v69-well)] px-3.5 py-3 [[data-theme=light]_&]:bg-[color-mix(in_srgb,#7DA4FF_58%,#ffffff)] [[data-theme=dark]_&]:bg-[#7DA4FF]">
         {/* No avatar on the title row: a one-letter disc next to the word
             "Announcement" said nothing the word didn't, and it was a third piece
             of chrome competing with the title. */}
         <div className="flex items-center gap-1.5">
-          <span className="text-[12px] font-normal text-[var(--v69-ink)] [[data-theme=dark]_&]:text-[#1B1B1B]">
+          {/* A step down where the cover is framed at size. See MOCK_UPSCALED. */}
+          <span
+            className={`text-[13px] font-normal text-[var(--v69-ink)] [[data-theme=dark]_&]:text-[#1B1B1B] ${MOCK_UPSCALED_BODY}`}
+          >
             Announcement
           </span>
           {/* The status pill is metadata, not a control: it loses its outline
@@ -2680,9 +3152,6 @@ function CardCommsApp() {
             Pinned
           </span>
         </div>
-        <p className="mt-2 text-[11px] font-normal leading-relaxed text-muted-foreground [[data-theme=dark]_&]:text-[#1B1B1B]/70">
-          All-hands Thursday at 10am.
-        </p>
       </div>
       <div className="flex">
         {/* Footer row, not a second card: it hugs the stack rather than sitting
@@ -2691,24 +3160,31 @@ function CardCommsApp() {
             loose, so there it takes a stronger wash and a hairline outline —
             both as literal rgba, since the dark mock skin flips --color-white to
             near-black and bg-white/x was darkening the pill, not lifting it. */}
-        <div className="inline-flex items-center gap-2 rounded-full bg-black/[0.03] py-1.5 pl-1.5 pr-2.5 [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.12)] [[data-theme=dark]_&]:ring-1 [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.2)] [[data-theme=light]_&]:bg-[#E7E7DE]">
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-black/[0.03] py-1 pl-1 pr-2 [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.12)] [[data-theme=dark]_&]:ring-1 [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.2)] [[data-theme=light]_&]:bg-[#E7E7DE]">
           {/* Deeper overlap so the four discs read as one group, but stopping
               short of the point where a neighbour clips the initials. No ring
               and no shadow: the 2px white ring read as a cut-out line drawn
               around every avatar, and a cast shadow only traded it for a smudge.
               The tints differ enough that a flat overlap separates them. */}
-          <div className="flex -space-x-1.5">
-            {SEEN_BY.map(({ initials, fill }) => (
+          <div className="flex -space-x-0.5">
+            {SEEN_BY.map(({ initials, fill, mono }) => (
               <span
                 key={initials}
-                className="flex size-7 items-center justify-center rounded-full text-[9px] font-normal text-[#262626]"
-                style={{ backgroundColor: fill }}
+                className="flex size-[30px] items-center justify-center rounded-full bg-[var(--av)] text-[9px] font-normal text-[#262626] [.template-mock_&]:size-[26px] [[data-theme=light]_&]:bg-[var(--av-mono)] border-2 border-transparent [[data-theme=light]_&]:border-[#E7E7DE]"
+                style={
+                  {
+                    "--av": fill,
+                    "--av-mono": mono,
+                  } as React.CSSProperties
+                }
               >
                 {initials}
               </span>
             ))}
           </div>
-          <span className="flex items-center gap-0.5 text-[11px] font-normal text-muted-foreground">
+          <span
+            className={`flex items-center gap-0.5 text-[11px] font-normal text-muted-foreground ${MOCK_UPSCALED_META}`}
+          >
             +3
             <svg
               viewBox="0 0 16 16"
@@ -2751,7 +3227,7 @@ const ASSISTANT_WAVE = [12, 26, 42, 54, 36, 22, 13];
 // Light gets the highlight only — the carve below it already darkens the lower
 // edge, and doubling that up turned the disc into a sphere.
 const DISC_LIGHT_KEY =
-  "radial-gradient(70% 70% at 32% 24%, rgba(255,255,255,0.34) 0%, rgba(255,255,255,0.1) 44%, rgba(255,255,255,0) 74%)";
+  "radial-gradient(70% 70% at 32% 24%, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.05) 44%, rgba(255,255,255,0) 74%)";
 // Dark keeps only what a machined face would show: the faintest wash off the top
 // left, and a darker pool through the middle of the dish.
 const DISC_DARK_KEY =
@@ -2766,7 +3242,7 @@ const DISC_DARK_CARVE =
 // Ripples out from the well, fading as they go — light only. The widest one sat
 // close enough to the disc's own edge that it read as an outline drawn around the
 // circle rather than as a ripple, so the set stops short of the rim.
-const DISC_RIPPLES = [{ size: 60, light: 0.07 }];
+const DISC_RIPPLES = [{ size: 60, light: 0.035 }];
 
 function CardAIAssistant() {
   return (
@@ -2785,7 +3261,7 @@ function CardAIAssistant() {
           className="pointer-events-none absolute inset-0 rounded-full [[data-theme=dark]_&]:hidden"
           style={{
             boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -1px 0 rgba(16,24,40,0.06), inset 0 8px 14px -8px rgba(16,24,40,0.09), inset 0 -10px 16px -10px rgba(16,24,40,0.11)",
+              "inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -1px 0 rgba(16,24,40,0.03), inset 0 8px 14px -8px rgba(16,24,40,0.045), inset 0 -10px 16px -10px rgba(16,24,40,0.055)",
           }}
         />
 
@@ -2805,7 +3281,7 @@ function CardAIAssistant() {
             what makes the surface read as covered rather than as raw material. */}
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-x-[12%] top-[6%] h-[26%] rounded-[50%] bg-[linear-gradient(180deg,rgba(255,255,255,0.28),rgba(255,255,255,0))] blur-[8px] [[data-theme=dark]_&]:bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0))]"
+          className="pointer-events-none absolute inset-x-[12%] top-[6%] h-[26%] rounded-[50%] bg-[linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0))] blur-[8px] [[data-theme=dark]_&]:bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0))]"
         />
 
         {DISC_RIPPLES.map((r) => (
@@ -2829,7 +3305,7 @@ function CardAIAssistant() {
             perimeter carve plus the darker middle already say concave. */}
         <span
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/2 size-[42%] -translate-x-1/2 -translate-y-1/2 rounded-full shadow-[inset_0_2px_4px_rgba(16,24,40,0.10),inset_0_-1px_0_rgba(255,255,255,0.9)] [[data-theme=dark]_&]:hidden"
+          className="pointer-events-none absolute left-1/2 top-1/2 size-[42%] -translate-x-1/2 -translate-y-1/2 rounded-full shadow-[inset_0_2px_4px_rgba(16,24,40,0.05),inset_0_-1px_0_rgba(255,255,255,0.4)] [[data-theme=dark]_&]:hidden"
         />
 
         {/* Halo behind the bars, so the waveform sits in its own light instead of
@@ -2837,17 +3313,20 @@ function CardAIAssistant() {
             shadow instead. */}
         <span
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/2 size-[54%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,0.5),rgba(255,255,255,0)_72%)] blur-[3px] [[data-theme=dark]_&]:bg-[radial-gradient(closest-side,rgba(255,255,255,0.06),rgba(255,255,255,0)_72%)]"
+          className="pointer-events-none absolute left-1/2 top-1/2 size-[54%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,0.26),rgba(255,255,255,0)_72%)] blur-[3px] [[data-theme=dark]_&]:bg-[radial-gradient(closest-side,rgba(255,255,255,0.06),rgba(255,255,255,0)_72%)]"
         />
 
-        {/* The one element with weight — full ink, centred, and the tallest thing
-            on the card. In dark it casts a short shadow onto the dish, so the bars
-            sit above the surface rather than being painted on it. */}
+        {/* The one element with weight — centred, and the tallest thing on the
+            card. In dark it casts a short shadow onto the dish, so the bars sit
+            above the surface rather than being painted on it.
+            Light steps off full ink to the palette's warm grey: at #262626 on a
+            near-white dish the bars were the only pure black on the page, and they
+            read as a logo dropped into the disc rather than as part of it. */}
         <span className="relative flex h-[54px] items-center gap-[5px] [[data-theme=dark]_&]:[filter:drop-shadow(0_1px_2px_rgba(0,0,0,0.75))]">
           {ASSISTANT_WAVE.map((h, i) => (
             <span
               key={i}
-              className="w-[4px] rounded-full bg-[var(--v69-ink)]"
+              className="w-[4px] rounded-full bg-[var(--v69-ink)] [[data-theme=light]_&]:bg-[#6E6F65]"
               style={{ height: `${h}px` }}
             />
           ))}
@@ -2915,10 +3394,8 @@ function CardConditionalForms() {
         {["Business", "Individual"].map((answer, i) => (
           <span
             key={answer}
-            className={`flex flex-1 items-center truncate px-2.5 text-[11px] font-normal ${
-              i === 0
-                ? "text-[var(--v69-ink)]"
-                : "text-muted-foreground"
+            className={`flex flex-1 items-center truncate px-3 text-[13px] font-normal ${
+              i === 0 ? "text-[var(--v69-ink)]" : "text-muted-foreground"
             } ${i === 1 ? "border-t border-[rgba(16,24,40,0.07)] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.10)]" : ""}`}
           >
             {answer}
@@ -2928,7 +3405,7 @@ function CardConditionalForms() {
 
       {/* The field the taken branch reveals. */}
       <div
-        className={`absolute right-[6%] flex w-[38%] items-center truncate whitespace-nowrap px-2.5 text-[11px] font-normal text-[var(--v69-ink)] ${NODE_SURFACE}`}
+        className={`absolute right-[6%] flex w-[38%] items-center truncate whitespace-nowrap px-3 text-[13px] font-normal text-[var(--v69-ink)] ${NODE_SURFACE}`}
         style={{ top: `${NODE_TARGET_Y - 7}%`, height: "14%" }}
       >
         Oakwood
@@ -3046,18 +3523,21 @@ const BLOCK_BOARD = [
   ".OO..GGG",
 ];
 // Puffy top-lit face: a highlight along the top edge, a shaded lower edge.
+// Light runs the moulding at roughly a third of dark's: on a pale board the same
+// lit top and shaded foot turned every cell into a moulded plastic tile, and the
+// board read as a toy rather than as a grid of placed pieces.
 const BLOCK_FACE =
-  "shadow-[inset_0_1.5px_0_rgba(255,255,255,0.45),inset_0_-2px_0_rgba(0,0,0,0.14)]";
+  "shadow-[inset_0_1.5px_0_rgba(255,255,255,0.45),inset_0_-2px_0_rgba(0,0,0,0.14)] [[data-theme=light]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.28),inset_0_-1px_0_rgba(0,0,0,0.05)]";
 // Empty cell — pressed into the board, and readable enough that the grid itself
 // is visible rather than implied. Light values first, dark overrides after.
 const BLOCK_HOLE =
-  "bg-black/[0.09] shadow-[inset_0_1px_2px_rgba(16,24,40,0.16)] [[data-theme=dark]_&]:bg-white/[0.08] [[data-theme=dark]_&]:shadow-[inset_0_1px_2px_rgba(0,0,0,0.55)]";
+  "bg-black/[0.09] shadow-[inset_0_1px_2px_rgba(16,24,40,0.16)] [[data-theme=light]_&]:bg-black/[0.06] [[data-theme=light]_&]:shadow-[inset_0_1px_1.5px_rgba(16,24,40,0.06)] [[data-theme=dark]_&]:bg-white/[0.08] [[data-theme=dark]_&]:shadow-[inset_0_1px_2px_rgba(0,0,0,0.55)]";
 // The board and the piece tray both sit a step ABOVE the card (lighter), with a
 // hairline and a soft inner shadow, so each is a distinct surface holding its
 // pieces rather than a patch of the card with blocks floating on it. One
 // treatment for both, so they read as the same material.
 const BLOCK_SURFACE =
-  "bg-[#FBFBF7] ring-1 ring-black/[0.07] shadow-[inset_0_1px_3px_rgba(16,24,40,0.07)] [[data-theme=dark]_&]:bg-[#323232] [[data-theme=dark]_&]:ring-white/[0.10] [[data-theme=dark]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_-1px_3px_rgba(0,0,0,0.4)]";
+  "bg-[#FBFBF7] ring-1 ring-black/[0.07] shadow-[inset_0_1px_3px_rgba(16,24,40,0.07)] [[data-theme=light]_&]:shadow-[inset_0_1px_2px_rgba(16,24,40,0.035)] [[data-theme=dark]_&]:bg-[#323232] [[data-theme=dark]_&]:ring-white/[0.10] [[data-theme=dark]_&]:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_-1px_3px_rgba(0,0,0,0.4)]";
 
 function BlockCell({ code, radius }: { code: string; radius: string }) {
   return BLOCK_HUES_LIGHT[code] ? (
@@ -3121,8 +3601,7 @@ const INTAKE_GLYPHS = {
 // One flowing sentence, not a stack of fixed lines: the words wrap to the card's
 // width on their own, so nothing trails off short of the right edge.
 type IntakePart =
-  | { text: string; dim?: boolean }
-  | { glyph: keyof typeof INTAKE_GLYPHS };
+  { text: string; dim?: boolean } | { glyph: keyof typeof INTAKE_GLYPHS };
 
 const INTAKE_SENTENCE: IntakePart[] = [
   { glyph: "bubble" },
@@ -3144,7 +3623,7 @@ function CardServiceRequest() {
     // Top-aligned: the sentence reads from the card's first line, the way a
     // notification does, rather than floating in the middle of the square.
     <div className="flex h-full flex-col bg-[var(--v69-ink)] p-5">
-      <p className="flex flex-wrap items-baseline gap-x-[0.28em] text-[24px] font-normal leading-[1.28] tracking-tight">
+      <p className="flex flex-wrap items-baseline gap-x-[0.28em] text-[26px] font-normal leading-[1.28] tracking-tight">
         {/* One flex item per WORD, not per phrase: a phrase is unbreakable, so
             wrapping by phrase left half a line empty every time one didn't fit.
             Word by word, the lines pack to the card's width. */}
@@ -3176,97 +3655,50 @@ function CardServiceRequest() {
   );
 }
 
-// The day's blocks as fractions of the 9–1 window the rail draws, so a block's
-// position is stated the way it reads: where it starts, how long it runs. The
-// first two share a row; the third drops so its overlap with the second shows.
-// Hierarchy is carried by fill rather than alpha: the block running now takes
-// the brand lime, the rest are solid neutrals stepping down in weight. Opaque
-// pills sit ON the rail instead of dissolving into it, which is what let the
-// hour lines show straight through them before.
-const EVENT_BLOCKS = [
-  {
-    left: "17%",
-    width: "24%",
-    top: "26%",
-    fill: "bg-[#C9C9C1] [[data-theme=dark]_&]:bg-[#5A5A5A]",
-  },
-  {
-    left: "45%",
-    width: "22%",
-    top: "26%",
-    fill: "bg-[#D9ED92] [[data-theme=dark]_&]:bg-[#D9ED92]",
-  },
-  {
-    left: "58%",
-    width: "26%",
-    top: "52%",
-    fill: "bg-[#B0B0A8] [[data-theme=dark]_&]:bg-[#7E7E7E]",
-  },
-];
-
-// Flat and fully opaque, the way a calendar rail draws them: no gradient and no
-// drop. The gradient-and-shadow version read as embossed plastic, where the
-// reference gets its polish from clean solid fills and nothing else.
-
-const EVENT_HOURS = ["9 AM", "10 AM", "11 AM", "12 PM"];
-
-// Events & RSVPs — the day as a rail: the block running now named at the top,
-// then the day's events laid against the hours they occupy, with the headcount
-// on the invite. A single-invite card said nothing about a day filling up, which
-// is the thing the app is for. The block running now takes the brand lime and
-// the rest stay neutral, so "now" is the one thing carrying colour.
+// Events & RSVPs — one event drawn as the invite it is: a coloured header band
+// carrying the time, then a white body with what it is and where. Modelled on the
+// system calendar's event card, in the site's own materials — the brand lime for
+// the band (the hue every other card uses for its one live thing), the periwinkle
+// as the marker beside the title, and the time in the mono face the site sets all
+// its figures and data labels in.
+//
+// It was a day-rail of hour ticks and pills before. That said "a day filling up",
+// but at cover size it was five grey lines and three lozenges, and nothing on it
+// named the event or told you when it was.
 function CardEvents() {
   return (
-    // No inner panel: the rail owns the whole square, so the hour lines run the
-    // full height of the card and the day reads as the widget rather than as a
-    // chip sitting inside it.
-    <div className="flex h-full flex-col bg-[var(--v69-card)] p-5">
-      {/* Title only: neither a clock nor a headcount in the corner, since the
-          rail below already carries everything the cover has to say. */}
-      <div className="flex min-w-0 items-baseline">
-        <span className="truncate text-[13px] font-normal text-[var(--v69-ink)]">
-          Client workshop
-        </span>
-      </div>
-
-      <div className="relative mt-4 flex-1">
-        {/* Hour ticks, drawn as a row of hairlines rather than a background
-            gradient so they land exactly where the labels below do. */}
-        {/* A hair over a pixel wide, so the gutter reads as ruled rather than as
-            a set of near-invisible seams. */}
-        <div className="absolute inset-0 flex justify-between">
-          {EVENT_HOURS.map((hour) => (
-            <span
-              key={hour}
-              className="w-[1.5px] bg-[var(--v69-ink)] opacity-[0.18]"
-            />
-          ))}
-          <span className="w-[1.5px] bg-[var(--v69-ink)] opacity-[0.18]" />
+    <div className="flex h-full items-center justify-center bg-[var(--v69-card)] p-5">
+      {/* A hairline in both themes, no drop in either: the shadow it used to carry
+          lifted it off the face like a sticker, but with nothing at all the white
+          body ran into the near-white card. Light takes 5% black, dark 8% white. */}
+      <div className="w-full overflow-hidden rounded-2xl ring-1 ring-black/[0.05] [[data-theme=dark]_&]:ring-white/[0.08]">
+        {/* The band. Ink on lime in both themes: it is the event's own colour,
+            not a surface that inverts with the skin. */}
+        <div
+          className="bg-[#D9ED92] px-3.5 py-2.5 text-[15px] leading-none tabular-nums text-[#262626]"
+          style={MOCK_MONO}
+        >
+          {/* The meridiem is set as its own span rather than after a space: in a
+              monospace face a word space carries a full digit's advance, which
+              left "AM" reading as a separate label instead of part of the time. */}
+          11–11:30<span className="ml-1">AM</span>
         </div>
-        {EVENT_BLOCKS.map((block) => (
+        <div className="flex gap-2.5 bg-[var(--v69-well)] px-3.5 py-3 [[data-theme=light]_&]:bg-[#FBFBF7]">
+          {/* The marker the reference runs down the left of the title — the other
+              brand hue, so the card carries both and neither has to shout. */}
           <span
-            key={block.left}
-            className={`absolute h-[9px] rounded-full ${block.fill}`}
-            style={{
-              left: block.left,
-              width: block.width,
-              top: block.top,
-            }}
+            aria-hidden
+            className="w-[3px] shrink-0 rounded-full bg-[#7DA4FF]"
           />
-        ))}
-      </div>
-
-      {/* Each label takes a quarter of the rail and sits left-aligned in it, so
-          it hangs off its own tick the way a calendar gutter reads. */}
-      <div className="mt-2 flex">
-        {EVENT_HOURS.map((hour) => (
-          <span
-            key={hour}
-            className="flex-1 pl-1 text-[11px] font-normal tabular-nums text-muted-foreground"
-          >
-            {hour}
-          </span>
-        ))}
+          <div className="min-w-0">
+            <p className="truncate text-[15px] font-normal leading-tight text-[var(--v69-ink)]">
+              Client workshop
+            </p>
+            <p className="mt-1 truncate text-[13px] font-normal leading-tight text-muted-foreground">
+              Studio, San Francisco
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -3307,7 +3739,9 @@ function CardDesignApprovals() {
         >
           <path d="M2 4.5A1.5 1.5 0 0 1 3.5 3h2.2l1.3 1.6h5.5A1.5 1.5 0 0 1 14 6.1v5.4A1.5 1.5 0 0 1 12.5 13h-9A1.5 1.5 0 0 1 2 11.5z" />
         </svg>
-        <span className={`text-[13px] font-normal ${ON_INK} [[data-theme=light]_&]:text-[var(--v69-ink)] [[data-theme=dark]_&]:text-[#EDEDED]`}>
+        <span
+          className={`text-[13px] font-normal ${ON_INK} [[data-theme=light]_&]:text-[var(--v69-ink)] [[data-theme=dark]_&]:text-[#EDEDED]`}
+        >
           Design reviews
         </span>
       </div>
@@ -3385,13 +3819,13 @@ export function V69CardMock({ slug }: { slug: string }) {
   if (slug === "events-rsvps") return <CardEvents />;
   if (slug === "design-approvals") return <CardDesignApprovals />;
   if (slug === "mass-messenger") return <CardMassMessenger />;
-  if (slug === "jargon-quest") return <CardCommunityQA />;
+  if (slug === "jargon-quest") return <CardJargonQuest />;
   if (slug === "internal-resource-library")
     return (
       <CardDeliverable
         heading="Team guides"
-        label="Read this week"
-        value="18/24"
+        label={null}
+        value={null}
         delta={null}
       />
     );

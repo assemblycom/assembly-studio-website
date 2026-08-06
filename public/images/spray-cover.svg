@@ -8,32 +8,52 @@
        unfinished. Coverage is even across each band's width — thinning the lime
        toward one side let dark's ground show through and read as a fade to
        black. No ground of its own — the card face shows through between specks,
-       so both themes share this artwork. -->
+       so both themes share this artwork.
+
+       Two things keep the spray from reading as a machine pattern. The alpha
+       ramp is DISPLACED by a coarse turbulence before the fine noise is added,
+       so each boundary wanders across the card instead of running dead straight
+       and level; and the fine noise is two octaves rather than one, which
+       clusters the specks into clumps and open patches instead of spacing them
+       evenly. Each band gets its own warp seed and frequency, so the two
+       boundaries drift independently.
+
+       The rects overhang the viewBox by 80 on every side and the gradients are
+       in userSpaceOnUse, so the ramp stays anchored to the 480 box while alpha
+       still exists beyond it. Without the overhang the displacement pulls empty
+       space in from outside the shape and punches holes along the top and
+       bottom edges, where the bands should be solid. -->
   <defs>
-    <filter id="s-lime" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.36" numOctaves="1" seed="11" result="n"/>
-      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 -0.5" result="na"/>
-      <feComposite in="SourceAlpha" in2="na" operator="arithmetic" k2="1" k3="1" result="sum"/>
+    <filter id="s-lime" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.008 0.013" numOctaves="2" seed="5" result="w"/>
+      <feDisplacementMap in="SourceAlpha" in2="w" scale="64" xChannelSelector="R" yChannelSelector="G" result="a"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.31 0.4" numOctaves="2" seed="11" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.6 0 0 0 -0.8" result="na"/>
+      <feComposite in="a" in2="na" operator="arithmetic" k2="1" k3="1" result="sum"/>
       <feComponentTransfer in="sum" result="dots">
         <feFuncA type="discrete" tableValues="0 1"/>
       </feComponentTransfer>
       <feFlood flood-color="#C4DE7A" result="c"/>
       <feComposite in="c" in2="dots" operator="in"/>
     </filter>
-    <filter id="s-peri" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.44" numOctaves="1" seed="47" result="n"/>
-      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 -0.5" result="na"/>
-      <feComposite in="SourceAlpha" in2="na" operator="arithmetic" k2="1" k3="1" result="sum"/>
+    <filter id="s-peri" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.011 0.007" numOctaves="2" seed="31" result="w"/>
+      <feDisplacementMap in="SourceAlpha" in2="w" scale="72" xChannelSelector="R" yChannelSelector="G" result="a"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.46 0.38" numOctaves="2" seed="47" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.6 0 0 0 -0.8" result="na"/>
+      <feComposite in="a" in2="na" operator="arithmetic" k2="1" k3="1" result="sum"/>
       <feComponentTransfer in="sum" result="dots">
         <feFuncA type="discrete" tableValues="0 1"/>
       </feComponentTransfer>
       <feFlood flood-color="#A9C3E4" result="c"/>
       <feComposite in="c" in2="dots" operator="in"/>
     </filter>
-    <filter id="s-blue" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.36" numOctaves="1" seed="23" result="n"/>
-      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 -0.5" result="na"/>
-      <feComposite in="SourceAlpha" in2="na" operator="arithmetic" k2="1" k3="1" result="sum"/>
+    <filter id="s-blue" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.006 0.01" numOctaves="2" seed="17" result="w"/>
+      <feDisplacementMap in="SourceAlpha" in2="w" scale="58" xChannelSelector="R" yChannelSelector="G" result="a"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.34 0.44" numOctaves="2" seed="23" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.6 0 0 0 -0.8" result="na"/>
+      <feComposite in="a" in2="na" operator="arithmetic" k2="1" k3="1" result="sum"/>
       <feComponentTransfer in="sum" result="dots">
         <feFuncA type="discrete" tableValues="0 1"/>
       </feComponentTransfer>
@@ -41,21 +61,21 @@
       <feComposite in="c" in2="dots" operator="in"/>
     </filter>
 
-    <linearGradient id="band-lime" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="band-lime" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="480">
       <stop offset="0" stop-color="#fff" stop-opacity="1"/>
       <stop offset="0.3" stop-color="#fff" stop-opacity="1"/>
       <stop offset="0.42" stop-color="#fff" stop-opacity="0.6"/>
       <stop offset="0.56" stop-color="#fff" stop-opacity="0.16"/>
       <stop offset="0.68" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
-    <linearGradient id="band-peri" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="band-peri" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="480">
       <stop offset="0.28" stop-color="#fff" stop-opacity="0"/>
       <stop offset="0.48" stop-color="#fff" stop-opacity="0.72"/>
       <stop offset="0.62" stop-color="#fff" stop-opacity="0.88"/>
       <stop offset="0.78" stop-color="#fff" stop-opacity="0.4"/>
       <stop offset="0.92" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
-    <linearGradient id="band-blue" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id="band-blue" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="480">
       <stop offset="0.48" stop-color="#fff" stop-opacity="0"/>
       <stop offset="0.64" stop-color="#fff" stop-opacity="0.32"/>
       <stop offset="0.76" stop-color="#fff" stop-opacity="0.8"/>
@@ -64,7 +84,7 @@
     </linearGradient>
   </defs>
 
-  <rect width="480" height="480" fill="url(#band-lime)" filter="url(#s-lime)"/>
-  <rect width="480" height="480" fill="url(#band-peri)" filter="url(#s-peri)"/>
-  <rect width="480" height="480" fill="url(#band-blue)" filter="url(#s-blue)"/>
+  <rect x="-80" y="-80" width="640" height="640" fill="url(#band-lime)" filter="url(#s-lime)"/>
+  <rect x="-80" y="-80" width="640" height="640" fill="url(#band-peri)" filter="url(#s-peri)"/>
+  <rect x="-80" y="-80" width="640" height="640" fill="url(#band-blue)" filter="url(#s-blue)"/>
 </svg>

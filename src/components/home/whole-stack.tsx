@@ -44,7 +44,11 @@ const VISUAL_FIELD_H = "h-[300px] sm:h-[360px]";
 // step visuals and the sign-up hand-off use, so the artwork in these panels
 // belongs to the same set. A tinted field rather than a grey placeholder box:
 // grey read as a missing image, blue reads as a frame waiting for one.
-const PANEL_BLUE = "#7DA4FF";
+// Light runs it mixed back toward white: at full strength the band around each
+// mock was the loudest thing in a panel that is otherwise white and type, and it
+// read as a border drawn round the artwork rather than as the ground under it.
+const PANEL_FIELD =
+  "bg-[#7DA4FF] [[data-theme=light]_&]:bg-[color-mix(in_srgb,#7DA4FF_52%,#ffffff)]";
 
 type VisualSlug =
   | "crm-relationships"
@@ -2615,8 +2619,7 @@ function DetailPanel({
                     : s.visual && BOTTOM_BLEED_VISUALS.has(s.visual)
                       ? "items-stretch justify-center px-4 pt-4 sm:px-6 sm:pt-6"
                       : "items-center justify-center p-4 sm:p-6"
-                }`}
-                style={{ backgroundColor: PANEL_BLUE }}
+                } ${PANEL_FIELD}`}
               >
                 {s.visual && <SectionVisual slug={s.visual} />}
               </div>

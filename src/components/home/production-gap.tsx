@@ -56,6 +56,11 @@ const APPS = [
   "Messages",
 ];
 const ACTIVE_APP = "Time tracker";
+// On a phone the mock is cropped to a fraction of its width and only ~300px of
+// its height shows, so the full list crowds the sidebar and the rows at the foot
+// get cut mid-word. Three apps still make the point the section is about — a
+// sidebar with several apps in it, one of them open.
+const MOBILE_APPS = new Set(["Onboarding", "Time tracker", "Messages"]);
 
 const ENTRIES = [
   {
@@ -296,7 +301,9 @@ function ProductionGapVisual({
             return (
               <span
                 key={app}
-                className={`flex items-center gap-2.5 rounded-[4px] px-2 py-1.5 text-[11px] leading-none ${rowBg} ${labelCls}`}
+                className={`flex items-center gap-2.5 rounded-[4px] px-2 py-1.5 text-[11px] leading-none ${rowBg} ${labelCls} ${
+                  MOBILE_APPS.has(app) ? "" : "max-md:hidden"
+                }`}
               >
                 <AppIcon name={app} color={iconColor} />
                 <span className="truncate pb-[3px] -mb-[3px]">{app}</span>
@@ -307,12 +314,10 @@ function ProductionGapVisual({
 
         {/* Region: the signed-in client. The third step talks about accounts
             being a platform primitive, so the mock needs a face for it.
-            It sits at the foot of the sidebar on desktop, where the whole mock
-            is in frame. On a phone the mock is cropped to its top-left corner,
-            and the foot of a 450px sidebar is a long way past the cut — the
-            third step lit a region nobody could see. There it follows the app
-            list instead, so the sidebar still runs to the crop but the client
-            is in view. */}
+            It sits at the foot of the sidebar in both layouts — the sidebar's
+            own foot is in frame on a phone as well, so parking the card under the
+            app list left it floating mid-column with a quarter of the sidebar
+            empty below it. */}
         <button
           type="button"
           onMouseEnter={() => setActive("avatar")}
@@ -325,7 +330,7 @@ function ProductionGapVisual({
           // look like a sixth app. No resting fill — the card takes the sidebar
           // step's colour along with the rest of the column and reads by its
           // border there, then lifts on its own step against an unlit sidebar.
-          className="mx-2 mt-6 flex items-center gap-2 rounded-[6px] border border-[var(--mk-border)] px-2 py-2.5 text-left outline-none transition-colors duration-200 md:mx-0 md:mt-auto md:rounded-none md:border-x-0 md:border-b-0 md:border-[var(--mk-hairline)] md:px-3"
+          className="mx-2 mb-3 mt-auto flex items-center gap-2 rounded-[6px] border border-[var(--mk-border)] px-2 py-2.5 text-left outline-none transition-colors duration-200 md:mx-0 md:mb-0 md:rounded-none md:border-x-0 md:border-b-0 md:border-[var(--mk-hairline)] md:px-3"
         >
           {/* --mk-selected, plus a ring: the row lifts to --mk-elevated on its
               tour step, and at --mk-fill the disc is five values off that and
@@ -658,7 +663,12 @@ function ProductionGapExplorer() {
             clipped by this box, so at phone widths its white surface reaches
             the box's right edge and meets the white page with nothing between
             them. From md up the box has room to show blue on every side. */}
-        <div className="h-[320px] w-full min-w-0 overflow-hidden rounded-xl bg-[#7DA4FF] py-4 pl-4 ring-1 ring-black/[0.08] md:h-auto md:py-7 md:pl-7 md:ring-0">
+        {/* The mock overflows this box on a phone and is clipped at its edge, so
+            THIS radius is what shapes the crop's bottom corners — the mock's own
+            bottom-left round sits ~175px below the cut and never shows. At the
+            box's 12px the cut read as a straight slice across the foot, so the
+            bottom pair is taken up to 16px, matching the mock's own top corner. */}
+        <div className="h-[320px] w-full min-w-0 overflow-hidden rounded-xl bg-[#7DA4FF] py-4 pl-4 ring-1 ring-black/[0.08] max-md:rounded-b-2xl md:h-auto md:py-7 md:pl-7 md:ring-0">
           {/* The mock is a desktop layout — the sidebar and the table are
               percentages of a wide viewport, so at phone width they collapse
               into each other. It's laid out at a desktop width and cropped by

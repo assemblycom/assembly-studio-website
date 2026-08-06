@@ -13,9 +13,7 @@ import {
 } from "@/lib/constants";
 import { FooterAurora } from "@/components/layout/footer";
 import { useTheme } from "@/components/theme/theme-provider";
-import { MockFit, MOCK_DESIGN_SIZE } from "@/components/templates/mock-fit";
 import { TemplateDetailPanel } from "@/components/proposal/template-detail-panel";
-import { V69CardMock } from "@/components/home/hero-v71";
 import { OptionAvatar } from "@/components/ui/select-menu";
 import { teamAvatar } from "@/lib/team";
 
@@ -53,7 +51,8 @@ const NAV_RAIL = "mx-auto w-full max-w-[1600px]";
 const NAV_GUTTER = "px-6 md:px-10";
 // cursor-default for the same reason the masthead below carries it: the mark and
 // the label are printed furniture, not anything to click or type into.
-const NAV_ROW = "flex h-14 cursor-default items-center justify-between lg:h-16";
+// The row's height is set where it's used, since it steps down on scroll.
+const NAV_ROW = "flex cursor-default items-center justify-between";
 
 // The build panel, shared by the prompt and the template so a typed idea and a
 // picked template arrive as the same object.
@@ -63,9 +62,9 @@ const NAV_ROW = "flex h-14 cursor-default items-center justify-between lg:h-16";
 // card with a filled well inside it, which put three tones inside one panel and
 // made the same information look heavier than the table a screen down.
 //
-// mt-10 under the section's lead — the step the article page puts between its
-// running text and the media that follows it.
-const CARD = "mt-10 overflow-hidden rounded-xl border border-border";
+// No margin of its own: the section places it, because on a phone the panel is
+// ordered ABOVE the heading it belongs to and the space has to move with it.
+const CARD = "overflow-hidden rounded-xl border border-border";
 const CARD_HEAD =
   "flex items-center justify-between gap-4 border-b border-border px-5 py-4";
 // The body's padding matches a step row's, so the two panels are set to the same
@@ -103,8 +102,12 @@ const CARD_CONTROL =
 // applies.
 const CARD_PROMPT_TEXT = "type-body text-[1rem] sm:text-[0.9375rem]";
 
-// Every small label on the masthead — "Proposal" over the title and the two names'
-// own labels. type-eyebrow's size, in PP Mori rather than its mono and in normal
+// What the field says when there's nothing in it — as the placeholder while
+// it's being edited, and as the paragraph if it was saved empty.
+const PROMPT_EMPTY = "Describe the app you want built.";
+
+// The two names' own labels in the credit row. type-eyebrow's size, in PP Mori
+// rather than its mono and in normal
 // case rather than its caps: mono read as another document's furniture on top of
 // the page's own face, and capitals on a two-word label read as shouting. The
 // tracking comes down with the caps, since 0.08em is drawn to open up capitals and
@@ -128,14 +131,13 @@ function headlineTitle(title: string) {
 const firstName = (name: string) => name.split(/\s+/)[0] ?? "";
 
 /**
- * "Prepared for" / "Prepared by" — the two names the page opens on, as a pair
- * so it reads as a document that was addressed rather than as a landing page.
+ * One name in the masthead's metadata row: the avatar, with the label above the
+ * name rather than beside it, so the two facts read as one block at a glance.
  *
- * Both are set identically: the same ink, the same size, the same 28px avatar.
- * The recipient used to take full ink against the sender's softer step, and side
- * by side that read as one of the two being greyed out rather than as a
- * hierarchy — they're a matched pair of facts about the document, so they look
- * like one.
+ * Both names are set identically — they're a matched pair of facts about the
+ * document, not a hierarchy — and both sit at the caption step. Rendered large
+ * and centred under the title, they outranked the headline and turned the
+ * masthead into a title page.
  */
 function BandName({
   label,
@@ -150,23 +152,30 @@ function BandName({
   className?: string;
 }) {
   return (
-    // items-center so the label sits over the pair it names rather than over the
-    // full width of a stretched column — the band is centred.
-    <div className={`flex flex-col items-center gap-2.5 ${className}`}>
-      <p className={BAND_EYEBROW}>{label}</p>
-      <div className="flex items-center gap-2.5">
+    <div className={`flex min-w-0 items-center gap-2.5 ${className}`}>
+      {/* Both circles are the same 26px, but a bright photo against the band
+          reads bigger than the same disc filled with a wash of the ink. The
+          hairline gives them a matching edge, which settles the two at the same
+          size by eye. */}
+      {/* Sized to the pair it sits beside rather than to one line of it: at
+          26px it read as a bullet next to the label, where a credit's photo
+          should stand as tall as the two lines it belongs to. */}
+      <span className="relative inline-flex shrink-0">
         <OptionAvatar
           option={{ value: name, label: name, avatar }}
-          size={28}
+          size={38}
           tone="field"
         />
-        {/* A step down on a phone. At the desktop 18px, two of these under a
-            36px title read as a second headline rather than as the document's
-            metadata — the treatment Linear, Notion and OpenAI all land on for a
-            prepared-for/by pair at this width. */}
-        <span className="type-h4 max-sm:text-[0.9375rem] text-[color:var(--proposal-ink)]">
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-full ring-1 ring-inset ring-[color-mix(in_srgb,var(--proposal-ink)_8%,transparent)]"
+        />
+      </span>
+      <div className="min-w-0">
+        <p className={BAND_EYEBROW}>{label}</p>
+        <p className="truncate text-[0.9375rem] text-[color:var(--proposal-ink)]">
           {name}
-        </span>
+        </p>
       </div>
     </div>
   );
@@ -182,11 +191,9 @@ function BandName({
  * in rather than as the proposal's centre.
  */
 function PromptCard({
-  appName,
   prompt,
   onCommit,
 }: {
-  appName: string;
   prompt: string;
   onCommit: (next: string) => void;
 }) {
@@ -215,8 +222,14 @@ function PromptCard({
     };
     queueMicrotask(check);
     el.addEventListener("scroll", check, { passive: true });
+    // Re-measured on resize too, not only when the text changes: the same
+    // prompt overflows at one width and fits at another, and a stale
+    // measurement left the fade sitting over a paragraph with nothing under it.
+    const observer = new ResizeObserver(check);
+    observer.observe(el);
     return () => {
       live = false;
+      observer.disconnect();
       el.removeEventListener("scroll", check);
     };
   }, [prompt, draft, editing]);
@@ -232,10 +245,25 @@ function PromptCard({
     el.style.height = `${el.scrollHeight}px`;
   }, [draft, editing]);
 
+  // Opening the field puts the caret after the last word, not in front of the
+  // first: pressing Edit means adding to what's there, and autofocus alone
+  // leaves the caret at position 0, where the first key typed lands in front of
+  // the prompt.
+  useEffect(() => {
+    const el = fieldRef.current;
+    if (!editing || !el) return;
+    el.focus();
+    const end = el.value.length;
+    el.setSelectionRange(end, end);
+  }, [editing]);
+
   return (
     <div className={CARD}>
       <div className={CARD_HEAD}>
-        <p className="truncate text-sm text-muted-foreground">{appName}</p>
+        {/* What the panel holds, not what it builds: the app's own name is
+            already the page's title, and repeating it here labelled the box
+            with the one thing the reader had just read. */}
+        <p className="truncate text-sm text-muted-foreground">Prompt</p>
         <div className="flex shrink-0 items-center gap-3.5">
           {editing ? (
             <>
@@ -280,13 +308,8 @@ function PromptCard({
           Edit puts a caret in what you were reading instead of swapping one shape
           for another. The box takes the focus ring; the textarea itself carries
           no chrome at all. */}
-      <div className={CARD_FIELD_INSET}>
-        <div
-          ref={boxRef}
-          className={`${CARD_FIELD} ${
-            moreBelow && !editing ? "prompt-fade-bottom" : ""
-          }`}
-        >
+      <div className={`relative ${CARD_FIELD_INSET}`}>
+        <div ref={boxRef} className={CARD_FIELD}>
           {editing ? (
             <>
               <label className="sr-only" htmlFor="proposal-prompt">
@@ -295,7 +318,6 @@ function PromptCard({
               <textarea
                 ref={fieldRef}
                 id="proposal-prompt"
-                autoFocus
                 rows={1}
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
@@ -304,6 +326,9 @@ function PromptCard({
                 // one buildSignupUrl trims to — without it you could type a
                 // prompt here that silently lost its tail on the way to signup.
                 maxLength={MAX_PROMPT_LENGTH}
+                // Clearing the field left an empty grey box with no way of
+                // knowing what belongs in it.
+                placeholder={PROMPT_EMPTY}
                 // overflow-hidden so the auto-grown field never shows a
                 // scrollbar of its own, and resize-none because the height is
                 // not the reader's problem to solve.
@@ -315,109 +340,95 @@ function PromptCard({
                 // left the shadow painting a hard near-black rectangle around
                 // the line of text in dark mode. The box around it carries the
                 // ring, so this element wants none of its own.
-                className={`${CARD_PROMPT_TEXT} block w-full resize-none overflow-hidden border-0 bg-transparent p-0 text-foreground outline-none focus-visible:shadow-none focus-visible:outline-none`}
+                className={`${CARD_PROMPT_TEXT} block w-full resize-none overflow-hidden border-0 bg-transparent p-0 text-foreground outline-none placeholder:text-muted-foreground focus-visible:shadow-none focus-visible:outline-none`}
               />
             </>
           ) : (
+            // Saved empty, the box reads as broken rather than as blank — the
+            // same line the field shows as its placeholder says what it wants.
             <p
-              className={`${CARD_PROMPT_TEXT} whitespace-pre-wrap text-pretty text-foreground`}
+              className={`${CARD_PROMPT_TEXT} whitespace-pre-wrap text-pretty ${
+                prompt ? "text-foreground" : "text-muted-foreground"
+              }`}
             >
-              {prompt}
+              {prompt || PROMPT_EMPTY}
             </p>
           )}
         </div>
+
+        {/* The last visible line fading out when the prompt runs on, in both
+            states — cut off at the box's edge mid-line it reads as text that
+            stops rather than text that continues.
+            An overlay inside the box rather than a mask on the box: masking the
+            scroller took its fill and its bottom edge with it, so the box itself
+            dissolved instead of the words inside it. Painted in the box's own
+            fill, over the text, with the box's bottom radius. */}
+        {moreBelow && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-3 bottom-3 h-12 rounded-b-lg"
+            style={{
+              background:
+                "linear-gradient(to top, var(--muted) 25%, color-mix(in srgb, var(--muted) 0%, transparent) 100%)",
+            }}
+          />
+        )}
       </div>
     </div>
   );
 }
 
 /**
- * Template variant — the same panel, with the template's cover and the
- * paragraph its own catalogue page opens with. Deliberately smaller than the
- * prompt variant's field: a picked template needs recognising, not reading, so
- * it's a picture at thumbnail size beside the summary rather than a full cover
- * with the writing underneath it.
+ * Template variant — the same panel, holding the paragraph the template's own
+ * catalogue page opens with and what comes in it.
+ *
+ * No cover in here: the masthead now carries it as the page's anchor, and the
+ * same picture twice on one screen read as a page that couldn't decide which
+ * copy of it mattered. The card is the writing; the band is the picture.
  */
 function TemplateCard({
   template,
-  dark,
   onSeeDetails,
 }: {
   template: Template;
-  dark: boolean;
   onSeeDetails: () => void;
 }) {
   return (
     <div className={CARD}>
       <div className={CARD_HEAD}>
-        <p className="truncate text-sm text-muted-foreground">
-          {template.title}
-        </p>
+        {/* Not "Template" — see buildLead. What the label has to tell the reader
+            is that the app can be changed, not where it came from. */}
+        <p className="truncate text-sm text-muted-foreground">Remixable app</p>
         <button type="button" onClick={onSeeDetails} className={CARD_CONTROL}>
           See full details
         </button>
       </div>
 
-      {/* The cover and the writing stay two blocks rather than one panel holding
-          both — sharing one, the picture read as part of the paragraph's surface
-          instead of as the app being proposed. Now that the card is outlined
-          rather than filled, they're divided by a hairline instead of by their
-          own fills, which is how the steps list separates its rows. They stack
-          on a phone, where the rule runs across instead of down. */}
-      <div className="flex flex-col sm:flex-row sm:items-stretch">
-        {/* The cover's block. Same framing as the catalogue cards: a square, the
-            mock scaled into it, and the hairline drawn over the cover rather than
-            as a border, so the widget fills the whole square. The square is
-            centred in the block, which stretches to the height of the writing
-            beside it. */}
-        <div className="flex shrink-0 items-center justify-center border-b border-border p-5 sm:w-48 sm:border-b-0 sm:border-r">
-          <div className="relative aspect-square w-full max-w-36">
-            <MockFit
-              className={`relative aspect-square overflow-hidden rounded-[12px] bg-background [[data-theme=dark]_&]:bg-[#151515] ${
-                MOCK_DESIGN_SIZE[template.slug] ?? ""
-              }`}
-            >
-              {/* A picture of an app, not an app: inert and hidden from
-                  assistive tech so its mock controls aren't tabbable. */}
-              <div
-                aria-hidden
-                className={`template-mock pointer-events-none [font-family:var(--font-inter),system-ui,sans-serif] ${
-                  dark ? "v72-mock-dark" : ""
-                }`}
+      {/* Writing only. The cover used to sit in a column beside it, but the
+          masthead already carries the picture, and a square that had to be
+          centred in a column the paragraph's height set the card's height from
+          the picture rather than from what it says. Same padding as the prompt
+          variant's body, so a template and a typed idea are set identically. */}
+      <div className={CARD_BODY}>
+        <p className="type-body text-pretty text-foreground">
+          {template.longDescription}
+        </p>
+        {/* What comes in it, as tags rather than as a section of its own: the
+            full list with a sentence on each is in the details panel. Filled
+            rather than outlined now the card around them is outlined — two
+            nested hairlines read as a form, a quiet fill reads as a tag. */}
+        {template.features.length > 0 && (
+          <ul className="mt-5 flex flex-wrap gap-1.5">
+            {template.features.map((feature) => (
+              <li
+                key={feature}
+                className="rounded-sm bg-muted px-2 py-1 text-[11px] uppercase leading-none tracking-[0.04em] text-muted-foreground [font-family:var(--font-diatype-mono),ui-monospace,monospace] [[data-theme=dark]_&]:bg-white/[0.06]"
               >
-                <V69CardMock slug={template.slug} />
-              </div>
-            </MockFit>
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 rounded-[12px] border border-border/60 [[data-theme=dark]_&]:border-transparent"
-            />
-          </div>
-        </div>
-
-        {/* The writing's block, on the same padding as the prompt variant's body
-            so a template and a typed idea are set identically. */}
-        <div className={`${CARD_BODY} min-w-0 flex-1`}>
-          <p className="type-body text-pretty text-foreground">
-            {template.longDescription}
-          </p>
-          {/* What comes in it, as tags rather than as a section of its own: the
-              full list with a sentence on each is in the details panel. Filled
-              rather than outlined now the card around them is outlined — two
-              nested hairlines read as a form, a quiet fill reads as a tag. */}
-          {template.features.length > 0 && (
-            <ul className="mt-5 flex flex-wrap gap-1.5">
-              {template.features.map((feature) => (
-                <li
-                  key={feature}
-                  className="rounded-sm bg-muted px-2 py-1 text-[11px] uppercase leading-none tracking-[0.04em] text-muted-foreground [font-family:var(--font-diatype-mono),ui-monospace,monospace] [[data-theme=dark]_&]:bg-white/[0.06]"
-                >
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                {feature}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );
@@ -512,7 +523,7 @@ function signupSteps(fromTemplate: boolean) {
     {
       title: "The app gets built",
       body: fromTemplate
-        ? "Assembly builds the template on your own account, with your branding and your client records already in place."
+        ? "Assembly builds the app on your own account, with your branding and your client records already in place."
         : "Assembly builds exactly what the prompt describes, on your own account, with your branding already in place.",
     },
     {
@@ -527,10 +538,73 @@ function signupSteps(fromTemplate: boolean) {
 // isn't a link — this page has no navigation by design, and a logo that quietly
 // leaves the proposal is the one exit we don't want to build.
 function ProposalHeaderShell() {
+  return <ProposalNav />;
+}
+
+/**
+ * The page's bar, behaving like the site's nav rather than like a logo printed
+ * at the top: sticky, transparent at rest, and settling into the same frosted
+ * surface once you scroll — the mask, the blur, the thresholds and the easing
+ * are StudioNav's, so the two read as one bar.
+ *
+ * Not StudioNav itself: that bar's job is the site's links and account actions,
+ * and a proposal carries neither. This one is the mark (not a link — a logo
+ * that quietly leaves the proposal is the one exit we don't want to build) and
+ * the page's single action.
+ */
+function ProposalNav({ startHref }: { startHref?: string }) {
+  const { theme } = useTheme();
+  const dark = theme === "dark";
+  const [scrolled, setScrolled] = useState(false);
+
+  // StudioNav's numbers, including the hysteresis: with one threshold, the
+  // layout nudge that scrolling causes right at the cutoff can re-cross it and
+  // flip the state back and forth.
+  useEffect(() => {
+    const THRESHOLD = 40;
+    const MARGIN = 24;
+    const onScroll = () =>
+      setScrolled((prev) =>
+        prev
+          ? window.scrollY > THRESHOLD - MARGIN
+          : window.scrollY > THRESHOLD + MARGIN,
+      );
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const ease =
+    "duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none";
+
   return (
-    <header style={{ backgroundColor: "var(--proposal-field)" }}>
-      <div className={NAV_GUTTER}>
-        <div className={`${NAV_RAIL} ${NAV_ROW}`}>
+    <header className={`sticky top-0 z-50 transition-colors ${ease}`}>
+      {/* The progressive frosted blur, copied from StudioNav: it extends past
+          the bar and is masked out below it, so the blur eases off into the
+          page instead of ending on a hairline. */}
+      <div
+        aria-hidden
+        className={`pointer-events-none absolute inset-x-0 top-0 h-[135%] transition-opacity ${ease} ${
+          scrolled ? "opacity-100" : "opacity-0"
+        }`}
+        style={{
+          backdropFilter: "blur(11px)",
+          WebkitBackdropFilter: "blur(11px)",
+          background: `linear-gradient(to bottom, ${
+            dark ? "rgba(14,14,16,0.5)" : "rgba(255,255,255,0.88)"
+          } 0%, transparent 100%)`,
+          maskImage:
+            "linear-gradient(to bottom, #000 0%, #000 42%, transparent 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to bottom, #000 0%, #000 42%, transparent 100%)",
+        }}
+      />
+      <div className={`relative z-10 ${NAV_GUTTER}`}>
+        <div
+          className={`${NAV_RAIL} ${NAV_ROW} transition-[height] ${ease} ${
+            scrolled ? "h-12 lg:h-14" : "h-14 lg:h-16"
+          }`}
+        >
           <Image
             src="/images/logo-mark.svg"
             alt="Assembly Studio"
@@ -539,6 +613,16 @@ function ProposalHeaderShell() {
             priority
             className="brightness-0 [[data-theme=dark]_&]:invert"
           />
+          {/* A step smaller than the closing CTA, which is the one that gets
+              the full size: this is the same door, kept within reach. */}
+          {startHref && (
+            <Link
+              href={startHref}
+              className="cursor-pointer rounded-lg bg-foreground px-3.5 py-2 text-[0.8125rem] text-background transition-opacity hover:opacity-90"
+            >
+              Sign up and build
+            </Link>
+          )}
         </div>
       </div>
     </header>
@@ -613,15 +697,23 @@ function ProposalContent() {
     : buildSignupUrl(prompt);
 
   const sender = firstName(from);
-  const buildLead = sender
-    ? `${sender} ${
-        template ? "picked this template for you" : "wrote this prompt for you"
-      }. Sign up below and this app gets built in your own workspace.`
+  // What this is and who made it, then what happens to it — the reader needs to
+  // learn the build isn't fixed, which is what makes the panel above worth
+  // reading closely.
+  //
+  // The template variant doesn't say "template". Being explicit that one was
+  // picked off a shelf reads as impersonal for a document somebody sent to one
+  // named client, so it's an app that was prepared for them, and the remix line
+  // is what carries the fact that it isn't finished work.
+  const buildLead = template
+    ? `${
+        sender ? `${sender} prepared this app for you` : "This app was prepared for you"
+      }. Look through what it comes with before signing up. We’ll build exactly that, in your own branded workspace. You can remix and customize it after.`
     : `${
-        template
-          ? "This template is where the build starts"
+        sender
+          ? `${sender} wrote this prompt for you`
           : "This prompt describes the app we’d build"
-      }. Sign up below and it gets built in your own workspace.`;
+      }. Update the prompt however you’d like before signing up. We’ll build exactly what’s in it, in your own branded workspace.`;
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -631,95 +723,80 @@ function ProposalContent() {
           Tailwind compiles an arbitrary hex through a different colour space, and
           the panels drawn in the same colour further down showed up a shade off
           the band. */}
-      {/* A full-bleed hairline closes the masthead. It earns its keep in dark,
-          where the band has no colour of its own and the hero would otherwise
-          run into the page with nothing but space between them; in light the
-          black band's own edge already does the work, so the rule is drawn in
-          --border and simply lands on that boundary. */}
+      {/* No rule under the masthead. The band is the page's own ground in both
+          themes, so a full-bleed hairline was dividing a surface from itself —
+          the space, and the metadata row's own rule, already mark where the
+          document starts. */}
+      <ProposalNav startHref={startHref} />
+
       <header
         style={{ backgroundColor: "var(--proposal-field)" }}
-        className="relative border-b border-border"
+        className="relative"
       >
-        {/* The site's nav, standing in: the mark where every other page has it,
-            and what this page is where the nav's actions would be. The mark is
-            not a link — a logo that quietly leaves the proposal is the one exit
-            we don't want to build. */}
-        {/* No rule under it: the site's nav doesn't carry one, and on this band
-            it drew a line across a surface that has no bar to separate. */}
-        <div className={NAV_GUTTER}>
-          <div className={`${NAV_RAIL} ${NAV_ROW}`}>
-            <Image
-              src="/images/logo-mark.svg"
-              alt="Assembly Studio"
-              width={22}
-              height={22}
-              priority
-              className="brightness-0 [[data-theme=dark]_&]:invert"
-            />
-          </div>
-        </div>
-
         {/* Padding on the wrapper, rail inside — the same nesting the sections
             below use, so the band's words land on the document's column rather
             than one gutter inside it. */}
-        <div className="px-6 md:px-10">
-          {/* Centred, the way the site's other page-level mastheads are (see the
-              security hero): the band is a title page, and the document's
-              left-aligned reading starts below it. */}
-          {/* cursor-default across the masthead: there is nothing to type into
+        <div className="relative px-6 md:px-10">
+          {/* Centred on the document's own rail from md, the way the site's
+              other page-level mastheads are — but at a fraction of the height
+              the band used to run to, and with the names as one credit row
+              rather than as two columns of their own.
+
+              Left-aligned on a phone. At that width a centred display title
+              wraps to three or four ragged lines with nothing to centre against,
+              and the credit row's two names sat in the middle of a column narrow
+              enough that the whole band read as a poster.
+
+              cursor-default across the masthead: there is nothing to type into
               up here, and the text caret the browser shows by default made the
-              title and the two names read like form fields. Text stays
-              selectable — only the pointer changes. */}
+              title and the names read like form fields. Text stays selectable —
+              only the pointer changes. */}
           <div
-            className={`${RAIL} cursor-default pb-16 pt-10 text-center md:pb-20 md:pt-14`}
+            // With no rule closing the band, its bottom padding is what marks
+            // the masthead off from the document — short, it read as the credit
+            // row belonging to the first section rather than to the title.
+            // No rule at any width: the band is the page's own ground, so a
+            // hairline across it divided a surface from itself. Space does the
+            // separating, which is why the phone's bottom padding is longer than
+            // it was when the rule carried that job.
+            className={`${RAIL} cursor-default pb-12 pt-10 text-left md:pb-24 md:pt-14 md:text-center`}
           >
-            {/* The title leads the band, with what kind of document this is as
-                its eyebrow. "Proposal" used to sit opposite the mark in the nav
-                row, where it labelled the page from a corner; over the name it
-                labels the thing it belongs to. It also can't collide with the
-                first section's heading the way an eyebrow repeating the app's
-                own name did. */}
-            {/* Set in PP Mori rather than type-eyebrow's mono, and in normal
-                case rather than its caps: this one sits directly over the title,
-                where a mono line read as another document's furniture and caps
-                read as shouting a single word. The tracking comes down with the
-                caps — 0.08em is drawn to open up capitals and only looks loose on
-                lowercase. */}
-            <p className="type-eyebrow normal-case tracking-[0.02em] text-[color:var(--proposal-ink-faint)] [font-family:var(--font-pp-mori)]">
-              Proposal
-            </p>
-            <h1 className="type-display mx-auto mt-3.5 max-w-[42rem] text-balance text-[color:var(--proposal-ink)]">
+            {/* The title leads, with nothing over it. A "Proposal" eyebrow was
+                labelling the page from above the name of the thing it proposes,
+                and the two names below already say what kind of document this
+                is. */}
+            <h1 className="type-display max-w-[20ch] text-balance text-[color:var(--proposal-ink)] md:mx-auto">
               {headline}
             </h1>
+            {/* The sender's line is dropped on a phone: under a title that
+                already runs to two or three lines there, it pushed the credit
+                and the build itself further down for a sentence the page can be
+                read without. */}
             {note && (
-              <p className="type-lead mx-auto mt-6 max-w-[33rem] text-pretty text-[color:var(--proposal-ink-soft)]">
+              <p className="type-lead mt-3 hidden max-w-[32rem] text-pretty text-[color:var(--proposal-ink-soft)] md:mx-auto md:mt-4 md:block">
                 {note}
               </p>
             )}
 
-            {/* The names go under the title, not over it: they're the
-                document's metadata — who it's for, who wrote it — and above the
-                name they outranked the one thing the page is about. */}
+            {/* The two names as one credit row, the way a document credits
+                itself — they were two tall columns with their own labels above
+                them, big enough to read as a second headline and far enough
+                apart to read as unrelated. No rule over them: on a centred band
+                a full-width hairline under a centred column of type read as a
+                divider between two sections rather than as a credit line. The
+                space does the separating. */}
             {recipient && (
-              // No rule between the two: at the column's full height it ran from
-              // the label's cap to the name's baseline and aligned with neither,
-              // and their own labels already group them. The space does the
-              // separating instead, which is why it's wider than it was.
-              // One per line on a phone, side by side from sm. Squeezed into two
-              // columns at 390px the two pairs nearly touched and the centred
-              // masthead lost its composition; stacked, each is a clean
-              // label-over-name and the column stays centred.
-              <div className="mt-12 flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:justify-center sm:gap-x-14 md:mt-14 md:gap-x-16">
+              <div className="mt-5 flex flex-wrap items-center gap-x-10 gap-y-4 text-left md:mt-6 md:justify-center">
                 <BandName label="Prepared for" name={recipient} />
                 {/* The link carries the sender's name only, so their photo is
-                    looked back up from it. The recipient is a client and has no
-                    photo of ours to find — they keep their initials.
-                    Hidden on a phone: who the proposal is FOR is the fact worth
-                    the space at that width, and stacking both put four lines of
-                    metadata under the title. */}
+                    looked back up from it. The recipient is a client and has
+                    no photo of ours to find — they keep their initials.
+                    Dropped on a phone: who the page was made FOR is the fact
+                    worth the width there, and two of these side by side left
+                    each one squeezed against the gutters. */}
                 {from && (
                   <BandName
-                    className="max-sm:hidden"
+                    className="max-md:hidden"
                     label="Prepared by"
                     name={from}
                     avatar={teamAvatar(from)}
@@ -740,36 +817,41 @@ function ProposalContent() {
           the title and this heading, and across a void that size the heading
           read as a second page title rather than as the name's subordinate. */}
       <section className="flex-1 px-6 md:px-10">
-        <div className={`${RAIL} pt-14 md:pt-20`}>
-          <h2 className="type-h3">Your custom app</h2>
-          <p className="type-lead mt-5 max-w-[45rem] text-pretty text-muted-foreground">
-            {buildLead}
-          </p>
+        {/* On a phone the build comes first and the section's heading and lead
+            follow it: the panel IS what the reader opened the link for, and
+            under three lines of running text it started below the fold. From md
+            the reading order is the document's own again — heading, lead, then
+            the thing they describe. */}
+        <div className={`${RAIL} flex flex-col pt-12 md:pt-20`}>
+          <div className="order-2 mt-10 md:order-1 md:mt-0">
+            <h2 className="type-h3">Your custom app</h2>
+            <p className="type-lead mt-3 max-w-[45rem] text-pretty text-muted-foreground">
+              {buildLead}
+            </p>
+          </div>
 
-          {template ? (
-            <TemplateCard
-              template={template}
-              dark={theme === "dark"}
-              onSeeDetails={() => setPanelOpen(true)}
-            />
-          ) : (
-            <PromptCard
-              appName={appName || "Your app"}
-              prompt={prompt}
-              onCommit={setPrompt}
-            />
-          )}
+          <div className="order-1 md:order-2 md:mt-10">
+            {template ? (
+              <TemplateCard
+                template={template}
+                onSeeDetails={() => setPanelOpen(true)}
+              />
+            ) : (
+              <PromptCard prompt={prompt} onCommit={setPrompt} />
+            )}
+          </div>
         </div>
       </section>
 
       {/* How it becomes a real app. No bottom padding: the closing CTA below
           carries its own, the way the site's stacked sections do. */}
       <section className="px-6 md:px-10">
-        <div className={`${RAIL} pt-14 md:pt-20`}>
+        <div className={`${RAIL} pt-12 md:pt-20`}>
           <h2 className="type-h3">Sign up to build it</h2>
-          <p className="type-lead mt-5 max-w-[45rem] text-pretty text-muted-foreground">
-            Creating your workspace is what starts the build. Here’s how it
-            goes.
+          <p className="type-lead mt-3 max-w-[45rem] text-pretty text-muted-foreground">
+            Creating your workspace is what starts the build, and there is
+            nothing to install or set up first. The app is yours from the moment
+            it exists, on your own account. Here’s how it goes.
           </p>
 
           <SignupSteps steps={signupSteps(!!template)} />
@@ -791,7 +873,7 @@ function ProposalContent() {
             phone, and pretty only rescues a last line of ONE word — it left
             "build above." sitting on its own. Balance evens the two lines
             instead, which is what a short centred standfirst wants. */}
-        <p className="type-lead mx-auto mt-5 max-w-sm text-balance text-muted-foreground sm:max-w-xl">
+        <p className="type-lead mx-auto mt-4 max-w-sm text-balance text-muted-foreground sm:max-w-xl">
           Signing up creates your workspace and kicks off the build above.
         </p>
         <Link

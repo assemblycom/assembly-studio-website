@@ -81,7 +81,11 @@ function FeaturedStory({ study }: { study: CaseStudy }) {
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className="group grid gap-8 md:grid-cols-2 md:items-center md:gap-12"
+      // Stacked on a phone this sits in the same column as the grid cards below
+      // it, so it has to keep their rhythm there — image to tag and tag to title
+      // both at 16px. Its own wider spacing is for the two-column layout, where
+      // nothing is under it to be measured against.
+      className="group grid gap-4 md:grid-cols-2 md:items-center md:gap-12"
     >
       <div className="relative aspect-[16/9] overflow-hidden rounded-lg bg-muted [[data-theme=dark]_&]:bg-white/[0.04]">
         {study.image && (
@@ -97,7 +101,7 @@ function FeaturedStory({ study }: { study: CaseStudy }) {
       </div>
       <div>
         <Tag label={sector} />
-        <div className="mt-5">
+        <div className="mt-4 md:mt-5">
           <StoryTitle
             company={study.shortName ?? study.company}
             headline={cardTitle(study)}

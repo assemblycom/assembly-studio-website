@@ -109,6 +109,18 @@ export default function RootLayout({
           type="font/otf"
           crossOrigin="anonymous"
         />
+        {/* ABC Diatype Mono, for the same reason. Without this it isn't requested
+            until the stylesheet has been parsed, by which point every mono
+            element — the stat badges under a case-study title, the sector tags,
+            the rail's unit chips — has already painted in the OS mono and visibly
+            re-renders when the real face lands. */}
+        <link
+          rel="preload"
+          href="/fonts/ABCDiatypeMono-Regular-Trial.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
         {/* Bitcount Grid Double — a dot-matrix display face used only for the
             tracker widget's metric number (LED-panel look). */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />

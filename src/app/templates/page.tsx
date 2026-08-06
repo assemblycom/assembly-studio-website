@@ -27,7 +27,12 @@ export default function TemplatesPage() {
               Get started
             </a>
           </div>
-          <div className="mt-8 md:mt-16">
+          {/* A full section step under the header, not a paragraph's worth: the
+              filter row is the top of a different thing, and at the old step it
+              read as a third line of the header block. Only from lg: below that
+              the filter row is sticky and carries its own pt-16 clearance, so a
+              margin on top of it left the grid stranded far from the hero. */}
+          <div className="lg:mt-20">
             <TemplatesBrowser templates={TEMPLATES} />
           </div>
         </div>

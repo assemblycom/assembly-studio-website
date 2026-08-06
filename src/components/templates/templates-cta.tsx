@@ -9,9 +9,15 @@ export function TemplatesCta() {
       <h2 className="type-display mx-auto max-w-md text-balance text-foreground md:max-w-2xl">
         Build the firm only you can build
       </h2>
+      {/* The break is explicit rather than left to the balancer: the two sentences
+          are the setup and the payoff, so the second one starts the second line
+          instead of the wrap landing mid-clause on "Run and / build". Only from
+          sm — at the narrow measure below that the copy wraps several times and a
+          forced break would strand a short line. */}
       <p className="type-lead mx-auto mt-5 max-w-sm text-pretty text-muted-foreground sm:max-w-xl">
-        Stop stitching together tools that were never meant to fit. Run and
-        build everything in one place.
+        Stop stitching together tools that were never meant to fit.{" "}
+        <br className="hidden sm:inline" />
+        Run and build everything in one place.
       </p>
       <a
         href={SIGNUP_URL}

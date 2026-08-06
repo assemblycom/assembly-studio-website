@@ -58,7 +58,7 @@ export function TemplateDetailPanel({
           different screen. */}
       <button
         type="button"
-        aria-label="Close template details"
+        aria-label="Close app details"
         onClick={onClose}
         className={`absolute inset-0 bg-[#0a0e1c]/20 backdrop-blur-[3px] transition-opacity duration-300 [[data-theme=dark]_&]:bg-black/50 ${
           open ? "opacity-100" : "opacity-0"
@@ -74,11 +74,11 @@ export function TemplateDetailPanel({
         }`}
       >
         <div className="flex shrink-0 items-center justify-between gap-4 border-b border-border px-6 py-4">
-          <p className="type-caption text-muted-foreground">Template details</p>
+          <p className="type-caption text-muted-foreground">App details</p>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close template details"
+            aria-label="Close app details"
             className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <IconClose className="size-[13px]" />
@@ -110,7 +110,7 @@ export function TemplateDetailPanel({
             />
           </div>
 
-          <h3 className="type-h4 mt-10">About this template</h3>
+          <h3 className="type-h4 mt-10">About this app</h3>
           <p className="type-body mt-3 text-foreground/80">
             {template.longDescription}
           </p>

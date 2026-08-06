@@ -215,8 +215,12 @@ export function HeroV76({
   };
 
 
+  // Dark stays flat on the page ground: the gradient started at #141414, three
+  // steps lighter than the #0a0a0a every other page opens on, so the landing
+  // page read as a different shade of dark. Light keeps its lift — there the
+  // ground is #ffffff and the gradient is what seats the hero.
   const groundGradient = dark
-    ? "linear-gradient(180deg, #141414 0%, #0d0d0d 55%, #0a0a0a 100%)"
+    ? "var(--background)"
     : "linear-gradient(180deg, #fcfcfd 0%, #f7f8fa 52%, #ffffff 100%)";
   const chevronCls = dark
     ? "bg-white/[0.06] text-white/70 ring-white/10 hover:bg-white/15 hover:text-white"
@@ -404,12 +408,11 @@ export function HeroV76({
                     className={`gap-0 rounded-2xl py-0 pb-0! shadow-none transition-transform duration-200 ease-out group-hover:-translate-y-0.5 ${dark ? "ring-0" : "ring-1 ring-black/[0.04]"}`}
                   >
                     <div data-slot="card-media" className="flex h-[212px] w-full items-center justify-center bg-[var(--card)]">
-                      {/* Light mode is the bare glyph — the tile is already
-                          outlined, so a second box around the plus read as a
-                          frame inside a frame. Dark mode keeps a filled chip,
-                          since an unframed hairline glyph all but disappears
-                          against the dark card face. */}
-                      <span className={`flex size-11 items-center justify-center rounded-xl transition-colors ${dark ? "bg-white/12 text-white/70 group-hover:bg-white/20" : "text-neutral-400 group-hover:text-neutral-600"}`}>
+                      {/* The bare glyph in both themes — the plus is the whole
+                          affordance, and the chip that used to sit behind it in
+                          dark was a second box inside an already-square tile.
+                          Hover brightens the glyph itself instead of the chip. */}
+                      <span className={`flex items-center justify-center transition-colors ${dark ? "text-white/70 group-hover:text-white" : "text-neutral-400 group-hover:text-neutral-600"}`}>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden>
                           <path d="M12 5v14M5 12h14" />
                         </svg>
