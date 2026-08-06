@@ -103,6 +103,15 @@ const CARD_CONTROL =
 // applies.
 const CARD_PROMPT_TEXT = "type-body text-[1rem] sm:text-[0.9375rem]";
 
+// Every small label on the masthead — "Proposal" over the title and the two names'
+// own labels. type-eyebrow's size, in PP Mori rather than its mono and in normal
+// case rather than its caps: mono read as another document's furniture on top of
+// the page's own face, and capitals on a two-word label read as shouting. The
+// tracking comes down with the caps, since 0.08em is drawn to open up capitals and
+// only looks loose on lowercase.
+const BAND_EYEBROW =
+  "type-eyebrow normal-case tracking-[0.02em] text-[color:var(--proposal-ink-faint)] [font-family:var(--font-pp-mori)]";
+
 /**
  * A template's name as the headline says it. Gallery names can carry a "New"
  * that belongs to the catalogue rather than to the app itself, and "New client
@@ -121,31 +130,30 @@ const firstName = (name: string) => name.split(/\s+/)[0] ?? "";
 /**
  * "Prepared for" / "Prepared by" — the two names the page opens on, as a pair
  * so it reads as a document that was addressed rather than as a landing page.
- * The recipient carries the band's full ink and the sender the soft step: they
- * are the same shape, and who the page is for is the one being emphasised.
+ *
+ * Both are set identically: the same ink, the same size, the same 28px avatar.
+ * The recipient used to take full ink against the sender's softer step, and side
+ * by side that read as one of the two being greyed out rather than as a
+ * hierarchy — they're a matched pair of facts about the document, so they look
+ * like one.
  */
 function BandName({
   label,
   name,
   avatar,
-  emphasis = false,
+  className = "",
 }: {
   label: string;
   name: string;
   /** Their photo, when we have one. Falls back to their initials. */
   avatar?: string;
-  emphasis?: boolean;
+  className?: string;
 }) {
   return (
     // items-center so the label sits over the pair it names rather than over the
     // full width of a stretched column — the band is centred.
-    <div className="flex flex-col items-center gap-2.5">
-      {/* Normal case, like the eyebrow over the title: three labels in one band
-          with two of them shouting would read as a mistake, and sentence case is
-          quieter under a centred masthead either way. */}
-      <p className="type-eyebrow normal-case tracking-[0.02em] text-[color:var(--proposal-ink-faint)]">
-        {label}
-      </p>
+    <div className={`flex flex-col items-center gap-2.5 ${className}`}>
+      <p className={BAND_EYEBROW}>{label}</p>
       <div className="flex items-center gap-2.5">
         <OptionAvatar
           option={{ value: name, label: name, avatar }}
@@ -156,13 +164,7 @@ function BandName({
             36px title read as a second headline rather than as the document's
             metadata — the treatment Linear, Notion and OpenAI all land on for a
             prepared-for/by pair at this width. */}
-        <span
-          className={`type-h4 max-sm:text-[0.9375rem] ${
-            emphasis
-              ? "text-[color:var(--proposal-ink)]"
-              : "text-[color:var(--proposal-ink-soft)]"
-          }`}
-        >
+        <span className="type-h4 max-sm:text-[0.9375rem] text-[color:var(--proposal-ink)]">
           {name}
         </span>
       </div>
@@ -191,6 +193,33 @@ function PromptCard({
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(prompt);
   const fieldRef = useRef<HTMLTextAreaElement | null>(null);
+  const boxRef = useRef<HTMLDivElement | null>(null);
+  const [moreBelow, setMoreBelow] = useState(false);
+
+  // Whether the prompt runs past the box, which is what the bottom fade is for.
+  // Tracked rather than assumed so the fade lifts once you reach the end — a
+  // permanent fade over the last line reads as text that never finishes.
+  //
+  // The first measurement goes through a microtask rather than the effect body,
+  // where a synchronous setState is a cascading render the repo's lint rule
+  // catches. NOT requestAnimationFrame: frames are paused in a hidden tab, so
+  // the fade would be missing until the tab was focused and scrolled. Effects
+  // run after paint, so layout is already settled by the time this reads it.
+  useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    let live = true;
+    const check = () => {
+      if (live)
+        setMoreBelow(el.scrollTop + el.clientHeight < el.scrollHeight - 1);
+    };
+    queueMicrotask(check);
+    el.addEventListener("scroll", check, { passive: true });
+    return () => {
+      live = false;
+      el.removeEventListener("scroll", check);
+    };
+  }, [prompt, draft, editing]);
 
   // The field grows to whatever it holds, so a long prompt is all there rather
   // than a few lines of it above a scrollbar — and a short one doesn't leave a
@@ -252,7 +281,12 @@ function PromptCard({
           for another. The box takes the focus ring; the textarea itself carries
           no chrome at all. */}
       <div className={CARD_FIELD_INSET}>
-        <div className={CARD_FIELD}>
+        <div
+          ref={boxRef}
+          className={`${CARD_FIELD} ${
+            moreBelow && !editing ? "prompt-fade-bottom" : ""
+          }`}
+        >
           {editing ? (
             <>
               <label className="sr-only" htmlFor="proposal-prompt">
@@ -676,12 +710,16 @@ function ProposalContent() {
               // masthead lost its composition; stacked, each is a clean
               // label-over-name and the column stays centred.
               <div className="mt-12 flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:justify-center sm:gap-x-14 md:mt-14 md:gap-x-16">
-                <BandName label="Prepared for" name={recipient} emphasis />
+                <BandName label="Prepared for" name={recipient} />
                 {/* The link carries the sender's name only, so their photo is
                     looked back up from it. The recipient is a client and has no
-                    photo of ours to find — they keep their initials. */}
+                    photo of ours to find — they keep their initials.
+                    Hidden on a phone: who the proposal is FOR is the fact worth
+                    the space at that width, and stacking both put four lines of
+                    metadata under the title. */}
                 {from && (
                   <BandName
+                    className="max-sm:hidden"
                     label="Prepared by"
                     name={from}
                     avatar={teamAvatar(from)}
@@ -749,7 +787,11 @@ function ProposalContent() {
         <h2 className="type-display mx-auto max-w-md text-balance text-foreground md:max-w-2xl">
           Ready{recipient ? `, ${firstName(recipient)}` : ""}?
         </h2>
-        <p className="type-lead mx-auto mt-5 max-w-sm text-pretty text-muted-foreground sm:max-w-xl">
+        {/* text-balance rather than text-pretty. This line runs to two lines on a
+            phone, and pretty only rescues a last line of ONE word — it left
+            "build above." sitting on its own. Balance evens the two lines
+            instead, which is what a short centred standfirst wants. */}
+        <p className="type-lead mx-auto mt-5 max-w-sm text-balance text-muted-foreground sm:max-w-xl">
           Signing up creates your workspace and kicks off the build above.
         </p>
         <Link

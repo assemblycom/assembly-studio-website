@@ -1648,6 +1648,25 @@ html[data-theme="dark"] .v63-ring-solid::before {
   }
 }
 
+/* The proposal prompt's soft bottom edge, for a prompt that runs past the box.
+   Same gradient and same reasoning as .production-cut-bottom above: a hard chop
+   landing mid-line reads as a rendering fault, where a fade reads as "continues
+   below". Applied in both themes — the text dissolves into the field's own fill
+   rather than into the page, so it doesn't wash out the way an edge fade on a
+   white surface does.
+
+   The component only sets this while there is more to scroll to, and never while
+   the field is being typed in: over a live field the mask would fade the very
+   line the caret is on. */
+.prompt-fade-bottom {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 calc(100% - 2.5rem),
+    transparent
+  );
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 2.5rem), transparent);
+}
+
 /* Slim overlay-style scrollbar for scroll areas inside sheets/modals, where
    the default bar reads far too heavy against the panel edge. */
 .scrollbar-slim {
