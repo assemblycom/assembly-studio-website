@@ -87,6 +87,10 @@
   --proposal-field: #101010;
   --proposal-ink: #ffffff;
   --proposal-ink-soft: rgba(255, 255, 255, 0.75);
+  /* The band's chrome step: the small labels over the names and the app title,
+     which sit below the reading inks so they read as captions on the print
+     rather than as another line of the page. */
+  --proposal-ink-faint: rgba(255, 255, 255, 0.5);
   --proposal-ink-fill: rgba(255, 255, 255, 0.15);
 }
 
@@ -121,13 +125,14 @@
   --mock-negative-bg: rgba(224, 122, 113, 0.14);
   --mock-negative-fg: #d9928b;
 
-  /* Dark mode inverts the masthead rather than darkening it: the band goes to
-     the brand lime and the ink to black. A near-black band on a near-black page
-     would be the one place the proposal stopped reading as a printed thing. */
-  --proposal-field: #d9ed92;
-  --proposal-ink: #101010;
-  --proposal-ink-soft: rgba(16, 16, 16, 0.7);
-  --proposal-ink-fill: rgba(16, 16, 16, 0.1);
+  /* The masthead is black with white ink in both themes — inverting it (it was
+     the brand lime, then a light neutral) put a second colour on a page that
+     reads better with none. In dark the field is the page's own ground rather
+     than the light theme's #101010: those two blacks are a visible step apart,
+     and the seam where the band ended read as a colour change. The band's
+     bottom edge is meant to disappear here; the header hairline and the space
+     around the title are what set the masthead off. */
+  --proposal-field: var(--background);
 }
 
 @theme inline {

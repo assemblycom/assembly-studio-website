@@ -47,7 +47,36 @@ export function OptionAvatar({
    */
   tone?: "default" | "field";
 }) {
-  const [failed, setFailed] = useState(false);
+  // The photo is loaded off-document first and only rendered once it's known to
+  // be good, rather than rendered hopefully and withdrawn on error.
+  //
+  // Reacting to the error can't be made reliable here: the markup is
+  // server-rendered, so the browser starts — and a missing file finishes — the
+  // request before hydration attaches any handler, and the engines disagree about
+  // what a broken <img> then looks like (Chrome collapses one with an empty alt
+  // to nothing, others draw their broken-image glyph over the initials). Probing
+  // first means a missing file is never in the document to be drawn at all.
+  // The src that came back good, rather than a boolean: switching to a different
+  // person's photo then reads as not-yet-loaded on its own, with no reset written
+  // into the effect body (a synchronous setState there is a cascading render).
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    const src = option.avatar;
+    if (!src) return;
+    let live = true;
+    const probe = new Image();
+    probe.onload = () => {
+      if (live && probe.naturalWidth > 0) setLoadedSrc(src);
+    };
+    probe.src = src;
+    return () => {
+      live = false;
+    };
+  }, [option.avatar]);
+
+  const loaded = !!option.avatar && loadedSrc === option.avatar;
+
   const initials = option.label
     .split(/\s+/)
     .slice(0, 2)
@@ -73,13 +102,13 @@ export function OptionAvatar({
       }`}
     >
       {initials}
-      {option.avatar && !failed && (
-        // A plain img rather than next/image: these are small fixed-size photos
-        // and a missing file has to fall back to the initials rather than throw.
+      {option.avatar && loaded && (
+        // A plain img rather than next/image: these are small fixed-size photos,
+        // and the src is already decoded by the probe above, so this render is
+        // guaranteed to paint.
         <img
           src={option.avatar}
           alt=""
-          onError={() => setFailed(true)}
           className="absolute inset-0 size-full object-cover"
         />
       )}
@@ -223,7 +252,12 @@ export function SelectMenu({
       // shows two options when it could show ten.
       const flip = below < MAX_MENU_HEIGHT && above > below;
       setPlacement(flip ? "top" : "bottom");
-      setMaxHeight(Math.max(MIN_MENU_HEIGHT, Math.min(MAX_MENU_HEIGHT, flip ? above : below)));
+      setMaxHeight(
+        Math.max(
+          MIN_MENU_HEIGHT,
+          Math.min(MAX_MENU_HEIGHT, flip ? above : below),
+        ),
+      );
     };
     measure();
     window.addEventListener("resize", measure);
@@ -337,7 +371,9 @@ export function SelectMenu({
             <ul
               role="listbox"
               aria-label={label}
-              style={{ maxHeight: maxHeight - (searchable ? SEARCH_ROW_HEIGHT : 0) }}
+              style={{
+                maxHeight: maxHeight - (searchable ? SEARCH_ROW_HEIGHT : 0),
+              }}
               className="scrollbar-slim overflow-y-auto overscroll-contain p-1"
             >
               {groups.length === 0 && (
@@ -354,7 +390,9 @@ export function SelectMenu({
               {groups.map((group, i) => (
                 <li
                   key={group.key || "_"}
-                  className={i > 0 ? "mt-1.5 border-t border-border pt-1.5" : ""}
+                  className={
+                    i > 0 ? "mt-1.5 border-t border-border pt-1.5" : ""
+                  }
                 >
                   {group.key && (
                     <p className="px-3 pb-1.5 pt-2 text-[12px] leading-none tracking-[0.01em] text-muted-foreground">
