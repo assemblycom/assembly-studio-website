@@ -247,8 +247,13 @@ export function ProposalCreator() {
       />
       <div className="mx-auto w-full max-w-xl px-6 pb-16 pt-10 md:pb-24 md:pt-14">
         <h1 className="type-h2">Proposal creator</h1>
+        {/* Says what the tool does and what you leave with. The old line ("A page
+            made for one person, and a link you can send them") described the
+            output as two things joined by a comma and never said what to do
+            here. */}
         <p className="type-lead mt-4 max-w-md text-muted-foreground">
-          A page made for one person, and a link you can send them.
+          Write up what we&rsquo;d build for one client. You get a link that
+          opens a page addressed to them.
         </p>
 
         {/* Room between the title block and the first field — at mt-10 the form
@@ -452,30 +457,24 @@ export function ProposalCreator() {
           <button type="button" onClick={submit} className={`${primary} mt-1`}>
             {link ? "Update link" : "Create proposal page"}
           </button>
-        </div>
 
-        {link && (
-          // The result, not a confirmation screen: the form stays open above it so
-          // a name typo is a two-second fix rather than a restart.
-          <div className="mt-8 rounded-xl border border-border p-5">
-            {/* The two things you do with a link, and not the link itself: a long
-              query string printed in full was the biggest thing on the page and
-              nobody reads it — copying it or opening it is the whole job. */}
-            <div className="flex flex-wrap gap-2.5">
-              <button type="button" onClick={copy} className={primary}>
-                {copied ? "Copied" : "Copy link"}
-              </button>
-              <a
-                href={link}
-                target="_blank"
-                rel="noreferrer"
-                className={outline}
-              >
-                Open page
-              </a>
-            </div>
-          </div>
-        )}
+          {/* The one thing you do with the link, as a secondary action under the
+              button that made it. This was a bordered panel holding two buttons,
+              which announced itself as a result step and left them rattling
+              around in a box that said nothing. The form stays open above it, so
+              a name typo is a two-second fix rather than a restart.
+              The link itself is deliberately not printed: a long query string in
+              full was the biggest thing on the page and nobody reads it.
+              Full width, like the button above it — the column stretches its
+              children, so this just doesn't fight it. h-10 matches the primary's
+              40px: the outline variant's border would otherwise make it 2px
+              taller, which shows when the two are stacked and the same width. */}
+          {link && (
+            <button type="button" onClick={copy} className={`${outline} h-10`}>
+              {copied ? "Copied" : "Copy link"}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* The tool closes on the same brand aurora as every page on the site,

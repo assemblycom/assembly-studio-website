@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { TEMPLATES, type Template } from "@/lib/templates";
 import {
   MAX_APP_NAME_LENGTH,
+  MAX_PROMPT_LENGTH,
   buildSignupUrl,
   templateSignupUrl,
 } from "@/lib/constants";
@@ -55,24 +56,52 @@ const NAV_GUTTER = "px-6 md:px-10";
 const NAV_ROW = "flex h-14 cursor-default items-center justify-between lg:h-16";
 
 // The build panel, shared by the prompt and the template so a typed idea and a
-// picked template arrive as the same object. Card and well are both tokens: in
-// light the well steps down from a white card, in dark it steps up off a darker
-// one, which is the same lift either way.
+// picked template arrive as the same object.
+//
+// Built like the steps list below it: one outlined container, no fill, its parts
+// separated by hairlines rather than by nested surfaces. It used to be a filled
+// card with a filled well inside it, which put three tones inside one panel and
+// made the same information look heavier than the table a screen down.
+//
 // mt-10 under the section's lead — the step the article page puts between its
 // running text and the media that follows it.
-const CARD =
-  "mt-10 rounded-xl border border-border bg-card p-3 [[data-theme=dark]_&]:border-white/[0.08]";
-const CARD_HEAD = "flex items-center justify-between gap-4 px-2.5 pb-3 pt-2";
-// The well hugs what's in it rather than holding a floor: a prompt of a
-// paragraph or two and a cover-beside-a-summary come out within a line of each
-// other, and a fixed height left whichever variant was shorter sitting in an
-// empty panel. The cover's size (below) is picked to land in that same range.
-const CARD_WELL = "rounded-lg bg-muted p-6 md:p-8";
+const CARD = "mt-10 overflow-hidden rounded-xl border border-border";
+const CARD_HEAD =
+  "flex items-center justify-between gap-4 border-b border-border px-5 py-4";
+// The body's padding matches a step row's, so the two panels are set to the same
+// rhythm. Used by the template variant, whose body is a cover and a summary.
+const CARD_BODY = "px-5 py-4";
+
+// The prompt's field. It IS a text box, and it looks like one in both states
+// rather than only once you press Edit — as bare text on the card's own ground it
+// read as a quote someone had pasted in, and the field appearing on edit was the
+// thing that made the change feel abrupt. Inset from the card so the box has an
+// edge of its own; filled rather than outlined, since the card is already an
+// outline and two hairlines inside each other read as a form.
+// The box stops growing at 20rem and scrolls inside itself past that. Left to
+// grow, a long prompt pushed the whole page down — the steps and the action ended
+// up a scroll away, and the proposal turned into a wall of prompt. Scrolling in a
+// text box is what a text box does, so the cap costs nothing; the same ceiling
+// applies while reading, so the panel is the same size in either state.
+const CARD_FIELD_INSET = "p-3";
+const CARD_FIELD =
+  "scrollbar-slim max-h-80 overflow-y-auto rounded-lg bg-muted px-4 py-3.5 focus-within:ring-1 focus-within:ring-inset focus-within:ring-foreground/20";
 // The card's quiet controls — Edit / Cancel / Save, and the template's way into
 // its full spec. Text buttons rather than buttons: the page has one action and
-// it isn't in here.
+// it isn't in here. text-sm because that's the size every button on this site
+// is set at; type-caption's 13px is for meta, and at that step these read as
+// labels you can't press.
 const CARD_CONTROL =
-  "type-caption text-muted-foreground transition-colors hover:text-foreground";
+  "text-sm text-muted-foreground transition-colors hover:text-foreground";
+
+// The prompt, reading and being edited. 16px on a phone and 15px from sm up:
+// under 16px, iOS Safari zooms the whole page the moment the field takes focus.
+// The site's own FIELD_CLS carries the same guard for the same reason, and it
+// isn't a type decision — which is why the paragraph you read gets it too, so
+// nothing resizes when Edit turns one into the other. Only the size is set here,
+// not the leading: type-body's unitless 1.6 then scales with whichever step
+// applies.
+const CARD_PROMPT_TEXT = "type-body text-[1rem] sm:text-[0.9375rem]";
 
 /**
  * A template's name as the headline says it. Gallery names can carry a "New"
@@ -120,8 +149,12 @@ function BandName({
           size={28}
           tone="field"
         />
+        {/* A step down on a phone. At the desktop 18px, two of these under a
+            36px title read as a second headline rather than as the document's
+            metadata — the treatment Linear, Notion and OpenAI all land on for a
+            prepared-for/by pair at this width. */}
         <span
-          className={`type-h4 ${
+          className={`type-h4 max-sm:text-[0.9375rem] ${
             emphasis
               ? "text-[color:var(--proposal-ink)]"
               : "text-[color:var(--proposal-ink-soft)]"
@@ -170,7 +203,7 @@ function PromptCard({
   return (
     <div className={CARD}>
       <div className={CARD_HEAD}>
-        <p className="type-caption truncate text-muted-foreground">{appName}</p>
+        <p className="truncate text-sm text-muted-foreground">{appName}</p>
         <div className="flex shrink-0 items-center gap-3.5">
           {editing ? (
             <>
@@ -187,7 +220,10 @@ function PromptCard({
                   onCommit(draft);
                   setEditing(false);
                 }}
-                className="type-caption text-foreground transition-opacity hover:opacity-70"
+                // Same size as its Cancel, and solid ink against Cancel's muted:
+                // the pair's hierarchy is carried in the ink, not in a weight —
+                // the family's 500 is a SemiBold and would shout here.
+                className="text-sm text-foreground transition-opacity hover:opacity-70"
               >
                 Save
               </button>
@@ -207,46 +243,52 @@ function PromptCard({
         </div>
       </div>
 
-      {/* Editing happens IN the well, not in a field inside it: a bordered box
-          on its own fill made a third surface inside the card, and the words
-          moved as you started typing. The textarea is the same type in the same
-          place as the paragraph it replaces — the well itself takes the focus
-          ring, so the surface you were reading is the one that goes live. */}
-      <div
-        className={`${CARD_WELL} focus-within:ring-1 focus-within:ring-inset focus-within:ring-foreground/15`}
-      >
-        {editing ? (
-          <>
-            <label className="sr-only" htmlFor="proposal-prompt">
-              The app idea, yours to edit
-            </label>
-            <textarea
-              ref={fieldRef}
-              id="proposal-prompt"
-              autoFocus
-              rows={1}
-              value={draft}
-              onChange={(event) => setDraft(event.target.value)}
-              spellCheck={false}
-              // overflow-hidden so the auto-grown field never shows a scrollbar
-              // of its own, and resize-none because the height is not the
-              // reader's problem to solve.
-              //
-              // It opts out of the site's global focus ring (see the
-              // :focus-visible block in globals.css), and out of BOTH of its
-              // halves: that rule pairs an ink outline with a
-              // background-coloured box-shadow, and clearing only the outline
-              // left the shadow painting a hard near-black rectangle around the
-              // line of text in dark mode. The well takes the focus ring here,
-              // so this element wants no ring of its own.
-              className="type-body block w-full resize-none overflow-hidden border-0 bg-transparent p-0 text-foreground outline-none focus-visible:shadow-none focus-visible:outline-none"
-            />
-          </>
-        ) : (
-          <p className="type-body whitespace-pre-wrap text-pretty text-foreground">
-            {prompt}
-          </p>
-        )}
+      {/* The field is the same box in both states — the textarea simply replaces
+          the paragraph inside it, at the same type in the same place, so pressing
+          Edit puts a caret in what you were reading instead of swapping one shape
+          for another. The box takes the focus ring; the textarea itself carries
+          no chrome at all. */}
+      <div className={CARD_FIELD_INSET}>
+        <div className={CARD_FIELD}>
+          {editing ? (
+            <>
+              <label className="sr-only" htmlFor="proposal-prompt">
+                The app idea, yours to edit
+              </label>
+              <textarea
+                ref={fieldRef}
+                id="proposal-prompt"
+                autoFocus
+                rows={1}
+                value={draft}
+                onChange={(event) => setDraft(event.target.value)}
+                spellCheck={false}
+                // The same ceiling the creator writes prompts against, and the
+                // one buildSignupUrl trims to — without it you could type a
+                // prompt here that silently lost its tail on the way to signup.
+                maxLength={MAX_PROMPT_LENGTH}
+                // overflow-hidden so the auto-grown field never shows a
+                // scrollbar of its own, and resize-none because the height is
+                // not the reader's problem to solve.
+                //
+                // It opts out of the site's global focus ring (see the
+                // :focus-visible block in globals.css), and out of BOTH of its
+                // halves: that rule pairs an ink outline with a
+                // background-coloured box-shadow, and clearing only the outline
+                // left the shadow painting a hard near-black rectangle around
+                // the line of text in dark mode. The box around it carries the
+                // ring, so this element wants none of its own.
+                className={`${CARD_PROMPT_TEXT} block w-full resize-none overflow-hidden border-0 bg-transparent p-0 text-foreground outline-none focus-visible:shadow-none focus-visible:outline-none`}
+              />
+            </>
+          ) : (
+            <p
+              className={`${CARD_PROMPT_TEXT} whitespace-pre-wrap text-pretty text-foreground`}
+            >
+              {prompt}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -271,7 +313,7 @@ function TemplateCard({
   return (
     <div className={CARD}>
       <div className={CARD_HEAD}>
-        <p className="type-caption truncate text-muted-foreground">
+        <p className="truncate text-sm text-muted-foreground">
           {template.title}
         </p>
         <button type="button" onClick={onSeeDetails} className={CARD_CONTROL}>
@@ -279,15 +321,22 @@ function TemplateCard({
         </button>
       </div>
 
-      <div className={CARD_WELL}>
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-7">
-          {/* The cover, at the one size it's framed at here. Same framing as the
-              catalogue cards: a square, the mock scaled into it, and the
-              hairline drawn over the cover rather than as a border, so the
-              widget fills the whole square. */}
-          <div className="relative w-32 shrink-0 sm:w-40">
+      {/* The cover and the writing stay two blocks rather than one panel holding
+          both — sharing one, the picture read as part of the paragraph's surface
+          instead of as the app being proposed. Now that the card is outlined
+          rather than filled, they're divided by a hairline instead of by their
+          own fills, which is how the steps list separates its rows. They stack
+          on a phone, where the rule runs across instead of down. */}
+      <div className="flex flex-col sm:flex-row sm:items-stretch">
+        {/* The cover's block. Same framing as the catalogue cards: a square, the
+            mock scaled into it, and the hairline drawn over the cover rather than
+            as a border, so the widget fills the whole square. The square is
+            centred in the block, which stretches to the height of the writing
+            beside it. */}
+        <div className="flex shrink-0 items-center justify-center border-b border-border p-5 sm:w-48 sm:border-b-0 sm:border-r">
+          <div className="relative aspect-square w-full max-w-36">
             <MockFit
-              className={`relative aspect-square overflow-hidden rounded-[14px] bg-background [[data-theme=dark]_&]:bg-[#151515] ${
+              className={`relative aspect-square overflow-hidden rounded-[12px] bg-background [[data-theme=dark]_&]:bg-[#151515] ${
                 MOCK_DESIGN_SIZE[template.slug] ?? ""
               }`}
             >
@@ -304,52 +353,113 @@ function TemplateCard({
             </MockFit>
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 rounded-[14px] border border-border/60 [[data-theme=dark]_&]:border-transparent"
+              className="pointer-events-none absolute inset-0 rounded-[12px] border border-border/60 [[data-theme=dark]_&]:border-transparent"
             />
           </div>
+        </div>
 
-          <div className="min-w-0">
-            <p className="type-body text-pretty text-foreground">
-              {template.longDescription}
-            </p>
-            {/* What comes in it, as tags rather than as a section of its own:
-                the full list with a sentence on each is in the details panel. */}
-            {template.features.length > 0 && (
-              <ul className="mt-5 flex flex-wrap gap-1.5">
-                {template.features.map((feature) => (
-                  <li
-                    key={feature}
-                    className="rounded-sm border border-border bg-background px-2 py-1 text-[11px] uppercase leading-none tracking-[0.04em] text-muted-foreground [font-family:var(--font-diatype-mono),ui-monospace,monospace] [[data-theme=dark]_&]:border-white/[0.1] [[data-theme=dark]_&]:bg-white/[0.05]"
-                  >
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+        {/* The writing's block, on the same padding as the prompt variant's body
+            so a template and a typed idea are set identically. */}
+        <div className={`${CARD_BODY} min-w-0 flex-1`}>
+          <p className="type-body text-pretty text-foreground">
+            {template.longDescription}
+          </p>
+          {/* What comes in it, as tags rather than as a section of its own: the
+              full list with a sentence on each is in the details panel. Filled
+              rather than outlined now the card around them is outlined — two
+              nested hairlines read as a form, a quiet fill reads as a tag. */}
+          {template.features.length > 0 && (
+            <ul className="mt-5 flex flex-wrap gap-1.5">
+              {template.features.map((feature) => (
+                <li
+                  key={feature}
+                  className="rounded-sm bg-muted px-2 py-1 text-[11px] uppercase leading-none tracking-[0.04em] text-muted-foreground [font-family:var(--font-diatype-mono),ui-monospace,monospace] [[data-theme=dark]_&]:bg-white/[0.06]"
+                >
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-/** The one action's arrow, at the weight the site's other inline arrows use. */
-function ArrowRight() {
+/**
+ * The steps, as the site's expanding rows: the FAQ's divided-row mechanics (a
+ * title-and-chevron control over a grid-rows drawer) inside the outline the
+ * security list boxes its rows with.
+ *
+ * Numbers are gone with the change. They were carrying the order while every
+ * step's copy was on show; with one row open at a time, a position in a list
+ * says little about what you're reading, and the security rows drop theirs at
+ * exactly the same point for the same reason.
+ *
+ * Single-open, matching the FAQ and the security rows — opening one closes the
+ * last. The first is open on arrival so the section reads as filled in rather
+ * than as three things to go and click.
+ */
+function SignupSteps({ steps }: { steps: { title: string; body: string }[] }) {
+  const [openTitle, setOpenTitle] = useState<string | null>(
+    steps[0]?.title ?? null,
+  );
+
   return (
-    <svg
-      aria-hidden
-      width="15"
-      height="15"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M5 12h14" />
-      <path d="m12 5 7 7-7 7" />
-    </svg>
+    <ul className="mt-10 overflow-hidden rounded-xl border border-border">
+      {steps.map((step) => {
+        const open = openTitle === step.title;
+        return (
+          <li
+            key={step.title}
+            className="border-t border-border first:border-t-0"
+          >
+            <button
+              type="button"
+              onClick={() => setOpenTitle(open ? null : step.title)}
+              aria-expanded={open}
+              className="group flex w-full cursor-pointer items-center justify-between gap-4 px-5 py-4 text-left"
+            >
+              <span className="type-body text-foreground">{step.title}</span>
+              {/* Rests pointing right and swings down as the row opens — the
+                  direction the copy arrives from, and the same 90° turn at the
+                  same 300ms as every other expanding row on the site. */}
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 20 20"
+                fill="none"
+                aria-hidden
+                className={`shrink-0 text-muted-foreground transition-[transform,color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:text-foreground motion-reduce:transition-none ${
+                  open ? "rotate-0" : "-rotate-90"
+                }`}
+              >
+                <path
+                  d="M5 8l5 5 5-5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            {/* Reveal via grid-rows 0fr → 1fr, so it animates without measuring
+                the copy. */}
+            <div
+              className={`grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none ${
+                open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+              }`}
+            >
+              <div className="overflow-hidden">
+                <p className="type-body max-w-[40rem] px-5 pb-4 text-pretty text-muted-foreground">
+                  {step.body}
+                </p>
+              </div>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
 
@@ -437,8 +547,13 @@ function ProposalContent() {
   // The prompt is editable, so what signup receives is whatever the card says
   // now — not what the link was written with. Seeded once: this page carries no
   // navigation, so the query it mounted with is the query it keeps.
+  // Clamped to the same ceiling the field enforces while typing: the query is
+  // hand-editable, and maxLength only governs what a person types, so a
+  // longer-than-supported prompt could otherwise arrive by link and lose its
+  // tail silently when signup trimmed it.
   const [prompt, setPrompt] = useState(
-    promptParam || "A brand-new app, from a blank canvas.",
+    promptParam.slice(0, MAX_PROMPT_LENGTH) ||
+      "A brand-new app, from a blank canvas.",
   );
 
   // What the headline calls the thing being built: a template's own title, or
@@ -479,9 +594,14 @@ function ProposalContent() {
           Tailwind compiles an arbitrary hex through a different colour space, and
           the panels drawn in the same colour further down showed up a shade off
           the band. */}
+      {/* A full-bleed hairline closes the masthead. It earns its keep in dark,
+          where the band has no colour of its own and the hero would otherwise
+          run into the page with nothing but space between them; in light the
+          black band's own edge already does the work, so the rule is drawn in
+          --border and simply lands on that boundary. */}
       <header
         style={{ backgroundColor: "var(--proposal-field)" }}
-        className="relative"
+        className="relative border-b border-border"
       >
         {/* The site's nav, standing in: the mark where every other page has it,
             and what this page is where the nav's actions would be. The mark is
@@ -522,7 +642,11 @@ function ProposalContent() {
                 labels the thing it belongs to. It also can't collide with the
                 first section's heading the way an eyebrow repeating the app's
                 own name did. */}
-            <p className="type-eyebrow text-[color:var(--proposal-ink-faint)]">
+            {/* Set in PP Mori rather than type-eyebrow's mono, keeping the
+                eyebrow's size, caps and tracking: this one sits directly over
+                the title, and a mono line there read as another document's
+                furniture on top of the page's own face. */}
+            <p className="type-eyebrow text-[color:var(--proposal-ink-faint)] [font-family:var(--font-pp-mori)]">
               Proposal
             </p>
             <h1 className="type-display mx-auto mt-3.5 max-w-[42rem] text-balance text-[color:var(--proposal-ink)]">
@@ -542,10 +666,11 @@ function ProposalContent() {
               // the label's cap to the name's baseline and aligned with neither,
               // and their own labels already group them. The space does the
               // separating instead, which is why it's wider than it was.
-              // A narrower gap on a phone keeps the two side by side, where 56px
-              // wrapped them into a stack two labels tall for no reason — the
-              // names are short, the space just wasn't there.
-              <div className="mt-12 flex flex-wrap items-start justify-center gap-x-8 gap-y-6 sm:gap-x-14 md:mt-14 md:gap-x-16">
+              // One per line on a phone, side by side from sm. Squeezed into two
+              // columns at 390px the two pairs nearly touched and the centred
+              // masthead lost its composition; stacked, each is a clean
+              // label-over-name and the column stays centred.
+              <div className="mt-12 flex flex-col items-center gap-6 sm:flex-row sm:items-start sm:justify-center sm:gap-x-14 md:mt-14 md:gap-x-16">
                 <BandName label="Prepared for" name={recipient} emphasis />
                 {/* The link carries the sender's name only, so their photo is
                     looked back up from it. The recipient is a client and has no
@@ -574,7 +699,7 @@ function ProposalContent() {
       <section className="flex-1 px-6 md:px-10">
         <div className={`${RAIL} pt-14 md:pt-20`}>
           <h2 className="type-h3">Your custom app</h2>
-          <p className="type-lead mt-5 max-w-[33rem] text-pretty text-muted-foreground">
+          <p className="type-lead mt-5 max-w-[45rem] text-pretty text-muted-foreground">
             {buildLead}
           </p>
 
@@ -594,77 +719,40 @@ function ProposalContent() {
         </div>
       </section>
 
-      {/* How it becomes a real app, then the one action. The steps are ruled off
-          each other rather than carded: they're the reading at the end of a
-          document, and the only panel down here should be the one you act on. */}
+      {/* How it becomes a real app. No bottom padding: the closing CTA below
+          carries its own, the way the site's stacked sections do. */}
       <section className="px-6 md:px-10">
-        <div className={`${RAIL} pb-20 pt-14 md:pb-28 md:pt-20`}>
+        <div className={`${RAIL} pt-14 md:pt-20`}>
           <h2 className="type-h3">Sign up to build it</h2>
-          <p className="type-lead mt-5 max-w-[33rem] text-pretty text-muted-foreground">
+          <p className="type-lead mt-5 max-w-[45rem] text-pretty text-muted-foreground">
             Creating your workspace is what starts the build. Here’s how it
             goes.
           </p>
 
-          {/* The index rides beside the title as the site's own mono "[1]" (see
-              the step strip in home/how-it-works), rather than as a numeral in a
-              2rem gutter: the gutter left the number stranded a long way from the
-              words it belonged to, and on a phone it took a column the text
-              needed. divide-y rather than a border on every row, so the list is
-              ruled BETWEEN its steps and doesn't close with a rule that made it
-              read as a table sitting above the action. */}
-          <ol className="mt-10 divide-y divide-border border-t border-border">
-            {signupSteps(!!template).map((step, i) => (
-              <li key={step.title} className="py-5 md:py-6">
-                <div className="flex items-baseline gap-2">
-                  {/* The title carries its weight in ink and in size rather than
-                      in a bold face: the family's 500 is a SemiBold, and a run
-                      of these set in it was the heaviest text on the page. */}
-                  <p className="type-lead text-foreground">{step.title}</p>
-                  <span
-                    aria-hidden
-                    className="shrink-0 text-[11px] tabular-nums text-muted-foreground/60 [font-family:var(--font-diatype-mono),ui-monospace,monospace]"
-                  >
-                    [{i + 1}]
-                  </span>
-                </div>
-                <p className="type-body mt-1.5 max-w-[36rem] text-pretty text-muted-foreground">
-                  {step.body}
-                </p>
-              </li>
-            ))}
-          </ol>
-
-          {/* The close, on the same printed colour the page opened on, so the
-              document is bracketed by it — in light, a black panel on white.
-              In dark that colour IS the page's ground, so instead of an outlined
-              hole it takes the lift the site gives its dark bordered containers
-              (bg-white/[0.04], as in home/how-it-works) and reads as a raised
-              surface. The fill is a utility rather than an inline style so the
-              dark override can win — an inline background beats any class.
-              The button inverts the pair, the band's ink as its fill, rather
-              than reaching for a third colour. */}
-          <div className="mt-12 flex flex-wrap items-center justify-between gap-8 rounded-xl bg-[var(--proposal-field)] px-7 py-8 md:mt-14 md:px-10 md:py-9 [[data-theme=dark]_&]:border [[data-theme=dark]_&]:border-border [[data-theme=dark]_&]:bg-white/[0.04]">
-            <div>
-              <p className="type-h4 text-[color:var(--proposal-ink)]">
-                Ready{recipient ? `, ${firstName(recipient)}` : ""}?
-              </p>
-              <p className="type-lead mt-1.5 text-[color:var(--proposal-ink-soft)]">
-                Signing up creates your workspace and kicks off the build above.
-              </p>
-            </div>
-            <Link
-              href={startHref}
-              style={{
-                backgroundColor: "var(--proposal-ink)",
-                color: "var(--proposal-field)",
-              }}
-              className="inline-flex h-12 shrink-0 items-center gap-2.5 rounded-lg px-7 text-sm transition-opacity hover:opacity-85"
-            >
-              <span>Sign up and build it</span>
-              <ArrowRight />
-            </Link>
-          </div>
+          <SignupSteps steps={signupSteps(!!template)} />
         </div>
+      </section>
+
+      {/* The close, built to the site's closing-CTA shape (see SecurityCta and
+          CustomersCta): a centred section with a display headline, one muted
+          line and the primary button, and no panel around any of it. It used to
+          be a bordered block in the printed colour with the button off to the
+          right, which was a CTA shape this site doesn't have anywhere else. The
+          only thing kept from it is the copy, which is addressed to whoever the
+          page was made for. */}
+      <section className="px-6 py-16 text-center md:py-24">
+        <h2 className="type-display mx-auto max-w-md text-balance text-foreground md:max-w-2xl">
+          Ready{recipient ? `, ${firstName(recipient)}` : ""}?
+        </h2>
+        <p className="type-lead mx-auto mt-5 max-w-sm text-pretty text-muted-foreground sm:max-w-xl">
+          Signing up creates your workspace and kicks off the build above.
+        </p>
+        <Link
+          href={startHref}
+          className="mx-auto mt-8 block w-full max-w-xs rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background transition-opacity hover:opacity-90 sm:inline-block sm:w-auto"
+        >
+          Sign up and build it
+        </Link>
       </section>
 
       <ProposalFooter />
