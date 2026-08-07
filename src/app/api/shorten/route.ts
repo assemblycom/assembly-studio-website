@@ -39,6 +39,30 @@ function isOwnProposalUrl(raw: string): boolean {
   }
 }
 
+/**
+ * The recipient's first name, as the link's path — proposal.assembly.com/ilia
+ * rather than /sHl0Ua. The name is already in the URL this shortens, so no new
+ * information is exposed by putting it in the path; it just reads as written for
+ * a person instead of machine-generated.
+ *
+ * First name only: a proposal is sent to one person and "ilia" is what reads
+ * well in a message. Anything unexpected in the name (accents, punctuation,
+ * a single-word company) falls back to a generated path rather than producing
+ * something mangled.
+ */
+function slugForRecipient(raw: string): string | null {
+  const first = raw.trim().split(/\s+/)[0] ?? "";
+  const slug = first
+    .normalize("NFD")
+    // Strip accents, so "Véronique" becomes "veronique" rather than dropping
+    // the letter entirely.
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+  // Two characters is the floor: shorter reads as a typo, not a name.
+  return slug.length >= 2 && slug.length <= 24 ? slug : null;
+}
+
 export async function POST(request: Request) {
   let url: unknown;
   try {
@@ -59,39 +83,59 @@ export async function POST(request: Request) {
   // creator carries on with the long link.
   if (!apiKey) return NextResponse.json({ url, shortened: false });
 
+  const base = slugForRecipient(
+    new URL(url).searchParams.get("for") ?? "",
+  );
+
+  // "ilia", then "ilia-2", "ilia-3"… A second, different proposal for the same
+  // person collides on the path, and a numbered one still reads as theirs. Past
+  // the last attempt the path is dropped and Short.io generates one, so a
+  // pile-up of Ilias degrades to a working link rather than to no link.
+  const attempts = base
+    ? [base, `${base}-2`, `${base}-3`, `${base}-4`, undefined]
+    : [undefined];
+
   try {
-    const response = await fetch(SHORT_IO_ENDPOINT, {
-      method: "POST",
-      headers: {
-        authorization: apiKey,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        domain: SHORT_IO_DOMAIN,
-        originalURL: url,
-        title: OG_TITLE,
-        // Short.io reads OG fields off the link record itself.
-        "og:title": OG_TITLE,
-        "og:description": OG_DESCRIPTION,
-        // Two proposals for the same person with the same brief are the same
-        // link; without this every regenerate mints another slug for one URL.
-        allowDuplicates: false,
-      }),
-      // Long enough for a cold call, short enough that the button doesn't hang.
-      signal: AbortSignal.timeout(8000),
-    });
+    for (const path of attempts) {
+      const response = await fetch(SHORT_IO_ENDPOINT, {
+        method: "POST",
+        headers: {
+          authorization: apiKey,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          domain: SHORT_IO_DOMAIN,
+          originalURL: url,
+          ...(path ? { path } : {}),
+          title: OG_TITLE,
+          // Short.io reads OG fields off the link record itself.
+          "og:title": OG_TITLE,
+          "og:description": OG_DESCRIPTION,
+          // Regenerating the same proposal returns the link that already exists
+          // rather than minting a second slug for one URL — which also means a
+          // repeat of an identical proposal keeps the name it was given.
+          allowDuplicates: false,
+        }),
+        // Long enough for a cold call, short enough that the button doesn't hang.
+        signal: AbortSignal.timeout(8000),
+      });
 
-    if (!response.ok) {
-      console.error(
-        `Short.io returned ${response.status}: ${await response.text()}`,
-      );
-      return NextResponse.json({ url, shortened: false });
+      if (response.ok) {
+        const data = (await response.json()) as { shortURL?: string };
+        if (!data.shortURL) break;
+        return NextResponse.json({ url: data.shortURL, shortened: true });
+      }
+
+      // 409 is the path being taken by a different proposal — try the next
+      // candidate. Anything else is a real failure and retrying won't fix it.
+      if (response.status !== 409) {
+        console.error(
+          `Short.io returned ${response.status}: ${await response.text()}`,
+        );
+        break;
+      }
     }
-
-    const data = (await response.json()) as { shortURL?: string };
-    if (!data.shortURL) return NextResponse.json({ url, shortened: false });
-
-    return NextResponse.json({ url: data.shortURL, shortened: true });
+    return NextResponse.json({ url, shortened: false });
   } catch (error) {
     console.error("Short.io request failed", error);
     return NextResponse.json({ url, shortened: false });

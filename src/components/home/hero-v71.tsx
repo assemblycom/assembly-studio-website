@@ -1323,8 +1323,13 @@ function CardRetainer() {
     // dark's: the same 30% of ink that reads as a mid grey on a near-black face
     // is a heavy slab on a near-white one, and the two accented bars are what
     // the card is about.
-    <div className="flex h-full flex-col bg-[var(--v69-card)] p-4 pt-8 [[data-theme=dark]_&]:[--retainer-bar:color-mix(in_srgb,var(--v69-ink)_30%,transparent)] [[data-theme=light]_&]:[--retainer-bar:color-mix(in_srgb,var(--v69-ink)_17%,transparent)]">
-      <div className="flex min-h-0 flex-1 gap-2">
+    <div className="flex h-full flex-col bg-[var(--v69-card)] p-4 pt-8 [[data-theme=dark]_&]:p-3 [[data-theme=dark]_&]:[--retainer-bar:color-mix(in_srgb,var(--v69-ink)_30%,transparent)] [[data-theme=light]_&]:[--retainer-bar:color-mix(in_srgb,var(--v69-ink)_17%,transparent)]">
+      {/* Dark sets the chart into a milled recess rather than floating it on the
+          card face: a fill a shade under the card, a dark top-inner wall and hairline
+          edge, and a lit bottom lip. The recess also does the framing the card's
+          own padding was doing, so the outer inset drops and the plot fills more
+          of the cover. Shallow by design — a deeper cavity reads as a folder. */}
+      <div className="flex min-h-0 flex-1 gap-2 [[data-theme=dark]_&]:rounded-[14px] [[data-theme=dark]_&]:bg-[#232323] [[data-theme=dark]_&]:p-4 [[data-theme=dark]_&]:shadow-[inset_0_1px_3px_rgba(0,0,0,0.5),inset_0_0_0_1px_rgba(0,0,0,0.3),inset_0_-1px_0_rgba(255,255,255,0.05),0_-1px_0_rgba(255,255,255,0.04)]">
         {/* Tick labels only. The gridlines they'd anchor are left off: at six rules
             across a cover-size plot the chart turns into ledger paper and the bars
             stop being the thing you read. */}
@@ -2170,16 +2175,16 @@ function CardMarkup() {
 
       {/* The pin: a comment marker dropped on the artwork, with its point at the
           spot it refers to. Rounded on three corners so it reads as a marker
-          rather than a dot. Glass rather than a fill: a fifth of white for the
-          body, a lit rim held on its top-left where the light comes from, and one
-          soft contact shadow — so the wash reads through it and it sits in the
-          artwork instead of punching a bright hole in it. The alphas are written
-          literally rather than as bg-white/20, since the dark mock skin remaps
-          --color-white to near-black and would flip the pin on a background that
-          doesn't flip with it. */}
+          rather than a dot. Embossed into the wash rather than glass on top of
+          it — a fill barely lighter than what it sits on, a soft shadow along the
+          top inner wall and a whisper of light on the bottom lip. The lit rim and
+          contact shadow it had made it the brightest thing on the card, which is
+          the composer's job. The alphas are written literally rather than as
+          bg-white/20, since the dark mock skin remaps --color-white to near-black
+          and would flip the pin on a background that doesn't flip with it. */}
       <span
         aria-hidden
-        className="absolute right-[16%] top-[30%] size-8 rounded-full rounded-bl-[5px] bg-[rgba(255,255,255,0.2)] shadow-[inset_0_1px_0_rgba(255,255,255,0.5),inset_1px_0_0_rgba(255,255,255,0.32),inset_0_-1px_0_rgba(255,255,255,0.14),0_1px_3px_rgba(16,24,40,0.07)]"
+        className="absolute right-[16%] top-[30%] size-8 rounded-full rounded-bl-[5px] bg-[rgba(255,255,255,0.11)] shadow-[inset_0_1px_2px_rgba(16,24,40,0.07),inset_0_-1px_0_rgba(255,255,255,0.1)]"
       />
 
       {/* The composer sits flat on the file. It used to float on a contact shadow
@@ -2286,21 +2291,8 @@ function CardTodo() {
       {/* The band, its glyph and its hairline are the approvals card's, to the
           value — see CardDesignApprovals for why neither theme inverts it. */}
       <div className="flex items-center gap-2 bg-[var(--v69-ink)] px-5 py-4 [[data-theme=light]_&]:bg-[#EDEDE6] [[data-theme=light]_&]:shadow-[inset_0_-1px_0_rgba(16,24,40,0.07)] [[data-theme=dark]_&]:bg-[#343434] [[data-theme=dark]_&]:shadow-[inset_0_-1px_0_rgba(255,255,255,0.08)]">
-        {/* A ticked box where the folder sits on the approvals card: same weight
-            and box, and it says list rather than set. */}
-        <svg
-          viewBox="0 0 16 16"
-          className={`size-4 ${ON_INK} [[data-theme=light]_&]:text-[var(--v69-ink)] [[data-theme=dark]_&]:text-[#EDEDED]`}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden
-        >
-          <path d="M13.5 8v3.5A1.5 1.5 0 0 1 12 13H4a1.5 1.5 0 0 1-1.5-1.5v-7A1.5 1.5 0 0 1 4 3h5.5" />
-          <path d="M5.75 7.75 8 10l5.5-6" />
-        </svg>
+        {/* No glyph: the word "To do" already says list, and the ticked box next
+            to it was a second thing to read in a two-word band. */}
         <span
           className={`text-[13px] font-normal ${ON_INK} [[data-theme=light]_&]:text-[var(--v69-ink)] [[data-theme=dark]_&]:text-[#EDEDED]`}
         >
@@ -2376,15 +2368,17 @@ function CardJargonQuest() {
           question and its action read as one recessed panel and the pill sits
           inside that surface instead of floating over the face. */}
       <div className="v69-inset-well flex h-full flex-col rounded-[14px] p-3.5">
-        <p className="text-[15px] font-normal leading-snug text-[var(--v69-ink)]">
-          What does &ldquo;retainer&rdquo; mean?
-        </p>
         {/* The round as the rail's own unit tag — same chip, mono face and caps as
             TICKETS / OPEN / DRAFT — so the one piece of metadata on this card is
-            set the way metadata is set everywhere else on the rail. */}
-        <span className={`mt-2 self-start ${MOCK_UNIT_TAG}`} style={MOCK_MONO}>
+            set the way metadata is set everywhere else on the rail. It leads the
+            question the way an eyebrow does: the round is the frame you read the
+            term inside, not a footnote to it. */}
+        <span className={`self-start ${MOCK_UNIT_TAG}`} style={MOCK_MONO}>
           Round 2 of 5
         </span>
+        <p className="mt-2 text-[15px] font-normal leading-snug text-[var(--v69-ink)]">
+          What does &ldquo;retainer&rdquo; mean?
+        </p>
         {/* On the gallery's dark face the full ink token read as a lit bar across
             the card, so the pill takes the held-back INK_SOLID step (70% ink) the
             rail's other solid CTAs use. Light runs it monochrome on the card's own
@@ -2866,12 +2860,12 @@ function CardMassMessenger() {
           No cast shadow: the pill is already the highest-contrast thing on the
           card, and a shadow under it read as a lifted sticker. */}
       <div
-        className={`flex h-16 w-full items-center gap-3 rounded-full bg-[var(--v69-ink)] pl-2 pr-5 text-[15px] font-normal ${ON_INK} [[data-theme=light]_&]:bg-[#FBFBF7] [[data-theme=light]_&]:text-[#262626]`}
+        className={`flex h-13 w-full items-center gap-3 rounded-full bg-[var(--v69-ink)] pl-1.5 pr-5 text-[15px] font-normal ${ON_INK} [[data-theme=light]_&]:bg-[#FBFBF7] [[data-theme=light]_&]:text-[#262626]`}
       >
         {/* Flat, with no lit rim — the badge is a face on the pill, not a raised
             button on it. */}
         <span
-          className={`flex size-12 shrink-0 items-center justify-center rounded-full text-[#262626] ${SEND_BADGE}`}
+          className={`flex size-10 shrink-0 items-center justify-center rounded-full text-[#262626] ${SEND_BADGE}`}
         >
           <svg
             viewBox="0 0 24 24"
@@ -3117,16 +3111,14 @@ function CardCommsApp() {
           colour the way its siblings do. Everything on it flips to the dark
           ground — the same move the calendar tile makes on its lime — since dark's
           near-white ink and grey secondary have no contrast left on the blue. */}
-      {/* The announcement carries the card's one colour in both skins now — the
-          periwinkle it already wore in dark, mixed back toward white for light so
-          it sits at the weight the discussion card's lime bubble does rather than
-          as a saturated slab. Not the lime: these two covers sit side by side in
-          the rail, and the bubble is what tells the discussion card apart.
+      {/* Light runs the announcement on the discussion card's lime so the two
+          covers read as one family; dark keeps the periwinkle, which is what
+          holds up against that skin's near-white ink.
           No hairline with a fill this definite; it only drew a box round it. The
           corner is squarer than the thread panel's for the same reason it looks
           rounder than it is: this is one short row, and a 16px radius on a block
           this shallow turns the whole thing into a lozenge. */}
-      <div className="rounded-lg bg-[var(--v69-well)] px-3.5 py-3 [[data-theme=light]_&]:bg-[color-mix(in_srgb,#7DA4FF_58%,#ffffff)] [[data-theme=dark]_&]:bg-[#7DA4FF]">
+      <div className="rounded-lg bg-[var(--v69-well)] px-3.5 py-3 [[data-theme=light]_&]:bg-[#D9ED92] [[data-theme=dark]_&]:bg-[#7DA4FF]">
         {/* No avatar on the title row: a one-letter disc next to the word
             "Announcement" said nothing the word didn't, and it was a third piece
             of chrome competing with the title. */}
@@ -3241,22 +3233,18 @@ const DISC_RIPPLES = [{ size: 60, light: 0.035 }];
 function CardAIAssistant() {
   return (
     <div className="flex h-full items-center justify-center bg-[var(--v69-card)] p-4">
-      <div className="relative flex aspect-square h-full max-h-[220px] flex-col items-center justify-center overflow-hidden rounded-full bg-[var(--v69-card)] [[data-theme=light]_&]:bg-[#EDEDE4] [[data-theme=dark]_&]:bg-[#1B1B1B] [[data-theme=dark]_.template-mock_&]:bg-[var(--v69-well)]">
+      {/* Light runs the PDF tile's material exactly: the shared inset well over a
+          fill that matches the card face, rather than the warm #EDEDE4 step it had.
+          The two are the rail's only single-mark covers, and side by side the
+          cream disc read as a different palette from the near-white tile. Dark is
+          untouched — the --disc-dark modifier clears the well there, the same way
+          the PDF tile does, so the carve below stays the only recess on the face. */}
+      <div className="v69-inset-well v69-inset-well--disc-dark relative flex aspect-square h-full max-h-[220px] flex-col items-center justify-center overflow-hidden rounded-full bg-[var(--v69-card)] [[data-theme=dark]_&]:bg-[#1B1B1B] [[data-theme=dark]_.template-mock_&]:bg-[var(--v69-well)]">
         {/* Dark-only carve — see DISC_DARK_CARVE. */}
         <span
           aria-hidden
           className="pointer-events-none absolute inset-0 rounded-full [[data-theme=light]_&]:hidden"
           style={{ boxShadow: DISC_DARK_CARVE }}
-        />
-        {/* Light-only counterpart, an order of magnitude softer: light's own value
-            step does most of the separating, so this only suggests the recess. */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-full [[data-theme=dark]_&]:hidden"
-          style={{
-            boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -1px 0 rgba(16,24,40,0.03), inset 0 8px 14px -8px rgba(16,24,40,0.045), inset 0 -10px 16px -10px rgba(16,24,40,0.055)",
-          }}
         />
 
         {/* Key light and shadow, one pair per theme. */}
@@ -3313,14 +3301,14 @@ function CardAIAssistant() {
         {/* The one element with weight — centred, and the tallest thing on the
             card. In dark it casts a short shadow onto the dish, so the bars sit
             above the surface rather than being painted on it.
-            Light steps off full ink to the palette's warm grey: at #262626 on a
-            near-white dish the bars were the only pure black on the page, and they
-            read as a logo dropped into the disc rather than as part of it. */}
+            Light takes the PDF tile's mark value (PDF_GLYPH_TOKENS) rather than a
+            step of its own: these two covers each carry a single mark on a recess,
+            and at #6E6F65 this one sat noticeably heavier than that one. */}
         <span className="relative flex h-[54px] items-center gap-[5px] [[data-theme=dark]_&]:[filter:drop-shadow(0_1px_2px_rgba(0,0,0,0.75))]">
           {ASSISTANT_WAVE.map((h, i) => (
             <span
               key={i}
-              className="w-[4px] rounded-full bg-[var(--v69-ink)] [[data-theme=light]_&]:bg-[#6E6F65]"
+              className="w-[4px] rounded-full bg-[var(--v69-ink)] [[data-theme=light]_&]:bg-[#A3A497]"
               style={{ height: `${h}px` }}
             />
           ))}
@@ -3338,8 +3326,12 @@ function CardAIAssistant() {
 // Geometry lives in one place: the ports below are stated as percentages of the
 // card, and both the nodes and the SVG edges read from them, so an edge always
 // lands dead centre on the port it belongs to.
-const NODE_PORT_X = 42; // right edge of the question node
-const NODE_TARGET_X = 56; // left edge of the field node
+const NODE_PORT_X = 40; // right edge of the question node
+const NODE_TARGET_X = 64; // left edge of the field node
+// Row height in design px rather than a share of the card. The type on these
+// nodes is a fixed size, so a percentage height set the row from the card and
+// left the label swimming in it; a real editor sizes a node from its own row.
+const NODE_ROW_H = 34;
 // Only the taken branch is drawn. The unanswered one used to run to an empty
 // dashed node, which read as a placeholder someone had forgotten to fill in.
 // Dropped from 40/31 when the second branch came out: with one pair left, the
@@ -3381,14 +3373,18 @@ function CardConditionalForms() {
 
       {/* The question node: one row per answer, the chosen one carrying the ink
           and a lit port, the other left muted. */}
+      {/* Anchored on the row the edge leaves, not on the node's own middle: the
+          port sits at the centre of the Business row, so the node is offset up by
+          half a row from that line. */}
       <div
-        className={`absolute left-[6%] flex w-[36%] flex-col ${NODE_SURFACE}`}
-        style={{ top: `${NODE_ROW_Y - 7.5}%`, height: "30%" }}
+        className={`absolute left-[6%] flex w-[34%] flex-col ${NODE_SURFACE}`}
+        style={{ top: `calc(${NODE_ROW_Y}% - ${NODE_ROW_H / 2}px)` }}
       >
         {["Business", "Individual"].map((answer, i) => (
           <span
             key={answer}
-            className={`flex flex-1 items-center truncate px-3 text-[13px] font-normal ${
+            style={{ height: NODE_ROW_H }}
+            className={`flex items-center truncate px-3 text-[13px] font-normal ${
               i === 0 ? "text-[var(--v69-ink)]" : "text-muted-foreground"
             } ${i === 1 ? "border-t border-[rgba(16,24,40,0.07)] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.10)]" : ""}`}
           >
@@ -3399,8 +3395,11 @@ function CardConditionalForms() {
 
       {/* The field the taken branch reveals. */}
       <div
-        className={`absolute right-[6%] flex w-[38%] items-center truncate whitespace-nowrap px-3 text-[13px] font-normal text-[var(--v69-ink)] ${NODE_SURFACE}`}
-        style={{ top: `${NODE_TARGET_Y - 7}%`, height: "14%" }}
+        className={`absolute right-[6%] flex w-[30%] items-center truncate whitespace-nowrap px-3 text-[13px] font-normal text-[var(--v69-ink)] ${NODE_SURFACE}`}
+        style={{
+          top: `calc(${NODE_TARGET_Y}% - ${NODE_ROW_H / 2}px)`,
+          height: NODE_ROW_H,
+        }}
       >
         Oakwood
       </div>

@@ -30,14 +30,18 @@
        An earlier pass had the opposite failure: fringe ramps peaking at 0.8 put
        60%+ of their pixels through, and each fringe rendered as a solid stripe.
 
+       The ramps run 0.62 to 0.32 rather than 1 to 0, and every rect is drawn at
+       55%. Both are there for the same reason: at full range each hue reached
+       total coverage well inside the crop, so the panel read as two flat fields
+       meeting at a hard horizon rather than as one sprayed blend. Held inside
+       that band neither hue ever goes solid, so specks of each carry all the way
+       through the other's field and the wash reads between them everywhere. The
+       fringe mids are raised to 0.1 for the same reason. Feature size is finer
+       than it was (0.07 / 0.065) — the coarse blobs made the crossing chunky.
+
        Every consumer paints this with `center / cover` on a box wider than it is
        tall, which crops the artwork's top and bottom away, so the whole story has
-       to be told through the middle of the box. The ramps cross in a long, even
-       taper rather than meeting in a tight band: a steep crossing put all the
-       spatter in one thin seam, and at cover size — with the crop on top of it —
-       the panel read as a plain gradient with a smudge across the middle. Neither
-       hue reaches full solid until the very edge now, so specks carry all the way
-       into both fields.
+       to be told through the middle of the box.
 
        No ground of its own — the wash underneath supplies the colour direction
        and shows through between specks, so both themes share this artwork.
@@ -47,7 +51,7 @@
        the solid ends. -->
   <defs>
     <filter id="p-lime-blob" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="61" result="n"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="61" result="n"/>
       <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.7 0 0 0 -0.85" result="na"/>
       <feComposite in="SourceAlpha" in2="na" operator="arithmetic" k2="1" k3="1" result="sum"/>
       <feComponentTransfer in="sum" result="dots">
@@ -67,7 +71,7 @@
       <feComposite in="c" in2="dots" operator="in"/>
     </filter>
     <filter id="p-blue-blob" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="19" result="n"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.065" numOctaves="2" seed="19" result="n"/>
       <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.7 0 0 0 -0.85" result="na"/>
       <feComposite in="SourceAlpha" in2="na" operator="arithmetic" k2="1" k3="1" result="sum"/>
       <feComponentTransfer in="sum" result="dots">
@@ -88,39 +92,39 @@
     </filter>
 
     <linearGradient id="p-lime" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="480">
-      <stop offset="0" stop-color="#fff" stop-opacity="1"/>
-      <stop offset="0.1" stop-color="#fff" stop-opacity="0.94"/>
-      <stop offset="0.26" stop-color="#fff" stop-opacity="0.78"/>
-      <stop offset="0.42" stop-color="#fff" stop-opacity="0.58"/>
-      <stop offset="0.58" stop-color="#fff" stop-opacity="0.38"/>
-      <stop offset="0.74" stop-color="#fff" stop-opacity="0.18"/>
-      <stop offset="0.9" stop-color="#fff" stop-opacity="0.04"/>
-      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="0" stop-color="#fff" stop-opacity="0.62"/>
+      <stop offset="0.1" stop-color="#fff" stop-opacity="0.577"/>
+      <stop offset="0.26" stop-color="#fff" stop-opacity="0.534"/>
+      <stop offset="0.42" stop-color="#fff" stop-opacity="0.491"/>
+      <stop offset="0.58" stop-color="#fff" stop-opacity="0.449"/>
+      <stop offset="0.74" stop-color="#fff" stop-opacity="0.406"/>
+      <stop offset="0.9" stop-color="#fff" stop-opacity="0.363"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0.32"/>
     </linearGradient>
     <linearGradient id="p-blue" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="480">
-      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
-      <stop offset="0.1" stop-color="#fff" stop-opacity="0.04"/>
-      <stop offset="0.26" stop-color="#fff" stop-opacity="0.18"/>
-      <stop offset="0.42" stop-color="#fff" stop-opacity="0.38"/>
-      <stop offset="0.58" stop-color="#fff" stop-opacity="0.58"/>
-      <stop offset="0.74" stop-color="#fff" stop-opacity="0.78"/>
-      <stop offset="0.9" stop-color="#fff" stop-opacity="0.94"/>
-      <stop offset="1" stop-color="#fff" stop-opacity="1"/>
+      <stop offset="0" stop-color="#fff" stop-opacity="0.32"/>
+      <stop offset="0.1" stop-color="#fff" stop-opacity="0.363"/>
+      <stop offset="0.26" stop-color="#fff" stop-opacity="0.406"/>
+      <stop offset="0.42" stop-color="#fff" stop-opacity="0.449"/>
+      <stop offset="0.58" stop-color="#fff" stop-opacity="0.491"/>
+      <stop offset="0.74" stop-color="#fff" stop-opacity="0.534"/>
+      <stop offset="0.9" stop-color="#fff" stop-opacity="0.577"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0.62"/>
     </linearGradient>
     <linearGradient id="p-lime-mid" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="480">
       <stop offset="0.12" stop-color="#fff" stop-opacity="0"/>
-      <stop offset="0.58" stop-color="#fff" stop-opacity="0.04"/>
+      <stop offset="0.58" stop-color="#fff" stop-opacity="0.1"/>
       <stop offset="1" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
     <linearGradient id="p-blue-mid" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="480">
       <stop offset="0" stop-color="#fff" stop-opacity="0"/>
-      <stop offset="0.42" stop-color="#fff" stop-opacity="0.04"/>
+      <stop offset="0.42" stop-color="#fff" stop-opacity="0.1"/>
       <stop offset="0.88" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
   </defs>
 
-  <rect x="-80" y="-80" width="640" height="640" fill="url(#p-lime)" filter="url(#p-lime-blob)"/>
-  <rect x="-80" y="-80" width="640" height="640" fill="url(#p-blue)" filter="url(#p-blue-blob)"/>
-  <rect x="-80" y="-80" width="640" height="640" fill="url(#p-blue-mid)" filter="url(#p-blue-fringe)"/>
-  <rect x="-80" y="-80" width="640" height="640" fill="url(#p-lime-mid)" filter="url(#p-lime-fringe)"/>
+  <rect opacity="0.55" x="-80" y="-80" width="640" height="640" fill="url(#p-lime)" filter="url(#p-lime-blob)"/>
+  <rect opacity="0.55" x="-80" y="-80" width="640" height="640" fill="url(#p-blue)" filter="url(#p-blue-blob)"/>
+  <rect opacity="0.55" x="-80" y="-80" width="640" height="640" fill="url(#p-blue-mid)" filter="url(#p-blue-fringe)"/>
+  <rect opacity="0.55" x="-80" y="-80" width="640" height="640" fill="url(#p-lime-mid)" filter="url(#p-lime-fringe)"/>
 </svg>

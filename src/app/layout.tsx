@@ -92,6 +92,13 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* Applies the persisted theme to <html> before paint to avoid a flash
+            of the wrong theme; defaults to light. First thing in <head> by
+            necessity: a parser-inserted inline script can't execute until every
+            stylesheet declared above it has loaded, so sitting below the Google
+            Fonts <link> made the theme wait on a cross-origin round trip and the
+            page painted light before dark was applied. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         {/* Preload the PP Mori display face (used for every heading, above the
             fold) so text renders in-brand immediately instead of swapping in
             late — which reads as a slow load. */}
@@ -129,9 +136,6 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double:wght@400..700&display=swap"
           rel="stylesheet"
         />
-        {/* Applies the persisted theme to <html> before paint to avoid a flash
-            of the wrong theme; defaults to light. */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
