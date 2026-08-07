@@ -20,12 +20,19 @@ const inter = Inter({
 
 const SITE_DESCRIPTION = PAGE_SEO.home.description;
 
-// The Bitcount stylesheet is served with media="print" so it blocks neither
-// render nor the theme script; this puts it back in play once the page has
-// painted. Waiting for load rather than flipping it inline is the point — set
-// synchronously in <head> it would simply become render-blocking again.
-const BITCOUNT_LINK_ID = "bitcount-font";
-const FONT_SWAP_SCRIPT = `addEventListener('load',function(){var l=document.getElementById('${BITCOUNT_LINK_ID}');if(l)l.media='all';});`;
+// Bitcount Grid Double, attached after the page has painted rather than
+// declared in the markup. A stylesheet <link> in <head> blocks every inline
+// script below it, and Next hoists <link> above <script> whatever order they
+// are written in, so as markup this held the theme script until a cross-origin
+// round trip finished and the page painted the wrong theme.
+//
+// Appended by script rather than rendered with media="print" and flipped: React
+// hydrates against the server's markup, so an attribute this script had already
+// changed came back as a hydration mismatch it explicitly refuses to patch. A
+// link React never rendered has nothing to diff.
+const BITCOUNT_HREF =
+  "https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double:wght@400..700&display=swap";
+const FONT_SWAP_SCRIPT = `addEventListener('load',function(){var l=document.createElement('link');l.rel='stylesheet';l.href='${BITCOUNT_HREF}';document.head.appendChild(l);});`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -144,21 +151,12 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         {/* Bitcount Grid Double — a dot-matrix display face used only for the
-            tracker widget's metric number (LED-panel look).
-            media="print" so it matches nothing at parse time, which keeps it out
-            of the set of stylesheets that block scripts: as a plain stylesheet it
-            held the theme script until a cross-origin round trip finished, and the
-            page painted light before dark was applied. FONT_SWAP_SCRIPT flips it
-            to all once the theme is set. One decorative number swapping face a
+            tracker widget's metric number (LED-panel look). The stylesheet itself
+            is attached on load by FONT_SWAP_SCRIPT, not declared here; only the
+            connection is warmed up front. One decorative number swapping face a
             beat late is a far smaller cost than the whole page doing it. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          id={BITCOUNT_LINK_ID}
-          href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double:wght@400..700&display=swap"
-          rel="stylesheet"
-          media="print"
-        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}

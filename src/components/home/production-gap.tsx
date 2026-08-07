@@ -21,18 +21,21 @@ const BODY =
 const HL_SIDEBAR_BG = "var(--mk-elevated)";
 const HL_PILL_BG = "var(--mk-fill)";
 
+// Order is the tour's order: the first entry is what the section opens on and
+// auto-advance runs down the list from there. The client experience leads —
+// it's the frame the other two sit inside, so it reads first.
 const REGIONS = [
-  {
-    id: "sidebar",
-    tag: "Sidebar with apps",
-    header: "Many apps, one experience",
-    body: "Each app appears in the sidebar alongside the others you've built or installed, and clients navigate them in one place. Small, focused apps. No fragile mega app.",
-  },
   {
     id: "url",
     tag: "The client URL",
     header: "Client experience, built-in",
     body: "Every workspace comes with a branded client experience on your own domain. Apps ship straight into it, with no URLs to wrangle, no hosting, no downtime.",
+  },
+  {
+    id: "sidebar",
+    tag: "Sidebar with apps",
+    header: "Many apps, one experience",
+    body: "Each app appears in the sidebar alongside the others you've built or installed, and clients navigate them in one place. Small, focused apps. No fragile mega app.",
   },
   {
     id: "avatar",

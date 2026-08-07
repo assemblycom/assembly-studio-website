@@ -55,7 +55,7 @@ const STEPS: Step[] = [
   },
   {
     id: "build",
-    title: "Build",
+    title: "Publish",
     body: "A real app deploys to your workspace, ready for your clients.",
     Visual: BuildStep,
     dwellMs: 9500,

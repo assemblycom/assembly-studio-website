@@ -22,7 +22,7 @@ export const OG_IMAGE = {
 // sitemap all read from here, so the copy can only be written once.
 export const PAGE_SEO = {
   home: {
-    title: "Assembly Studio Platform & AI App Builder",
+    title: "Assembly Studio AI App Builder",
     description:
       "Vibe code the apps your firm needs, and they launch production-ready — secure, authenticated, and built for professional services firms, not a throwaway prototype.",
     path: "/",

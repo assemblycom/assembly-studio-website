@@ -27,7 +27,7 @@ const STATS: Stat[] = [
   },
   {
     label: "Apps created",
-    to: 5_500,
+    to: 10_000,
     format: (n) => `${Math.round(n).toLocaleString("en-US")}+`,
   },
   {
@@ -37,7 +37,7 @@ const STATS: Stat[] = [
   },
   {
     label: "Payments processed",
-    to: 150,
+    to: 100,
     format: (n) => `$${Math.round(n)}M+`,
   },
 ];
