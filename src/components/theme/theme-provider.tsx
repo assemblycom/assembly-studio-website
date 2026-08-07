@@ -8,19 +8,17 @@ import {
   useState,
 } from "react";
 import { flushSync } from "react-dom";
+import {
+  DEFAULT_PREFERENCE,
+  STORAGE_KEY,
+  type Theme,
+  type ThemePreference,
+} from "./theme-script";
 
-// The resolved theme actually applied to <html data-theme>.
-export type Theme = "light" | "dark";
-// The user's stored preference — "system" follows the OS (Cursor-style).
-export type ThemePreference = "system" | "light" | "dark";
-
-const STORAGE_KEY = "studio-theme";
-const DEFAULT_PREFERENCE: ThemePreference = "system";
-
-// Inline script run before paint (in the document head) so the right theme is
-// on <html> before React hydrates — no flash. Resolves "system" against the OS.
-// Kept in sync with STORAGE_KEY / DEFAULT_PREFERENCE below.
-export const THEME_INIT_SCRIPT = `try{var p=localStorage.getItem('${STORAGE_KEY}');if(p!=='dark'&&p!=='light'&&p!=='system')p='${DEFAULT_PREFERENCE}';var t=p==='system'?(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):p;document.documentElement.dataset.theme=t;}catch(e){document.documentElement.dataset.theme='light';}`;
+// The storage key, the default and the pre-paint script live in theme-script.ts,
+// a plain module — see the note there for why they cannot live in this file.
+export type { Theme, ThemePreference } from "./theme-script";
+export { THEME_INIT_SCRIPT } from "./theme-script";
 
 type ThemeContextValue = {
   // Resolved theme (light/dark) — what's actually shown.

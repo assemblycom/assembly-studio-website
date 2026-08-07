@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { RootShell } from "@/components/layout/root-shell";
-import { ThemeProvider, THEME_INIT_SCRIPT } from "@/components/theme/theme-provider";
+import { ThemeProvider } from "@/components/theme/theme-provider";
+// Imported from the plain module, never from the "use client" provider — a
+// server importer of a client export gets a throwing proxy, not the string.
+import { THEME_INIT_SCRIPT } from "@/components/theme/theme-script";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { OG_IMAGE, PAGE_SEO } from "@/lib/seo";
 import "./globals.css";
@@ -16,6 +19,13 @@ const inter = Inter({
 });
 
 const SITE_DESCRIPTION = PAGE_SEO.home.description;
+
+// The Bitcount stylesheet is served with media="print" so it blocks neither
+// render nor the theme script; this puts it back in play once the page has
+// painted. Waiting for load rather than flipping it inline is the point — set
+// synchronously in <head> it would simply become render-blocking again.
+const BITCOUNT_LINK_ID = "bitcount-font";
+const FONT_SWAP_SCRIPT = `addEventListener('load',function(){var l=document.getElementById('${BITCOUNT_LINK_ID}');if(l)l.media='all';});`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -92,13 +102,18 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        {/* Applies the persisted theme to <html> before paint to avoid a flash
-            of the wrong theme; defaults to light. First thing in <head> by
-            necessity: a parser-inserted inline script can't execute until every
-            stylesheet declared above it has loaded, so sitting below the Google
-            Fonts <link> made the theme wait on a cross-origin round trip and the
-            page painted light before dark was applied. */}
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        {/* Applies the persisted theme to <html> before paint to avoid a flash of
+            the wrong theme; defaults to light. A parser-inserted inline script
+            can't execute until every stylesheet declared above it has loaded, and
+            Next hoists <link> above <script> in the rendered head no matter what
+            order they are written in here — so this cannot be kept clear of the
+            Google Fonts stylesheet by position. That link is loaded non-blocking
+            instead (see below), which is what actually lets this run before paint. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `${THEME_INIT_SCRIPT}${FONT_SWAP_SCRIPT}`,
+          }}
+        />
         {/* Preload the PP Mori display face (used for every heading, above the
             fold) so text renders in-brand immediately instead of swapping in
             late — which reads as a slow load. */}
@@ -129,12 +144,20 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         {/* Bitcount Grid Double — a dot-matrix display face used only for the
-            tracker widget's metric number (LED-panel look). */}
+            tracker widget's metric number (LED-panel look).
+            media="print" so it matches nothing at parse time, which keeps it out
+            of the set of stylesheets that block scripts: as a plain stylesheet it
+            held the theme script until a cross-origin round trip finished, and the
+            page painted light before dark was applied. FONT_SWAP_SCRIPT flips it
+            to all once the theme is set. One decorative number swapping face a
+            beat late is a far smaller cost than the whole page doing it. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
+          id={BITCOUNT_LINK_ID}
           href="https://fonts.googleapis.com/css2?family=Bitcount+Grid+Double:wght@400..700&display=swap"
           rel="stylesheet"
+          media="print"
         />
         <script
           type="application/ld+json"
