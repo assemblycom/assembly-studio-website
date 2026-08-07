@@ -156,7 +156,7 @@ export default function SecurityPage() {
         {/* Full-bleed line above the first section. */}
         <div className="border-t border-border [[data-theme=dark]_&]:border-[#383838]" />
 
-      {/* What makes Assembly Studio different — uses the site content rail
+      {/* What makes Assembly different — uses the site content rail
           (mx-auto max-w-[1600px], px-6 md:px-10) rather than the narrower
           Section default, so the left column lines up with the nav logo. */}
       <section className="mx-auto max-w-[1200px] px-6 pb-20 pt-16 md:px-10 md:pb-28 md:pt-24">
@@ -164,8 +164,11 @@ export default function SecurityPage() {
           {/* Left — heading sits with its column (no sticky follow; the page
               stays still). */}
           <div className="md:self-start">
+            {/* Broken deliberately rather than left to wrap: "What makes" over
+                "Assembly different" puts the product name at the head of its own
+                line instead of stranding "different" alone on the second. */}
             <h2 className="type-h2">
-              What makes Assembly Studio different
+              What makes <span className="block">Assembly different</span>
             </h2>
             <p className="mt-6 max-w-md text-muted-foreground">
               Apps you build inherit our platform&apos;s security model, so you

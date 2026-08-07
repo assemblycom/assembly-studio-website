@@ -36,8 +36,14 @@
        meeting at a hard horizon rather than as one sprayed blend. Held inside
        that band neither hue ever goes solid, so specks of each carry all the way
        through the other's field and the wash reads between them everywhere. The
-       fringe mids are raised to 0.1 for the same reason. Feature size is finer
-       than it was (0.07 / 0.065) — the coarse blobs made the crossing chunky.
+       fringe mids are raised to 0.1 for the same reason.
+
+       Feature size is 0.22 / 0.21, well past the "coarse spatter" this file was
+       first written for. At 0.05 the blobs were large enough to read as torn
+       paper shapes rather than as grain, and each one landing or not landing was
+       a visible event across the taper. Fine grain lets the coverage ramp do the
+       work smoothly. It survives the gallery's downscale — checked at 108px as
+       well as at cover size — where anything coarser started to clump.
 
        Every consumer paints this with `center / cover` on a box wider than it is
        tall, which crops the artwork's top and bottom away, so the whole story has
@@ -51,7 +57,7 @@
        the solid ends. -->
   <defs>
     <filter id="p-lime-blob" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.07" numOctaves="2" seed="61" result="n"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.22" numOctaves="2" seed="61" result="n"/>
       <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.7 0 0 0 -0.85" result="na"/>
       <feComposite in="SourceAlpha" in2="na" operator="arithmetic" k2="1" k3="1" result="sum"/>
       <feComponentTransfer in="sum" result="dots">
@@ -71,7 +77,7 @@
       <feComposite in="c" in2="dots" operator="in"/>
     </filter>
     <filter id="p-blue-blob" x="-25%" y="-25%" width="150%" height="150%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.065" numOctaves="2" seed="19" result="n"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.21" numOctaves="2" seed="19" result="n"/>
       <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.7 0 0 0 -0.85" result="na"/>
       <feComposite in="SourceAlpha" in2="na" operator="arithmetic" k2="1" k3="1" result="sum"/>
       <feComponentTransfer in="sum" result="dots">

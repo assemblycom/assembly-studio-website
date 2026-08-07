@@ -2175,16 +2175,14 @@ function CardMarkup() {
 
       {/* The pin: a comment marker dropped on the artwork, with its point at the
           spot it refers to. Rounded on three corners so it reads as a marker
-          rather than a dot. Embossed into the wash rather than glass on top of
-          it — a fill barely lighter than what it sits on, a soft shadow along the
-          top inner wall and a whisper of light on the bottom lip. The lit rim and
-          contact shadow it had made it the brightest thing on the card, which is
-          the composer's job. The alphas are written literally rather than as
-          bg-white/20, since the dark mock skin remaps --color-white to near-black
-          and would flip the pin on a background that doesn't flip with it. */}
+          rather than a dot. Solid, on the composer's own surface value rather
+          than a wash of white: translucent it took the wash's colour underneath
+          and all but vanished against the blue it sits on. The two are the only
+          UI on the card, so they are the same material — an opaque marker reads
+          as a real thing left on the file, which is what it is. */}
       <span
         aria-hidden
-        className="absolute right-[16%] top-[30%] size-8 rounded-full rounded-bl-[5px] bg-[rgba(255,255,255,0.11)] shadow-[inset_0_1px_2px_rgba(16,24,40,0.07),inset_0_-1px_0_rgba(255,255,255,0.1)]"
+        className="absolute right-[16%] top-[30%] size-8 rounded-full rounded-bl-[5px] bg-[var(--v69-card)] [[data-theme=dark]_.template-mock_&]:bg-[#F7F7F5]"
       />
 
       {/* The composer sits flat on the file. It used to float on a contact shadow
