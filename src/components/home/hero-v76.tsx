@@ -37,13 +37,21 @@ const STRIP_ORDER = [
   "proposal-builder",
   "content-approval-flow",
 ];
-// Resolved against the visible set the server hands down, so a template hidden
-// in Contentful drops out of the strip rather than needing STRIP_ORDER edited to
-// match. Two of the names above are hidden today and fall away here.
-const carouselFrom = (templates: Template[]): Template[] =>
-  STRIP_ORDER.map((slug) => templates.find((t) => t.slug === slug)).filter(
-    (t): t is Template => Boolean(t),
+// STRIP_ORDER is a preference, not the list. It is resolved against the catalogue
+// the server hands down, so a template that leaves Contentful drops out without
+// anyone editing the order above — and the strip then tops up from whatever else
+// is listed, so it keeps its shape instead of collapsing to however many of these
+// eight names happen to survive. Capped at eight, the length it was drawn for.
+const STRIP_MAX = 8;
+const carouselFrom = (templates: Template[]): Template[] => {
+  const preferred = STRIP_ORDER.map((slug) =>
+    templates.find((t) => t.slug === slug),
+  ).filter((t): t is Template => Boolean(t));
+  const rest = templates.filter(
+    (t) => !preferred.some((p) => p.slug === t.slug),
   );
+  return [...preferred, ...rest].slice(0, STRIP_MAX);
+};
 
 
 function IconChevron({ className }: { className?: string }) {
@@ -435,7 +443,12 @@ export function HeroV76({
                     See all templates
                     <IconArrow className={`size-3.5 transition-transform group-hover:translate-x-0.5 ${dark ? "text-white/50" : "text-neutral-400"}`} />
                   </p>
-                  <p className="mt-1 text-[11px] text-muted-foreground">{templates.length - carousel.length} more</p>
+                  {/* Only when there is a remainder. The strip now tops up from
+                      the catalogue, so when it holds all of it this counted to
+                      zero and the tile read "0 more". */}
+                  {templates.length > carousel.length ? (
+                    <p className="mt-1 text-[11px] text-muted-foreground">{templates.length - carousel.length} more</p>
+                  ) : null}
                 </a>
               </div>
               {/* Progressive blur over the same edges the row's mask fades —

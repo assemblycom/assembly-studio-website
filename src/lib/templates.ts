@@ -30,13 +30,14 @@ export interface Template {
   /** Optional walkthrough video; when set it leads the detail gallery. */
   videoUrl?: string;
   /**
-   * Hidden in Contentful, so the site stops listing it. Delisted rather than
-   * deleted: hiding is a reversible editorial state, and the entry here carries
-   * work the CMS has no copy of — the cover mock, the industry tags, the feature
-   * list. Lookups by slug still find it (see getTemplateBySlug), so a proposal
-   * already sent against one keeps rendering.
+   * Has a visible entry in Contentful, which is the catalogue: a template the
+   * site lists. Everything stays committed rather than being deleted — an entry
+   * here carries work the CMS has no copy of (the cover mock, industry tags,
+   * feature list), and listing is a reversible editorial state. Lookups by slug
+   * still find an unlisted one (see getTemplateBySlug), so a proposal already
+   * sent against it keeps rendering.
    */
-  hidden?: boolean;
+  listed?: boolean;
   /**
    * TEMP — until real screenshots/videos exist. Lets a template demonstrate its
    * gallery shape with designed placeholder frames: how many preview frames
@@ -566,23 +567,23 @@ const PREVIEW_BY_SLUG: Record<string, { previewCount?: number; hasVideo?: boolea
 // count as featured now.
 const LOWER_PRIORITY = new Set<string>();
 
-// The committed floor for what's hidden — NOT the mechanism. Hiding an entry in
-// Contentful is enough on its own: getVisibleTemplates() reads fields.isHidden
-// at build time and every listing resolves through it.
+// The committed floor for what the site lists — NOT the mechanism. Contentful is
+// the catalogue: getVisibleTemplates() reads the published, unhidden App Template
+// entries at build time and every listing resolves through it. Unhide an entry
+// there, or add one, and the next build lists it.
 //
-// This set exists so that a build during a Contentful outage falls back to what
-// was last known rather than putting every hidden template back on the site. The
-// two are unioned, so it only ever hides more, never less. It's a safety net,
-// and going stale is the worst it can do.
-const HIDDEN_SLUGS = new Set([
-  "client-resource-library",
-  "internal-resource-library",
-  "client-discussion-forum",
-  "progress-tracker",
-  "content-approval-flow",
-  "voice-ai-integration",
-  "block-builder-game",
-  "client-ai-assistant",
+// This set is what a build falls back to when Contentful is unreachable, so an
+// outage shows the last known catalogue rather than an empty gallery or the whole
+// committed set. It fails closed: a template unhidden in the CMS during an outage
+// stays off the site until the next good build, which is the harmless direction.
+const LISTED_SLUGS = new Set([
+  "new-client-intake",
+  "document-collection",
+  "client-project-tracker",
+  "time-tracker",
+  "client-support-requests",
+  "internal-communications-app",
+  "goal-tracker",
 ]);
 
 // Templates whose core value depends on AI — surfaced with an "AI" tag.
@@ -596,7 +597,7 @@ const AI_SLUGS = new Set([
 // Each entry's own value wins where it has one, so the maps only fill gaps.
 export const LOCAL_TEMPLATES: Template[] = BASE_TEMPLATES.map((t) => ({
   ...t,
-  hidden: t.hidden ?? HIDDEN_SLUGS.has(t.slug),
+  listed: t.listed ?? LISTED_SLUGS.has(t.slug),
   featured: t.featured ?? !LOWER_PRIORITY.has(t.slug),
   usesAI: t.usesAI ?? AI_SLUGS.has(t.slug),
   industries: t.industries?.length ? t.industries : (INDUSTRY_BY_SLUG[t.slug] ?? []),
@@ -613,17 +614,17 @@ export const LOCAL_TEMPLATES: Template[] = BASE_TEMPLATES.map((t) => ({
 export const TEMPLATES: Template[] = LOCAL_TEMPLATES;
 
 /**
- * The committed visible set. Server surfaces should use getVisibleTemplates()
- * from ./visible-templates instead, which resolves this against Contentful; this
- * is for the client modules that read a list at module scope, where an await
- * can't reach and only the committed floor is available.
+ * The committed catalogue. Server surfaces should use getVisibleTemplates() from
+ * ./visible-templates instead, which resolves this against Contentful; this is
+ * for the client modules that read a list at module scope, where an await can't
+ * reach and only the committed floor is available.
  */
-export const VISIBLE_TEMPLATES: Template[] = TEMPLATES.filter((t) => !t.hidden);
+export const VISIBLE_TEMPLATES: Template[] = TEMPLATES.filter((t) => t.listed);
 
 /**
- * Searches the whole set, hidden included. A proposal sent before a template was
- * hidden still names it, and that document should keep rendering rather than
- * losing its build panel because of an editorial change made afterwards.
+ * Searches the whole set, unlisted included. A proposal sent before a template
+ * left the catalogue still names it, and that document should keep rendering
+ * rather than losing its build panel to an editorial change made afterwards.
  */
 export function getTemplateBySlug(slug: string): Template | undefined {
   return TEMPLATES.find((t) => t.slug === slug);
