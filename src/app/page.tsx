@@ -10,6 +10,14 @@ import { WholeStack } from "@/components/home/whole-stack";
 import { Reveal } from "@/components/ui/reveal";
 import { GridDivider, GridRails } from "@/components/ui/grid-lines";
 
+// Re-resolved against Contentful every few minutes rather than only at deploy.
+// Prerendered once, an editor hiding a template in the CMS had no effect until
+// somebody happened to ship — which is not what "the CMS is the catalogue" can
+// mean in practice. Five minutes is short enough that a change lands while the
+// person who made it is still looking, and long enough that crawlers aren't
+// re-running the query on every hit.
+export const revalidate = 300;
+
 export default async function HomePage() {
   const templates = await getVisibleTemplates();
   return (

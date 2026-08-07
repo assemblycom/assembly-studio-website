@@ -86,15 +86,24 @@ function toAppTemplate(entry: Entry<never>): AppTemplateEntry | null {
  * configured or is unreachable — the pages fall back to the templates committed
  * in templates.ts, so a CMS problem can't take the gallery down.
  */
-// A production build renders every template page in one process, so without
-// this the same query would run once per page. Deliberately not cached in dev,
-// where an editor wants a refresh to show their change.
-let cached: Promise<AppTemplateEntry[]> | null = null;
+// A production build renders every template page in one process, so without this
+// the same query would run once per page. Deliberately not cached in dev, where
+// an editor wants a refresh to show their change.
+//
+// Time-bounded, and that matters now the pages revalidate: an unbounded module
+// promise outlives a regeneration, so a warm lambda would keep serving the
+// catalogue it fetched the first time and the ISR window would do nothing. A
+// minute still collapses a whole build's worth of renders into one query, while
+// being far shorter than the pages' own revalidate.
+const CACHE_MS = 60_000;
+let cached: { at: number; value: Promise<AppTemplateEntry[]> } | null = null;
 
 export function getAppTemplates(): Promise<AppTemplateEntry[]> {
   if (process.env.NODE_ENV !== "production") return fetchAppTemplates();
-  cached ??= fetchAppTemplates();
-  return cached;
+  if (!cached || Date.now() - cached.at > CACHE_MS) {
+    cached = { at: Date.now(), value: fetchAppTemplates() };
+  }
+  return cached.value;
 }
 
 async function fetchAppTemplates(): Promise<AppTemplateEntry[]> {
@@ -119,44 +128,4 @@ async function fetchAppTemplates(): Promise<AppTemplateEntry[]> {
 export async function getAppTemplate(slug: string): Promise<AppTemplateEntry | null> {
   const all = await getAppTemplates();
   return all.find((t) => t.slug === slug) ?? null;
-}
-
-/**
- * Slugs an editor has hidden in Contentful. Its own query rather than a flag on
- * getAppTemplates(), because that one filters hidden entries out — what's needed
- * here is exactly the set it drops.
- *
- * Returns empty when the CMS is unconfigured or unreachable. That is safe only
- * because callers union this with the committed set in templates.ts: an outage
- * can then fail to hide something newly hidden, but can never un-hide something
- * already known to be hidden. Getting that the wrong way round would put a
- * retired template back on the site the first time Contentful had a bad minute.
- */
-let cachedHidden: Promise<Set<string>> | null = null;
-
-export function getHiddenTemplateSlugs(): Promise<Set<string>> {
-  if (process.env.NODE_ENV !== "production") return fetchHiddenTemplateSlugs();
-  cachedHidden ??= fetchHiddenTemplateSlugs();
-  return cachedHidden;
-}
-
-async function fetchHiddenTemplateSlugs(): Promise<Set<string>> {
-  if (!client) return new Set();
-  try {
-    const res = await client.getEntries({
-      content_type: CONTENT_TYPE,
-      "fields.appType": APP_TEMPLATE,
-      "fields.isHidden": true,
-      select: ["fields.slug"],
-      limit: 200,
-    });
-    return new Set(
-      res.items
-        .map((item) => (item.fields as { slug?: unknown }).slug)
-        .filter((slug): slug is string => typeof slug === "string"),
-    );
-  } catch (error) {
-    console.warn("Contentful hidden-template fetch failed:", error);
-    return new Set();
-  }
 }

@@ -583,7 +583,6 @@ const LISTED_SLUGS = new Set([
   "time-tracker",
   "client-support-requests",
   "internal-communications-app",
-  "goal-tracker",
 ]);
 
 // Templates whose core value depends on AI — surfaced with an "AI" tag.
