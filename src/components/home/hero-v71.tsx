@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { APP_URL } from "@/lib/constants";
 import {
   getFeaturedTemplates,
-  TEMPLATES,
+  VISIBLE_TEMPLATES,
   type Template,
 } from "@/lib/templates";
 import { IconArrow } from "./icons";
@@ -1513,7 +1513,7 @@ function CardInfo() {
         <IconArrow className="size-4 text-[var(--v69-ink)]/50 transition-transform group-hover:translate-x-0.5" />
       </p>
       <p className={`mt-1 text-[var(--v69-ink)]/55 ${T.meta}`}>
-        {TEMPLATES.length - CAROUSEL.length} more
+        {VISIBLE_TEMPLATES.length - CAROUSEL.length} more
       </p>
     </a>
   );
@@ -3827,7 +3827,7 @@ export function V69CardMock({ slug }: { slug: string }) {
 const FEATURED = getFeaturedTemplates(6);
 const CAROUSEL: Template[] = [
   ...FEATURED,
-  ...TEMPLATES.filter((t) => !FEATURED.some((f) => f.slug === t.slug)),
+  ...VISIBLE_TEMPLATES.filter((t) => !FEATURED.some((f) => f.slug === t.slug)),
 ].slice(0, 12);
 
 // V70 nav — a slightly squarish frosted pill that shortens into a compact

@@ -30,6 +30,14 @@ export interface Template {
   /** Optional walkthrough video; when set it leads the detail gallery. */
   videoUrl?: string;
   /**
+   * Hidden in Contentful, so the site stops listing it. Delisted rather than
+   * deleted: hiding is a reversible editorial state, and the entry here carries
+   * work the CMS has no copy of — the cover mock, the industry tags, the feature
+   * list. Lookups by slug still find it (see getTemplateBySlug), so a proposal
+   * already sent against one keeps rendering.
+   */
+  hidden?: boolean;
+  /**
    * TEMP — until real screenshots/videos exist. Lets a template demonstrate its
    * gallery shape with designed placeholder frames: how many preview frames
    * (1–4) and whether a video tile leads. Ignored once `images`/`videoUrl` are
@@ -558,6 +566,25 @@ const PREVIEW_BY_SLUG: Record<string, { previewCount?: number; hasVideo?: boolea
 // count as featured now.
 const LOWER_PRIORITY = new Set<string>();
 
+// The committed floor for what's hidden — NOT the mechanism. Hiding an entry in
+// Contentful is enough on its own: getVisibleTemplates() reads fields.isHidden
+// at build time and every listing resolves through it.
+//
+// This set exists so that a build during a Contentful outage falls back to what
+// was last known rather than putting every hidden template back on the site. The
+// two are unioned, so it only ever hides more, never less. It's a safety net,
+// and going stale is the worst it can do.
+const HIDDEN_SLUGS = new Set([
+  "client-resource-library",
+  "internal-resource-library",
+  "client-discussion-forum",
+  "progress-tracker",
+  "content-approval-flow",
+  "voice-ai-integration",
+  "block-builder-game",
+  "client-ai-assistant",
+]);
+
 // Templates whose core value depends on AI — surfaced with an "AI" tag.
 const AI_SLUGS = new Set([
   "client-ai-assistant",
@@ -569,6 +596,7 @@ const AI_SLUGS = new Set([
 // Each entry's own value wins where it has one, so the maps only fill gaps.
 export const LOCAL_TEMPLATES: Template[] = BASE_TEMPLATES.map((t) => ({
   ...t,
+  hidden: t.hidden ?? HIDDEN_SLUGS.has(t.slug),
   featured: t.featured ?? !LOWER_PRIORITY.has(t.slug),
   usesAI: t.usesAI ?? AI_SLUGS.has(t.slug),
   industries: t.industries?.length ? t.industries : (INDUSTRY_BY_SLUG[t.slug] ?? []),
@@ -584,6 +612,19 @@ export const LOCAL_TEMPLATES: Template[] = BASE_TEMPLATES.map((t) => ({
  */
 export const TEMPLATES: Template[] = LOCAL_TEMPLATES;
 
+/**
+ * The committed visible set. Server surfaces should use getVisibleTemplates()
+ * from ./visible-templates instead, which resolves this against Contentful; this
+ * is for the client modules that read a list at module scope, where an await
+ * can't reach and only the committed floor is available.
+ */
+export const VISIBLE_TEMPLATES: Template[] = TEMPLATES.filter((t) => !t.hidden);
+
+/**
+ * Searches the whole set, hidden included. A proposal sent before a template was
+ * hidden still names it, and that document should keep rendering rather than
+ * losing its build panel because of an editorial change made afterwards.
+ */
 export function getTemplateBySlug(slug: string): Template | undefined {
   return TEMPLATES.find((t) => t.slug === slug);
 }
@@ -868,6 +909,6 @@ export const TEMPLATE_FEATURE_DETAILS: Record<string, string> = {
 
 /** Curated templates shown on the homepage. Falls back to the first few. */
 export function getFeaturedTemplates(limit = 6): Template[] {
-  const featured = TEMPLATES.filter((t) => t.featured);
-  return (featured.length > 0 ? featured : TEMPLATES).slice(0, limit);
+  const featured = VISIBLE_TEMPLATES.filter((t) => t.featured);
+  return (featured.length > 0 ? featured : VISIBLE_TEMPLATES).slice(0, limit);
 }

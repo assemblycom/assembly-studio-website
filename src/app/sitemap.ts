@@ -6,7 +6,7 @@ import {
   PROPOSAL_PATH,
   SITE_URL,
 } from "@/lib/constants";
-import { TEMPLATES } from "@/lib/templates";
+import { getVisibleTemplates } from "@/lib/visible-templates";
 import { CASE_STUDIES } from "@/lib/case-studies";
 
 // Pin to build time so the filesystem walk below never runs in a lambda, where
@@ -67,7 +67,8 @@ function findStaticRoutes(dir = APP_DIR, route = ""): string[] {
   return routes;
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const templates = await getVisibleTemplates();
   const lastModified = new Date();
 
   const entry = (path: string): MetadataRoute.Sitemap[number] => ({
@@ -82,7 +83,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     ...pages.map(entry),
-    ...TEMPLATES.map((t) => entry(`/templates/${t.slug}`)),
+    ...templates.map((t) => entry(`/templates/${t.slug}`)),
     ...CASE_STUDIES.map((s) => entry(`/customers/${s.slug}`)),
   ];
 }

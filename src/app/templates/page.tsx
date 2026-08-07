@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { TemplatesBrowser } from "@/components/templates/templates-browser";
 import { TemplatesCta } from "@/components/templates/templates-cta";
-import { TEMPLATES } from "@/lib/templates";
+import { getVisibleTemplates } from "@/lib/visible-templates";
 import { SIGNUP_URL } from "@/lib/constants";
 import { PAGE_SEO, pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata(PAGE_SEO.templates);
 
-export default function TemplatesPage() {
+export default async function TemplatesPage() {
+  const templates = await getVisibleTemplates();
   return (
     <>
       {/* Left-aligned header (à la Linear's customers index) — the title,
@@ -33,7 +34,7 @@ export default function TemplatesPage() {
               the filter row is sticky and carries its own pt-16 clearance, so a
               margin on top of it left the grid stranded far from the hero. */}
           <div className="lg:mt-20">
-            <TemplatesBrowser templates={TEMPLATES} />
+            <TemplatesBrowser templates={templates} />
           </div>
         </div>
       </section>

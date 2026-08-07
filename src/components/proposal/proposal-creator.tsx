@@ -8,7 +8,11 @@ import {
   MAX_PROPOSAL_NOTE_LENGTH,
   SITE_URL,
 } from "@/lib/constants";
-import { TEMPLATES, TEMPLATE_CATEGORIES } from "@/lib/templates";
+import {
+  TEMPLATES,
+  TEMPLATE_CATEGORIES,
+  type Template,
+} from "@/lib/templates";
 import { teamOptions } from "@/lib/team";
 import {
   FIELD_CLS,
@@ -40,14 +44,15 @@ const categoryRank = (category: string) => {
   return index === -1 ? TEMPLATE_CATEGORIES.length : index;
 };
 
-const TEMPLATE_OPTIONS = [...TEMPLATES]
-  .sort((a, b) => categoryRank(a.category) - categoryRank(b.category))
-  .map((template) => ({
-    value: template.slug,
-    label: template.title,
-    hint: template.description,
-    group: template.category,
-  }));
+const templateOptions = (templates: Template[]) =>
+  [...templates]
+    .sort((a, b) => categoryRank(a.category) - categoryRank(b.category))
+    .map((template) => ({
+      value: template.slug,
+      label: template.title,
+      hint: template.description,
+      group: template.category,
+    }));
 
 // The proposal page says nothing about why they were sent it beyond this line,
 // so the field starts filled rather than empty: a generated "based on what you
@@ -120,7 +125,10 @@ const ERRORS = {
 
 type FieldErrors = Partial<Record<keyof typeof ERRORS, string>>;
 
-export function ProposalCreator() {
+export function ProposalCreator({ templates }: { templates: Template[] }) {
+  // Passed by the page rather than imported: the visible set is resolved against
+  // Contentful on the server, which a client component can't await.
+  const options = templateOptions(templates);
   const { theme } = useTheme();
   const [recipient, setRecipient] = useState("");
   const [from, setFrom] = useState("");
@@ -413,7 +421,7 @@ export function ProposalCreator() {
                   setTemplateSlug(value);
                   clearError("template");
                 }}
-                options={TEMPLATE_OPTIONS}
+                options={options}
                 required
                 placeholder="Choose a template…"
                 searchable

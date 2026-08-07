@@ -3,10 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { pageMetadata } from "@/lib/seo";
 import { ogImageFor } from "@/lib/og";
+import { getVisibleTemplates } from "@/lib/visible-templates";
 import { getAppTemplate } from "@/lib/contentful";
 import { TemplateOverview } from "@/components/templates/template-overview";
 import {
-  TEMPLATES,
   TEMPLATE_CUSTOMIZATION as CUSTOMIZABLE,
   getTemplateBySlug,
   type Template,
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  return TEMPLATES.map((t) => ({ slug: t.slug }));
+  return (await getVisibleTemplates()).map((t) => ({ slug: t.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

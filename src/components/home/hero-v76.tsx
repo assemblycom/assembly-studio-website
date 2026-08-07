@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { memo, useEffect, useRef, useState } from "react";
 import { APP_URL, templateSignupUrl } from "@/lib/constants";
-import { TEMPLATES, type Template } from "@/lib/templates";
+import { type Template } from "@/lib/templates";
 import { IconArrow } from "./icons";
 import { V66Composer } from "./hero-v66";
 import { PROMPT_IDEAS } from "./prompt-ideas";
@@ -37,9 +37,13 @@ const STRIP_ORDER = [
   "proposal-builder",
   "content-approval-flow",
 ];
-const CAROUSEL: Template[] = STRIP_ORDER
-  .map((slug) => TEMPLATES.find((t) => t.slug === slug))
-  .filter((t): t is Template => Boolean(t));
+// Resolved against the visible set the server hands down, so a template hidden
+// in Contentful drops out of the strip rather than needing STRIP_ORDER edited to
+// match. Two of the names above are hidden today and fall away here.
+const carouselFrom = (templates: Template[]): Template[] =>
+  STRIP_ORDER.map((slug) => templates.find((t) => t.slug === slug)).filter(
+    (t): t is Template => Boolean(t),
+  );
 
 
 function IconChevron({ className }: { className?: string }) {
@@ -110,7 +114,15 @@ const TemplateCard = memo(function TemplateCard({
 export function HeroV76({
   showPlus = true,
   showBody = false,
-}: { showPlus?: boolean; showBody?: boolean } = {}) {
+  // Passed by the page rather than imported: the visible set is resolved against
+  // Contentful on the server, which a client component can't await.
+  templates,
+}: {
+  showPlus?: boolean;
+  showBody?: boolean;
+  templates: Template[];
+}) {
+  const carousel = carouselFrom(templates);
   // Theme is global now (persisted, applied to <html data-theme>), so the hero
   // reads it from context and the nav toggle drives the whole site.
   const { theme } = useTheme();
@@ -383,7 +395,7 @@ export function HeroV76({
                 // brings the first card back to the title's left edge.
                 className="v76-card-row mt-1 flex gap-4 overflow-x-auto pb-10 pl-6 pr-6 pt-3 md:mt-3 md:pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               >
-                {CAROUSEL.map((t, i) => (
+                {carousel.map((t, i) => (
                   <TemplateCard
                     key={t.slug}
                     template={t}
@@ -423,7 +435,7 @@ export function HeroV76({
                     See all templates
                     <IconArrow className={`size-3.5 transition-transform group-hover:translate-x-0.5 ${dark ? "text-white/50" : "text-neutral-400"}`} />
                   </p>
-                  <p className="mt-1 text-[11px] text-muted-foreground">{TEMPLATES.length - CAROUSEL.length} more</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground">{templates.length - carousel.length} more</p>
                 </a>
               </div>
               {/* Progressive blur over the same edges the row's mask fades —

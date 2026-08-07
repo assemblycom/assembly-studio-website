@@ -1,4 +1,5 @@
 import { HeroV76 } from "@/components/home/hero-v76";
+import { getVisibleTemplates } from "@/lib/visible-templates";
 import { HowItWorks } from "@/components/home/how-it-works";
 import { TrustTicker } from "@/components/home/trust-ticker";
 import { Testimonials } from "@/components/home/testimonials";
@@ -9,13 +10,14 @@ import { WholeStack } from "@/components/home/whole-stack";
 import { Reveal } from "@/components/ui/reveal";
 import { GridDivider, GridRails } from "@/components/ui/grid-lines";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const templates = await getVisibleTemplates();
   return (
     <>
       {/* Upper half shares the hero's surface — the walkthrough sits on the
           same color as the hero (see .section-follow), so they read as one
           canvas. */}
-      <HeroV76 />
+      <HeroV76 templates={templates} />
 
       {/* Content region — framed by vertical rails aligned to the 1200px
           content column. The rails start below the hero and run down through
