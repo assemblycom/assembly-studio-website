@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SITE_NAME, SITE_URL } from "./constants";
+import { OG_IMAGE } from "./og";
 
 export interface PageSeo {
   /** Bare page name. The brand prefix is added for both the tab and the card. */
@@ -9,14 +10,9 @@ export interface PageSeo {
   path: string;
 }
 
-// One card for the whole site. Every page shares it, so the social preview is
-// the brand mark rather than a per-page layout.
-export const OG_IMAGE = {
-  url: "/og.jpg",
-  width: 1200,
-  height: 630,
-  alt: SITE_NAME,
-};
+// Re-exported so the many pages already importing it from here keep working.
+// It lives in ./og alongside the generated card, which shares its dimensions.
+export { OG_IMAGE } from "./og";
 
 // One record per static page: the search snippet, the social card and the
 // sitemap all read from here, so the copy can only be written once.
@@ -76,7 +72,12 @@ export const PAGE_SEO = {
  * every page through here keeps the tab title, the card, and the canonical URL
  * from drifting apart.
  */
-export function pageMetadata({ title, description, path }: PageSeo): Metadata {
+export function pageMetadata(
+  { title, description, path }: PageSeo,
+  // A card naming one app, for the two surfaces whose preview is about a
+  // specific thing rather than about the site. Everything else takes OG_IMAGE.
+  image: typeof OG_IMAGE = OG_IMAGE,
+): Metadata {
   // The homepage title already carries the brand; every other page gets it via
   // the "Assembly Studio | %s" template, which openGraph does not apply itself.
   const socialTitle = path === "/" ? title : `${SITE_NAME} | ${title}`;
@@ -90,13 +91,13 @@ export function pageMetadata({ title, description, path }: PageSeo): Metadata {
       title: socialTitle,
       description,
       url: `${SITE_URL}${path}`,
-      images: [OG_IMAGE],
+      images: [image],
     },
     twitter: {
       card: "summary_large_image",
       title: socialTitle,
       description,
-      images: [OG_IMAGE.url],
+      images: [image.url],
     },
   };
 }

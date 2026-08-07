@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { pageMetadata } from "@/lib/seo";
+import { ogImageFor } from "@/lib/og";
 import { getAppTemplate } from "@/lib/contentful";
 import { TemplateOverview } from "@/components/templates/template-overview";
 import {
@@ -26,13 +27,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const template = getTemplateBySlug(slug);
   if (!template) return {};
   const entry = await getAppTemplate(slug);
-  return pageMetadata({
-    title: entry?.name ?? template.title,
-    // The card description is a fragment ("Track records through stages");
-    // the long form reads as a sentence in a search result.
-    description: template.longDescription || template.description,
-    path: `/templates/${template.slug}`,
-  });
+  const name = entry?.name ?? template.title;
+  return pageMetadata(
+    {
+      title: name,
+      // The card description is a fragment ("Track records through stages");
+      // the long form reads as a sentence in a search result.
+      description: template.longDescription || template.description,
+      path: `/templates/${template.slug}`,
+    },
+    // A template's preview names the template. Shared across every surface that
+    // unfurls the link, so what someone sees before clicking is what they get.
+    ogImageFor(name),
+  );
 }
 
 /**

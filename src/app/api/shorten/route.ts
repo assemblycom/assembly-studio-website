@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { SITE_URL } from "@/lib/constants";
-import { proposalTitle } from "@/lib/proposal-title";
+import { proposalAppName, proposalTitle } from "@/lib/proposal-title";
+import { ogImageFor } from "@/lib/og";
 
 // Shortens a proposal link through Short.io, so what gets sent is
 // proposal.assembly.com/abc123 rather than a hundred-character query string.
@@ -88,11 +89,18 @@ export async function POST(request: Request) {
 
   const query = new URL(url).searchParams;
   const base = slugForRecipient(query.get("for") ?? "");
-  const ogTitle = proposalTitle({
+  const parts = {
     for: query.get("for") ?? undefined,
     name: query.get("name") ?? undefined,
     template: query.get("template") ?? undefined,
-  });
+  };
+  const ogTitle = proposalTitle(parts);
+  // Absolute: this is stored on Short.io's record and read by crawlers that have
+  // no page of ours to resolve it against.
+  const ogImage = `${SITE_URL}${
+    ogImageFor(proposalAppName(parts), parts.template ? "template" : "prompt")
+      .url
+  }`;
 
   // "ilia", then "ilia-2", "ilia-3"… A second, different proposal for the same
   // person collides on the path, and a numbered one still reads as theirs. Past
@@ -118,6 +126,7 @@ export async function POST(request: Request) {
           // Short.io reads OG fields off the link record itself.
           "og:title": ogTitle,
           "og:description": OG_DESCRIPTION,
+          "og:image": ogImage,
           // Regenerating the same proposal returns the link that already exists
           // rather than minting a second slug for one URL — which also means a
           // repeat of an identical proposal keeps the name it was given.

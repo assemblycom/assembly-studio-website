@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ProposalPage } from "@/components/proposal/proposal-page";
-import { proposalTitle } from "@/lib/proposal-title";
+import { proposalAppName, proposalTitle } from "@/lib/proposal-title";
+import { ogImageFor } from "@/lib/og";
 import { PAGE_SEO, pageMetadata } from "@/lib/seo";
 
 // A proposal is written for one person and sent to them directly, so it stays
@@ -27,13 +28,24 @@ export async function generateMetadata({
     const value = params[key];
     return Array.isArray(value) ? value[0] : value;
   };
-  const title = proposalTitle({
+  const parts = {
     for: one("for"),
     name: one("name"),
     template: one("template"),
-  });
+  };
+  const title = proposalTitle(parts);
+  // The card names the app, not the whole title: the recipient's name is already
+  // beside the preview in the message it was sent in, and repeating it there
+  // spends the card's one line on the thing the reader already knows.
+  const appName = proposalAppName(parts);
 
-  const base = pageMetadata(PAGE_SEO.proposal);
+  const base = pageMetadata(
+    PAGE_SEO.proposal,
+    // A proposal built on a template wears the template card; one described from
+    // a prompt wears the prompt card. The two are different kinds of document
+    // and the preview says which before the reader opens it.
+    ogImageFor(appName, parts.template ? "template" : "prompt"),
+  );
   return {
     ...base,
     // Absolute so the tab reads "Client intake for Véronique" rather than
