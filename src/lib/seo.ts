@@ -57,6 +57,16 @@ export const PAGE_SEO = {
       "Get a live walkthrough of Assembly Studio tailored to your firm — see how an app goes live inside your branded, secure client experience.",
     path: "/demo",
   },
+  // Not a page anyone searches for — this record exists for the social card. A
+  // proposal is sent as a link and read in Slack or a mail client, so the
+  // preview IS the first impression, and without its own record the page
+  // inherited the homepage's card and previewed as the marketing site.
+  proposal: {
+    title: "Your proposal",
+    description:
+      "An app built for your firm, ready to open in your own workspace.",
+    path: "/proposal",
+  },
 } as const satisfies Record<string, PageSeo>;
 
 

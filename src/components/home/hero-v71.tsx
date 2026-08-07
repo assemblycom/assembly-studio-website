@@ -1550,9 +1550,12 @@ function CardTracker() {
     <div className="flex h-full flex-col rounded-[14px] bg-[linear-gradient(160deg,#ffffff_0%,#f4f6f9_58%,#eceff3_100%)] p-3.5 [--v69-tracker-empty:#00000008] [[data-theme=light]_&]:bg-none [[data-theme=light]_&]:bg-[#F5F5F0] [[data-theme=light]_&]:[--v69-tracker-empty:#00000012] [[data-theme=dark]_&]:bg-[linear-gradient(160deg,#232323_0%,#1b1b1b_58%,#151515_100%)] [[data-theme=dark]_&]:ring-1 [[data-theme=dark]_&]:ring-white/[0.08] [[data-theme=dark]_&]:[--v69-tracker-empty:#ffffff1a]">
       {/* Metric header: the count top-left, the unit pinned top-right. */}
       <div className="flex items-end gap-1 px-0.5">
-        {/* Primary metric — clean, unstretched Inter (soft off-white, not pure). */}
+        {/* Primary metric — clean, unstretched Inter (soft off-white, not pure).
+            Held off full ink where the cover is framed in light: at 34px on a
+            near-white card #262626 was the one pure-black mark in the rail. The
+            hero keeps full ink, where the figure carries the whole tile. */}
         <span
-          className="text-[34px] font-medium leading-none tracking-tight text-[var(--v69-ink)] [[data-theme=dark]_&]:text-[#ededed]"
+          className="text-[34px] font-medium leading-none tracking-tight text-[var(--v69-ink)] [[data-theme=light]_.template-mock_&]:text-[#3B3C34] [[data-theme=dark]_&]:text-[#ededed]"
           style={{
             fontFamily: "var(--font-diatype-mono), ui-monospace, monospace",
           }}
@@ -2264,9 +2267,12 @@ function CardResourceLibrary() {
   );
 }
 
-// Client to-do list — a today agenda: a date caption over a white panel with
-// the day's tasks, each a thumbnail, title, time range, and a duration pill.
-// Monochrome; the panel separates from the light-gray card by brightness.
+// Client to-do list — the day's agenda as a titled list, built on the design
+// approvals folder: a header band naming the list, then a row per task with the
+// time it runs. The two are the same shape of thing — a named set with a line
+// per item and one fact about each — so they're set identically rather than each
+// inventing its own list. It had thumbnails in gapped rows before; at cover size
+// the placeholder squares were the heaviest thing on the card and said nothing.
 function CardTodo() {
   // Three rows: with the list running the whole card rather than a panel inset
   // into it, two left most of the square empty.
@@ -2276,56 +2282,44 @@ function CardTodo() {
     { title: "Send recap", time: "6:15 – 6:45 pm" },
   ];
   return (
-    // The list owns the square. It used to sit on a panel inset into the card,
-    // which is a card inside a card: two rounded surfaces and two edges for one
-    // list. The header rule is the only division left, and it runs edge to edge.
     <div className="flex h-full flex-col bg-[var(--v69-card)]">
-      {/* The head is a rule, not a bar. With no panel under it a filled strip
-          would be the one shaded block on the card and read as a leftover
-          fragment of the surface that used to be there. The hairline is literal
-          rgba because the mock's dark skin remaps --color-white. */}
-      <div className="flex items-center px-4 py-3.5 shadow-[inset_0_-1px_0_rgba(16,24,40,0.06)] [[data-theme=dark]_&]:shadow-[inset_0_-1px_0_rgba(255,255,255,0.10)]">
-        <span className="text-[11px] font-normal leading-none text-muted-foreground">
+      {/* The band, its glyph and its hairline are the approvals card's, to the
+          value — see CardDesignApprovals for why neither theme inverts it. */}
+      <div className="flex items-center gap-2 bg-[var(--v69-ink)] px-5 py-4 [[data-theme=light]_&]:bg-[#EDEDE6] [[data-theme=light]_&]:shadow-[inset_0_-1px_0_rgba(16,24,40,0.07)] [[data-theme=dark]_&]:bg-[#343434] [[data-theme=dark]_&]:shadow-[inset_0_-1px_0_rgba(255,255,255,0.08)]">
+        {/* A ticked box where the folder sits on the approvals card: same weight
+            and box, and it says list rather than set. */}
+        <svg
+          viewBox="0 0 16 16"
+          className={`size-4 ${ON_INK} [[data-theme=light]_&]:text-[var(--v69-ink)] [[data-theme=dark]_&]:text-[#EDEDED]`}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="M13.5 8v3.5A1.5 1.5 0 0 1 12 13H4a1.5 1.5 0 0 1-1.5-1.5v-7A1.5 1.5 0 0 1 4 3h5.5" />
+          <path d="M5.75 7.75 8 10l5.5-6" />
+        </svg>
+        <span
+          className={`text-[13px] font-normal ${ON_INK} [[data-theme=light]_&]:text-[var(--v69-ink)] [[data-theme=dark]_&]:text-[#EDEDED]`}
+        >
           To do
         </span>
       </div>
-      {/* Top-aligned under the header, the way a list is read. Centred in the
-          leftover height, the rows floated in the middle of the square with a
-          band of empty card above and below them. */}
-      <div className="flex flex-col gap-6 p-4">
+      {/* Rails on the rows rather than the wrapper, last row included — same
+          reasoning as the approvals list. */}
+      <div className="pt-2">
         {tasks.map((t) => (
-          <div key={t.title} className="flex items-center gap-3">
-            {/* The thumbnails carry the image mark the other galleries use, so
-                  an empty square reads as a picture yet to load rather than as a
-                  blank swatch. */}
-            {/* Light only: the shared well-2 step is the heaviest thing on a
-                  near-white panel, so the three squares read as grey weight
-                  rather than as placeholders. Dark is untouched. */}
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--v69-well-2)] [[data-theme=light]_&]:bg-[#EAEAE2]">
-              <svg
-                viewBox="0 0 24 24"
-                className="size-[18px] text-[var(--v69-ink)]/30"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                aria-hidden
-              >
-                <rect x="3" y="3" width="18" height="18" rx="3" />
-                <circle cx="8.5" cy="8.5" r="1.6" />
-                <path
-                  d="M21 14l-4.5-4.5L6 20"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
+          <div
+            key={t.title}
+            className="border-b px-5 py-3.5 [[data-theme=light]_&]:border-black/[0.07] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.14)]"
+          >
+            <div className="truncate text-[13px] font-normal text-[var(--v69-ink)]">
+              {t.title}
             </div>
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-[13px] font-normal leading-tight text-[var(--v69-ink)]">
-                {t.title}
-              </div>
-              <div className="mt-0.5 text-[11px] font-normal leading-tight text-muted-foreground">
-                {t.time}
-              </div>
+            <div className="mt-0.5 truncate text-[11px] font-normal text-muted-foreground">
+              {t.time}
             </div>
           </div>
         ))}

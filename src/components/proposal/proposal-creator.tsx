@@ -6,6 +6,7 @@ import {
   MAX_APP_NAME_LENGTH,
   MAX_PROMPT_LENGTH,
   MAX_PROPOSAL_NOTE_LENGTH,
+  SITE_URL,
 } from "@/lib/constants";
 import { TEMPLATES, TEMPLATE_CATEGORIES } from "@/lib/templates";
 import { teamOptions } from "@/lib/team";
@@ -138,6 +139,9 @@ export function ProposalCreator() {
   // The finished link. Held in state rather than derived, so editing a field
   // after generating doesn't silently change a link that's already been copied.
   const [link, setLink] = useState("");
+  // The shortener is best-effort, so the button shows it's working rather than
+  // blocking: the long link is already usable if Short.io never answers.
+  const [shortening, setShortening] = useState(false);
   const [copied, setCopied] = useState(false);
   const copyTimer = useRef<number | null>(null);
   // Pressing the button when a link already exists rewrites it in place, which
@@ -222,19 +226,40 @@ export function ProposalCreator() {
     setConfirmed(link ? "updated" : "created");
     if (confirmTimer.current) window.clearTimeout(confirmTimer.current);
     confirmTimer.current = window.setTimeout(() => setConfirmed(null), 1800);
-    setLink(
-      buildProposalUrl(
-        {
-          recipient,
-          from,
-          note,
-          ...(mode === "template"
-            ? { template: templateSlug }
-            : { prompt, appName }),
-        },
-        window.location.origin,
-      ),
+    // SITE_URL rather than window.location.origin: a proposal is made to be sent,
+    // and a link built on localhost pointed at localhost — it opened for whoever
+    // generated it and for nobody else.
+    const longUrl = buildProposalUrl(
+      {
+        recipient,
+        from,
+        note,
+        ...(mode === "template"
+          ? { template: templateSlug }
+          : { prompt, appName }),
+      },
+      SITE_URL,
     );
+    // Show the real link straight away, then swap in the branded short one if the
+    // shortener answers. Nothing waits on Short.io.
+    setLink(longUrl);
+    setShortening(true);
+    void (async () => {
+      try {
+        const response = await fetch("/api/shorten", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ url: longUrl }),
+        });
+        const data = (await response.json()) as { url?: string };
+        // Only replace what's on screen if it hasn't been edited underneath us.
+        if (data.url) setLink((current) => (current === longUrl ? data.url! : current));
+      } catch {
+        // The long link is already in state and works — see the route's comment.
+      } finally {
+        setShortening(false);
+      }
+    })();
   };
 
   const copy = async () => {
@@ -508,7 +533,7 @@ export function ProposalCreator() {
               taller, which shows when the two are stacked and the same width. */}
           {link && (
             <button type="button" onClick={copy} className={`${outline} h-10`}>
-              {copied ? "Copied" : "Copy link"}
+              {copied ? "Copied" : shortening ? "Shortening…" : "Copy link"}
             </button>
           )}
         </div>
