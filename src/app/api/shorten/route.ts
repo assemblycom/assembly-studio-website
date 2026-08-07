@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { SITE_URL } from "@/lib/constants";
+import { proposalTitle } from "@/lib/proposal-title";
 
 // Shortens a proposal link through Short.io, so what gets sent is
 // proposal.assembly.com/abc123 rather than a hundred-character query string.
@@ -20,8 +21,10 @@ const SHORT_IO_DOMAIN = "proposal.assembly.com";
 
 // What the recipient sees when the link is pasted into Slack, iMessage or a mail
 // client. Short.io serves these as the redirect's own OG tags, which is what keeps
-// the preview on Assembly rather than on the shortener.
-const OG_TITLE = "A proposal from Assembly";
+// the preview on Assembly rather than on the shortener — and which is why the
+// title has to be set HERE as well as on the page. A crawler unfurling a short
+// link never reaches /proposal, so the page's own generateMetadata title would
+// never be seen; both call proposalTitle so the two say the same thing.
 const OG_DESCRIPTION =
   "An app built for you, ready to open in your own workspace.";
 
@@ -83,9 +86,13 @@ export async function POST(request: Request) {
   // creator carries on with the long link.
   if (!apiKey) return NextResponse.json({ url, shortened: false });
 
-  const base = slugForRecipient(
-    new URL(url).searchParams.get("for") ?? "",
-  );
+  const query = new URL(url).searchParams;
+  const base = slugForRecipient(query.get("for") ?? "");
+  const ogTitle = proposalTitle({
+    for: query.get("for") ?? undefined,
+    name: query.get("name") ?? undefined,
+    template: query.get("template") ?? undefined,
+  });
 
   // "ilia", then "ilia-2", "ilia-3"… A second, different proposal for the same
   // person collides on the path, and a numbered one still reads as theirs. Past
@@ -107,9 +114,9 @@ export async function POST(request: Request) {
           domain: SHORT_IO_DOMAIN,
           originalURL: url,
           ...(path ? { path } : {}),
-          title: OG_TITLE,
+          title: ogTitle,
           // Short.io reads OG fields off the link record itself.
-          "og:title": OG_TITLE,
+          "og:title": ogTitle,
           "og:description": OG_DESCRIPTION,
           // Regenerating the same proposal returns the link that already exists
           // rather than minting a second slug for one URL — which also means a

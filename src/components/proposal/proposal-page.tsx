@@ -5,8 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { TEMPLATES, type Template } from "@/lib/templates";
+import { proposalAppName } from "@/lib/proposal-title";
 import {
-  MAX_APP_NAME_LENGTH,
   MAX_PROMPT_LENGTH,
   buildSignupUrl,
   templateSignupUrl,
@@ -114,19 +114,6 @@ const PROMPT_EMPTY = "Describe the app you want built.";
 // only looks loose on lowercase.
 const BAND_EYEBROW =
   "type-eyebrow normal-case tracking-[0.02em] text-[color:var(--proposal-ink-faint)] [font-family:var(--font-pp-mori)]";
-
-/**
- * A template's name as the headline says it. Gallery names can carry a "New"
- * that belongs to the catalogue rather than to the app itself, and "New client
- * intake" reads as a new intake rather than as the thing being built. Dropped
- * here only: the template keeps its own name everywhere else.
- */
-function headlineTitle(title: string) {
-  const trimmed = title.replace(/^new\s+/i, "");
-  return trimmed === title
-    ? title
-    : trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
-}
 
 const firstName = (name: string) => name.split(/\s+/)[0] ?? "";
 
@@ -680,9 +667,12 @@ function ProposalContent() {
   // What the headline calls the thing being built: a template's own title, or
   // the name the sender gave the prompt. Capped here as well as in the creator —
   // the query is hand-editable, and a headline is not a place to put a sentence.
-  const appName = template
-    ? headlineTitle(template.title)
-    : (params.get("name") ?? "").trim().slice(0, MAX_APP_NAME_LENGTH);
+  // Shared with the tab title and the Short.io link record, so the headline and
+  // the preview name the app the same way.
+  const appName = proposalAppName({
+    name: params.get("name") ?? undefined,
+    template: templateSlug,
+  });
   const headline = appName || "A new app, built for you";
 
   // Signing up goes straight to onboarding on dashboard, carrying what the
