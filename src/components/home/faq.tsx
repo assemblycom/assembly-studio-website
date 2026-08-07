@@ -163,12 +163,11 @@ function FAQItem({
           </span>
           {/* The chevron turns 90°, not 180 — half the travel of a full flip,
               and timed to the drawer (300ms) so the two move as one gesture.
-              Which 90° depends on the width. On a phone it rests pointing right
-              and swings down as the row opens, the direction the answer actually
-              arrives from; pointing down at a closed row promised the answer was
-              already below. From md it keeps the desktop turn it had, down at
-              rest to flat when open. The drawn path points down, so the resting
-              state is the rotated one on mobile and the plain one above it. */}
+              Right at rest, down when open: the arrow points the way the answer
+              arrives from. Pointing down at a closed row promised the answer was
+              already below it. The drawn path points down, so the resting state
+              is the rotated one. Same at every width — this used to invert above
+              md, which left every open row on a desktop pointing sideways. */}
           <svg
             width="20"
             height="20"
@@ -176,7 +175,7 @@ function FAQItem({
             fill="none"
             aria-hidden
             className={`shrink-0 text-muted-foreground transition-[transform,color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:text-foreground motion-reduce:transition-none ${
-              open ? "rotate-0 md:-rotate-90" : "-rotate-90 md:rotate-0"
+              open ? "rotate-0" : "-rotate-90"
             }`}
           >
             <path
@@ -216,7 +215,7 @@ function FAQItem({
           aria-hidden
           // Same right-at-rest, down-on-open turn as the divided variant.
           className={`shrink-0 text-muted-foreground transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
-            open ? "rotate-0 md:-rotate-90" : "-rotate-90 md:rotate-0"
+            open ? "rotate-0" : "-rotate-90"
           }`}
         >
           <path
