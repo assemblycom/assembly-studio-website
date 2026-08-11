@@ -137,8 +137,11 @@ export function TrustTicker() {
       ref={ref}
       aria-label="Assembly by the numbers"
       // Decorative stat band — default arrow cursor, non-selectable so it never
-      // reads as editable content.
-      className="cursor-default select-none pb-8 md:pb-10"
+      // reads as editable content. No padding of its own: the cells' own py is
+      // the band's air, so it's equal above and below the figures and the column
+      // rules meet the rules that open and close the band instead of stopping
+      // short of the bottom one.
+      className="cursor-default select-none"
     >
       {/* Figures — in the 1100 rail, with hairline dividers between columns on
           desktop. The hero's full-bleed divider is the top boundary; this band
