@@ -31,6 +31,13 @@ export interface AppTemplateEntry {
    * and callers must handle its absence rather than substituting the slug.
    */
   templateId?: string;
+  /**
+   * Contentful "Hidden". It governs LISTING only — whether the template appears
+   * in the gallery and the homepage strip. A published entry always keeps its
+   * /templates/[slug] page and its place in the proposal picker, hidden or not,
+   * so a template can be linked and proposed before it is announced.
+   */
+  isHidden: boolean;
   featured: boolean;
   order?: number;
 }
@@ -76,14 +83,20 @@ function toAppTemplate(entry: Entry<never>): AppTemplateEntry | null {
     overview: (f.appOverview as Document) ?? undefined,
     images: imageList.map(toImage).filter((i): i is NonNullable<typeof i> => Boolean(i)),
     templateId: typeof f.templateId === "string" ? f.templateId : undefined,
+    isHidden: f.isHidden === true,
     featured: f.isFeatured === true,
     order: typeof f.order === "number" ? f.order : undefined,
   };
 }
 
 /**
- * Every published App Template. Returns an empty list when Contentful isn't
- * configured or is unreachable — the pages fall back to the templates committed
+ * Every published App Template, hidden ones included — the hidden flag is
+ * applied per surface (see visible-templates.ts), not here, because the detail
+ * pages and the proposal picker are meant to carry hidden templates too. Fetching
+ * them out at the query was why a hidden template's page rendered from the
+ * committed record alone, with none of its CMS copy or screenshots.
+ *
+ * Returns an empty list when Contentful isn't configured or is unreachable — the pages fall back to the templates committed
  * in templates.ts, so a CMS problem can't take the gallery down.
  */
 // A production build renders every template page in one process, so without this
@@ -112,7 +125,6 @@ async function fetchAppTemplates(): Promise<AppTemplateEntry[]> {
     const res = await client.getEntries({
       content_type: CONTENT_TYPE,
       "fields.appType": APP_TEMPLATE,
-      "fields.isHidden[ne]": true,
       include: 2,
       limit: 200,
     });

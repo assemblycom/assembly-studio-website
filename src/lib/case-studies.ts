@@ -15,7 +15,11 @@ export type ContentBlock =
   | { type: "paragraph"; text: string }
   | { type: "list"; items: string[] }
   | { type: "quote"; text: string; attribution?: string }
-  | { type: "image"; src: string; alt: string };
+  | { type: "image"; src: string; alt: string }
+  // A real screenshot of an app the customer built, sat on a tinted pad and
+  // opened full-size on click. Separate from `image`, whose sources are still
+  // placeholders across most stories.
+  | { type: "screenshot"; src: string; alt: string; caption?: string };
 
 export interface CaseStudy {
   slug: string;
@@ -193,6 +197,153 @@ export const CASE_STUDIES: CaseStudy[] = [
       {
         type: "paragraph",
         text: "The opportunities to leverage partner-provided data to enrich everything from internal team processes to potential customer-facing traveler experiences means that with Assembly, Capital One Luxury Travel didn’t have to choose between building or buying. They did both — and created a scalable foundation for their Luxury Travel program.",
+      },
+    ],
+  },
+  {
+    slug: "sargent-cpa",
+    company: "Sargent CPAs",
+    seoDescription:
+      "How Sargent CPAs built custom client apps with Assembly Studio, consolidated third-party tools, and kept a portal that feels like the firm.",
+    industry: "Accounting & Advisory",
+    headline:
+      "How Sargent CPAs Built a Custom Client Experience with Assembly Studio",
+    summary:
+      "Sargent CPAs is an accounting firm built on close client relationships. Operations Manager Anthony Drozd explains how Assembly Studio lets their team offer a warm, custom-branded client experience and replace third-party software.",
+    stats: [
+      { value: "100+", label: "clients in one portal" },
+      { value: "2", label: "custom apps built with Studio" },
+      { value: "3+", label: "third-party tools consolidated" },
+    ],
+    challenge:
+      "Sargent CPAs is a boutique accounting and advisory practice whose growth comes entirely through referrals, so every client relationship carries outsized weight. The team spent a long time assessing accounting-specific platforms like TaxDome and Canopy, but on the client side those felt corporate rather than inviting, and the firm's differentiation is warmth.",
+    solution:
+      "Assembly became the single front door for client interaction: communications, task lists, document intake, e-signatures, and billing in one branded environment. Behind it, Assembly's API and Automations took the repetitive mechanics of a tax practice off the team's plate, and Assembly Studio let Anthony build client-facing apps, starting with a meeting manager that syncs to the team's Google Calendar.",
+    results: [
+      "Over 100 clients managed in one branded portal",
+      "Three or more third-party tools consolidated into Assembly",
+      "Recurring obligations show up as portal tasks instead of email nudges",
+      "Custom apps built by describing them in plain language, with no third-party software to license or explain",
+    ],
+    glance: {
+      founded: "2016",
+      runningSince: "2025",
+      companyUrl: "https://www.sargentpc.com/",
+      apps: [
+        "Files",
+        "Messages",
+        "Tasks",
+        "Contracts",
+        "Invoicing",
+        "Forms",
+        "Automations",
+        "Assembly Studio",
+        "Airtable",
+        "QuickBooks",
+        "Google Calendar",
+      ],
+    },
+    body: [
+      {
+        type: "heading",
+        text: "A Relationship-First Firm That Refused to Feel Corporate",
+      },
+      {
+        type: "paragraph",
+        text: "Sargent CPAs is a boutique accounting and advisory practice that serves clients across the United States and internationally. They offer bookkeeping, tax preparation, and on-demand consulting. Growth has come entirely through referrals, which means every client relationship carries outsized weight. “We specialize in individual and freelancing clients,” says Anthony Drozd, the firm’s operations manager. “We really love helping our clients and building a relationship with them.”",
+      },
+      {
+        type: "paragraph",
+        text: "That relationship-first model shaped how the firm evaluated software. The team spent a long time assessing the accounting-specific platforms like TaxDome and Canopy. None of them fit.",
+      },
+      {
+        type: "quote",
+        text: "TaxDome and Canopy may do everything you want in one box, but on the client side it feels very corporate. It didn’t look friendly or seem inviting.",
+        attribution: "Anthony Drozd, Operations Manager, Sargent CPAs",
+      },
+      {
+        type: "paragraph",
+        text: "Assembly offered a more flexible, customized experience that allowed Sargent CPAs to offer a warm, client-first experience. “Assembly came the closest to letting us give our clients the experience we wanted,” Anthony says.",
+      },
+      {
+        type: "heading",
+        text: "One Branded Portal for Communications, Tasks, and Documents",
+      },
+      {
+        type: "paragraph",
+        text: "Sargent CPAs rolled out Assembly as the single front door for client interaction during their last renewal season. Communications, task lists, document intake, e-signatures, and billing all live in the same branded environment, replacing a stack of disconnected tools.",
+      },
+      {
+        type: "paragraph",
+        text: "The firm’s core client workflow now runs through the Tasks app. Recurring obligations that used to require an email nudge, like paying estimated quarterly taxes, signing forms, and returning requested documents, now appear as tasks in the client’s portal with a clear next action. “Our clients really liked that we had an integrated system where all of their communications and the tasks they needed to do were in one central location,” Anthony says.",
+      },
+      {
+        type: "paragraph",
+        text: "Branding was non-negotiable for a firm whose differentiation is warmth. Assembly’s customization lets Sargent CPAs deliver a portal that reads as an extension of the firm rather than a vendor’s software.",
+      },
+      {
+        type: "quote",
+        text: "When clients log into the portal, they see our branded colors and our logos. They feel like it’s a safe, trusted place, with custom features in the side menu that are exactly what we need for our clients.",
+        attribution: "Anthony Drozd, Operations Manager, Sargent CPAs",
+      },
+      {
+        type: "paragraph",
+        text: "Behind that client-facing simplicity, Anthony has built a heavily automated back office. Using Assembly’s API and Automations, he has taken the repetitive mechanics of a tax practice off his team’s plate.",
+      },
+      {
+        type: "quote",
+        text: "Assembly has allowed our team to work better by streamlining client communications, document intake, and form signing. With automations and integrations, we’ve automated a lot of the tedious work: downloading documents, uploading files for clients to sign on a regular basis, that doesn’t need the expertise of a CPA.",
+        attribution: "Anthony Drozd, Operations Manager, Sargent CPAs",
+      },
+      {
+        type: "heading",
+        text: "Building Custom Experiences Inside Assembly Studio",
+      },
+      {
+        type: "paragraph",
+        text: "Using Assembly’s new AI-powered app builder, Sargent CPAs were able to even further customize their client experience, starting with helping clients with their meeting management.",
+      },
+      {
+        type: "paragraph",
+        text: "The concept was simple: a client-facing area in their portal that securely syncs with the team’s Google Calendar, finds upcoming meetings, and displays the date, time, and which Sargent CPAs team member they’re meeting, with a reschedule request built directly into the app. Most importantly, the internal team could control if and when the client’s rescheduling requests are approved.",
+      },
+      {
+        type: "quote",
+        text: "It’s a really awesome feature for our clients. A centralized location where they can log in and see any upcoming meetings they might have.",
+        attribution: "Anthony Drozd, Operations Manager, Sargent CPAs",
+      },
+      {
+        type: "paragraph",
+        text: "Anthony was able to describe the app in plain language, connect to Google Calendar, and have a working app ready to be used by clients.",
+      },
+      {
+        type: "paragraph",
+        text: "With a client-facing application under his belt, Anthony next plans to replace more complicated email-based tax document collection with a request list built into the portal. “This is a common feature we see with other third-party software, but we wanted it integrated directly into our portal, and no third-party software does that,” he says. “The client experience is really important to us.”",
+      },
+      {
+        type: "paragraph",
+        text: "Every custom app the firm builds is a third-party tool it doesn’t have to license, integrate, or explain to clients, while keeping the portal experience unbroken. “You can build it any way you want and make it perfect for your clients and your business,” Anthony says. “With the ability to customize and build new apps, you save a lot of money instead of integrating third-party software.”",
+      },
+      {
+        type: "heading",
+        text: "Lower Costs and an Experience that Clients Love",
+      },
+      {
+        type: "paragraph",
+        text: "By integrating Assembly into their client process, Sargent CPAs have consolidated multiple software tools into one central location: billing, form signing, document requests, all while offering a client experience unique to their firm. “Paying for multiple third-party tools gets expensive,” Anthony says. “Now it’s all under one hood for all our clients.”",
+      },
+      {
+        type: "paragraph",
+        text: "The client-side payoff is the one that matters most to a referral-driven firm. Meeting questions that used to arrive by email now resolve in the portal. Quarterly tax obligations show up as tasks rather than accountants chasing clients via email. And every interaction happens inside an interface that looks and feels like Sargent CPAs.",
+      },
+      {
+        type: "quote",
+        text: "I love being able to think of any idea we come up with and implement it directly into the portal. We’ve created custom things that are really unique for our clients, and they’ve found them very helpful.",
+        attribution: "Anthony Drozd, Operations Manager, Sargent CPAs",
+      },
+      {
+        type: "paragraph",
+        text: "With Assembly’s client experience platform and AI building features helping streamline custom experiences, Sargent CPAs is building toward a practice where the technology disappears and the advisory relationship is all the client sees.",
       },
     ],
   },
@@ -1120,206 +1271,30 @@ export const CASE_STUDIES: CaseStudy[] = [
     ],
   },
   {
-    slug: "sargent-cpa",
-    company: "Sargent CPAs",
-    seoDescription:
-      "How Sargent CPAs built custom client apps with Assembly Studio, consolidated third-party tools, and kept a portal that feels like the firm.",
-    industry: "Accounting & Advisory",
-    headline:
-      "How Sargent CPAs Built a Custom Client Experience with Assembly Studio",
-    summary:
-      "Sargent CPAs is an accounting firm built on close client relationships. Operations Manager Anthony Drozd explains how Assembly Studio lets their team offer a warm, custom-branded client experience and replace third-party software.",
-    stats: [
-      { value: "100+", label: "clients in one portal" },
-      { value: "2", label: "custom apps built with Studio" },
-      { value: "3+", label: "third-party tools consolidated" },
-    ],
-    challenge:
-      "Sargent CPAs is a boutique accounting and advisory practice whose growth comes entirely through referrals, so every client relationship carries outsized weight. The team spent a long time assessing accounting-specific platforms like TaxDome and Canopy, but on the client side those felt corporate rather than inviting, and the firm's differentiation is warmth.",
-    solution:
-      "Assembly became the single front door for client interaction: communications, task lists, document intake, e-signatures, and billing in one branded environment. Behind it, Assembly's API and Automations took the repetitive mechanics of a tax practice off the team's plate, and Assembly Studio let Anthony build client-facing apps, starting with a meeting manager that syncs to the team's Google Calendar.",
-    results: [
-      "Over 100 clients managed in one branded portal",
-      "Three or more third-party tools consolidated into Assembly",
-      "Recurring obligations show up as portal tasks instead of email nudges",
-      "Custom apps built by describing them in plain language, with no third-party software to license or explain",
-    ],
-    glance: {
-      founded: "2016",
-      runningSince: "2025",
-      companyUrl: "https://www.sargentpc.com/",
-      apps: [
-        "Files",
-        "Messages",
-        "Tasks",
-        "Contracts",
-        "Invoicing",
-        "Forms",
-        "Automations",
-        "Assembly Studio",
-        "Airtable",
-        "QuickBooks",
-        "Google Calendar",
-      ],
-    },
-    body: [
-      {
-        type: "heading",
-        text: "A Relationship-First Firm That Refused to Feel Corporate",
-      },
-      {
-        type: "paragraph",
-        text: "Sargent CPAs is a boutique accounting and advisory practice that serves clients across the United States and internationally. They offer bookkeeping, tax preparation, and on-demand consulting. Growth has come entirely through referrals, which means every client relationship carries outsized weight.",
-      },
-      {
-        type: "quote",
-        text: "We specialize in individual and freelancing clients. We really love helping our clients and building a relationship with them.",
-        attribution: "Anthony Drozd, Operations Manager, Sargent CPAs",
-      },
-      {
-        type: "paragraph",
-        text: "That relationship-first model shaped how the firm evaluated software. The team spent a long time assessing the accounting-specific platforms like TaxDome and Canopy. None of them fit.",
-      },
-      {
-        type: "quote",
-        text: "TaxDome and Canopy may do everything you want in one box, but on the client side it feels very corporate. It didn’t look friendly or seem inviting.",
-        attribution: "Anthony Drozd, Operations Manager, Sargent CPAs",
-      },
-      {
-        type: "paragraph",
-        text: "Assembly offered a more flexible, customized experience that allowed Sargent CPAs to offer a warm, client-first experience.",
-      },
-      {
-        type: "quote",
-        text: "When we looked at other software, it felt too corporate and hard around the edges. Assembly came the closest to letting us give our clients the experience we wanted.",
-        attribution: "Anthony Drozd, Operations Manager, Sargent CPAs",
-      },
-      {
-        type: "heading",
-        text: "One Branded Portal for Communications, Tasks, and Documents",
-      },
-      {
-        type: "paragraph",
-        text: "Sargent CPAs rolled out Assembly as the single front door for client interaction during their last renewal season. Communications, task lists, document intake, e-signatures, and billing all live in the same branded environment, replacing a stack of disconnected tools.",
-      },
-      {
-        type: "paragraph",
-        text: "The firm’s core client workflow now runs through the Tasks app. Recurring obligations that used to require an email nudge, like paying estimated quarterly taxes, signing forms, and returning requested documents, now appear as tasks in the client’s portal with a clear next action.",
-      },
-      {
-        type: "quote",
-        text: "Our clients really liked that we had an integrated system where all of their communications and the tasks they needed to do were in one central location.",
-        attribution: "Anthony Drozd, Operations Manager, Sargent CPAs",
-      },
-      {
-        type: "paragraph",
-        text: "Branding was non-negotiable for a firm whose differentiation is warmth. Assembly’s customization lets Sargent CPAs deliver a portal that reads as an extension of the firm rather than a vendor’s software.",
-      },
-      {
-        type: "quote",
-        text: "When clients log into the portal, they see our branded colors and our logos. They feel like it’s a safe, trusted place, with custom features in the side menu that are exactly what we need for our clients.",
-        attribution: "Anthony Drozd, Operations Manager, Sargent CPAs",
-      },
-      {
-        type: "paragraph",
-        text: "Behind that client-facing simplicity, Anthony has built a heavily automated back office. Using Assembly’s API and Automations, he has taken the repetitive mechanics of a tax practice off his team’s plate.",
-      },
-      {
-        type: "quote",
-        text: "Assembly has allowed our team to work better by streamlining client communications, document intake, and form signing. With automations and integrations, we’ve automated a lot of the tedious work: downloading documents, uploading files for clients to sign on a regular basis, that doesn’t need the expertise of a CPA.",
-        attribution: "Anthony Drozd, Operations Manager, Sargent CPAs",
-      },
-      {
-        type: "heading",
-        text: "Building Custom Experiences Inside Assembly Studio",
-      },
-      {
-        type: "paragraph",
-        text: "Using Assembly’s new AI-powered app builder, Sargent CPAs were able to even further customize their client experience, starting with helping clients with their meeting management.",
-      },
-      {
-        type: "paragraph",
-        text: "The concept was simple: a client-facing area in their portal that securely syncs with the team’s Google Calendar, finds upcoming meetings, and displays the date, time, and which Sargent CPAs team member they’re meeting, with a reschedule request built directly into the app. Most importantly, the internal team could control if and when the client’s rescheduling requests are approved.",
-      },
-      {
-        type: "quote",
-        text: "It’s a really awesome feature for our clients. A centralized location where they can log in and see any upcoming meetings they might have.",
-        attribution: "Anthony Drozd, Operations Manager, Sargent CPAs",
-      },
-      {
-        type: "paragraph",
-        text: "Anthony was able to describe the app in plain language, connect to Google Calendar, and have a working app ready to be used by clients.",
-      },
-      {
-        type: "paragraph",
-        text: "With a client-facing application under his belt, Anthony next plans to replace more complicated email-based tax document collection with a request list built into the portal.",
-      },
-      {
-        type: "quote",
-        text: "This is a common feature we see with other third-party software, but we wanted it integrated directly into our portal, and no third-party software does that. The client experience is really important to us. Being able to build something directly into the client portal was really important.",
-        attribution: "Anthony Drozd, Operations Manager, Sargent CPAs",
-      },
-      {
-        type: "paragraph",
-        text: "Every custom app the firm builds is a third-party tool it doesn’t have to license, integrate, or explain to clients, while keeping the portal experience unbroken.",
-      },
-      {
-        type: "quote",
-        text: "You can build it any way you want and make it perfect for your clients and your business. With the ability to customize and build new apps, you save a lot of money instead of integrating third-party software.",
-        attribution: "Anthony Drozd, Operations Manager, Sargent CPAs",
-      },
-      {
-        type: "heading",
-        text: "Lower Costs and an Experience that Clients Love",
-      },
-      {
-        type: "paragraph",
-        text: "By integrating Assembly into their client process, Sargent CPAs have consolidated multiple software tools into one central location: billing, form signing, document requests, all while offering a client experience unique to their firm.",
-      },
-      {
-        type: "quote",
-        text: "Paying for multiple third-party tools gets expensive. Now it’s all under one hood for all our clients.",
-        attribution: "Anthony Drozd, Operations Manager, Sargent CPAs",
-      },
-      {
-        type: "paragraph",
-        text: "The client-side payoff is the one that matters most to a referral-driven firm. Meeting questions that used to arrive by email now resolve in the portal. Quarterly tax obligations show up as tasks rather than accountants chasing clients via email. And every interaction happens inside an interface that looks and feels like Sargent CPAs.",
-      },
-      {
-        type: "quote",
-        text: "I love being able to think of any idea we come up with and implement it directly into the portal. We’ve created custom things that are really unique for our clients, and they’ve found them very helpful.",
-        attribution: "Anthony Drozd, Operations Manager, Sargent CPAs",
-      },
-      {
-        type: "paragraph",
-        text: "With Assembly’s client experience platform and AI building features helping streamline custom experiences, Sargent CPAs is building toward a practice where the technology disappears and the advisory relationship is all the client sees.",
-      },
-    ],
-  },
-  {
     slug: "advertai-marketing",
-    company: "AdvertAI Marketing",
+    company: "Advertai Marketing",
+    image: "/images/customers/advertai-marketing.jpg",
     seoDescription:
-      "How AdvertAI Marketing replaced five tools with six apps built on Assembly Studio, and made its client experience the reason agencies pick it.",
-    industry: "Marketing & Web Development",
+      "How Advertai Marketing replaced five tools with five apps built on Assembly Studio, and made its client experience the reason agencies pick it.",
+    industry: "Marketing",
     headline:
-      "How AdvertAI Marketing Differentiates with Assembly’s Client Experience",
+      "How Advertai Marketing Differentiates with Assembly’s Client Experience",
     summary:
-      "Garrett Leonard’s white-label web development agency came to Assembly to fix scattered client communication. With Assembly Studio, they replaced their entire supporting tool stack and now differentiate on their client experience.",
+      "Garrett Leonard’s digital agency came to Assembly to fix scattered client communication, then used Assembly Studio to replace its supporting tool stack and make client experience the reason partners pick it.",
     stats: [
-      { value: "6+", label: "apps built" },
+      { value: "5+", label: "apps built" },
       { value: "5+", label: "tools eliminated" },
       { value: "5 weeks", label: "development to launch" },
     ],
     challenge:
-      "AdvertAI Marketing builds premium websites for brands worldwide and white-labels fulfillment for other agencies, where every partner brings multiple concurrent projects. ClickUp handled internal tasks but had no client-facing layer, so intake ran through Google Forms, feedback through Markup.io, files through Google Drive, and everything else over email.",
+      "Advertai Marketing helps businesses and brands around the world build and strengthen their digital presence, working directly with businesses while also white-labeling fulfillment for other agencies, where every partner can bring multiple client projects at once. ClickUp handled internal tasks but had no client-facing layer, so intake ran through Google Forms, feedback through Markup.io, files through Google Drive, and everything else over email.",
     solution:
-      "AdvertAI gave every client and agency partner one branded portal with its CRM structured to mirror the partner model, then used Assembly Studio to build the missing half: a message center that unifies Assembly messages, Gmail, ClickUp due dates and billing history, plus in-house replacements for design feedback, SEO reporting, onboarding and project provisioning.",
+      "Advertai gave every client and agency partner one branded portal with its CRM structured to mirror the partner model, then used Assembly Studio to build the missing half: a message center that unifies Assembly messages, Gmail, ClickUp due dates and billing history, plus in-house replacements for design feedback, SEO reporting, onboarding and project provisioning.",
     results: [
-      "Built six or more custom apps in a few weeks each",
+      "Built five or more custom apps in a few weeks each",
       "Retiring Markup.io, Google Drive, Bright Local, Keyword.com and Google Forms",
       "Project managers stopped clicking between platforms to run a client day",
-      "Client approvals, feedback and reporting all stay inside AdvertAI’s branded portal",
+      "Client approvals, feedback and reporting all stay inside Advertai’s branded portal",
     ],
     glance: {
       founded: "2023",
@@ -1331,20 +1306,20 @@ export const CASE_STUDIES: CaseStudy[] = [
       { type: "heading", text: "Selling an Experience, Not Just a Website" },
       {
         type: "paragraph",
-        text: "AdvertAI Marketing builds premium websites for businesses and brands around the world. Founded in 2023 by Garrett Leonard, the 11-person agency also engages with other agency partners to white-label fulfillment under that agency’s existing brand.",
+        text: "Advertai Marketing helps businesses and brands around the world build and strengthen their digital presence. Founded in 2023 by Garrett Leonard, the 11-person agency works directly with businesses while also partnering with other agencies to provide white-label fulfillment under their existing brands.",
       },
       {
         type: "paragraph",
-        text: "In this agency partner model, every new client brings multiple concurrent projects, each with its own timeline, stakeholders, and approval cycle, putting enormous weight on the project management experience. Here, Garrett saw the opportunity to differentiate himself with a better client experience.",
+        text: "Managing both direct and white-label relationships creates a complex project environment. Agency partners can bring multiple client projects at once, each with its own timeline, stakeholders, deliverables, and approval process. Garrett saw an opportunity for Advertai Marketing to stand out by providing a better, more organized client experience.",
       },
       {
         type: "paragraph",
-        text: "The problem was his tooling: ClickUp handled internal task management well, but it had no client-facing layer. Intake ran through Google Forms. Feedback and approvals lived in Markup.io. Files sat in Google Drive. Everything else happened over email.",
+        text: "The problem was his tooling: ClickUp handled internal task management well, but it had no client-facing layer. Intake ran through Google Forms. Feedback and approvals lived in Markup. Files sat in Google Drive. Everything else happened over email.",
       },
       {
         type: "quote",
         text: "We were dealing with scattered emails and no good way to share information with clients.",
-        attribution: "Garrett Leonard, Founder, AdvertAI Marketing",
+        attribution: "Garrett Leonard, Founder, Advertai Marketing",
       },
       {
         type: "paragraph",
@@ -1356,7 +1331,7 @@ export const CASE_STUDIES: CaseStudy[] = [
       },
       {
         type: "paragraph",
-        text: "AdvertAI adopted Assembly in 2025 with a specific goal: give every client and agency partner one branded place to see their projects, talk to the team, and get what they need.",
+        text: "Advertai adopted Assembly in 2025 with a specific goal: give every client and agency partner one branded place to see their projects, talk to the team, and get what they need.",
       },
       {
         type: "paragraph",
@@ -1369,15 +1344,15 @@ export const CASE_STUDIES: CaseStudy[] = [
       {
         type: "quote",
         text: "That was actually why we came to Assembly in the first place: to find something that made us feel different from other marketing agencies and web design agencies. Something that felt unique, an experience you don’t typically get in this industry.",
-        attribution: "Garrett Leonard, Founder, AdvertAI Marketing",
+        attribution: "Garrett Leonard, Founder, Advertai Marketing",
       },
       {
         type: "paragraph",
-        text: "The all-in-one portal experience became central to AdvertAI’s positioning in differentiating itself among other marketing and web development agencies.",
+        text: "The all-in-one portal experience became central to Advertai’s positioning in differentiating itself among other marketing and web development agencies.",
       },
       {
         type: "heading",
-        text: "Building the Missing Half: AdvertAI on Assembly Studio",
+        text: "Building the Missing Half: Advertai on Assembly Studio",
       },
       {
         type: "paragraph",
@@ -1386,15 +1361,20 @@ export const CASE_STUDIES: CaseStudy[] = [
       {
         type: "quote",
         text: "We use ClickUp for a lot of our project management and internal task-related items. We’ve always been missing the opportunity to connect that with the front-facing, client-related tools like Assembly.",
-        attribution: "Garrett Leonard, Founder, AdvertAI Marketing",
+        attribution: "Garrett Leonard, Founder, Advertai Marketing",
       },
       {
         type: "paragraph",
         text: "The first tool that Garrett built was a comprehensive message center for his business, rivaling category-defining software tools like Front.",
       },
       {
+        type: "screenshot",
+        src: "/images/customers/advertai-message-center.png",
+        alt: "Advertai Marketing's Message Center app, showing the client thread list alongside a conversation with Gmail, templates and reply tools",
+      },
+      {
         type: "paragraph",
-        text: "The Message Center sits on top of Assembly’s native Messages app, extended with the workflow logic AdvertAI’s project managers actually need to run a day of client communication. It has become the app the team lives in, including:",
+        text: "The Message Center sits on top of Assembly’s native Messages app, extended with the workflow logic Advertai’s project managers actually need to run a day of client communication. It has become the app the team lives in, including:",
       },
       {
         type: "list",
@@ -1403,34 +1383,33 @@ export const CASE_STUDIES: CaseStudy[] = [
           "Integrations with Gmail: client emails appear in the same message list alongside Assembly messages, plus upcoming ClickUp due dates, internal notes, and billing history. The team added talk-to-text for longer messages and custom sound alerts for notifications",
           "Ownership: messages can be assigned to specific internal team members, with the ability to restrict who’s allowed to respond to which clients",
           "Reply later and internal tagging: team members can flag a message for later and receive a notification banner at the end of the day, or tag a colleague with a question directly on the conversation",
-          "Response templates: AdvertAI sends five to ten standard response and update types every week, and those now live in the app as templates",
+          "Response templates: Advertai sends five to ten standard response and update types every week, and those now live in the app as templates",
           "Suggest a Reply: new team members can draft a response and route it to a team lead for review before it goes out, a training mechanism built directly into the workflow",
         ],
       },
       {
         type: "quote",
         text: "That’s been a really great feature in training people.",
-        attribution: "Garrett Leonard, Founder, AdvertAI Marketing",
+        attribution: "Garrett Leonard, Founder, Advertai Marketing",
       },
       { type: "heading", text: "The Rest of the Stack, Rebuilt In-House" },
       {
         type: "paragraph",
-        text: "The Message Center was the first app, not the last. In just a few weeks, AdvertAI also built out:",
+        text: "The Message Center was the first app, not the last. In just a few weeks, Advertai also built out:",
       },
       {
         type: "list",
         items: [
           "A design feedback app, an Assembly-native replacement for Markup.io, keeping client approvals inside the branded portal",
-          "An agency rewards program, a loyalty app for partner agencies that tracks project milestone progress and unlocks tiered discounts after every 5 or 10 sites completed in a year",
+          "An agency rewards program, a loyalty app for partner agencies that tracks progress and unlocks tiered discounts when they reach project milestones",
           "An SEO dashboard for client-facing visibility into deliverables and reporting, plus internal site issue detection, replacing Bright Local and Keyword.com",
-          "A project hub for custom onboarding forms, client surveys, and an AI content writing tool built around AdvertAI’s specific copy process",
-          "A project starter app that provisions a new project across every Assembly app and ClickUp simultaneously",
+          "A project hub for custom onboarding forms, client surveys, and an AI content writing tool built around Advertai’s specific copy process, that provisions a new project across every Assembly app and ClickUp simultaneously",
         ],
       },
       {
         type: "quote",
         text: "We’ve been able to build out apps in just a few weeks that I don’t know if we could have done within five to ten years before Assembly Studio. It’s allowed me to create automations and workflows that I didn’t realize were going to be possible.",
-        attribution: "Garrett Leonard, Founder, AdvertAI Marketing",
+        attribution: "Garrett Leonard, Founder, Advertai Marketing",
       },
       {
         type: "heading",
@@ -1438,12 +1417,12 @@ export const CASE_STUDIES: CaseStudy[] = [
       },
       {
         type: "paragraph",
-        text: "The most immediate result was consolidation. AdvertAI is in the process of retiring Markup.io, Google Drive, Bright Local, Keyword.com, and Google Forms, replaced by apps the team built themselves inside their own portal.",
+        text: "The most immediate result was consolidation. Advertai is in the process of retiring Markup.io, Google Drive, Bright Local, Keyword.com, and Google Forms, replaced by apps the team built themselves inside their own portal.",
       },
       {
         type: "quote",
         text: "It’s not only saved us money, it’s greatly improved the internal workflows we have, because there’s much less clicking between different platforms for all of our project managers to complete the day-to-day tasks we need with each client. It’s saved them a ton of time, and it’s been much less of a headache for them, not having to figure out where to go for the next thing. They can stay on Assembly for just about everything they do every day.",
-        attribution: "Garrett Leonard, Founder, AdvertAI Marketing",
+        attribution: "Garrett Leonard, Founder, Advertai Marketing",
       },
       {
         type: "paragraph",
@@ -1452,11 +1431,11 @@ export const CASE_STUDIES: CaseStudy[] = [
       {
         type: "quote",
         text: "I’m already starting to see myself get hours back each week, because there’s less maintenance and fewer things I need to stay on top of. The apps are doing a lot of this themselves.",
-        attribution: "Garrett Leonard, Founder, AdvertAI Marketing",
+        attribution: "Garrett Leonard, Founder, Advertai Marketing",
       },
       {
         type: "paragraph",
-        text: "The part he weights most heavily, though, is what clients see. Approvals, feedback, reporting, and communication all now happen inside AdvertAI’s own branded environment.",
+        text: "The part he weighs most heavily, though, is what clients see. Approvals, feedback, reporting, and communication all now happen inside Advertai’s own branded environment.",
       },
       {
         // Run inline rather than as two stacked pull-quotes: back to back, the
@@ -1467,12 +1446,12 @@ export const CASE_STUDIES: CaseStudy[] = [
       },
       {
         type: "paragraph",
-        text: "As AdvertAI continues shifting toward an agency-first model, that differentiated experience is the growth engine, and the rewards program is already doing double duty as a pitch asset for new partners.",
+        text: "As Advertai grows, its differentiated client experience continues to drive that momentum. The rewards program strengthens existing relationships while also serving as a compelling pitch asset for prospective partners.",
       },
       {
         type: "quote",
         text: "Assembly Studio is something I’d definitely recommend to other agency owners, and really any business looking to not only make things easier for them, but make the experience a lot better for the clients they work with.",
-        attribution: "Garrett Leonard, Founder, AdvertAI Marketing",
+        attribution: "Garrett Leonard, Founder, Advertai Marketing",
       },
     ],
   },
@@ -1486,10 +1465,10 @@ export function getCaseStudyBySlug(slug: string): CaseStudy | undefined {
 // Everything else flows into the story table below. Single source of truth so
 // the hero and the table never double-list a study.
 export const HERO_STUDY_SLUGS = [
+  "advertai-marketing",
   "capital-one-luxury-travel",
-  "ditto-by-dbc",
-  "jungle-luxe",
   "collective-cpa",
+  "jungle-luxe",
 ] as const;
 
 export const HERO_STUDIES: CaseStudy[] = HERO_STUDY_SLUGS.map(

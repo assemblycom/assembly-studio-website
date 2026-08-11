@@ -197,7 +197,7 @@ function openGetStarted(value: string) {
   window.location.href = buildSignupUrl(trimmed || undefined);
 }
 
-export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 ring-black/[0.06]", surfaceRadiusClass = "rounded-[22px]", minHeightClass = "min-h-[188px]", tone = "light", typewriter = false, mutedControls = false, submitLabel, submitDark = false, accent = LIME, hidePlus = false, hideHowTo = false, howToLabel = "How it works", howToSide = "left", promptPicker = false, promptPickerLabel = "Select a prompt", promptPickerSide = "left", promptPickerUp = false, promptItems, plusItems, compact = false, minimalControls = false, plusAsAttach = false, footerLeading, showSubmit = true, submitDisabled, textDimmed = false, splitFooter = false, value: valueProp, onValueChange, textareaRef }: { glow?: boolean; surfaceClassName?: string; surfaceRadiusClass?: string; minHeightClass?: string; tone?: "light" | "dark"; typewriter?: boolean; mutedControls?: boolean; submitLabel?: string; submitDark?: boolean; accent?: string; hidePlus?: boolean; hideHowTo?: boolean; howToLabel?: string; howToSide?: "left" | "right"; promptPicker?: boolean; promptPickerLabel?: string; promptPickerSide?: "left" | "right"; promptPickerUp?: boolean; promptItems?: (string | { label: string; prompt: string })[]; plusItems?: { label: string; icon: "attach" | "transfer" }[]; compact?: boolean; minimalControls?: boolean; plusAsAttach?: boolean; footerLeading?: React.ReactNode; showSubmit?: boolean; submitDisabled?: boolean; textDimmed?: boolean; splitFooter?: boolean; value?: string; onValueChange?: (v: string) => void; textareaRef?: React.Ref<HTMLTextAreaElement> } = {}) {
+export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 ring-black/[0.06]", surfaceRadiusClass = "rounded-[22px]", minHeightClass = "min-h-[188px]", tone = "light", typewriter = false, mutedControls = false, submitLabel, submitDark = false, themeAuto = false, accent = LIME, hidePlus = false, hideHowTo = false, howToLabel = "How it works", howToSide = "left", promptPicker = false, promptPickerLabel = "Select a prompt", promptPickerSide = "left", promptPickerUp = false, promptItems, plusItems, compact = false, minimalControls = false, plusAsAttach = false, footerLeading, showSubmit = true, submitDisabled, textDimmed = false, splitFooter = false, value: valueProp, onValueChange, textareaRef }: { glow?: boolean; surfaceClassName?: string; surfaceRadiusClass?: string; minHeightClass?: string; tone?: "light" | "dark"; typewriter?: boolean; mutedControls?: boolean; submitLabel?: string; submitDark?: boolean; themeAuto?: boolean; accent?: string; hidePlus?: boolean; hideHowTo?: boolean; howToLabel?: string; howToSide?: "left" | "right"; promptPicker?: boolean; promptPickerLabel?: string; promptPickerSide?: "left" | "right"; promptPickerUp?: boolean; promptItems?: (string | { label: string; prompt: string })[]; plusItems?: { label: string; icon: "attach" | "transfer" }[]; compact?: boolean; minimalControls?: boolean; plusAsAttach?: boolean; footerLeading?: React.ReactNode; showSubmit?: boolean; submitDisabled?: boolean; textDimmed?: boolean; splitFooter?: boolean; value?: string; onValueChange?: (v: string) => void; textareaRef?: React.Ref<HTMLTextAreaElement> } = {}) {
 
   // Prompt-picker entries. Default: the shared "Build a …" examples. A hero can
   // pass `promptItems` as plain strings (shown and inserted verbatim) or as
@@ -331,7 +331,17 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
   const lightPill = mutedControls
     ? "bg-[var(--v69-chip)] ring-1 ring-[color:var(--v69-chip-border)] shadow-[0_1px_2px_rgba(16,24,40,0.05)] hover:brightness-[0.98]"
     : "bg-white ring-1 ring-black/[0.06] shadow-sm hover:bg-neutral-50";
-  const textCls = dark ? "text-white/75 placeholder:text-white/40" : "text-neutral-900 placeholder:text-neutral-400";
+  const textCls = themeAuto
+    ? "text-neutral-900 placeholder:text-neutral-400 [[data-theme=dark]_&]:text-white/75 [[data-theme=dark]_&]:placeholder:text-white/40"
+    : dark
+      ? "text-white/75 placeholder:text-white/40"
+      : "text-neutral-900 placeholder:text-neutral-400";
+  // The ghost/typewriter preview sits on the field, so it follows the same rule.
+  const ghostCls = themeAuto
+    ? "text-neutral-400 [[data-theme=dark]_&]:text-white/40"
+    : dark
+      ? "text-white/40"
+      : "text-neutral-400";
   // minimalControls: strip the pill background/ring/shadow so the footer items
   // read as bare, polished elements (v74) — just a faint hover shape.
   const pillCls = minimalControls
@@ -492,9 +502,19 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
   // carries the fill; without it the whole box vanishes into the page.
   // Radius is concentric with the outer box (outer − the p-2 frame) so the
   // card's corners follow the gradient-border curve instead of sitting tighter.
-  const cardCls = dark
-    ? "rounded-[10px] md:rounded-[14px] bg-[#1b1b1b] p-3.5 ring-1 ring-white/[0.08]"
-    : "rounded-[10px] md:rounded-[14px] bg-white p-3.5 ring-1 ring-black/[0.06]";
+  // themeAuto states both skins as data-theme variants instead of picking one
+  // from `tone`. `tone` is the live theme, which a client component only knows
+  // after hydration — so the server sent this field's WHITE fill to a dark-mode
+  // visitor, and a white slab the size of the composer was the first thing the
+  // page painted. The pre-paint script has already set the attribute, so the
+  // variant lands on the first paint. Callers that pass a fixed tone (the
+  // proposal page's "field") keep the single-skin behaviour.
+  const FIELD_BASE = "rounded-[10px] md:rounded-[14px] p-3.5 ring-1";
+  const cardCls = themeAuto
+    ? `${FIELD_BASE} bg-white ring-black/[0.06] [[data-theme=dark]_&]:bg-[#1b1b1b] [[data-theme=dark]_&]:ring-white/[0.08]`
+    : dark
+      ? `${FIELD_BASE} bg-[#1b1b1b] ring-white/[0.08]`
+      : `${FIELD_BASE} bg-white ring-black/[0.06]`;
 
   return (
     <div className="relative">
@@ -522,7 +542,7 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
               // preview than fits: a prompt longer than the field would otherwise
               // spill over the footer row and out of the composer entirely. The
               // fade says the text continues rather than ending mid-sentence.
-              className={`pointer-events-none absolute inset-0 overflow-hidden px-1 text-base leading-[1.5] transition-colors duration-150 ${dark ? "text-white/40" : "text-neutral-400"}`}
+              className={`pointer-events-none absolute inset-0 overflow-hidden px-1 text-base leading-[1.5] transition-colors duration-150 ${ghostCls}`}
               style={
                 previewing
                   ? {
@@ -783,14 +803,27 @@ export function V66Composer({ glow = true, surfaceClassName = "bg-white ring-1 r
               aria-label={submitLabel ?? "Build it"}
               className={`flex ${submitH} items-center justify-center gap-1.5 rounded-lg ${pillText} font-normal transition-all duration-150 ease-out active:scale-[0.98] ${
                 submitActive
-                  ? submitDark
-                    ? "text-white hover:opacity-90"
-                    : "text-neutral-900 hover:brightness-95"
-                  : dark
-                    ? "bg-white/10 text-white/40"
-                    : "bg-neutral-200/70 text-neutral-400"
+                  ? themeAuto
+                    ? // Both skins as variants, for the same reason the field
+                      // takes them: picked from `tone`, the near-black light pill
+                      // was what a dark-mode visitor saw first, before it turned
+                      // accent. The caller supplies the two fills as custom
+                      // properties, since they are its own accent.
+                      "text-white hover:opacity-90 [[data-theme=dark]_&]:text-neutral-900 [[data-theme=dark]_&]:hover:brightness-95 bg-[var(--composer-submit,#171717)]"
+                    : submitDark
+                      ? "text-white hover:opacity-90"
+                      : "text-neutral-900 hover:brightness-95"
+                  : themeAuto
+                    ? "bg-neutral-200/70 text-neutral-400 [[data-theme=dark]_&]:bg-white/10 [[data-theme=dark]_&]:text-white/40"
+                    : dark
+                      ? "bg-white/10 text-white/40"
+                      : "bg-neutral-200/70 text-neutral-400"
               } ${submitLabel && submitActive ? "w-auto pl-3.5 pr-2.5" : submitW}`}
-              style={submitActive ? { backgroundColor: submitDark ? "#171717" : accent } : undefined}
+              style={
+                submitActive && !themeAuto
+                  ? { backgroundColor: submitDark ? "#171717" : accent }
+                  : undefined
+              }
             >
               {/* The words at every width. They used to appear from sm up only, so
                   on a phone the one action on the page was a bare arrow — the

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ProposalCreator } from "@/components/proposal/proposal-creator";
-import { getVisibleTemplates } from "@/lib/visible-templates";
+import { getCatalogueTemplates } from "@/lib/visible-templates";
 
 // An internal tool, not a marketing page: kept off the sitemap and out of the
 // index. The link it produces (/proposal) is noindex for the same reason — a
@@ -19,5 +19,5 @@ export const metadata: Metadata = {
 export const revalidate = 300;
 
 export default async function ProposalCreatorPage() {
-  return <ProposalCreator templates={await getVisibleTemplates()} />;
+  return <ProposalCreator templates={await getCatalogueTemplates()} />;
 }

@@ -35,7 +35,9 @@ export function SecurityDifferentiators({
   const [openTitle, setOpenTitle] = useState<string | null>(null);
 
   return (
-    <ul className="overflow-hidden rounded-xl border border-border md:rounded-none md:border-0">
+    // Clip with a margin so the rounded corners still cut the rows on mobile
+    // while a focused row's outline can sit just outside its edge.
+    <ul className="overflow-clip [overflow-clip-margin:6px] rounded-xl border border-border md:rounded-none md:border-0">
       {items.map((card, i) => {
         const open = openTitle === card.title;
         return (
@@ -53,7 +55,7 @@ export function SecurityDifferentiators({
                 type="button"
                 onClick={() => setOpenTitle(open ? null : card.title)}
                 aria-expanded={open}
-                className="group flex w-full cursor-pointer items-center justify-between gap-4 text-left md:gap-6 md:pointer-events-none md:cursor-default"
+                className="group flex w-full cursor-pointer items-center justify-between gap-4 rounded-md text-left md:gap-6 md:pointer-events-none md:cursor-default"
               >
                 {/* One line, always: the short title below md, the full one from
                     md up where the column is wide enough for it. */}

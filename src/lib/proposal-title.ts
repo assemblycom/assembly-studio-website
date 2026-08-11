@@ -19,13 +19,20 @@ export function headlineTitle(title: string) {
 export function proposalAppName({
   name,
   template,
+  // The title of the template as the caller already resolved it. The committed
+  // array is only half the catalogue — the other half lives in Contentful — and
+  // a template this file can't see still has to name the app rather than falling
+  // through to the generic headline.
+  templateTitle,
 }: {
   name?: string;
   template?: string;
+  templateTitle?: string;
 }): string {
   const slug = (template ?? "").trim();
   const picked = slug ? TEMPLATES.find((t) => t.slug === slug) : undefined;
   if (picked) return headlineTitle(picked.title);
+  if (slug && templateTitle) return headlineTitle(templateTitle);
   return (name ?? "").trim().slice(0, MAX_APP_NAME_LENGTH);
 }
 
@@ -47,6 +54,7 @@ export function proposalTitle(params: {
   for?: string;
   name?: string;
   template?: string;
+  templateTitle?: string;
 }): string {
   const appName = proposalAppName(params);
   const preparedFor = (params.for ?? "").trim();

@@ -35,7 +35,7 @@ export function CTA() {
           before the footer, without leaving a large empty gap. */}
       <div className="mx-auto max-w-3xl pb-16 pt-16 text-center md:pb-24 md:pt-24">
         <h2
-          className={`type-h2 text-balance leading-[1.12] ${dark ? "text-white" : "text-neutral-900"}`}
+          className="type-h2 text-balance leading-[1.12] text-neutral-900 [[data-theme=dark]_&]:text-white"
         >
           Build the firm
           <br />
@@ -45,7 +45,8 @@ export function CTA() {
           {/* Same animated gradient border as the hero composer up top. Every
               prop below must stay in step with hero-v76's composer — the two
               boxes are the same control and any drift shows immediately. */}
-          <div className="v63-gradient-border v63-ring-solid relative rounded-[18px] md:rounded-[22px]">
+          {/* The submit pill's two fills, matching the hero's composer. */}
+          <div className="v63-gradient-border v63-ring-solid relative rounded-[18px] [--composer-submit:#171717] md:rounded-[22px] [[data-theme=dark]_&]:[--composer-submit:#7DA4FF]">
             <V66Composer
               textareaRef={inputRef}
               typewriter
@@ -54,6 +55,9 @@ export function CTA() {
               submitDisabled={false}
               glow={false}
               tone={theme}
+              // Both skins in CSS, so the field isn't a white slab on the first
+              // paint for a dark-mode visitor (see the composer's themeAuto).
+              themeAuto
               compact
               minimalControls
               splitFooter
@@ -77,11 +81,7 @@ export function CTA() {
               // while this section is pure bg-background — leaving a white field
               // on white, with no inner/outer separation at all. #f7f8fa is the
               // gradient's own mid stop, so the two composers match exactly.
-              surfaceClassName={
-                dark
-                  ? "bg-transparent shadow-[0_24px_60px_-28px_rgba(0,0,0,0.8)]"
-                  : "bg-[#f7f8fa] shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
-              }
+              surfaceClassName="bg-[#f7f8fa] shadow-[0_1px_2px_rgba(16,24,40,0.04)] [[data-theme=dark]_&]:bg-transparent [[data-theme=dark]_&]:shadow-[0_24px_60px_-28px_rgba(0,0,0,0.8)]"
             />
           </div>
 

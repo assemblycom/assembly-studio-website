@@ -11,6 +11,7 @@ import {
   type ContentBlock,
 } from "@/lib/case-studies";
 import { VideoPlayer } from "@/components/customers/video-player";
+import { CaseStudyScreenshot } from "@/components/customers/case-study-screenshot";
 import { CustomerLogo, hasCustomerLogo } from "@/components/customers/customer-logos";
 import { IconArrow } from "@/components/home/icons";
 import { APP_URL } from "@/lib/constants";
@@ -20,6 +21,9 @@ import { APP_URL } from "@/lib/constants";
 // stack is the intended fallback.
 const MONO_EYEBROW =
   '"ABC Diatype Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
+
+// How many app names the meta panel lists before falling back to a count.
+const APPS_SHOWN = 5;
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -110,7 +114,15 @@ function MetaCard({ study }: { study: CaseStudy }) {
             <dd className="mt-0.5 text-sm text-muted-foreground">
               {/* Drop the redundant "App" suffix on Assembly apps; leave
                   third-party integration names (OneDrive, Monday…) intact. */}
-              {g.apps.map((a) => a.replace(/ App$/, "")).join(", ")}
+              {/* Capped at five: the longest lists ran to a dozen names and the
+                  panel row turned into a paragraph. The count carries the rest —
+                  the point is how many apps, not which twelve. */}
+              {(() => {
+                const apps = g.apps.map((a) => a.replace(/ App$/, ""));
+                const shown = apps.slice(0, APPS_SHOWN).join(", ");
+                const rest = apps.length - APPS_SHOWN;
+                return rest > 0 ? `${shown}, and ${rest} more` : shown;
+              })()}
             </dd>
           </div>
         </dl>
@@ -169,6 +181,14 @@ function BodyBlock({ block }: { block: ContentBlock }) {
           <span className="text-sm text-muted-foreground">Placeholder</span>
         </div>
       );
+    case "screenshot":
+      return (
+        <CaseStudyScreenshot
+          src={block.src}
+          alt={block.alt}
+          caption={block.caption}
+        />
+      );
   }
 }
 
@@ -196,7 +216,11 @@ function RelatedCard({ study }: { study: CaseStudy }) {
       <h3 className="type-h3 mt-8">
         {study.company}
       </h3>
-      <p className="mt-3 text-[0.9375rem] leading-relaxed text-muted-foreground">
+      {/* Clamped: these summaries are written for the story's own header, where
+          they have the full column, and a long one here stretched its card well
+          past the one beside it. Four lines is the longest of them at desktop
+          card width, so in practice it evens the row rather than cutting copy. */}
+      <p className="mt-3 line-clamp-4 text-[0.9375rem] leading-relaxed text-muted-foreground">
         {study.summary}
       </p>
     </Link>

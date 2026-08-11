@@ -148,9 +148,22 @@ const AVATAR_TINTS = {
   violet: { bg: "#f0eaff", fg: "#7f69b5" },
   purple: { bg: "#faeefb", fg: "#7a2d87" },
   olive: { bg: "#ebf3e7", fg: "#75876e" },
+  // Not one of the product's shipped avatar pairs: this is the site's own
+  // periwinkle accent, as the sample firm's brand colour. Both values are that
+  // accent — the fill is it over white, the ink is it taken down toward the
+  // page's near-black, since the accent itself has no contrast as 12px type on
+  // its own pale fill (the same reason the calendar spine runs a deeper lime).
+  periwinkle: { bg: "#eef3ff", fg: "#5c78b9" },
 } as const;
 
 type AvatarTint = keyof typeof AVATAR_TINTS;
+
+// The sample firm's brand colour, wherever these mocks show "your brand": the
+// logo tile, the tinted client sidebar, and the brand-colour swatch. One
+// constant because those three have to be the same colour to read as one firm's
+// branding — and it used to be the product's magenta `purple`, which was the
+// only hue on the page that came from outside the site's palette.
+const MOCK_BRAND_TINT: AvatarTint = "periwinkle";
 
 // The palette's fill, ink and self-outline, resolved for the current theme.
 //
@@ -214,7 +227,7 @@ function useTint(tint: AvatarTint, prominence: "quiet" | "strong" = "quiet") {
 function BrandMark({ className = "" }: { className?: string }) {
   // Strong: this is a lone logo tile, not one of a column of avatars, and at
   // the quiet strength it sank into the dark sidebar and the dark settings row.
-  const colors = useTint("purple", "strong");
+  const colors = useTint(MOCK_BRAND_TINT, "strong");
   return (
     <span
       className={`flex shrink-0 items-center justify-center rounded-[4px] bg-[var(--mk-invert-bg)] leading-none text-[var(--mk-invert-fg)] ${className}`}
@@ -713,11 +726,12 @@ function ClientSidebarVisual({ bleed = false }: { bleed?: boolean }) {
   // a neutral wash to fall back to.
   const { theme } = useTheme();
   const isLight = theme !== "dark";
-  const surfaceTint = isLight ? AVATAR_TINTS.purple.bg : undefined;
+  const brand = AVATAR_TINTS[MOCK_BRAND_TINT];
+  const surfaceTint = isLight ? brand.bg : undefined;
   const selected = isLight
     ? {
-        backgroundColor: `color-mix(in oklab, ${AVATAR_TINTS.purple.fg} 13%, ${AVATAR_TINTS.purple.bg})`,
-        color: AVATAR_TINTS.purple.fg,
+        backgroundColor: `color-mix(in oklab, ${brand.fg} 13%, ${brand.bg})`,
+        color: brand.fg,
       }
     : undefined;
   return (
@@ -862,8 +876,8 @@ function BrandingVisual() {
         <span
           className="size-[28px] shrink-0 rounded-[6px] bg-[var(--mk-fill)] ring-1 ring-inset ring-[var(--mk-border)]"
           style={{
-            backgroundColor: AVATAR_TINTS.purple.fg,
-            boxShadow: `inset 0 0 0 1px ${AVATAR_TINTS.purple.fg}`,
+            backgroundColor: AVATAR_TINTS[MOCK_BRAND_TINT].fg,
+            boxShadow: `inset 0 0 0 1px ${AVATAR_TINTS[MOCK_BRAND_TINT].fg}`,
           }}
         />
       </div>

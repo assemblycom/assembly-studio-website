@@ -190,7 +190,7 @@ export function TemplateMock({ slug }: { slug: string }) {
     );
   }
 
-  if (slug === "onboarding-wizard") {
+  if (slug === "client-onboarding-wizard") {
     const stats: [string, string][] = [
       ["In progress", "1"],
       ["Completed", "0"],
@@ -286,7 +286,12 @@ export function TemplateMock({ slug }: { slug: string }) {
     );
   }
 
-  // Default — New client intake
+  // Default — New client intake. Also the catch-all for any slug with no cover
+  // of its own, which is indistinguishable from a designed one at a glance, so
+  // say so in dev rather than letting a template quietly wear someone else's UI.
+  if (process.env.NODE_ENV !== "production" && slug !== "new-client-intake") {
+    console.warn(`[templates] No cover mock for "${slug}" — showing the generic intake form. Add a case in V69CardMock (hero-v71.tsx).`);
+  }
   const fields = [
     { label: "Company name", value: "Northwind Co." },
     { label: "Primary contact", value: "jane@northwind.com" },

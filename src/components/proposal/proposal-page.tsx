@@ -398,7 +398,10 @@ function TemplateCard({
           variant's body, so a template and a typed idea are set identically. */}
       <div className={CARD_BODY}>
         <p className="type-body text-pretty text-foreground">
-          {template.longDescription}
+          {/* The one-line summary is the floor: a Contentful entry with no
+              committed record here has no long description, and the card read as
+              an empty box. */}
+          {template.longDescription || template.description}
         </p>
         {/* What comes in it, as tags rather than as a section of its own: the
             full list with a sentence on each is in the details panel. Filled
@@ -638,15 +641,22 @@ function ProposalFooter() {
   );
 }
 
-function ProposalContent() {
+function ProposalContent({ catalogue }: { catalogue: Template[] }) {
   const params = useSearchParams();
   const recipient = (params.get("for") ?? "").trim();
   const from = (params.get("from") ?? "").trim();
   const note = (params.get("note") ?? "").trim();
   const promptParam = (params.get("prompt") ?? "").trim();
   const templateSlug = (params.get("template") ?? "").trim();
+  // Catalogue first, committed array second. The catalogue is Contentful, so it
+  // holds entries that were never committed here — which is exactly what the
+  // proposal creator offers, so a link it wrote could name a template this page
+  // could not find, and the proposal silently fell back to the blank-canvas
+  // prompt. TEMPLATES stays as the floor: a proposal sent before a template left
+  // the catalogue still has to resolve.
   const template: Template | undefined = templateSlug
-    ? TEMPLATES.find((t) => t.slug === templateSlug)
+    ? catalogue.find((t) => t.slug === templateSlug) ??
+      TEMPLATES.find((t) => t.slug === templateSlug)
     : undefined;
 
   const { theme } = useTheme();
@@ -672,6 +682,7 @@ function ProposalContent() {
   const appName = proposalAppName({
     name: params.get("name") ?? undefined,
     template: templateSlug,
+    templateTitle: template?.title,
   });
   const headline = appName || "A new app, built for you";
 
@@ -891,7 +902,7 @@ function ProposalContent() {
   );
 }
 
-export function ProposalPage() {
+export function ProposalPage({ catalogue }: { catalogue: Template[] }) {
   // The params suspend, and everything on the page depends on them — the shell
   // is the head of the band alone, so a real load paints the frame.
   return (
@@ -902,7 +913,7 @@ export function ProposalPage() {
         </div>
       }
     >
-      <ProposalContent />
+      <ProposalContent catalogue={catalogue} />
     </Suspense>
   );
 }

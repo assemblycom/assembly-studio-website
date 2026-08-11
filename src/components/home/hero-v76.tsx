@@ -20,13 +20,15 @@ import { useTheme } from "@/components/theme/theme-provider";
 
 const MONO = '"ABC Diatype Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
 const RAIL = "mx-auto max-w-[1600px] px-6 md:px-10";
+const FRAME_PAD = 6; // breathing room between the card and the selector ring
+const CARD_RADIUS = 16; // the cards' rounded-2xl, in px — the ring adds its own gap on top
 
 // Prompt Ideas data + seeded-composer behavior live in prompt-ideas.ts,
 // shared with the bottom CTA so the two boxes read identically.
 
 // Strip shows the most-used templates, ranked by real usage.
 const STRIP_ORDER = [
-  "onboarding-wizard",
+  "client-onboarding-wizard",
   "client-project-tracker",
   "client-support-requests",
   // Retainer usage overview is deliberately not here — it stays a gallery-only
@@ -71,13 +73,14 @@ const CARD_HUE: Record<string, string> = {};
 const TemplateCard = memo(function TemplateCard({
   template,
   index,
-  dark,
   href,
+  onSelect,
 }: {
   template: Template;
   index: number;
-  dark: boolean;
   href: string;
+  // Hover (and keyboard focus) glides the selector frame to this card.
+  onSelect: (i: number) => void;
 }) {
   return (
     // next/link, not a bare <a>: the sign-up sheet renders this same page behind
@@ -90,20 +93,26 @@ const TemplateCard = memo(function TemplateCard({
       href={href}
       prefetch
       data-card={index}
+      onMouseEnter={() => onSelect(index)}
+      onFocus={() => onSelect(index)}
       // `group` drives the mock's hover animation on desktop; `data-card` lets
       // the mobile in-view observer replay the animation on scroll.
-      className="group block w-[212px] shrink-0 origin-center text-left"
+      // No outline of its own: the row is a scroller, so the global one was
+      // cropped at whichever end the card sat against. The selector frame is
+      // already the focus indicator here — onFocus moves it to this card, and it
+      // draws outside the scroller's clip.
+      className="group block w-[212px] shrink-0 origin-center text-left shadow-none outline-none"
     >
       <Card
         size="sm"
-        className={`gap-0 rounded-2xl py-0 pb-0! shadow-none transition-[transform,box-shadow] duration-200 ease-out [will-change:transform] ${dark ? "ring-0" : "ring-1 ring-black/[0.04]"}`}
+        className="gap-0 rounded-2xl py-0 pb-0! shadow-none ring-1 ring-black/[0.04] transition-[transform,box-shadow] duration-200 ease-out [will-change:transform] [[data-theme=dark]_&]:ring-0"
       >
         {(() => {
           const hue = CARD_HUE[template.slug];
           return (
             <div
               data-slot="card-media"
-              className={`h-[212px] w-full overflow-hidden [font-family:var(--font-inter),system-ui,sans-serif] ${hue ? "v72-mock-color" : dark ? "v72-mock-dark" : ""}`}
+              className={`h-[212px] w-full overflow-hidden [font-family:var(--font-inter),system-ui,sans-serif] ${hue ? "v72-mock-color" : "v76-mock-auto"}`}
               style={hue ? { backgroundColor: hue } : undefined}
             >
               <div className="h-full w-full">
@@ -113,7 +122,10 @@ const TemplateCard = memo(function TemplateCard({
           );
         })()}
       </Card>
-      <p className={`mt-3 line-clamp-2 text-[13px] font-normal leading-[1.3] ${dark ? "text-white" : "text-neutral-900"}`}>{template.title}</p>
+      {/* Clear of the selector ring, which stands 6px outside the cover: at
+          mt-3 the title sat 6px under the ring's bottom edge and read as
+          crowded by it. */}
+      <p className="mt-4 line-clamp-2 text-[13px] font-normal leading-[1.3] text-neutral-900 [[data-theme=dark]_&]:text-white">{template.title}</p>
       <p className="mt-1 text-[11px] text-muted-foreground">{template.category}</p>
     </Link>
   );
@@ -164,6 +176,68 @@ export function HeroV76({
     setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
   };
 
+  // The selected card — the one the selector frame is drawn around. Hover moves
+  // it; on load it's the first card.
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  // Read by the scroll handler, which is registered once and so can't close over
+  // the state itself.
+  const selectedRef = useRef(0);
+  const [frame, setFrame] = useState({
+    x: 24 - FRAME_PAD,
+    top: 24 - FRAME_PAD,
+    w: 212 + 2 * FRAME_PAD,
+    h: 212 + 2 * FRAME_PAD,
+  });
+  // The placeholder above is the desktop layout's geometry, and it is what the
+  // server renders — on a phone the real card sits 6px right and 16px lower, so
+  // the ring painted misaligned until the measure below landed. Held invisible
+  // until it has been measured once, so first paint never shows a ring around
+  // nothing.
+  const [frameMeasured, setFrameMeasured] = useState(false);
+  // Gate the glide until after the first measure has painted, so the frame snaps
+  // to the first card on load instead of visibly sliding in from its placeholder.
+  const [frameReady, setFrameReady] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() =>
+      requestAnimationFrame(() => setFrameReady(true)),
+    );
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+
+  // Measure the selected card and glide the frame to it. getBoundingClientRect
+  // (not offsetLeft) so it's independent of which ancestor is the offsetParent;
+  // re-measured on layout via ResizeObserver.
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row) return;
+    const measure = () => {
+      const cardEl = row.querySelector<HTMLElement>(
+        `[data-card="${selectedIndex}"]`,
+      );
+      const media = cardEl?.querySelector<HTMLElement>('[data-slot="card-media"]');
+      if (!cardEl || !media) return;
+      const rowRect = row.getBoundingClientRect();
+      const mRect = media.getBoundingClientRect();
+      if (mRect.width < 40 || mRect.height < 40) return; // not laid out yet
+      setFrame({
+        x: mRect.left - rowRect.left + row.scrollLeft - FRAME_PAD,
+        top: mRect.top - rowRect.top - FRAME_PAD,
+        w: mRect.width + 2 * FRAME_PAD,
+        h: mRect.height + 2 * FRAME_PAD,
+      });
+      setFrameMeasured(true);
+    };
+    measure();
+    const raf = requestAnimationFrame(measure);
+    const ro = new ResizeObserver(measure);
+    ro.observe(row);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [selectedIndex]);
+
   useEffect(() => {
     updateArrows();
     const onResize = () => updateArrows();
@@ -183,15 +257,29 @@ export function HeroV76({
   // viewport look identical to it. Measuring the horizontal share separately is
   // what keeps the second card still while the first one plays.
   //
-  // Hysteresis matters just as much: the class only comes off once the card has
-  // left completely, so jitter around the boundary can't restart the animation
-  // in a loop, and a card animates once per pass.
+  // Which card that is has hysteresis: the selection only moves once the NEXT
+  // card is nearly full, so jitter around the boundary can't flip it back and
+  // forth. The class itself then simply follows the selection (see the effect
+  // below) — it used to have its own, looser rule, which is what left a card
+  // animating after the strip had moved on to another one.
+  // Re-read on change rather than only at mount: the match was evaluated once,
+  // so a window narrowed into the mobile layout (or a tablet rotated) showed the
+  // strip with nothing driving it — no card animations, and now no selector
+  // frame either, since focus is what moves it here.
+  const [mobileStrip, setMobileStrip] = useState(false);
   useEffect(() => {
     // Match either a hover-less pointer (real phones/tablets) OR the mobile
     // layout width. Width matters too: a narrow desktop window still reports
     // hover, but shows the mobile strip, and is how this gets checked.
     const mq = window.matchMedia("(hover: none), (max-width: 767px)");
-    if (!mq.matches) return;
+    const sync = () => setMobileStrip(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    if (!mobileStrip) return;
     const row = rowRef.current;
     if (!row) return;
     const cards = [...row.querySelectorAll<HTMLElement>("[data-card]")];
@@ -204,16 +292,28 @@ export function HeroV76({
       const vh = window.innerHeight;
       // Every rect is read before any class is written — interleaving the two
       // would force a reflow per card on each scroll event.
-      const focused = cards.map((card) => {
-        const r = card.getBoundingClientRect();
+      const rects = cards.map((card) => card.getBoundingClientRect());
+      const onScreen = rects.map((r) => r.bottom > 0 && r.top < vh);
+      // The card in focus is the one the selector frame wraps, so swiping the
+      // strip moves it the way hover does on desktop. First match rather than
+      // last — swiping forward brings the next card into focus while the
+      // previous one is still fully shown, and the frame should stay put until
+      // it isn't.
+      const inFocus = rects.findIndex((r, i) => {
+        if (!onScreen[i]) return false;
         const shown =
           Math.max(0, Math.min(r.right, vw) - Math.max(r.left, 0)) / r.width;
-        const onScreen = r.bottom > 0 && r.top < vh;
-        return onScreen && shown >= FOCUSED ? true : !onScreen || shown === 0 ? false : null;
+        return shown >= FOCUSED;
       });
-      focused.forEach((state, i) => {
-        if (state !== null) cards[i].classList.toggle("is-inview", state);
-      });
+      if (inFocus !== -1) setSelectedIndex(inFocus);
+      // Vertical visibility is the second half of the rule the effect below
+      // states: the selected card stops animating while the hero is scrolled
+      // off, so an infinite animation (the timer's blinking colon) isn't left
+      // running out of sight — and replays when it comes back.
+      const sel = inFocus !== -1 ? inFocus : selectedRef.current;
+      cards.forEach((card, i) =>
+        card.classList.toggle("is-inview", i === sel && onScreen[i]),
+      );
     };
 
     update();
@@ -225,7 +325,34 @@ export function HeroV76({
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
-  }, []);
+  }, [mobileStrip]);
+
+  // The animation hook follows the selection exactly: the card inside the frame
+  // is the one that plays, and it is the only one. Two things fall out of that.
+  // A card that the strip has moved past stops, instead of running on because it
+  // was still partly on screen. And a card re-selected later plays AGAIN — the
+  // class came off when it lost the frame, so putting it back applies the
+  // animation anew rather than leaving a finished one sitting at its end state.
+  useEffect(() => {
+    selectedRef.current = selectedIndex;
+    if (!mobileStrip) return;
+    const row = rowRef.current;
+    if (!row) return;
+    const cards = [...row.querySelectorAll<HTMLElement>("[data-card]")];
+    const vh = window.innerHeight;
+    // Same two conditions the scroll handler applies — a card tapped or focused
+    // while the rail is off-screen shouldn't spend its animation unseen.
+    const rects = cards.map((card) => card.getBoundingClientRect());
+    cards.forEach((card, i) =>
+      card.classList.toggle(
+        "is-inview",
+        i === selectedIndex && rects[i].bottom > 0 && rects[i].top < vh,
+      ),
+    );
+    // Also what clears the class when a narrow window is widened back into the
+    // desktop layout, where hover drives the animations instead.
+    return () => cards.forEach((card) => card.classList.remove("is-inview"));
+  }, [mobileStrip, selectedIndex]);
 
   // Arrows scroll the strip by roughly a screenful of cards.
   const scrollRow = (dir: 1 | -1) => {
@@ -235,63 +362,18 @@ export function HeroV76({
   };
 
 
+  // The rail's token ladder now lives in .v76-card-row (globals.css) and the
+  // ground and chevrons take data-theme variants: all three were `dark ?`
+  // ternaries, and `dark` only resolves after hydration, so the server sent the
+  // light values to every visitor and a dark-mode phone painted a light hero
+  // until the JS landed.
+  //
   // Dark stays flat on the page ground: the gradient started at #141414, three
   // steps lighter than the #0a0a0a every other page opens on, so the landing
   // page read as a different shade of dark. Light keeps its lift — there the
   // ground is #ffffff and the gradient is what seats the hero.
-  const groundGradient = dark
-    ? "var(--background)"
-    : "linear-gradient(180deg, #fcfcfd 0%, #f7f8fa 52%, #ffffff 100%)";
-  const chevronCls = dark
-    ? "bg-white/[0.06] text-white/70 ring-white/10 hover:bg-white/15 hover:text-white"
-    : "bg-black/[0.05] text-neutral-600 ring-black/[0.08] hover:bg-black/[0.09] hover:text-neutral-900";
-  const rowTokens: Record<string, string> = dark
-    ? {
-        "--card": "#1b1b1b",
-        "--card-foreground": "#f2f3f5",
-        "--foreground": "#ffffff",
-        "--muted-foreground": "rgba(255,255,255,0.5)",
-        // Dark equivalents of the mock skin tokens — neutral grays stepping up
-        // from the card face so wells/panels/chips lift instead of staying the
-        // light values (which rendered as bright white boxes in dark mode).
-        "--v69-box": "#1b1b1b",
-        "--v69-card": "#1f1f1f",
-        "--v69-inner": "#242424",
-        "--v69-well": "#2b2b2b",
-        "--v69-well-2": "#333333",
-        "--v69-tracker-empty": "#242424",
-        "--v69-chip": "#2e2e2e",
-        "--v69-chip-border": "rgba(255,255,255,0.12)",
-        "--v69-ink": "#f2f3f5",
-      }
-    : {
-        // Card faces take the warm off-white every hand-tuned card on this
-        // rail already uses (F5F5F0) instead of the original cool grey, so
-        // every OTHER reused card mock — the ones nobody has re-tuned by hand
-        // yet — picks up the same warm family for free. Wells step a notch
-        // darker/warmer to stay legible and chips stay white so they still
-        // pop against the face.
-        "--card": "#f5f5f0",
-        "--card-foreground": "#1a1a1a",
-        "--foreground": "#111111",
-        "--muted-foreground": "rgba(0,0,0,0.5)",
-        "--v69-box": "#f5f5f0",
-        // Three-step ladder, one job each: the widget's ground (--v69-card,
-        // the mock's own face), the surfaces that sit on it (--v69-inner —
-        // panels, rows, bubbles, fields), and the recess for anything nested
-        // inside a surface (--v69-well). Each step is darker than the last, so
-        // depth always reads the same way round on every card.
-        "--v69-card": "#f5f5f0",
-        "--v69-inner": "#e7e7de",
-        "--v69-well": "#dcdcd0",
-        "--v69-well-2": "#cfcfc0",
-        // Tracker heatmap's lightest (empty) cell reads a touch more neutral
-        // than the shared well tone; dark mode falls back to --v69-well-2.
-        "--v69-tracker-empty": "#e3e3d6",
-        "--v69-chip": "#ffffff",
-        "--v69-chip-border": "rgba(20,20,10,0.09)",
-        "--v69-ink": "#262626",
-      };
+  const chevronCls =
+    "bg-black/[0.05] text-neutral-600 ring-black/[0.08] hover:bg-black/[0.09] hover:text-neutral-900 [[data-theme=dark]_&]:bg-white/[0.06] [[data-theme=dark]_&]:text-white/70 [[data-theme=dark]_&]:ring-white/10 [[data-theme=dark]_&]:hover:bg-white/15 [[data-theme=dark]_&]:hover:text-white";
 
   return (
     <>
@@ -302,12 +384,17 @@ export function HeroV76({
         narrowOnScroll
         restPaddingClass="px-6 md:px-10"
       />
-      <section className={`relative -mt-14 pb-24 md:-mt-16 ${dark ? "bg-[#0a0a0a]" : "bg-white"}`}>
-        <div className="relative overflow-hidden" style={{ background: groundGradient }}>
+      {/* Theme-dependent colour here is written as a data-theme variant, not as a
+          `dark ? …` ternary: `dark` only resolves after hydration, so the server
+          sent the light face to every visitor and a dark-mode phone painted a
+          white hero until the JS landed. The pre-paint script sets the attribute,
+          so a variant is correct on the first paint. */}
+      <section className="relative -mt-14 bg-white pb-24 md:-mt-16 [[data-theme=dark]_&]:bg-[#0a0a0a]">
+        <div className="relative overflow-hidden bg-[linear-gradient(180deg,#fcfcfd_0%,#f7f8fa_52%,#ffffff_100%)] [[data-theme=dark]_&]:bg-[var(--background)] [[data-theme=dark]_&]:bg-none">
 
           <div className={`relative z-10 ${RAIL} pb-16 pt-36 md:pt-36 lg:pb-20`}>
             <div className="relative z-30 max-w-2xl">
-              <h1 className={`type-display mx-auto max-w-xl text-center md:mx-0 md:text-left ${dark ? "text-white" : "text-neutral-900"}`}>
+              <h1 className="type-display mx-auto max-w-xl text-center text-neutral-900 md:mx-0 md:text-left [[data-theme=dark]_&]:text-white">
                 The platform firms
                 {/* Fixed two-line lockup on every breakpoint. */}
                 <br />
@@ -321,7 +408,10 @@ export function HeroV76({
               )}
 
               <div className="mx-auto mt-8 max-w-xl md:mx-0">
-                <div className="v63-gradient-border v63-ring-solid relative rounded-[18px] md:rounded-[22px]">
+                {/* The submit pill's two fills, as a custom property the
+                    composer reads — near-black on the light page, the brand
+                    periwinkle on the dark one. */}
+                <div className="v63-gradient-border v63-ring-solid relative rounded-[18px] [--composer-submit:#171717] md:rounded-[22px] [[data-theme=dark]_&]:[--composer-submit:#7DA4FF]">
                   <V66Composer
                     textareaRef={inputRef}
                     typewriter
@@ -330,6 +420,10 @@ export function HeroV76({
                     submitDisabled={false}
                     glow={false}
                     tone={theme}
+                    // The composer states both skins in CSS rather than taking
+                    // the one `tone` resolves to after hydration — `tone` stays
+                    // for the parts that aren't first paint.
+                    themeAuto
                     compact
                     minimalControls
                     promptPicker
@@ -342,7 +436,8 @@ export function HeroV76({
                     plusAsAttach
                     submitLabel="Get started"
                     // Light mode uses a solid black submit button; dark keeps
-                    // the accent fill.
+                    // the accent fill. Both are handed over as one custom
+                    // property so the swap happens in CSS, on the first paint.
                     submitDark={!dark}
                     value={prompt}
                     onValueChange={setPrompt}
@@ -395,28 +490,108 @@ export function HeroV76({
                 // something to scroll to on it, so the first and last card sit
                 // crisp at the ends.
                 style={{
-                  ...rowTokens,
                   "--v76-fade-l": canLeft ? 1 : 0,
                   "--v76-fade-r": canRight ? 1 : 0,
                 } as React.CSSProperties}
-                // Card left edge lines up with the hero title/prompt box: pl-6
-                // brings the first card back to the title's left edge.
-                className="v76-card-row mt-1 flex gap-4 overflow-x-auto pb-10 pl-6 pr-6 pt-3 md:mt-3 md:pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                // Card left edge lines up with the hero title/prompt box: the
+                // left pad is px-6 (24px) + FRAME_PAD, so it's the selector
+                // frame — which hugs 6px outside the card — that lines up with
+                // the title, not the card. The top pad clears the tab, on both
+                // layouts now that mobile carries the frame too.
+                className="v76-card-row relative mt-1 flex gap-4 overflow-x-auto pb-10 pl-[30px] pr-6 pt-9 md:mt-3 md:pt-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               >
+                {/* Selector frame — a ring with a flush-right tab, wrapping the
+                    hovered card on desktop and the card swiped into focus on
+                    mobile. */}
+                <div
+                  aria-hidden
+                    className={`pointer-events-none absolute left-0 top-0 z-20 ${frameMeasured ? "" : "opacity-0"} ${frameReady ? "transition-transform duration-[760ms] ease-[cubic-bezier(0.45,0,0.15,1)]" : ""}`}
+                    style={{
+                      transform: `translateX(${frame.x}px)`,
+                      top: frame.top,
+                      width: frame.w,
+                      height: frame.h,
+                    }}
+                  >
+                    {(() => {
+                      // Ring and tab are one colour so they read as one piece.
+                      // The tab sits flush on the ring's top edge — its bottom
+                      // corners ease into that edge with a concave fillet, so
+                      // the junction is a curve rather than a notch.
+                      const W = frame.w;
+                      const H = frame.h;
+                      const T = 30; // tab height above the frame
+                      // Concentric with the card: the ring's radius is the card's
+                      // plus the gap it stands off by, so the two curves run
+                      // parallel instead of crossing at the corners.
+                      const R = CARD_RADIUS + FRAME_PAD;
+                      const K = 10; // tab top-corner radius
+                      const CR = 9; // concave fillet where tab meets the frame's top edge
+                      const TAB_W = 84;
+                      // One step down from the card face, in the same neutral
+                      // grey family the rail's widgets use — the frame belongs
+                      // to the card it wraps, so it can't be a stray tint.
+                      // Dark takes an equal-RGB neutral rather than the cool
+                      // #7a7a80 it had: that grey carried a blue cast nothing
+                      // else in the dark skin has, and at that brightness the
+                      // ring was the loudest edge on the page — louder than the
+                      // cards it wraps. This sits in the same family as the
+                      // covers' own surfaces. Both values ride on the element as
+                      // data-theme variants rather than as a JS-picked attribute,
+                      // so the ring isn't near-white on a dark first paint.
+                      const selectorCls =
+                        "stroke-[#eaeaea] [[data-theme=dark]_&]:stroke-[#4A4A4A]";
+                      const tabFillCls =
+                        "fill-[#eaeaea] [[data-theme=dark]_&]:fill-[#4A4A4A]";
+                      // Inset from the rounded top-right corner so both of the
+                      // tab's bases land on the straight run of the top edge.
+                      const tabRight = W - R - CR;
+                      const tabLeft = tabRight - TAB_W;
+                      const ring = `M ${R} ${T} H ${W - R} Q ${W} ${T} ${W} ${T + R} V ${T + H - R} Q ${W} ${T + H} ${W - R} ${T + H} H ${R} Q 0 ${T + H} 0 ${T + H - R} V ${T + R} Q 0 ${T} ${R} ${T} Z`;
+                      const tab = `M ${tabLeft - CR} ${T} Q ${tabLeft} ${T} ${tabLeft} ${T - CR} L ${tabLeft} ${K} Q ${tabLeft} 0 ${tabLeft + K} 0 H ${tabRight - K} Q ${tabRight} 0 ${tabRight} ${K} L ${tabRight} ${T - CR} Q ${tabRight} ${T} ${tabRight + CR} ${T} Z`;
+                      return (
+                        <>
+                          <svg
+                            width={W}
+                            height={T + H}
+                            viewBox={`0 0 ${W} ${T + H}`}
+                            fill="none"
+                            className="absolute left-0 overflow-visible"
+                            style={{ top: -T }}
+                          >
+                            <path d={ring} className={selectorCls} strokeWidth="1.5" />
+                            <path d={tab} className={tabFillCls} />
+                          </svg>
+                          <span
+                            // The label inverts with the tab it sits on — the tab
+                            // is a dark surface in dark mode, so near-black type
+                            // has nothing left to hold there.
+                            className="absolute flex items-center justify-center text-[12.5px] font-normal leading-none text-neutral-900 [[data-theme=dark]_&]:text-[#F2F2F2]"
+                            style={{ left: tabLeft, top: -T, width: TAB_W, height: T }}
+                          >
+                            Template
+                          </span>
+                        </>
+                      );
+                    })()}
+                </div>
                 {carousel.map((t, i) => (
                   <TemplateCard
                     key={t.slug}
                     template={t}
                     index={i}
-                    dark={dark}
                     href={templateSignupUrl(t)}
+                    onSelect={setSelectedIndex}
                   />
                 ))}
 
                 <a
                   href="/templates"
                   aria-label="See all templates"
-                  className="group w-[212px] shrink-0 origin-center transition-opacity duration-200 ease-out"
+                  // The selector frame never wraps this tile, so unlike the
+                  // template cards it needs a ring of its own — inset, since the
+                  // row clips whatever sits outside the last tile's edge.
+                  className="group w-[212px] shrink-0 origin-center rounded-2xl outline-none transition-opacity duration-200 ease-out focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground/40"
                 >
                   <Card
                     size="sm"
@@ -425,23 +600,23 @@ export function HeroV76({
                     // No outline in dark — the tile's own face already separates
                     // it from the page there, and the hairline was the brightest
                     // edge in the row.
-                    className={`gap-0 rounded-2xl py-0 pb-0! shadow-none transition-transform duration-200 ease-out group-hover:-translate-y-0.5 ${dark ? "ring-0" : "ring-1 ring-black/[0.04]"}`}
+                    className="gap-0 rounded-2xl py-0 pb-0! shadow-none ring-1 ring-black/[0.04] transition-transform duration-200 ease-out group-hover:-translate-y-0.5 [[data-theme=dark]_&]:ring-0"
                   >
                     <div data-slot="card-media" className="flex h-[212px] w-full items-center justify-center bg-[var(--card)]">
                       {/* The bare glyph in both themes — the plus is the whole
                           affordance, and the chip that used to sit behind it in
                           dark was a second box inside an already-square tile.
                           Hover brightens the glyph itself instead of the chip. */}
-                      <span className={`flex items-center justify-center transition-colors ${dark ? "text-white/70 group-hover:text-white" : "text-neutral-400 group-hover:text-neutral-600"}`}>
+                      <span className="flex items-center justify-center text-neutral-400 transition-colors group-hover:text-neutral-600 [[data-theme=dark]_&]:text-white/70 [[data-theme=dark]_.group:hover_&]:text-white">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden>
                           <path d="M12 5v14M5 12h14" />
                         </svg>
                       </span>
                     </div>
                   </Card>
-                  <p className={`mt-3 inline-flex items-center gap-1.5 text-[13px] font-normal ${dark ? "text-white" : "text-neutral-900"}`}>
+                  <p className="mt-4 inline-flex items-center gap-1.5 text-[13px] font-normal text-neutral-900 [[data-theme=dark]_&]:text-white">
                     See all templates
-                    <IconArrow className={`size-3.5 transition-transform group-hover:translate-x-0.5 ${dark ? "text-white/50" : "text-neutral-400"}`} />
+                    <IconArrow className="size-3.5 text-neutral-400 transition-transform group-hover:translate-x-0.5 [[data-theme=dark]_&]:text-white/50" />
                   </p>
                   {/* Only when there is a remainder. The strip now tops up from
                       the catalogue, so when it holds all of it this counted to

@@ -18,7 +18,7 @@ const ALL = "All";
 // hairline and inner highlight are both light, so on those cards they drew a pale
 // outline across the dark area instead of disappearing into it; the dark fill
 // already defines the card's edge, so the overlay is dropped entirely.
-const BLEED_COVERS = new Set(["design-approvals", "service-request-intake"]);
+const BLEED_COVERS = new Set(["design-approvals"]);
 
 /** Edge affordance for the chip strip: just the button. The fade itself lives on
  *  the scroller (see EDGE_FADE) rather than in an overlay here. */
@@ -290,11 +290,10 @@ export function TemplatesBrowser({ templates }: Props) {
           search field as one dense block. */}
         <div className="flex flex-col gap-3 lg:flex-row-reverse lg:items-center lg:gap-10">
           {/* Search — filters the grid live across title/description/category/
-          industry. Full-width on top on mobile; a fixed 256px field at the end
-          of the chip row on desktop. It stays open rather than collapsing to
-          its icon: the field says what it does without being clicked, and the
-          chips scroll, so they don't need the width back. */}
-          <div className="relative shrink-0 lg:w-64">
+          industry. Full-width on top, and small screens only: at lg the whole
+          catalogue is a short scroll behind a visible chip row, so the field was
+          a second way to do what the chips already do, in the widest layout. */}
+          <div className="relative shrink-0 lg:hidden">
             <svg
               aria-hidden
               viewBox="0 0 24 24"
@@ -377,7 +376,12 @@ export function TemplatesBrowser({ templates }: Props) {
                     data-category={cat}
                     aria-pressed={active}
                     onClick={() => selectCategory(cat)}
-                    className={`type-caption inline-flex h-8 shrink-0 items-center whitespace-nowrap rounded-lg px-3 leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-foreground/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                    // Inset ring, the focus idiom the rest of the site uses: an
+                    // offset ring is drawn outside the chip, and this strip is an
+                    // overflow scroller, so it was clipped top and bottom on every
+                    // chip and clipped again at the ends of the row. Drawn inside,
+                    // there is nothing for the scroller to crop.
+                    className={`type-caption inline-flex h-8 shrink-0 items-center whitespace-nowrap rounded-lg px-3 leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground/40 ${
                       active
                         ? "bg-foreground/[0.10] text-foreground"
                         : "bg-transparent text-muted-foreground active:bg-foreground/[0.08] [@media(hover:hover)]:hover:bg-foreground/[0.05] [@media(hover:hover)]:hover:text-foreground"
@@ -418,7 +422,17 @@ export function TemplatesBrowser({ templates }: Props) {
           <div className="mt-10 grid gap-x-6 gap-y-12 min-[560px]:grid-cols-2 min-[760px]:grid-cols-3 min-[1100px]:grid-cols-4 lg:gap-x-8 lg:gap-y-[72px] min-[1440px]:grid-cols-5">
             {filtered.map((template) => (
               <article key={template.slug} className="w-full">
-                <Link href={`/templates/${template.slug}`} className="block">
+                {/* Its own focus ring rather than the global outline fallback:
+                  that one is full-strength foreground with square corners, so on
+                  a rounded cover it landed as a hard black box around the card
+                  and its caption. Same weight and tint as the filter chips and
+                  the arrows. Drawn on the cover rather than on the whole link:
+                  around the link it enclosed the caption too, and a two-line
+                  description ran right into it. */}
+                <Link
+                  href={`/templates/${template.slug}`}
+                  className="group/card block outline-none"
+                >
                   {/* Real preview image when set; otherwise the template's widget
                     cover mock (shared with the home hero). */}
                   {/* Square at every width: the widgets are drawn square, and the
@@ -432,9 +446,9 @@ export function TemplatesBrowser({ templates }: Props) {
                     square and the hairline sits on its outermost pixel.
                     It can't live inside MockFit: `.template-mock-fit > *` sizes
                     and scales every direct child to the design size. */}
-                  <div className="relative">
+                  <div className="relative rounded-[14px] transition-shadow group-focus-visible/card:ring-2 group-focus-visible/card:ring-foreground/40 group-focus-visible/card:ring-offset-4 group-focus-visible/card:ring-offset-background sm:rounded-[20px]">
                     <MockFit
-                      className={`relative aspect-square overflow-hidden rounded-[20px] bg-background [[data-theme=dark]_&]:bg-[#151515] ${MOCK_DESIGN_SIZE[template.slug] ?? ""}`}
+                      className={`relative aspect-[16/10] overflow-hidden rounded-[14px] bg-background sm:aspect-square sm:rounded-[20px] [[data-theme=dark]_&]:bg-[#151515] ${MOCK_DESIGN_SIZE[template.slug] ?? ""}`}
                     >
                       {/* template-mock-gallery marks this rail specifically — a few
                         covers are skinned for the gallery alone, and .template-mock
@@ -458,7 +472,7 @@ export function TemplatesBrowser({ templates }: Props) {
                         // two soft dark insets stay — they fall off before they reach
                         // the middle and read as depth, not as an edge. Light only:
                         // the dark surface has no hairline to catch a highlight.
-                        className="pointer-events-none absolute inset-0 rounded-[20px] border border-border/45 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05),inset_0_8px_20px_-10px_rgba(0,0,0,0.07)] [[data-theme=dark]_&]:border-transparent [[data-theme=dark]_&]:shadow-none"
+                        className="pointer-events-none absolute inset-0 rounded-[14px] border border-border/45 sm:rounded-[20px] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05),inset_0_8px_20px_-10px_rgba(0,0,0,0.07)] [[data-theme=dark]_&]:border-transparent [[data-theme=dark]_&]:shadow-none"
                       />
                     )}
                   </div>

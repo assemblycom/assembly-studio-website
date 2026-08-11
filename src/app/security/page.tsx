@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Section } from "@/components/ui/section";
 import { FAQ, type FAQEntry } from "@/components/home/faq";
-import { GridRails } from "@/components/ui/grid-lines";
+import { GridDivider, GridRails } from "@/components/ui/grid-lines";
 import { SecurityTestimonials } from "@/components/security/security-testimonials";
 import { SecurityCompliance } from "@/components/security/security-compliance";
 import {
@@ -181,11 +181,17 @@ export default function SecurityPage() {
         </div>
       </section>
 
+        {/* Closes the "different" section. Capped to the rail width, not
+            full-bleed: both ends land on a vertical rail. */}
+        <GridDivider />
 
         {/* Customer story — Metta Health spotlight. */}
         <section className="mx-auto max-w-[1200px] px-6 pb-20 pt-16 md:px-10 md:pb-28 md:pt-16">
           <SecurityTestimonials />
         </section>
+
+        {/* Closes the customer story, and the rails region with it. */}
+        <GridDivider />
       </div>
 
 

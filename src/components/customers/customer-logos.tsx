@@ -6,15 +6,17 @@
 // Capital One is an inline SVG (letter counters knocked out in `surface`).
 // ─────────────────────────────────────────────────────────────────────────
 
+import { AdvertaiLogo } from "@/components/customers/advertai-logo";
 import { CapitalOneLogo } from "@/components/customers/capital-one-logo";
 import { MaskLogo } from "@/components/customers/mask-logo";
 
 type LogoSpec =
-  | { kind: "svg" }
+  | { kind: "svg"; mark: "capital-one" | "advertai"; width: string }
   | { kind: "mask"; src: string; aspect: string; width: string };
 
 const CUSTOMER_LOGO_SPECS: Record<string, LogoSpec> = {
-  "capital-one-luxury-travel": { kind: "svg" },
+  "capital-one-luxury-travel": { kind: "svg", mark: "capital-one", width: "w-16" },
+  "advertai-marketing": { kind: "svg", mark: "advertai", width: "w-14" },
   "ditto-by-dbc": {
     kind: "mask",
     src: "/images/customers/ditto-logo-mask.png",
@@ -75,6 +77,17 @@ const CUSTOMER_LOGO_SPECS: Record<string, LogoSpec> = {
     aspect: "1 / 1",
     width: "w-12",
   },
+  // Wordmark only: the firm's lockup sets "SARGENT CPAS" under an illustrated
+  // portrait, and the type is the half that survives being flattened to one
+  // colour at this size.
+  "sargent-cpa": {
+    kind: "mask",
+    src: "/images/customers/sargent-logo-mask.png",
+    aspect: "563 / 304",
+    // Wider than the one-line wordmarks: this one stacks CPAS under SARGENT, so
+    // at their width the type sat two steps smaller than everyone else's.
+    width: "w-16",
+  },
 };
 
 export function hasCustomerLogo(slug: string): boolean {
@@ -98,12 +111,9 @@ export function CustomerLogo({
   const spec = CUSTOMER_LOGO_SPECS[slug];
   if (!spec) return null;
   if (spec.kind === "svg") {
-    return (
-      <CapitalOneLogo
-        className={fit ? "h-full w-full" : "w-16 text-foreground"}
-        surface={surface}
-      />
-    );
+    const className = fit ? "h-full w-full" : `${spec.width} text-foreground`;
+    if (spec.mark === "advertai") return <AdvertaiLogo className={className} />;
+    return <CapitalOneLogo className={className} surface={surface} />;
   }
   return (
     <MaskLogo

@@ -207,7 +207,7 @@ function ProductionGapVisual({
   return (
     // No shadow: the border alone separates the window from the blue frame, and
     // the drop shadow read as a heavy smudge along the bottom of the panel.
-    <div className="production-mock relative w-full select-none overflow-hidden rounded-l-2xl border-y border-l border-border bg-[var(--mk-surface)] [font-family:var(--font-inter),system-ui,sans-serif]">
+    <div className="production-mock relative w-full select-none overflow-hidden rounded-l-lg border-y border-l border-border bg-[var(--mk-surface)] md:rounded-l-2xl [font-family:var(--font-inter),system-ui,sans-serif]">
       {/* Browser top bar — same right-edge fade as the body (fades to the dark
           mock surface behind it, not the bezel), so the top bar cuts off too. */}
       <div className="production-cut-fade flex h-[44px] items-center gap-3 border-b border-[var(--mk-hairline)] px-4">
@@ -256,7 +256,13 @@ function ProductionGapVisual({
           // lit region stopped short and left the rest of the column white. From
           // md up the button fills the column itself and owns the fill, which
           // keeps it clear of the client row at the foot — its own region.
-          className={`relative flex w-[22%] min-w-[136px] max-w-[156px] shrink-0 flex-col overflow-hidden border-r border-[var(--mk-hairline)] transition-colors duration-200 ${
+          // Below md the column is held to exactly the height the crop shows —
+          // the blue box's 320px, less its 16px top padding, the mock's top
+          // border, and the 44px browser bar — so the client card that `mt-auto`
+          // parks at the sidebar's foot lands inside the frame instead of ~190px
+          // below the cut. The body itself stays as tall as the table, so nothing
+          // about the content crop changes.
+          className={`relative flex h-[259px] w-[22%] min-w-[136px] max-w-[156px] shrink-0 flex-col overflow-hidden border-r border-[var(--mk-hairline)] transition-colors duration-200 md:h-auto ${
             active === "sidebar"
               ? "bg-[var(--mk-elevated)] md:bg-transparent"
               : ""
@@ -274,7 +280,10 @@ function ProductionGapVisual({
           }
           // flex-1 from md up only: it's what pushes the client row to the foot
           // of the sidebar, which on a phone is past the crop (see that row).
-          className="flex flex-col gap-0.5 px-2 py-3 text-left outline-none transition-colors duration-200 md:flex-1"
+          // outline-none with nothing in its place is deliberate: onFocus lights
+          // this row to HL_SIDEBAR_BG (above), so focus already shows, and a ring
+          // in the mock's ink read as a hard black box drawn over the artwork.
+          className="flex flex-col gap-0.5 px-2 py-3 text-left shadow-none outline-none transition-colors duration-200 md:flex-1"
         >
           {/* px-2 matches the nav rows below, so the icon column shares one
               left edge down the whole sidebar. */}
@@ -326,14 +335,13 @@ function ProductionGapVisual({
           onMouseEnter={() => setActive("avatar")}
           onFocus={() => setActive("avatar")}
           style={active === "avatar" ? { backgroundColor: HL_SIDEBAR_BG } : undefined}
-          // Two shapes for two contexts. At the foot of a full sidebar it's a
-          // row divided off by a hairline; floating mid-column on a phone that
-          // read as a stray line, so there it's a card instead — inset to the
-          // app rows' own text edge, and dropped clear of the list so it doesn't
-          // look like a sixth app. No resting fill — the card takes the sidebar
-          // step's colour along with the rest of the column and reads by its
-          // border there, then lifts on its own step against an unlit sidebar.
-          className="mx-2 mb-3 mt-auto flex items-center gap-2 rounded-[6px] border border-[var(--mk-border)] px-2 py-2.5 text-left outline-none transition-colors duration-200 md:mx-0 md:mb-0 md:rounded-none md:border-x-0 md:border-b-0 md:border-[var(--mk-hairline)] md:px-3"
+          // One shape in both layouts: a row at the foot of the sidebar, divided
+          // off by a hairline. The phone used to get an inset bordered card
+          // instead, from when this sat mid-column and a bare rule read as a
+          // stray line; at the column's foot the card was the only outlined,
+          // filled object in a mock made of flat rows, so it read as bulky
+          // furniture rather than part of the interface.
+          className="mt-auto flex items-center gap-2 border-t border-[var(--mk-hairline)] px-3 py-2.5 text-left shadow-none outline-none transition-colors duration-200"
         >
           {/* --mk-selected, plus a ring: the row lifts to --mk-elevated on its
               tour step, and at --mk-fill the disc is five values off that and
@@ -668,10 +676,10 @@ function ProductionGapExplorer() {
             them. From md up the box has room to show blue on every side. */}
         {/* The mock overflows this box on a phone and is clipped at its edge, so
             THIS radius is what shapes the crop's bottom corners — the mock's own
-            bottom-left round sits ~175px below the cut and never shows. At the
-            box's 12px the cut read as a straight slice across the foot, so the
-            bottom pair is taken up to 16px, matching the mock's own top corner. */}
-        <div className="h-[320px] w-full min-w-0 overflow-hidden rounded-xl bg-[#7DA4FF] py-4 pl-4 ring-1 ring-black/[0.08] max-md:rounded-b-2xl md:h-auto md:py-7 md:pl-7 md:ring-0">
+            bottom-left round sits well below the cut and never shows. One value
+            all the way round on a phone: the wider bottom pair it used to carry
+            made the crop read as a rounded tray under a squarer window. */}
+        <div className="h-[320px] w-full min-w-0 overflow-hidden rounded-xl bg-[#7DA4FF] py-4 pl-4 ring-1 ring-black/[0.08] md:h-auto md:py-7 md:pl-7 md:ring-0">
           {/* The mock is a desktop layout — the sidebar and the table are
               percentages of a wide viewport, so at phone width they collapse
               into each other. It's laid out at a desktop width and cropped by

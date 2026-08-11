@@ -3,7 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { pageMetadata } from "@/lib/seo";
 import { ogImageFor } from "@/lib/og";
-import { getVisibleTemplates } from "@/lib/visible-templates";
+import {
+  getCatalogueTemplate,
+  getCatalogueTemplates,
+} from "@/lib/visible-templates";
 import { getAppTemplate } from "@/lib/contentful";
 import { TemplateOverview } from "@/components/templates/template-overview";
 import {
@@ -26,13 +29,16 @@ interface Props {
 // re-running the query on every hit.
 export const revalidate = 300;
 
+// Every published App Template, hidden ones included: a hidden template still
+// has a page, it just isn't listed anywhere. Slugs outside this list fall through
+// to on-demand rendering and 404 there if nothing resolves them.
 export async function generateStaticParams() {
-  return (await getVisibleTemplates()).map((t) => ({ slug: t.slug }));
+  return (await getCatalogueTemplates()).map((t) => ({ slug: t.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const template = getTemplateBySlug(slug);
+  const template = (await getCatalogueTemplate(slug)) ?? getTemplateBySlug(slug);
   if (!template) return {};
   const entry = await getAppTemplate(slug);
   const name = entry?.name ?? template.title;
@@ -109,7 +115,10 @@ function TemplateHeader({
 
 export default async function TemplateDetailPage({ params }: Props) {
   const { slug } = await params;
-  const local = getTemplateBySlug(slug);
+  // The catalogue first, so a template that lives only in Contentful resolves;
+  // the committed array second, so a slug the CMS has since dropped keeps its
+  // page rather than 404ing on an editorial change.
+  const local = (await getCatalogueTemplate(slug)) ?? getTemplateBySlug(slug);
   if (!local) notFound();
 
   // Contentful owns this template if an App Template entry exists for the slug;
@@ -149,6 +158,7 @@ export default async function TemplateDetailPage({ params }: Props) {
             <div>
               <TemplateGallery
                 title={template.title}
+                slug={template.slug}
                 images={template.images}
                 previewCount={template.previewCount}
               />

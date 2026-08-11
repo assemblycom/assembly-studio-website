@@ -157,6 +157,10 @@ export default function RootLayout({
             beat late is a far smaller cost than the whole page doing it. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Template and customer screenshots live in Contentful, and their blur
+            placeholders are fetched straight from there — so the connection is
+            worth having open before the first of them is asked for. */}
+        <link rel="preconnect" href="https://images.ctfassets.net" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}

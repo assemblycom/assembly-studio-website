@@ -78,7 +78,7 @@ export const TEMPLATE_INDUSTRIES = [
 // Industry tags kept out of the template objects to keep that list readable.
 // Each template carries 2–4 industries it most naturally serves.
 const INDUSTRY_BY_SLUG: Record<string, string[]> = {
-  "onboarding-wizard": ["Accounting", "Legal", "Consulting", "Marketing"],
+  "client-onboarding-wizard": ["Accounting", "Legal", "Consulting", "Marketing"],
   "new-client-intake": ["Accounting", "Legal", "Consulting", "Marketing"],
   "document-collection": ["Accounting", "Legal", "Real estate", "Financial services"],
   "client-project-tracker": ["Marketing", "Consulting", "Technology", "Real estate"],
@@ -119,10 +119,10 @@ const INDUSTRY_BY_SLUG: Record<string, string[]> = {
 const BASE_TEMPLATES: Template[] = [
   // Onboarding
   {
-    slug: "onboarding-wizard",
+    slug: "client-onboarding-wizard",
     templateId: "app-b789d151",
-    title: "Onboarding wizard",
-    description: "Multi-step flow with saved progress",
+    title: "Client onboarding wizard",
+    description: "Multi-step onboarding flow with saved progress",
     icon: "🪄",
     category: "Onboarding",
     longDescription:
@@ -527,7 +527,7 @@ const BASE_TEMPLATES: Template[] = [
 // Video leads templates whose value is best shown in motion (flows, AI, live
 // dashboards, scheduling, markup).
 const PREVIEW_BY_SLUG: Record<string, { previewCount?: number; hasVideo?: boolean }> = {
-  "onboarding-wizard": { previewCount: 4, hasVideo: true },
+  "client-onboarding-wizard": { previewCount: 4, hasVideo: true },
   "new-client-intake": { previewCount: 3 },
   "document-collection": { previewCount: 2 },
   "client-project-tracker": { previewCount: 3 },

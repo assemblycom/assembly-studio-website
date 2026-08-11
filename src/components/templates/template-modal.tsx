@@ -190,6 +190,7 @@ export function TemplateModalBrowser({
             <div>
               <TemplateGallery
                 title={template.title}
+                slug={template.slug}
                 images={template.images}
                 previewCount={template.previewCount}
               />

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useState } from "react";
 import { useAuthState } from "@/lib/use-auth";
 
 const PLAN_NAMES = [
@@ -345,23 +345,7 @@ export function FeatureComparison() {
   // Collapsed by default so the long table doesn't overwhelm — a toggle reveals
   // the full comparison (best-in-class progressive disclosure).
   const [expanded, setExpanded] = useState(false);
-  // Collapsing from deep in the long table would strand the reader in empty
-  // space, so send them back to the top of the page on collapse.
-  const collapsingRef = useRef(false);
-  const toggle = () => {
-    collapsingRef.current = expanded;
-    setExpanded((e) => !e);
-  };
-  // The scroll has to wait for the collapsed DOM. Starting it in the click
-  // handler meant it was still animating when the table unmounted, and a
-  // document that shrinks by thousands of pixels mid-flight cancels the smooth
-  // scroll and clamps you to the bottom of the now-short page instead — which
-  // is exactly the stranding this is here to prevent.
-  useEffect(() => {
-    if (expanded || !collapsingRef.current) return;
-    collapsingRef.current = false;
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [expanded]);
+  const toggle = () => setExpanded((e) => !e);
   // Signed-in visitors don't see the Free column (matches the pricing cards).
   const { authed } = useAuthState();
   const columns = PLAN_NAMES.map((name, i) => ({ name, i })).filter(
@@ -375,15 +359,55 @@ export function FeatureComparison() {
     // cursor-default so hovering the comparison text shows an arrow, not the
     // text/I-beam cursor (this table is read-only, not editable).
     <div className="cursor-default">
+      {/* The toggle stays put: it's the control the reader opened the table with,
+          so it's the one that closes it. It used to move to the foot of the table
+          when open, which meant closing happened thousands of pixels from where
+          opening did — and the page then had to scroll itself back to the top to
+          avoid stranding the reader in the space the table left behind. */}
+      <div className="flex justify-center">
+        <button
+          type="button"
+          onClick={toggle}
+          aria-expanded={expanded}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm text-foreground transition-colors hover:bg-muted sm:w-auto [[data-theme=dark]_&]:border-[#383838]"
+        >
+          {expanded ? "Hide comparison" : "Compare all features"}
+          {/* The site's chevron rule (see the FAQ rows): 90° of travel, not a
+              full flip, at the drawer's own 300ms. Right at rest, down when open,
+              so the arrow points the way the content arrives from. */}
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 20 20"
+            fill="none"
+            aria-hidden
+            className={`transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+              expanded ? "rotate-0" : "-rotate-90"
+            }`}
+          >
+            <path
+              d="M5 8l5 5 5-5"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      </div>
+
       {expanded && (
         <>
-          <h2 className="type-h3">Compare plans</h2>
+          <h2 className="type-h3 mt-14">Compare plans</h2>
           {/* Filled in dark, like the plan cards above it: on the page's own
               near-black the table was a field of hairlines with nothing behind
               them, and the rows were hard to hold onto while reading across.
               Every opaque bar inside it (the sticky header, its mask, the mobile
               tabs) has to take the same fill or it bands against the card. */}
-          <div className="mt-8 overflow-clip rounded-2xl border border-border px-6 pb-8 md:px-8 [[data-theme=dark]_&]:border-[#383838] [[data-theme=dark]_&]:bg-card">
+          {/* pb-2, not pb-8: every row carries its own 14px, so a large pad under
+              the last one left a band of empty card below "Technical advisor"
+              nearly twice the gap between any two rows. */}
+          <div className="mt-8 overflow-clip rounded-2xl border border-border px-6 pb-2 md:px-8 [[data-theme=dark]_&]:border-[#383838] [[data-theme=dark]_&]:bg-card">
       {/* Mobile: plan tabs + a single-column feature list for the chosen plan. */}
       <div className="lg:hidden">
         {/* Scrollable plan tabs, pinned under the nav so they stay reachable as
@@ -482,37 +506,6 @@ export function FeatureComparison() {
           </div>
         </>
       )}
-
-      {/* Centered toggle — sits under the table when open (needs room), tucked
-          up under the plans above when collapsed. */}
-      <div className={`flex justify-center ${expanded ? "mt-10" : "mt-0"}`}>
-        <button
-          type="button"
-          onClick={toggle}
-          aria-expanded={expanded}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border px-5 py-2.5 text-sm text-foreground transition-colors hover:bg-muted sm:w-auto [[data-theme=dark]_&]:border-[#383838]"
-        >
-          {expanded ? "Hide comparison" : "Compare all features"}
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 20 20"
-            fill="none"
-            aria-hidden
-            className={`transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-              expanded ? "rotate-180" : ""
-            }`}
-          >
-            <path
-              d="M5 8l5 5 5-5"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-      </div>
     </div>
   );
 }

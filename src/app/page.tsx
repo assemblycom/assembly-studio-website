@@ -39,12 +39,15 @@ export default async function HomePage() {
         <div className="section-follow">
           {/* Fade-only (no rise): the ticker's own colored band made the
               translate read as the whole block sliding on load. */}
+          {/* Opens the stats band, and drawn here rather than inside it so both
+              ends land on the vertical rails — the band's own column is capped
+              narrower than the rails and nudged off-centre, so a rule drawn there
+              stopped short at both ends. */}
+          <GridDivider />
           <Reveal variant="fade">
             <TrustTicker />
           </Reveal>
-          {/* The boundary into the content sits here rather than above the stats
-              band: the band reads as part of the hero, so a rule above its
-              numbers cut it off from what it belongs to. */}
+          {/* Closes the band, on the same rails. */}
           <GridDivider />
           <Reveal variant="fade">
             <HowItWorks />

@@ -217,7 +217,11 @@ export function HowItWorks() {
                 // here read as a stray border: the tabs are square inside a
                 // rounded, overflow-hidden shell, so an outline either had its
                 // corner sliced by the shell or floated free of the segments.
-                className="group relative cursor-pointer px-5 py-4 text-left transition-colors hover:bg-foreground/[0.03] focus:outline-none focus-visible:bg-foreground/[0.07] sm:text-center"
+                // Focus fills the cell rather than ringing it: these are segments of
+                // one strip, so a box around a single cell fights the dividers
+                // that define it and notches at the strip's rounded corner. A
+                // deeper version of the hover fill is the strip's own language.
+                className="group relative cursor-pointer px-5 py-4 text-left outline-none transition-colors hover:bg-foreground/[0.03] focus-visible:shadow-[inset_0_-2px_0_0_rgba(0,0,0,0.45)] sm:text-center [[data-theme=dark]_&]:focus-visible:shadow-[inset_0_-2px_0_0_rgba(255,255,255,0.45)]"
               >
                 {/* Progress track (fills over the dwell on the active tab). */}
                 <span

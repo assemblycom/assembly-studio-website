@@ -41,11 +41,18 @@ declare global {
   }
 }
 
-// Kept verbatim from the Team size dropdown this replaced, so the options the
-// sales team already sorts on don't change under them.
-const COMPANY_SIZES = ["Just me", "2–10", "11–50", "51–200", "200+"].map(
-  (size) => ({ value: size, label: size }),
-);
+// The same brackets assembly.com's book-demo form offers, so a lead routes and
+// reports the same whichever form it came in through. The submitted value is
+// that form's string verbatim; the label is ours, in the site's sentence case
+// and en dashes.
+const COMPANY_SIZES = [
+  ["Just Me", "Just me"],
+  ["2 - 5", "2–5"],
+  ["6 - 10", "6–10"],
+  ["11 - 50", "11–50"],
+  ["51 - 100", "51–100"],
+  ["100+", "100+"],
+].map(([value, label]) => ({ value, label }));
 
 const inputCls = `${FIELD_CLS} aria-[invalid=true]:border-[var(--mock-negative-fg)]`;
 

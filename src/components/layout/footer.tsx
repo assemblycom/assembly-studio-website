@@ -270,7 +270,11 @@ export function Footer({
                   ] as const
                 ).map((col) => (
                   <div key={col.label} className="sm:min-w-32">
-                    <p className={`font-mono text-xs uppercase tracking-wide ${light ? "text-muted-foreground" : "text-white/50"}`}>
+                    {/* A step above the links, not level with them: at
+                        muted-foreground the label was the exact colour of the
+                        items under it, so on a phone — where the columns stack
+                        into one list — nothing marked where a category began. */}
+                    <p className={`font-mono text-xs uppercase tracking-wide ${light ? "text-foreground" : "text-white/80"}`}>
                       {col.label}
                     </p>
                     <ul className="mt-4 flex flex-col gap-1.5">

@@ -157,16 +157,13 @@ export function TrustTicker() {
             rest of the page). At 1200 this band sat 22px wider on each side, so
             the first figure started left of the heading under it and the row
             read as misaligned rather than as the same column. */}
-        {/* Nudged right on desktop so the row is centred by eye, not just by the
-            box: every figure is left-aligned in an equal column, so the last one
-            stops short of where its column ends and all of that slack piled up
-            on the right. 44px is half the difference, which lands the first and
-            last figures the same distance from the page rails. A transform, not a
-            margin — the geometry stays put, only the optical centre moves.
-            Held until 1280, which is the first width where the band has 44px of
-            slack beside it; nudging earlier pushed the last figure out past the
-            page padding. */}
-        <div className="mx-auto max-w-[1100px] min-[1280px]:translate-x-11">
+        {/* Centred in the rails, with equal air on both sides. It used to be
+            nudged 44px right past 1280 to centre the figures optically, since
+            each one is left-aligned in its column and the last leaves slack at
+            its end. That slack is the lesser problem now the band's opening and
+            closing rules run rail to rail: against two lines that are symmetric,
+            a row shifted off-centre reads as a mistake. */}
+        <div className="mx-auto max-w-[1100px]">
           {/* Phone: no frame at all — the 2x2 is set by two guide lines instead,
               the row rule running the full width of the screen and the column
               rule down the middle of it. An outline made the figures a card
@@ -176,6 +173,16 @@ export function TrustTicker() {
               out of it and each cell takes the rail back as its own padding. From
               sm up all of it is reset and the row goes back to four columns (see
               the cell classes). */}
+          {/* Opens the band on a phone, where there are no rails and this rule
+              bleeds to the screen edges like the row rule inside the 2x2. From md
+              up the opening rule is a GridDivider on the page (above this
+              section), because only that lands on the vertical rails — drawn here
+              it would inherit this column's 1100px cap and its optical nudge, and
+              stop short of them at both ends. */}
+          <div
+            aria-hidden
+            className="border-t border-border max-sm:-mx-6 md:hidden [[data-theme=dark]_&]:border-[#383838]"
+          />
           <div className="grid grid-cols-2 max-sm:-mx-6 sm:grid-cols-4 sm:gap-x-0 sm:gap-y-0 sm:divide-x sm:divide-border [[data-theme=dark]_&]:sm:divide-[#383838]">
             {STATS.map((s, i) => (
               // The outer cells drop their outer padding so the first figure
@@ -197,15 +204,32 @@ export function TrustTicker() {
               // second row a top edge, so only the two interior lines get drawn.
               <div
                 key={s.label}
-                className={`px-6 py-7 text-center max-sm:border-border sm:rounded-none sm:p-0 sm:py-9 sm:text-left sm:first:pl-0 sm:last:pr-0 [[data-theme=dark]_&]:max-sm:border-[#383838] sm:[&:not(:first-child)]:pl-7 sm:[&:not(:last-child)]:pr-7 ${
-                  i % 2 === 1 ? "max-sm:border-l" : ""
+                // The column rule is drawn as an inset pseudo-element rather than
+                // a border: a border runs the full cell box, padding included, so
+                // in the 2x2 the two halves joined into one line that overshot the
+                // figures top and bottom. Inset, it measures the label and number
+                // it divides. The row rule stays full-width — it reads as the band
+                // boundary, the way the rails above and below do.
+                // The column gutters step with the columns: 28px each side is a
+                // sixth of a column's width once the band starts shrinking below
+                // its 1100 cap, which is what pushed the figures into the rules.
+                className={`relative px-6 py-7 text-center max-sm:border-border sm:rounded-none sm:p-0 sm:py-9 sm:text-left sm:first:pl-0 sm:last:pr-0 [[data-theme=dark]_&]:max-sm:border-[#383838] sm:[&:not(:first-child)]:pl-4 sm:[&:not(:last-child)]:pr-4 lg:[&:not(:first-child)]:pl-7 lg:[&:not(:last-child)]:pr-7 ${
+                  i % 2 === 1
+                    ? "max-sm:before:pointer-events-none max-sm:before:absolute max-sm:before:inset-y-5 max-sm:before:left-0 max-sm:before:w-px max-sm:before:bg-border [[data-theme=dark]_&]:max-sm:before:bg-[#383838]"
+                    : ""
                 } ${i > 1 ? "max-sm:border-t" : ""}`}
               >
                 <p className="text-[13px] leading-snug text-muted-foreground">
                   {s.label}
                 </p>
                 <p
-                  className={`${STAT_FONT} mt-1.5 text-[36px] leading-none tabular-nums tracking-[-0.02em] text-foreground/80 md:text-[46px]`}
+                  // Fluid, not stepped: the figure was fixed at 46px from md up
+                  // while its column kept shrinking with the viewport, so from
+                  // ~1180px down the longest ones ("10,000+", "$100M+") grew
+                  // straight through the column rule beside them. The clamp ties
+                  // the figure to the width it has to live in, and still lands on
+                  // 46px once the band reaches its 1100 cap.
+                  className={`${STAT_FONT} mt-1.5 text-[clamp(30px,3.2vw,46px)] leading-none tabular-nums tracking-[-0.02em] text-foreground/80`}
                 >
                   <RollingNumber text={s.format(s.to)} play={play} />
                 </p>

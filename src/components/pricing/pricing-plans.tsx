@@ -70,7 +70,6 @@ const PLANS: Plan[] = [
       {
         label: "Everything in Free, plus",
         items: [
-          "Unlimited apps",
           "API & MCP connector",
           "More included credits",
           "Add-on build credits",
@@ -334,7 +333,7 @@ export function PricingPlans() {
             role="radio"
             aria-checked={billing === "monthly"}
             onClick={() => setBilling("monthly")}
-            className="relative px-5 py-2 text-center text-muted-foreground transition-colors hover:text-foreground md:px-4 md:py-1.5"
+            className="relative rounded-md px-5 py-2 text-center text-muted-foreground transition-colors hover:text-foreground md:px-4 md:py-1.5"
           >
             <span className="hidden md:inline">Pay&nbsp;</span>Monthly
           </button>
@@ -342,7 +341,7 @@ export function PricingPlans() {
             role="radio"
             aria-checked={billing === "yearly"}
             onClick={() => setBilling("yearly")}
-            className="relative px-5 py-2 text-center text-muted-foreground transition-colors hover:text-foreground md:px-4 md:py-1.5"
+            className="relative rounded-md px-5 py-2 text-center text-muted-foreground transition-colors hover:text-foreground md:px-4 md:py-1.5"
           >
             <span className="hidden md:inline">Pay&nbsp;</span>Yearly
           </button>

@@ -3,6 +3,7 @@ import Image from "next/image";
 import {
   CASE_STUDIES,
   getIndustryGroup,
+  HERO_STUDY_SLUGS,
   type CaseStudy,
 } from "@/lib/case-studies";
 
@@ -11,14 +12,9 @@ import {
 // is two-tone — the company name in muted, the headline in foreground. The
 // full story list still lives in the hub table below.
 
-// Curated flagship stories, lead first (real photography).
-const FEATURED_SLUGS = [
-  "capital-one-luxury-travel",
-  "ditto-by-dbc",
-  "collective-cpa",
-  "jungle-luxe",
-];
-const STORIES: CaseStudy[] = FEATURED_SLUGS.map((slug) =>
+// Curated flagship stories, lead first (real photography). Order and membership
+// come from HERO_STUDY_SLUGS so these never double-list with the hub table.
+const STORIES: CaseStudy[] = HERO_STUDY_SLUGS.map((slug) =>
   CASE_STUDIES.find((s) => s.slug === slug),
 ).filter((s): s is CaseStudy => Boolean(s));
 
@@ -26,7 +22,9 @@ const STORIES: CaseStudy[] = FEATURED_SLUGS.map((slug) =>
 // name already sits above, so these don't repeat it. The full headline still
 // shows on each case-study detail page.
 const CARD_TITLES: Record<string, string> = {
-  "capital-one-luxury-travel": "Balancing 'Build vs. Buy'",
+  "advertai-marketing": "Differentiating on Client Experience",
+  "capital-one-luxury-travel":
+    "Balancing 'Build vs. Buy' for 1,100+ Hotel Partners",
   "ditto-by-dbc": "Scaling Secure, Data-Driven Marketing Campaigns",
   "collective-cpa": "Unifying Fragmented Accounting Services for Growing Client Teams",
   "jungle-luxe": "Peace of Mind for International Property Owners",
@@ -85,7 +83,7 @@ function FeaturedStory({ study }: { study: CaseStudy }) {
       // it, so it has to keep their rhythm there — image to tag and tag to title
       // both at 16px. Its own wider spacing is for the two-column layout, where
       // nothing is under it to be measured against.
-      className="group grid gap-4 md:grid-cols-2 md:items-center md:gap-12"
+      className="group grid gap-4 rounded-xl md:grid-cols-2 md:items-center md:gap-12"
     >
       <div className="relative aspect-[16/9] overflow-hidden rounded-lg bg-muted [[data-theme=dark]_&]:bg-white/[0.04]">
         {study.image && (
@@ -122,7 +120,7 @@ function FeaturedStory({ study }: { study: CaseStudy }) {
 function GridCard({ study }: { study: CaseStudy }) {
   const sector = getIndustryGroup(study.industry) ?? study.industry;
   return (
-    <Link href={`/customers/${study.slug}`} className="group flex flex-col">
+    <Link href={`/customers/${study.slug}`} className="group flex flex-col rounded-xl">
       <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-muted [[data-theme=dark]_&]:bg-white/[0.04]">
         {study.image && (
           <Image

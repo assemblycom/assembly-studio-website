@@ -17,6 +17,7 @@ import {
 // Shorter, table-only story titles so the column stays on one line. The full
 // headline still shows on each case-study detail page.
 const TABLE_TITLES: Record<string, string> = {
+  "ditto-by-dbc": "Scaling secure, data-driven campaigns",
   "valuenode-accounting": "Building a fully digital CPA practice",
   "metta-health": "HIPAA-compliant patient authorizations at scale",
   "orca-accounting": "Scaling 4.5x in seven months",
@@ -33,7 +34,7 @@ function StoryTableRow({ study }: { study: CaseStudy }) {
   return (
     <Link
       href={`/customers/${study.slug}`}
-      className="group flex items-center justify-between gap-4 border-t border-border px-6 py-4 transition-colors hover:bg-muted/[0.35] md:px-8 lg:grid lg:grid-cols-[minmax(0,200px)_minmax(0,1fr)_minmax(0,210px)_auto] lg:items-center lg:gap-x-8 lg:py-6"
+      className="group flex items-center justify-between gap-4 rounded-lg border-t border-border px-6 py-4 transition-colors hover:bg-muted/[0.35] md:px-8 lg:grid lg:grid-cols-[minmax(0,200px)_minmax(0,1fr)_minmax(0,210px)_auto] lg:items-center lg:gap-x-8 lg:py-6"
     >
       <span className="text-[15px] text-foreground">{study.company}</span>
       {/* Story + tag show only at lg and up; mobile and tablet keep it to a

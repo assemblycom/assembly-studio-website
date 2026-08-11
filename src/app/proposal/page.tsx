@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ProposalPage } from "@/components/proposal/proposal-page";
+import { getCatalogueTemplates } from "@/lib/visible-templates";
 import { proposalAppName, proposalTitle } from "@/lib/proposal-title";
 import { ogImageFor } from "@/lib/og";
 import { PAGE_SEO, pageMetadata } from "@/lib/seo";
@@ -33,11 +34,17 @@ export async function generateMetadata({
     name: one("name"),
     template: one("template"),
   };
-  const title = proposalTitle(parts);
+  // Resolved against the catalogue for the same reason the page is: the title
+  // has to name a Contentful-only template, not fall back to "Your proposal".
+  const templateTitle = parts.template
+    ? (await getCatalogueTemplates()).find((t) => t.slug === parts.template)
+        ?.title
+    : undefined;
+  const title = proposalTitle({ ...parts, templateTitle });
   // The card names the app, not the whole title: the recipient's name is already
   // beside the preview in the message it was sent in, and repeating it there
   // spends the card's one line on the thing the reader already knows.
-  const appName = proposalAppName(parts);
+  const appName = proposalAppName({ ...parts, templateTitle });
 
   const base = pageMetadata(
     PAGE_SEO.proposal,
@@ -58,6 +65,9 @@ export async function generateMetadata({
   };
 }
 
-export default function Page() {
-  return <ProposalPage />;
+// The catalogue is resolved here rather than in the component: it comes from
+// Contentful, and the proposal body is a client component that can't await it.
+// Without this, ?template= only ever matched a committed template.
+export default async function Page() {
+  return <ProposalPage catalogue={await getCatalogueTemplates()} />;
 }

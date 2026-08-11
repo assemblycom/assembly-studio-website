@@ -588,8 +588,16 @@ html[data-theme="dark"] body {
   textarea:focus-visible,
   select:focus-visible,
   [tabindex]:focus-visible {
-    outline: 2px solid var(--foreground);
+    /* 40% of the ink, the same strength the components that style their own
+       focus ring use (the filter chips, the scroll arrows, the template cards).
+       At full strength this was a hard black box — the loudest mark on the page,
+       and heavier than anything else the design puts on an edge. */
+    outline: 2px solid color-mix(in oklab, var(--foreground) 40%, transparent);
     outline-offset: 2px;
+    /* An outline takes the element's own radius, and link/row wrappers rarely
+       have one — so focus landed as a square box around rounded content. This
+       is the floor; anything with a radius utility keeps its own. */
+    border-radius: 8px;
     box-shadow: 0 0 0 2px var(--background);
   }
 
@@ -725,6 +733,24 @@ html[data-theme="dark"] body {
   background: linear-gradient(90deg, #ebedf0 25%, #f6f7f9 50%, #ebedf0 75%);
   background-size: 200% 100%;
   animation: skeletonSweep 1.5s ease-in-out infinite;
+}
+/* The light sweep is three near-white greys, which on the near-black ground read
+   as a lit panel rather than as a placeholder. */
+[data-theme="dark"] .skeleton-shimmer {
+  background: linear-gradient(90deg, #171717 25%, #232323 50%, #171717 75%);
+  background-size: 200% 100%;
+}
+/* A sweeping placeholder is exactly the kind of ambient motion this setting asks
+   us to drop; the flat middle tone still reads as "loading". */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer {
+    animation: none;
+    background: #f6f7f9;
+  }
+  [data-theme="dark"] .skeleton-shimmer {
+    animation: none;
+    background: #232323;
+  }
 }
 
 /* Animated conic-gradient border around the composer. The masked ::before
@@ -881,6 +907,34 @@ html[data-theme="dark"] .v63-ring-solid::before {
 }
 
 .v76-card-row {
+  /* The rail's token ladder. It used to be handed to the row as an inline style
+     object picked with a `dark ?` ternary in hero-v76 — which only resolves after
+     hydration, so the server sent every visitor the light ladder and a dark-mode
+     phone painted the whole rail in light faces until the JS landed. Here the
+     pre-paint script's data-theme governs it, so the first paint is right.
+
+     Light runs a neutral grey ladder: the warm off-white family stays on the
+     templates gallery and detail pages, which pin it via .template-mock — here
+     the widgets sit right under the composer on a cool white ground, and warm
+     faces read as a different material to it. Equal-RGB steps, no cast either
+     way. Three rungs, one job each: the widget's ground (--v69-card), the
+     surfaces sitting on it (--v69-inner), and the recess for anything nested
+     inside a surface (--v69-well). */
+  --card: #f2f2f2;
+  --card-foreground: #1a1a1a;
+  --foreground: #111111;
+  --muted-foreground: rgba(0, 0, 0, 0.5);
+  --v69-box: #f2f2f2;
+  --v69-card: #f2f2f2;
+  --v69-inner: #e6e6e6;
+  --v69-well: #dbdbdb;
+  --v69-well-2: #cfcfcf;
+  /* The heatmap's empty cell reads a touch more neutral than the shared well. */
+  --v69-tracker-empty: #e3e3e3;
+  --v69-chip: #ffffff;
+  --v69-chip-border: rgba(20, 20, 20, 0.09);
+  --v69-ink: #262626;
+
   /* Narrower on phones, where the row is barely wider than one card and a
      desktop-width fade would eat most of it. */
   --v76-fade-w: 44px;
@@ -896,6 +950,25 @@ html[data-theme="dark"] .v63-ring-solid::before {
   transition:
     --v76-fade-l 260ms ease-out,
     --v76-fade-r 260ms ease-out;
+}
+
+/* Dark's equivalents: neutral greys stepping UP from the card face, so wells,
+   panels and chips still lift instead of keeping the light values (which rendered
+   as bright white boxes in dark mode). */
+[data-theme="dark"] .v76-card-row {
+  --card: #1b1b1b;
+  --card-foreground: #f2f3f5;
+  --foreground: #ffffff;
+  --muted-foreground: rgba(255, 255, 255, 0.5);
+  --v69-box: #1b1b1b;
+  --v69-card: #1f1f1f;
+  --v69-inner: #242424;
+  --v69-well: #2b2b2b;
+  --v69-well-2: #333333;
+  --v69-tracker-empty: #242424;
+  --v69-chip: #2e2e2e;
+  --v69-chip-border: rgba(255, 255, 255, 0.12);
+  --v69-ink: #f2f3f5;
 }
 
 @media (min-width: 768px) {
@@ -926,7 +999,12 @@ html[data-theme="dark"] .v63-ring-solid::before {
 
 /* Dark-mode skin for the reused template-card mocks. Tailwind v4 utilities read
    their color from --color-* theme vars, so scoping these on the mock wrapper
-   reskins the light mocks to dark WITHOUT editing the shared component. */
+   reskins the light mocks to dark WITHOUT editing the shared component.
+   .v76-mock-auto is the same skin applied by theme instead of by class: the hero
+   rail attached .v72-mock-dark from a `dark ?` ternary, which the server could
+   only resolve to light, so a dark-mode phone painted light mocks until
+   hydration. */
+[data-theme="dark"] .v76-mock-auto,
 .v72-mock-dark {
   /* Dark cells can take a much bigger brightness lift than light ones. */
   --v69-shimmer-peak: 1.5;
@@ -1437,6 +1515,115 @@ html[data-theme="dark"] .v63-ring-solid::before {
     inset 0 1px 0 rgba(255, 255, 255, 0.16),
     inset 0 -1px 0 rgba(255, 255, 255, 0.05);
 }
+/* Plotted ground — dotted rules on a 40px grid, for a cover that wants a
+   drafting surface under a single object instead of a filled panel. Two dot
+   fields rather than lines: one runs the dots along the horizontals, the other
+   along the verticals. */
+.v69-plot-grid {
+  --plot-dot: rgba(16, 24, 40, 0.16);
+  background-image:
+    radial-gradient(circle at 0.5px 0.5px, var(--plot-dot) 0.5px, transparent 0),
+    radial-gradient(circle at 0.5px 0.5px, var(--plot-dot) 0.5px, transparent 0);
+  background-size:
+    4px 40px,
+    40px 4px;
+}
+[data-theme="dark"] .v69-plot-grid {
+  --plot-dot: rgba(255, 255, 255, 0.14);
+}
+[data-theme="dark"] .v69-plot-grid--lines {
+  --plot-dot: rgba(255, 255, 255, 0.06);
+}
+/* Hatched ground — fine diagonal rules, the third of the plain grounds a cover
+   can stand a single object on. Kept under a 4% ink so it reads as paper
+   texture, not as a pattern competing with what sits on it. */
+.v69-hatch-ground {
+  --hatch-line: rgba(16, 24, 40, 0.05);
+  background-image: repeating-linear-gradient(
+    45deg,
+    var(--hatch-line) 0 1px,
+    transparent 1px 8px
+  );
+}
+[data-theme="dark"] .v69-hatch-ground {
+  --hatch-line: rgba(255, 255, 255, 0.05);
+}
+
+/* Ruled squares — graph paper. The third weight of the same ground: heavier than
+   the dot field, lighter than the hatch, and the one that reads as a surface you
+   plot ON rather than a texture, so it suits the covers whose object is pinned
+   to a position. */
+.v69-plot-grid--lines {
+  /* Lighter than the dot field's ink: a continuous rule covers many times the
+     area a row of dots does, so at the same value the grid stopped being a
+     ground and started being the loudest thing on the cover. */
+  --plot-dot: rgba(16, 24, 40, 0.07);
+  background-image:
+    linear-gradient(to right, var(--plot-dot) 0 1px, transparent 1px),
+    linear-gradient(to bottom, var(--plot-dot) 0 1px, transparent 1px);
+  background-size:
+    28px 28px,
+    28px 28px;
+  /* Centred rather than tiled from the top-left: the covers aren't multiples of
+     28px, so anchoring at the corner spent the whole remainder on one clipped
+     column at the right edge while the left one sat whole. Centred, the
+     remainder splits between the two sides and the sheet reads as cropped
+     rather than as a grid that stopped early. */
+  background-position: center center;
+}
+
+/* Same ground as an even field rather than ruled lines — for a cover carrying a
+   single record, where ruling reads as a table it isn't part of. */
+.v69-plot-grid--dots {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    var(--plot-dot) 1px,
+    transparent 0
+  );
+  background-size: 14px 14px;
+}
+/* The help-desk cover stands its rows on the same dotted ground the other record
+   covers use — but only in the templates gallery. The home hero's rail renders
+   this cover without .template-mock-gallery, and it keeps the plain face it was
+   drawn with there. Same values as .v69-plot-grid + --dots above; stated here
+   because a class can't be handed to an element from a stylesheet. */
+.template-mock-gallery .v69-cover-support {
+  --plot-dot: rgba(16, 24, 40, 0.16);
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    var(--plot-dot) 1px,
+    transparent 0
+  );
+  background-size: 14px 14px;
+}
+[data-theme="dark"] .template-mock-gallery .v69-cover-support {
+  --plot-dot: rgba(255, 255, 255, 0.14);
+}
+
+/* Softens any of the plotted grounds off at the card's edges, so the field
+   dissolves into the face instead of being cut square by the card's corner. A
+   vignette of the card's own colour painted OVER the pattern, rather than a
+   mask: a mask on the element would take its contents with it. The card's
+   children are lifted above the overlay so only the ground is affected. */
+.v69-plot-grid--fade {
+  position: relative;
+}
+.v69-plot-grid--fade::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    closest-side at 50% 50%,
+    transparent 40%,
+    var(--v69-card) 100%
+  );
+}
+.v69-plot-grid--fade > * {
+  position: relative;
+  z-index: 1;
+}
+
 /* Milled well — a content area recessed into the card face rather than a panel
    sitting on it. Four soft inner shadows do the work (heaviest at the top, where
    the light would be occluded), a hairline rim catches the top edge, and a wide
@@ -1476,32 +1663,23 @@ html[data-theme="dark"] .v63-ring-solid::before {
   background-image: none;
   box-shadow: none;
 }
-/* Softened glass for the onboarding tile: its lit rim was the brightest thing on
-   an otherwise quiet card and pulled the eye off the bar it frames. Keeps the
-   material, at roughly a third of the edge brightness. */
+/* Dark drops the glass on the onboarding tile entirely and takes the same flat
+   block every record card in the set uses: a step off the card face, its hairline
+   doing the separating. The lit rim and the sheen over it were the only extruded
+   material left in the gallery, and beside the intake card's flat block they read
+   as two different materials for the same kind of object. Light keeps the glass —
+   there the face is flat and the material is what lifts the tile off it. */
 [data-theme="dark"] .v69-glass-tile.v69-glass-tile--soft {
-  background-color: rgba(255, 255, 255, 0.04);
-  background-image: linear-gradient(
-    165deg,
-    rgba(255, 255, 255, 0.07) 0%,
-    rgba(255, 255, 255, 0.025) 45%,
-    rgba(255, 255, 255, 0) 70%
-  );
-  /* Both fills stop at the padding edge. Under the default border-box they
-     painted UNDER the translucent border as well, so the 1px band carried fill
-     + gradient + border stacked — a halo brighter than either surface, and
-     brighter at the top-left where the gradient starts, which is what made the
-     edge look doubled and lopsided. The gallery upscales this mock, so that
-     band landed across ~2 device pixels and the unevenness was plain. */
-  background-clip: padding-box;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  background-color: #303030;
+  background-image: none;
+  box-shadow: none;
 }
-/* Opt-out for tiles sitting on a card face that already carries a gradient (the
-   intake card): in dark, glass over a lit face read as a second sheet of glass,
-   so the tile takes a flat fill and keeps only its hairline. Light is unchanged —
-   there the face is flat and the glass is what separates the tile from it. */
-[data-theme="dark"] .v69-glass-tile.v69-glass-tile--flat {
-  background-color: var(--v69-inner);
+/* In the gallery this cover sits next to the intake cover, whose record row is a
+   flat white block — the translucent glass let the warm face through and read as
+   a different material for the same kind of object, so on the templates page
+   light takes the same flat white. The hero keeps its glass. */
+[data-theme="light"] .template-mock .v69-glass-tile.v69-glass-tile--soft {
+  background-color: #ffffff;
   background-image: none;
   box-shadow: none;
 }
@@ -1857,14 +2035,20 @@ html[data-theme="dark"] .v63-ring-solid::before {
   width: var(--template-mock-w, 288px);
   height: var(--template-mock-h, 288px);
   /* calc() can't divide two lengths; atan2 + tan turns the container width
-     into the unitless ratio a transform needs. */
-  transform: translate(-50%, -50%)
-    scale(
-      var(
-        --template-mock-scale,
-        tan(atan2(100cqw, var(--template-mock-w, 288px)))
-      )
-    );
+     into the unitless ratio a transform needs.
+
+     Centring and scale are SEPARATE properties on purpose. As one `transform`
+     shorthand, iOS — which can't resolve a container-query unit inside atan2 —
+     threw the whole declaration out and lost the centring along with the scale,
+     so a cover spilled out of its frame until MockFit measured it. Split, an
+     unresolvable scale costs only the scale: the cover still sits centred, a few
+     percent large and cropped by the frame, which is a state you have to be
+     looking for. MockFit then sets the variable and it lands exact. */
+  translate: -50% -50%;
+  scale: var(
+    --template-mock-scale,
+    tan(atan2(100cqw, var(--template-mock-w, 288px)))
+  );
 }
 /* Detail-page covers sit in a much wider column — fit down, never blow up past
    the size the widget was drawn at. */
@@ -2033,5 +2217,160 @@ html[data-theme="dark"] .v63-ring-solid::before {
 @media (prefers-reduced-motion: reduce) {
   .studio-glow-frame {
     animation: none;
+  }
+}
+
+/* ============================================================
+   Gallery covers on a phone — a wide, short frame.
+   A square cover eats most of a phone screen, so the rail became one
+   tall widget per scroll. The frame goes 16:10 there and the mock is
+   DRAWN in a 288x180 box (not squashed into one): the design box and
+   the frame share an aspect, so MockFit's width/design ratio still
+   lands the cover flush on all four sides.
+
+   Unlayered on purpose — it has to outrank the per-slug
+   MOCK_DESIGN_SIZE utilities, which set a square design box.
+   Scoped to .template-mock-gallery so the home hero's rail and the
+   proposal page keep the square covers they were drawn for.
+   ============================================================ */
+/* Dot field — the column count arrives as --dot-cols-base (inline, from the
+   component). Reading it through --dot-cols leaves a hook a stylesheet can
+   override, which an inline grid-template-columns would not. */
+.dot-field {
+  grid-template-columns: repeat(
+    var(--dot-cols, var(--dot-cols-base, 8)),
+    minmax(0, 1fr)
+  );
+}
+
+@media (width < 40rem) {
+  .template-mock-fit:has(> .template-mock-gallery) {
+    /* 16:10, and DELIBERATELY larger than the frame it lands in. Everything in
+       these covers is laid out in percentages except the type, which is fixed
+       px — so the design box is what sets how large type reads relative to the
+       card. At 288 wide the box scaled UP into a phone-width card (~1.24x) and
+       every label came out bigger than it does on desktop, on a card with far
+       less height to carry it. Drawing at 336 scales close to 1:1 instead, so
+       labels sit close to their desktop size and the layout has a little more
+       room at the same time. Past ~360 the fixed-size parts stop keeping up
+       with the box and the covers read sparse. */
+    --template-mock-w: 336px;
+    --template-mock-h: 210px;
+  }
+  /* Covers built from one or two stacked blocks were drawn in a square box. In
+     the phone gallery's 16:10 box those blocks run 300px wide at the same height
+     and read as stretched bars. Holding them to the width they were drawn at
+     (240px box less its p-4), centred, keeps the proportions. */
+  .template-mock-gallery .v69-cover-column > * {
+    max-width: 208px;
+    margin-inline: auto;
+    width: 100%;
+  }
+  /* A step narrower again, for a cover whose object is a single wide row: at the
+     shared width it ran nearly wall to wall and lost the margin that makes it
+     read as an object sitting on the ground. */
+  .template-mock-gallery .v69-cover-column--tight > * {
+    /* Read against this cover's own design box (see below), not the shared one.
+       Never below ~190px: the filename is the point of the card, and under that
+       it starts truncating away its own extension. */
+    max-width: 224px;
+  }
+  /* Holding the content back leaves these covers with room to spare, so they
+     also take a smaller design box than the rest of the phone gallery — the
+     frame scales the whole cover up to fill it, type included. */
+  .template-mock-fit:has(.v69-cover-column) {
+    --template-mock-w: 268px;
+    --template-mock-h: 168px;
+  }
+  /* Except the tight one. Its object is a single row carrying a filename and a
+     size, and at the 268 box that row scaled up ~1.25x — the type came out half
+     again the size it reads at on desktop and the row dominated the card. A
+     larger box scales it close to 1:1; the row's own width goes up to match so
+     it keeps its share of the frame at the smaller type. */
+  .template-mock-fit:has(.v69-cover-column--tight) {
+    --template-mock-w: 320px;
+    --template-mock-h: 200px;
+  }
+  /* The block board spans the phone card rather than sitting as a small square
+     in the middle of it. Its cells drop their aspect-square and take an equal
+     share of the height instead, so the 8x8 still reads as a full board. */
+  .template-mock-gallery .v69-block-board {
+    height: 100%;
+    grid-template-rows: repeat(8, minmax(0, 1fr));
+  }
+  .template-mock-gallery .v69-block-board > * {
+    aspect-ratio: auto;
+  }
+  /* Covers whose composition IS a square object — a folder, a board — rather
+     than a stack of rows. Stretched into the phone frame's 16:10 they lose the
+     proportions that make the object read as itself, so they keep their square
+     and centre in the extra width. */
+  .template-mock-gallery .v69-cover-square {
+    aspect-ratio: 1;
+    height: 100%;
+    width: auto;
+    margin-inline: auto;
+  }
+  /* Five rows of dots don't fit the short frame — the same count re-lays into
+     three wider rows, so the field still reads as one bank of tickets. */
+  .template-mock-gallery .dot-field {
+    --dot-cols: 13;
+    gap: 0.375rem;
+  }
+  /* The plotted ground on a phone card. Two things thinned it out here: the
+     field is the same 14px pitch on a card less than two-thirds the height, so
+     it reads as a few stray dots rather than a surface, and the fade's
+     closest-side vignette measures against that short side — at 40% it started
+     washing out barely 40px from the centre and took most of the field with it.
+     A tighter pitch, a step more ink, and a vignette that only works the last
+     third. */
+  .template-mock-gallery .v69-plot-grid {
+    --plot-dot: rgba(16, 24, 40, 0.22);
+  }
+  [data-theme="dark"] .template-mock-gallery .v69-plot-grid {
+    --plot-dot: rgba(255, 255, 255, 0.2);
+  }
+  .template-mock-gallery .v69-plot-grid--dots {
+    background-size: 11px 11px;
+  }
+  .template-mock-gallery .v69-plot-grid--fade::after {
+    background: radial-gradient(
+      closest-side at 50% 50%,
+      transparent 68%,
+      var(--v69-card) 100%
+    );
+  }
+  /* The composer cover is one panel with two small controls on its footer, and
+     its type is the down-stepped rung the desktop gallery's up-scale calls for.
+     At the shared 336px box the phone scales it ~1:1, so that rung landed at its
+     literal 9px and the placeholder read as fine print. A smaller box scales the
+     cover up the way the desktop frame does, putting the type back on the rail's
+     own size. */
+  .template-mock-fit:has(.v69-chat-cover) {
+    --template-mock-w: 288px;
+    --template-mock-h: 180px;
+  }
+  /* With the cover scaled up, the panel's 16px corner came out well rounder than
+     the card frame's own 14px. Drawn tighter so the two radii read as one. */
+  .template-mock-gallery .v69-chat-field {
+    border-radius: 11px;
+  }
+  /* Same case as the composer, one step further: the segmented control is a
+     single small object on an empty ground, drawn at 224px on desktop and scaled
+     up a third. At the shared phone box it came out at its drawn size and read
+     as a chip lost in the middle of a wide card. */
+  .template-mock-fit:has(.v69-intake-cover) {
+    --template-mock-w: 256px;
+    --template-mock-h: 160px;
+  }
+  /* The approvals folder is a header band over rows of fixed height — 253px of
+     content, where the phone frame is 204 tall. The third row was cut two pixels
+     into its title, leaving a pale bar of clipped glyph tops along the card's
+     foot (near-white type in dark, so it read as a stray white element). Two rows
+     fit the frame whole, and the list still ends on a rail short of the foot.
+     Not a size change: shrinking the cover to fit all three would take the type
+     a fifth below every other cover's. */
+  .template-mock-gallery .v69-approval-list > *:nth-child(3) {
+    display: none;
   }
 }

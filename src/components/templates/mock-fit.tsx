@@ -23,9 +23,17 @@ export const MOCK_DESIGN_SIZE: Record<string, string> = {
     "[--template-mock-w:240px] [--template-mock-h:240px]",
   "internal-communications-app":
     "[--template-mock-w:240px] [--template-mock-h:240px]",
+  // A single row on a plotted ground, with nothing else in the square: at the
+  // shared size the row's fixed type landed at the small end of the scale and
+  // the filename — the point of the cover — read smaller than the caption under
+  // the card. Only one step down, not the 240 the others take: the row spans the
+  // full box, so a smaller box narrows it, and at 240 the filename truncated.
+  "internal-resource-library":
+    "[--template-mock-w:264px] [--template-mock-h:264px]",
   // The wizard is a single narrow bar in an otherwise empty square, so it takes
-  // the largest step.
-  "onboarding-wizard": "[--template-mock-w:224px] [--template-mock-h:224px]",
+  // the largest step. The request queue's segmented control is the same case.
+  "client-onboarding-wizard": "[--template-mock-w:224px] [--template-mock-h:224px]",
+  "service-request-intake": "[--template-mock-w:224px] [--template-mock-h:224px]",
 };
 
 /**

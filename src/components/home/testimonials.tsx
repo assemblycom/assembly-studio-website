@@ -9,30 +9,25 @@ import { Section } from "@/components/ui/section";
 // floats in the whitespace above the shortest bar. Same copy as before —
 // only the composition changed.
 //
-// The featured story wants a real Assembly Studio beta firm once that
-// content exists; until then Jungle Luxe carries it — the strongest
-// outcome-shaped story we have. Swap FEATURED when the beta content lands.
+// Carried by Advertai Marketing, the first Assembly Studio firm with a full
+// story behind it — the attribution, portrait, and stats are theirs, and the
+// link goes to their case study rather than the customers index.
 // ─────────────────────────────────────────────────────────────────────────
 
-// TODO: real attribution, portrait, and story link — this featured story must
-// come from an Assembly Studio beta firm (content pending). Name/Firm and the
-// portrait are placeholders for now; the quote + stats are the approved copy.
 const FEATURED = {
   quote:
-    "Everywhere else, we got stuck at the prototype. Assembly got it securely to our clients.",
-  name: "Name",
-  firm: "Firm",
-  // Stand-in only, so the layout can be judged with a real photo in place.
-  // Replace together with name/firm when the beta-firm content lands.
-  image: "/images/customers/jungle-luxe.jpg",
+    "We’ve built out apps within weeks that I doubt we could have done within five to ten years before.",
+  name: "Garrett",
+  firm: "Advertai Marketing",
+  image: "/images/customers/advertai-marketing.jpg",
   stats: [
     // The number is the claim; the caption only has to say what it counts. Set
     // in mono caps, every extra word is a long line under a short headline.
-    { value: "One week", label: "Idea to live app" },
-    { value: "250 clients", label: "Onboarded in month one" },
-    { value: "$5,000/mo", label: "Vendor costs replaced" },
+    { value: "5 weeks", label: "Development to launch" },
+    { value: "200+ clients", label: "Using applications" },
+    { value: "5+ tools", label: "Consolidated and saved" },
   ],
-  href: "/customers",
+  href: "/customers/advertai-marketing",
 };
 
 // Descending bar heights (md+) so the row reads as a small chart and leaves
@@ -46,9 +41,7 @@ export function Testimonials() {
     // 1100px inside the Section's own padding sat 10px short on either side.
     <Section id="testimonials" className="px-0 py-16 md:py-24">
       <div className="relative mx-auto max-w-[1200px] px-6 md:px-10">
-        {/* Portrait — pinned upper-right (desktop only). Stand-in photo so the
-            section can be judged with real content; swap with the beta firm's
-            own image alongside the attribution.
+        {/* Portrait — pinned upper-right (desktop only).
             right-10, not right-0: absolute offsets resolve against the padding
             box, so right-0 parked it on the measure's outer edge — 40px past the
             column every other element in the section lines up on. */}
@@ -57,7 +50,14 @@ export function Testimonials() {
             src={FEATURED.image}
             alt=""
             fill
-            sizes="144px"
+            // Declared well above the 144px box: object-cover scales the source
+            // by its short side, so the file has to be wider than the frame
+            // before the crop, and a retina screen doubles that again. At 144
+            // the optimizer returned a file narrower than the crop needed and
+            // the portrait was visibly soft. Quality has to be one of the values
+            // in next.config's `qualities` — anything else falls back to 75.
+            sizes="288px"
+            quality={90}
             className="object-cover"
           />
         </div>
@@ -68,7 +68,8 @@ export function Testimonials() {
             src={FEATURED.image}
             alt=""
             fill
-            sizes="128px"
+            sizes="256px"
+            quality={90}
             className="object-cover"
           />
         </div>

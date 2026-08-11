@@ -130,10 +130,22 @@ function FAQItem({
         open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
       }`}
     >
-      <div className="overflow-hidden">
+      {/* Closed, this has to be overflow-hidden: that is what suppresses a grid
+          item's automatic minimum size, and without it the 0fr row can't collapse
+          — every answer stands open. Open, it switches to a clip with a margin so
+          a link's focus outline isn't cropped at the edges. min-h-0 keeps the row
+          collapsible through the transition, when open is already true. */}
+      <div
+        className={`min-h-0 ${open ? "overflow-clip [overflow-clip-margin:6px]" : "overflow-hidden"}`}
+      >
         <div
           className={
-            variant === "divided" ? "space-y-4 pb-6 pr-10" : "space-y-4 px-5 pb-4"
+            // pt-2 is headroom for a focus ring, not spacing: the reveal
+            // wrapper clips its overflow, so a link on the answer's first line
+            // had its outline cropped along the top.
+            variant === "divided"
+              ? "space-y-4 pb-6 pr-10 pt-2"
+              : "space-y-4 px-5 pb-4 pt-2"
           }
         >
           {answer.split("\n\n").map((para, i) => (
@@ -201,7 +213,10 @@ function FAQItem({
       <button
         onClick={onToggle}
         aria-expanded={open}
-        className="flex w-full cursor-pointer items-center justify-between gap-4 px-5 py-3 text-left"
+        // Inset ring: the card clips its overflow to keep the answer's reveal
+        // inside its rounded corners, so an outline drawn outside the button was
+        // cropped on all four sides — the row had no visible focus state at all.
+        className="flex w-full cursor-pointer items-center justify-between gap-4 rounded-[8px] px-5 py-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground/40"
       >
         <span className="type-body text-foreground">
           <span className="sm:hidden">{shortQuestion ?? question}</span>
