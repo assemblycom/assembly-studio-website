@@ -143,10 +143,15 @@ export function TrustTicker() {
       // short of the bottom one.
       className="cursor-default select-none"
     >
-      {/* Figures — in the 1100 rail, with hairline dividers between columns on
+      {/* Figures — on the page rails, with hairline dividers between columns on
           desktop. The hero's full-bleed divider is the top boundary; this band
           draws its own bottom rule below. */}
-      <div className="mx-auto max-w-[1600px] px-6 md:px-10">
+      {/* No side padding from md up: the band's own column IS the rail width, so
+          the four columns are exact quarters of it and the outer two sit against
+          the rails the way the inner two sit against their dividers. Padding here
+          would inset the band and make the outer gaps wider than the inner ones.
+          Below md there are no rails, so the page's 24px rail applies. */}
+      <div className="mx-auto w-full px-6 md:px-0">
         {/* No fill. A tint light enough to sit on this near-white page reads as a
             smudge rather than a surface, and a fill strong enough to read would
             be a framed card on a page we just stripped every rail and divider
@@ -156,17 +161,12 @@ export function TrustTicker() {
             trailed off short of the right edge. `divide-x` puts the rules
             between equal cells and every cell takes the same padding, so the
             four read as evenly spaced across the rail. */}
-        {/* 1100, matching How it works below it (and the section rails on the
-            rest of the page). At 1200 this band sat 22px wider on each side, so
-            the first figure started left of the heading under it and the row
-            read as misaligned rather than as the same column. */}
-        {/* Centred in the rails, with equal air on both sides. It used to be
-            nudged 44px right past 1280 to centre the figures optically, since
-            each one is left-aligned in its column and the last leaves slack at
-            its end. That slack is the lesser problem now the band's opening and
-            closing rules run rail to rail: against two lines that are symmetric,
-            a row shifted off-centre reads as a mistake. */}
-        <div className="mx-auto max-w-[1100px]">
+        {/* 1040 — narrower than the 1200 rails on purpose: this band carries its
+            own pair of side lines (see the grid below), drawn inside the rails so
+            the four figures read as one closed set rather than as a row that runs
+            the whole page width. Centred, so the two outer columns keep the same
+            air as the two inner ones. */}
+        <div className="mx-auto max-w-[1040px]">
           {/* Phone: no frame at all — the 2x2 is set by two guide lines instead,
               the row rule running the full width of the screen and the column
               rule down the middle of it. An outline made the figures a card
@@ -186,20 +186,23 @@ export function TrustTicker() {
             aria-hidden
             className="border-t border-border max-sm:-mx-6 md:hidden [[data-theme=dark]_&]:border-[#383838]"
           />
-          <div className="grid grid-cols-2 max-sm:-mx-6 sm:grid-cols-4 sm:gap-x-0 sm:gap-y-0 sm:divide-x sm:divide-border [[data-theme=dark]_&]:sm:divide-[#383838]">
+          {/* border-x closes the row on its own two side lines, inset from the
+              page rails — the band's boundary, on the same hairline values as the
+              column rules between the figures. Desktop only: the phone 2x2 is set
+              by guide lines, not a frame. */}
+          <div className="grid grid-cols-2 max-sm:-mx-6 sm:grid-cols-4 sm:gap-x-0 sm:gap-y-0 sm:divide-x sm:divide-border sm:border-x sm:border-border [[data-theme=dark]_&]:sm:divide-[#383838] [[data-theme=dark]_&]:sm:border-[#383838]">
             {STATS.map((s, i) => (
-              // The outer cells drop their outer padding so the first figure
-              // starts exactly on the rail and the last ends on it — flush with
-              // the copy above and below. The inner padding stays, so the
-              // dividers keep their breathing room. Every cell aligns left,
-              // including the last: right-aligning it closed the gap to the rail
-              // but broke the one thing the row has going for it, which is that
-              // all four figures start at the same offset from their own column.
+              // Every cell is centred in its own column, at every width. Left-
+              // aligned, the four figures shared a starting offset but each one
+              // left a different amount of slack before the line after it — and
+              // the last column's slack sat against the right rail with nothing
+              // to balance it, so the whole row read as pushed left. Centred, the
+              // slack splits evenly on both sides of each figure and the gaps to
+              // the lines even out across the band.
               //
-              // Below sm the cells are centred, take the page rail back as their
-              // own padding, and are divided by the two guide lines; at sm every
-              // one of those properties is reset so the row goes back to four
-              // columns of a single band.
+              // Below sm the cells take the page rail back as their own padding
+              // and are divided by the two guide lines; at sm those properties
+              // are reset so the row goes back to four columns of a single band.
               //
               // The mobile dividers are keyed off the index rather than divide-x:
               // divide-* walks DOM order, which in a 2x2 puts its line on the
@@ -213,15 +216,11 @@ export function TrustTicker() {
                 // figures top and bottom. Inset, it measures the label and number
                 // it divides. The row rule stays full-width — it reads as the band
                 // boundary, the way the rails above and below do.
-                // The column gutters step with the columns: 28px each side is a
-                // sixth of a column's width once the band starts shrinking below
-                // its 1100 cap, which is what pushed the figures into the rules.
-                // At full width the left gutter is 50px instead, matching the
-                // band's own inset from the page rails: every figure then sits
-                // the same distance right of the line to its left, and the first
-                // column no longer reads as more generously spaced than the
-                // three after it.
-                className={`relative px-6 py-7 text-center max-sm:border-border sm:rounded-none sm:p-0 sm:py-9 sm:text-left sm:first:pl-0 sm:last:pr-0 [[data-theme=dark]_&]:max-sm:border-[#383838] sm:[&:not(:first-child)]:pl-4 sm:[&:not(:last-child)]:pr-4 lg:[&:not(:first-child)]:pl-[50px] lg:[&:not(:last-child)]:pr-7 ${
+                // The column gutters are equal on both sides of every cell, so
+                // the centring is true: 16px stepping to 28px once the columns
+                // have the width for it. They only keep the figures off the lines
+                // — the centring is what places them.
+                className={`relative px-6 py-7 text-center max-sm:border-border sm:rounded-none sm:px-4 sm:py-9 lg:px-7 [[data-theme=dark]_&]:max-sm:border-[#383838] ${
                   i % 2 === 1
                     ? "max-sm:before:pointer-events-none max-sm:before:absolute max-sm:before:inset-y-5 max-sm:before:left-0 max-sm:before:w-px max-sm:before:bg-border [[data-theme=dark]_&]:max-sm:before:bg-[#383838]"
                     : ""
