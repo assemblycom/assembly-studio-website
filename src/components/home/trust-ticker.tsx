@@ -150,7 +150,7 @@ export function TrustTicker() {
           1040 column already sits inside them. Below that there are no rails, so
           the page rail is what keeps this band's side lines off the screen edges —
           without it the frame ran edge to edge on tablets. */}
-      <div className="mx-auto w-full px-6 md:px-10 min-[1200px]:px-0">
+      <div className="mx-auto w-full px-6 min-[820px]:px-10 min-[1200px]:px-0">
         {/* No fill. A tint light enough to sit on this near-white page reads as a
             smudge rather than a surface, and a fill strong enough to read would
             be a framed card on a page we just stripped every rail and divider
@@ -166,7 +166,7 @@ export function TrustTicker() {
             the whole page width. Centred, so the two outer columns keep the same
             air as the two inner ones. */}
         <div className="mx-auto max-w-[1040px]">
-          {/* Phone: no frame at all — the 2x2 is set by two guide lines instead,
+          {/* Phone and small tablet: no frame at all — the 2x2 is set by two guide lines instead,
               the row rule running the full width of the screen and the column
               rule down the middle of it. An outline made the figures a card
               parked on the page; the lines make them part of its grid, which is
@@ -183,13 +183,20 @@ export function TrustTicker() {
               stop short of them at both ends. */}
           <div
             aria-hidden
-            className="border-t border-border max-sm:-mx-6 md:hidden [[data-theme=dark]_&]:border-[#383838]"
+            className="-mx-6 border-t border-border md:hidden [[data-theme=dark]_&]:border-[#383838]"
           />
           {/* border-x closes the row on its own two side lines, inset from the
               page rails — the band's boundary, on the same hairline values as the
               column rules between the figures. Desktop only: the phone 2x2 is set
               by guide lines, not a frame. */}
-          <div className="grid grid-cols-2 max-sm:-mx-6 sm:grid-cols-4 sm:gap-x-0 sm:gap-y-0 sm:divide-x sm:divide-border sm:border-x sm:border-border [[data-theme=dark]_&]:sm:divide-[#383838] [[data-theme=dark]_&]:sm:border-[#383838]">
+          {/* 820, not the sm breakpoint: below it the four columns are too narrow
+              for "Businesses powered" and "Payments processed" to hold one line,
+              and a row of half-wrapped labels is a worse state than the stacked
+              pairs. 820 leaves the longest label ~25px of slack, so a fallback
+              font mid-load can't tip it back into wrapping. */}
+          {/* Written as base styles reset at 820 rather than as max-[819px]
+              variants: arbitrary max-* variants don't come out of this build. */}
+          <div className="-mx-6 grid grid-cols-2 min-[820px]:mx-0 min-[820px]:grid-cols-4 min-[820px]:gap-x-0 min-[820px]:gap-y-0 min-[820px]:divide-x min-[820px]:divide-border min-[820px]:border-x min-[820px]:border-border [[data-theme=dark]_&]:min-[820px]:divide-[#383838] [[data-theme=dark]_&]:min-[820px]:border-[#383838]">
             {STATS.map((s, i) => (
               // Every cell is centred in its own column, at every width. Left-
               // aligned, the four figures shared a starting offset but each one
@@ -199,8 +206,8 @@ export function TrustTicker() {
               // slack splits evenly on both sides of each figure and the gaps to
               // the lines even out across the band.
               //
-              // Below sm the cells take the page rail back as their own padding
-              // and are divided by the two guide lines; at sm those properties
+              // Below md the cells take the page rail back as their own padding
+              // and are divided by the two guide lines; at md those properties
               // are reset so the row goes back to four columns of a single band.
               //
               // The mobile dividers are keyed off the index rather than divide-x:
@@ -219,11 +226,11 @@ export function TrustTicker() {
                 // the centring is true: 16px stepping to 28px once the columns
                 // have the width for it. They only keep the figures off the lines
                 // — the centring is what places them.
-                className={`relative flex flex-col px-6 py-7 text-center max-sm:border-border sm:rounded-none sm:px-4 sm:py-9 lg:px-7 [[data-theme=dark]_&]:max-sm:border-[#383838] ${
+                className={`relative flex flex-col border-border px-6 py-7 text-center min-[820px]:rounded-none min-[820px]:px-4 min-[820px]:py-9 lg:px-7 [[data-theme=dark]_&]:border-[#383838] ${
                   i % 2 === 1
-                    ? "max-sm:before:pointer-events-none max-sm:before:absolute max-sm:before:inset-y-5 max-sm:before:left-0 max-sm:before:w-px max-sm:before:bg-border [[data-theme=dark]_&]:max-sm:before:bg-[#383838]"
+                    ? "before:pointer-events-none before:absolute before:inset-y-5 before:left-0 before:w-px before:bg-border min-[820px]:before:hidden [[data-theme=dark]_&]:before:bg-[#383838]"
                     : ""
-                } ${i > 1 ? "max-sm:border-t" : ""}`}
+                } ${i > 1 ? "border-t min-[820px]:border-t-0" : ""}`}
               >
                 <p className="text-[13px] leading-snug text-muted-foreground">
                   {s.label}
@@ -253,7 +260,7 @@ export function TrustTicker() {
               row rule above it does. */}
           <div
             aria-hidden
-            className="border-t border-border max-sm:-mx-6 md:hidden [[data-theme=dark]_&]:border-[#383838]"
+            className="-mx-6 border-t border-border md:hidden [[data-theme=dark]_&]:border-[#383838]"
           />
         </div>
       </div>
