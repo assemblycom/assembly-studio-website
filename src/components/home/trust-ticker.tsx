@@ -216,7 +216,12 @@ export function TrustTicker() {
                 // The column gutters step with the columns: 28px each side is a
                 // sixth of a column's width once the band starts shrinking below
                 // its 1100 cap, which is what pushed the figures into the rules.
-                className={`relative px-6 py-7 text-center max-sm:border-border sm:rounded-none sm:p-0 sm:py-9 sm:text-left sm:first:pl-0 sm:last:pr-0 [[data-theme=dark]_&]:max-sm:border-[#383838] sm:[&:not(:first-child)]:pl-4 sm:[&:not(:last-child)]:pr-4 lg:[&:not(:first-child)]:pl-7 lg:[&:not(:last-child)]:pr-7 ${
+                // At full width the left gutter is 50px instead, matching the
+                // band's own inset from the page rails: every figure then sits
+                // the same distance right of the line to its left, and the first
+                // column no longer reads as more generously spaced than the
+                // three after it.
+                className={`relative px-6 py-7 text-center max-sm:border-border sm:rounded-none sm:p-0 sm:py-9 sm:text-left sm:first:pl-0 sm:last:pr-0 [[data-theme=dark]_&]:max-sm:border-[#383838] sm:[&:not(:first-child)]:pl-4 sm:[&:not(:last-child)]:pr-4 lg:[&:not(:first-child)]:pl-[50px] lg:[&:not(:last-child)]:pr-7 ${
                   i % 2 === 1
                     ? "max-sm:before:pointer-events-none max-sm:before:absolute max-sm:before:inset-y-5 max-sm:before:left-0 max-sm:before:w-px max-sm:before:bg-border [[data-theme=dark]_&]:max-sm:before:bg-[#383838]"
                     : ""
