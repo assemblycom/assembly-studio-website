@@ -146,12 +146,11 @@ export function TrustTicker() {
       {/* Figures — on the page rails, with hairline dividers between columns on
           desktop. The hero's full-bleed divider is the top boundary; this band
           draws its own bottom rule below. */}
-      {/* No side padding from md up: the band's own column IS the rail width, so
-          the four columns are exact quarters of it and the outer two sit against
-          the rails the way the inner two sit against their dividers. Padding here
-          would inset the band and make the outer gaps wider than the inner ones.
-          Below md there are no rails, so the page's 24px rail applies. */}
-      <div className="mx-auto w-full px-6 md:px-0">
+      {/* The padding drops only once the rails exist (1200), where the band's own
+          1040 column already sits inside them. Below that there are no rails, so
+          the page rail is what keeps this band's side lines off the screen edges —
+          without it the frame ran edge to edge on tablets. */}
+      <div className="mx-auto w-full px-6 md:px-10 min-[1200px]:px-0">
         {/* No fill. A tint light enough to sit on this near-white page reads as a
             smudge rather than a surface, and a fill strong enough to read would
             be a framed card on a page we just stripped every rail and divider
@@ -220,7 +219,7 @@ export function TrustTicker() {
                 // the centring is true: 16px stepping to 28px once the columns
                 // have the width for it. They only keep the figures off the lines
                 // — the centring is what places them.
-                className={`relative px-6 py-7 text-center max-sm:border-border sm:rounded-none sm:px-4 sm:py-9 lg:px-7 [[data-theme=dark]_&]:max-sm:border-[#383838] ${
+                className={`relative flex flex-col px-6 py-7 text-center max-sm:border-border sm:rounded-none sm:px-4 sm:py-9 lg:px-7 [[data-theme=dark]_&]:max-sm:border-[#383838] ${
                   i % 2 === 1
                     ? "max-sm:before:pointer-events-none max-sm:before:absolute max-sm:before:inset-y-5 max-sm:before:left-0 max-sm:before:w-px max-sm:before:bg-border [[data-theme=dark]_&]:max-sm:before:bg-[#383838]"
                     : ""
@@ -236,7 +235,11 @@ export function TrustTicker() {
                   // straight through the column rule beside them. The clamp ties
                   // the figure to the width it has to live in, and still lands on
                   // 46px once the band reaches its 1100 cap.
-                  className={`${STAT_FONT} mt-1.5 text-[clamp(30px,3.2vw,46px)] leading-none tabular-nums tracking-[-0.02em] text-foreground/80`}
+                  //
+                  // mt-auto pins every figure to the foot of its cell, so the four
+                  // stay on one line even where a longer label wraps to two — on a
+                  // tablet the row used to step up and down with the labels.
+                  className={`${STAT_FONT} mt-auto pt-1.5 text-[clamp(30px,3.2vw,46px)] leading-none tabular-nums tracking-[-0.02em] text-foreground/80`}
                 >
                   <RollingNumber text={s.format(s.to)} play={play} />
                 </p>
