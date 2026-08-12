@@ -41,6 +41,10 @@ export const TEAM: TeamMember[] = [
     label: "Brittany Nickell",
     avatar: "/images/team/brittany.jpg",
   },
+  { value: "aishik", label: "Aishik Mallick", avatar: "/images/team/aishik.jpg" },
+  { value: "arif", label: "Arif Uddin", avatar: "/images/team/arif.jpg" },
+  { value: "dovid", label: "Dovid Baum", avatar: "/images/team/dovid.jpg" },
+  { value: "ana", label: "Ana Eremina", avatar: "/images/team/ana.jpg" },
 ];
 
 // The link carries the name, not the key: the proposal page prints whatever
