@@ -209,7 +209,7 @@ const BASE_TEMPLATES: Template[] = [
   // Proposals
   {
     slug: "proposal-builder",
-    templateId: "app-40930443",
+    templateId: "app-0eedb184",
     title: "Proposal builder",
     description: "Branded proposals clients can e-sign",
     icon: "🧾",
