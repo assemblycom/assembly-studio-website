@@ -2,6 +2,18 @@
 
 Marketing website for Assembly Studio (the AI workflow platform).
 
+## Before you deploy anything, read this
+
+**Never run `vercel --prod`.** It publishes the working directory straight to
+https://studio.assembly.com, skipping GitHub and any review. Pushing to `main` is
+how changes go live, because Vercel builds every push to it.
+
+**Ask before deploying, including before pushing `main`** — the push is the
+deploy. To see a change on a real URL without going live, run plain `vercel` for
+a preview, or push a branch and let Vercel preview it.
+
+Full detail in "Branching and deploying" below.
+
 ## Tech Stack
 - **Framework**: Next.js 16 (App Router)
 - **Styling**: Tailwind CSS v4
@@ -90,6 +102,17 @@ instead (see below).
   review *from the code owner*, so a teammate's approval alone will not land it.
   Approvals are dismissed on new pushes, and the newest push must be approved.
 - **Feature branches** branch off `main` and open PRs back into `main`.
+
+### Double-check before deploying
+
+Nothing technically stops a deploy right now. Anyone on the Vercel team can push
+and ship to the live site, and the branch rules on GitHub don't reach the Vercel
+CLI. That makes this a shared habit rather than a gate, so it's worth a beat of
+care: know that what you're about to do is going live.
+
+If you're not sure it should go out yet, open a PR instead of pushing. It gets a
+preview URL, so the change can be reviewed on a real page rather than described.
+Once it looks right, merging it into `main` is what puts it live.
 
 ### Never run `vercel --prod`
 
