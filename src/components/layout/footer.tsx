@@ -11,6 +11,7 @@ import {
   type NavLink,
 } from "@/lib/constants";
 import { DiaGradient } from "@/components/ui/dia-gradient";
+import { FooterVideo } from "@/components/layout/footer-video";
 import type { ThemePreference } from "@/components/theme/theme-provider";
 
 // V71's brand aurora (from hero-iterations) — green + blue on a near-black
@@ -81,6 +82,16 @@ const DOCS_LINKS: NavLink[] = [
 const NAVIGATE: NavLink[] = NAV_LINKS.filter((link) => !link.disabled).flatMap(
   (link) => (link.href === DOCS_URL ? DOCS_LINKS : [link]),
 );
+
+// The footer's video card. Assets are self-hosted in public/ — the loop is only
+// ~86KB and the full clip is fetched only once someone presses play. TITLE IS
+// DRAFT COPY.
+const FOOTER_VIDEO = {
+  loopSrc: "/videos/footer-story-loop.mp4",
+  videoSrc: "/videos/footer-story.mp4",
+  poster: "/images/footer-story-poster.jpg",
+  title: "Watch a client onboarding hub get built in two minutes",
+};
 
 // Social links point off-site, so they keep opening in a new tab (newTab).
 const CONNECT: NavLink[] = [
@@ -260,9 +271,13 @@ export function Footer({
 
         <div className="mx-auto max-w-[1600px] px-6 pb-12 md:px-10 md:pb-16">
           <div className="relative z-10 mt-10 md:mt-12">
-            {/* Link columns (left) + theme/back-to-top controls (top-right). */}
-            <div className="flex flex-col gap-10 sm:flex-row sm:items-start sm:justify-between sm:gap-20">
-              <div className="flex flex-col gap-10 sm:flex-row sm:gap-20">
+            {/* Six tracks, not four: on quarters of a 1360 rail the three
+                labelled columns sat 350px apart and read as three separate
+                things. A narrower track pulls them into one group and leaves the
+                video two tracks, so the frame gets bigger as the gaps close.
+                The switch keeps the far right corner. */}
+            <div className="flex flex-col gap-10 lg:grid lg:grid-cols-6 lg:items-start lg:gap-x-10">
+              <div className="flex flex-col gap-10 sm:flex-row sm:gap-20 lg:col-span-2 lg:grid lg:grid-cols-2 lg:gap-x-10">
                 {(
                   [
                     { label: "Navigate", links: NAVIGATE },
@@ -287,11 +302,31 @@ export function Footer({
                   </div>
                 ))}
               </div>
-              <div className="flex shrink-0 items-center gap-4">
-                {themeToggle && (
-                  <ThemeSwitch toggle={themeToggle} onDark={!light} frosted />
-                )}
+              {/* Labelled like the link columns so the video reads as part of the
+                  same set rather than as an ad dropped into the footer. */}
+              <div className="w-full lg:col-span-2 lg:col-start-3">
+                <p className={`font-mono text-xs uppercase tracking-wide ${light ? "text-foreground" : "text-white/80"}`}>
+                  Watch
+                </p>
+                {/* Capped well under its two tracks: at full width the frame was
+                    427px and read as the footer's subject rather than one of its
+                    columns. 220 keeps it about as tall as the link list beside
+                    it. */}
+                <div className="mt-4 max-w-[220px]">
+                  <FooterVideo
+                    loopSrc={FOOTER_VIDEO.loopSrc}
+                    videoSrc={FOOTER_VIDEO.videoSrc}
+                    poster={FOOTER_VIDEO.poster}
+                    title={FOOTER_VIDEO.title}
+                    onDark={!light}
+                  />
+                </div>
               </div>
+              {themeToggle && (
+                <div className="flex shrink-0 items-center gap-4 lg:col-start-6 lg:justify-self-end">
+                  <ThemeSwitch toggle={themeToggle} onDark={!light} frosted />
+                </div>
+              )}
             </div>
           </div>
 
