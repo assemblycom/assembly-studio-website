@@ -1,0 +1,9 @@
+# Ana owns this site. With "Require review from Code Owners" on, a pull request
+# into main needs her approval specifically — a passing review from anyone else
+# no longer satisfies the branch rule.
+#
+# Note for whoever reads this next: GitHub does not let an author approve their
+# own pull request, so Ana's own PRs cannot be self-approved. She ships to main
+# directly instead, which repo admins are still permitted to do (the protection
+# rule deliberately does not enable "Do not allow bypassing the above settings").
+* @nastyaeremina
