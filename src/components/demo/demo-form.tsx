@@ -78,9 +78,18 @@ const CANNOT_BOOK_SIZES = new Set(["Just Me", "2 - 5", "6 - 10"]);
 //
 // The lead is still submitted and still reaches the router: only the UI and the
 // navigation are suppressed.
+// Their iframe carries `chilipiper-frame`, but the wrapper it sits in has no id
+// and no class — just a fixed, full-viewport div at z-index 99999. Hiding only the
+// iframe left that wrapper over the page swallowing every click, so the button in
+// our own message did nothing. It has to be matched structurally, by what it
+// contains, since there is no name to match on.
 const SUPPRESS_STYLE_ID = "chilipiper-suppress";
-const SUPPRESS_CSS = `iframe[src*="${"copilotplatforms"}.chilipiper.com"],
-[id^="chilipiper"], [class*="chilipiper"] { display: none !important; }`;
+const CP_FRAME = "iframe.chilipiper-frame";
+const SUPPRESS_CSS = `${CP_FRAME},
+iframe[src*="${"copilotplatforms"}.chilipiper.com"],
+[id^="chilipiper"], [class*="chilipiper"],
+body > div:has(> ${CP_FRAME}),
+body > div:has(${CP_FRAME}) { display: none !important; }`;
 
 const inputCls = `${FIELD_CLS} aria-[invalid=true]:border-[var(--mock-negative-fg)]`;
 
@@ -145,6 +154,9 @@ export function DemoForm() {
   const lead = useRef<ChiliPiperLead | null>(null);
   // Set for the length of a sub-threshold submit, and read by the listener below.
   const suppressing = useRef(false);
+  // Watches for Chili Piper's anonymous wrapper so it can be hidden on arrival.
+  const hideWrapper = useRef<MutationObserver | null>(null);
+  useEffect(() => () => hideWrapper.current?.disconnect(), []);
 
   // Registered on mount, which is before next/script loads the concierge
   // (afterInteractive), so this listener sees a message first and can stop theirs
@@ -176,6 +188,24 @@ export function DemoForm() {
       style.textContent = SUPPRESS_CSS;
       document.head.append(style);
     }
+
+    // The stylesheet above assumes their wrapper is a child of <body>. This does
+    // not assume anything: whatever gets added, if it holds their frame, it goes.
+    // Belt and braces on purpose — the wrapper is anonymous, and when the CSS
+    // misses it the whole page stops taking clicks.
+    hideWrapper.current?.disconnect();
+    const observer = new MutationObserver((records) => {
+      for (const record of records) {
+        for (const node of record.addedNodes) {
+          if (!(node instanceof HTMLElement)) continue;
+          if (node.matches(CP_FRAME) || node.querySelector(CP_FRAME)) {
+            node.style.setProperty("display", "none", "important");
+          }
+        }
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    hideWrapper.current = observer;
   };
 
   const openScheduler = (nextLead: ChiliPiperLead) => {
