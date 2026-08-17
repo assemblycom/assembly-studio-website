@@ -15,11 +15,14 @@ https://studio.assembly.com, skipping GitHub and any review.
 
 **`main` is staging, not production.** Merging into `main` deploys to
 https://studio.assembly-staging.com. Production is the `production` branch, and
-`git push origin main:production` is the promote — that push is the deploy.
+**publishing a GitHub Release** is what promotes onto it — that is the deploy.
+Nobody pushes `production` by hand; `.github/workflows/release.yml` does it, and
+only for a commit that is already on `main`.
 
 **Ask before promoting.** Merging into `main` is safe and expected. Never use
 Vercel's Promote button or `vercel promote`: they re-alias an existing build
 instead of rebuilding, and this site bakes `noindex` into non-production builds.
+To undo a release, use Vercel's instant rollback.
 
 For a real URL without going live, run plain `vercel` for a preview, push a
 branch and let Vercel preview it, or merge to `main` for staging.

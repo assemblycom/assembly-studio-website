@@ -9,11 +9,11 @@ https://studio.assembly.com, skipping GitHub and any review.
 
 **`main` is staging, not production.** Merging a PR into `main` deploys to
 https://studio.assembly-staging.com. Production is the `production` branch, and
-pushing `main` into it is the promote — that push is what changes
+publishing a GitHub Release is what promotes `main` onto it and changes
 https://studio.assembly.com.
 
-**Ask before promoting.** Merging into `main` is safe and expected; pushing
-`production` is the deploy.
+**Ask before promoting.** Merging into `main` is safe and expected; publishing a
+release is the deploy.
 
 Full detail in "Branching and deploying" below.
 
@@ -118,8 +118,39 @@ already is.
   Approvals are dismissed on new pushes, and the newest push must be approved.
 - **Ana pushes to `main` directly.** She owns the site and is its code owner.
 - **Feature branches** branch off `main` and open PRs back into `main`.
-- **Promoting** is `git push origin main:production`, or a PR from `main` into
-  `production` when the accumulated diff is worth reading first.
+- **Promoting is publishing a GitHub Release.** See "Releasing" below. Nobody
+  pushes `production` by hand — the branch rule won't let them, and the release
+  is what leaves a record of what shipped.
+
+### Releasing
+
+Production is deployed by publishing a release, not by pushing a branch.
+`.github/workflows/release.yml` runs on `release: published`, checks that the
+tagged commit is an ancestor of `main`, and pushes it to `production`. Vercel
+builds that push, and the site is live a couple of minutes later.
+
+So the whole promote is: **GitHub → Releases → Draft a new release**, tag a
+commit on `main`, write what changed, publish.
+
+- **The ancestry check is the point.** A tag can sit on any commit, including
+  one that never opened a PR and never rendered on staging. The workflow refuses
+  those, so production only ever moves to something `main` already holds. If it
+  fails, merge to `main` first and re-tag — don't work around it.
+- **It needs `RELEASE_TOKEN`**, a repository secret holding a token that can
+  push to `production`. The built-in `GITHUB_TOKEN` cannot: a code-owner branch
+  rule is not bypassable by permissions, only by identity, so the token has to
+  belong to someone on that rule's bypass list. A missing secret fails the first
+  step with an explanation rather than a 403 at the end. The token also needs
+  permission to write workflow files (classic PAT: `workflow` scope;
+  fine-grained: Workflows) — `production` carries `.github/workflows/` like any
+  other branch, and a token without it is refused on that ground alone, with an
+  error that says nothing about branch rules.
+- **The push is deliberately not forced.** Production only fast-forwards, so a
+  rejected push means production holds a commit `main` doesn't — investigate it,
+  don't force past it.
+- **To undo a bad release, use Vercel's instant rollback**, not a revert commit
+  and not a force push. It re-aliases the previous production build without
+  rebuilding, so it's live in seconds. Fix forward on `main` afterwards.
 
 ### Promotion rebuilds — it does not move the artifact
 
@@ -128,15 +159,18 @@ build that already exists; they do not rebuild it. **Don't use them here.**
 `next.config.ts` reads `VERCEL_ENV` at build time and bakes
 `X-Robots-Tag: noindex, nofollow` into every non-production build, so promoting
 the staging artifact would deindex the live marketing site. `SITE_URL` is
-resolved at build time too. Promote by pushing the branch and letting production
-build itself — a couple of minutes, and the env-gated pieces come out right.
+resolved at build time too. Promote by publishing a release and letting
+production build itself — a couple of minutes, and the env-gated pieces come out
+right.
 
 ### Double-check before promoting
 
-Nothing technically stops a promote. Anyone on the Vercel team can push and ship
-to the live site, and the branch rules on GitHub don't reach the Vercel CLI. That
-makes this a shared habit rather than a gate, so it's worth a beat of care: know
-that what you're about to do is going live.
+The release workflow gates the GitHub path: production only takes commits that
+reached `main`, and only a bypass-list token can move the branch. **It does not
+reach the Vercel CLI.** `vercel --prod` still uploads a working directory
+straight to the live site, past the branch rule, the release, and the ancestry
+check alike. That one stays a shared habit rather than a gate, so it's worth a
+beat of care: know that what you're about to do is going live.
 
 If you're not sure it should go out yet, leave it on `main`. Staging is a real
 URL on a real browser, which is a better review than a description — and there
