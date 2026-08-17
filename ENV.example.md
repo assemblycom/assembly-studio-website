@@ -1,5 +1,29 @@
 # Environment variables
 
+Vercel scopes these per environment. The site runs in three: **Production**
+(`production` branch), **Staging** (`main`), and **Preview** (everything else).
+A variable set only on Production is *missing* on staging, and the site quietly
+falls back — Contentful to the committed templates, the hero box to its curated
+completions. Set them on all three unless a value is genuinely production-only.
+
+## `NEXT_PUBLIC_SITE_URL` (staging only)
+
+The canonical host, read by `SITE_URL` in `src/lib/constants.ts`. Unset — on
+production, previews, and locally — it falls back to
+`https://studio.assembly.com`.
+
+Set it on the **Staging** scope only:
+
+```
+NEXT_PUBLIC_SITE_URL=https://studio.assembly-staging.com
+```
+
+Without it, staging still renders, but every canonical, `og:url`, docs link, and
+proposal URL it produces names production — and `/api/shorten`, which only
+accepts URLs whose origin matches `SITE_URL`, rejects every proposal the staging
+creator builds. `NEXT_PUBLIC_` because `SITE_URL` is read in client components;
+a bare env var is undefined in the browser bundle.
+
 ## `ANTHROPIC_API_KEY` (optional)
 
 Powers the AI autocomplete in the hero prompt box (`src/app/api/complete/route.ts`).
@@ -22,7 +46,7 @@ Then restart `npm run dev`.
 ### Production (Vercel)
 
 Add `ANTHROPIC_API_KEY` under **Project → Settings → Environment Variables**
-(Production scope), then redeploy.
+(Production, Staging, and Preview scopes), then redeploy.
 
 The key is only ever read server-side in the API route — it is never sent to the
 browser.
@@ -67,7 +91,9 @@ npm run contentful:pull         # write src/lib/templates.generated.ts
 ```
 
 Then add `CONTENTFUL_SPACE_ID` and `CONTENTFUL_DELIVERY_TOKEN` to Vercel
-(Production scope). `prebuild` runs the pull on every deploy.
+(Production, Staging, and Preview scopes — both tokens are read-only, and
+staging reviewing a different set of templates than production ships is worse
+than sharing them). `prebuild` runs the pull on every deploy.
 
 ### Publishing rebuilds the site
 

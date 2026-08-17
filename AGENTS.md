@@ -11,12 +11,18 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 # Deploying
 
 **Never run `vercel --prod`.** It publishes the working directory straight to
-https://studio.assembly.com, skipping GitHub and any review. Pushing to `main` is
-how changes go live: Vercel builds every push to it.
+https://studio.assembly.com, skipping GitHub and any review.
 
-**Ask before deploying, including before pushing `main`** — the push is the
-deploy. For a real URL without going live, run plain `vercel` for a preview, or
-push a branch and let Vercel preview it.
+**`main` is staging, not production.** Merging into `main` deploys to
+https://studio.assembly-staging.com. Production is the `production` branch, and
+`git push origin main:production` is the promote — that push is the deploy.
+
+**Ask before promoting.** Merging into `main` is safe and expected. Never use
+Vercel's Promote button or `vercel promote`: they re-alias an existing build
+instead of rebuilding, and this site bakes `noindex` into non-production builds.
+
+For a real URL without going live, run plain `vercel` for a preview, push a
+branch and let Vercel preview it, or merge to `main` for staging.
 
 Everything else worth knowing about this repo — design rules, theming, SEO, the
 branch flow — is in `CLAUDE.md`. Read it before making changes; it applies

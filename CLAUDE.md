@@ -5,12 +5,15 @@ Marketing website for Assembly Studio (the AI workflow platform).
 ## Before you deploy anything, read this
 
 **Never run `vercel --prod`.** It publishes the working directory straight to
-https://studio.assembly.com, skipping GitHub and any review. Pushing to `main` is
-how changes go live, because Vercel builds every push to it.
+https://studio.assembly.com, skipping GitHub and any review.
 
-**Ask before deploying, including before pushing `main`** — the push is the
-deploy. To see a change on a real URL without going live, run plain `vercel` for
-a preview, or push a branch and let Vercel preview it.
+**`main` is staging, not production.** Merging a PR into `main` deploys to
+https://studio.assembly-staging.com. Production is the `production` branch, and
+pushing `main` into it is the promote — that push is what changes
+https://studio.assembly.com.
+
+**Ask before promoting.** Merging into `main` is safe and expected; pushing
+`production` is the deploy.
 
 Full detail in "Branching and deploying" below.
 
@@ -92,27 +95,52 @@ the next page reuses it too.
 
 ## Branching and deploying
 
-`main` is production. Vercel builds it on every push, and the result becomes
-https://studio.assembly.com. There is no staging branch: that branch existed,
-carried nothing main lacked, and was deleted. Preview deploys come from branches
-instead (see below).
+Vercel builds every push. Which URL the build lands on depends on the branch:
 
-- **Ana pushes to `main` directly.** She owns the site and is its code owner.
-- **Everyone else opens a PR into `main`.** The branch rule requires one approving
+| Branch      | Environment | URL                                  |
+| ----------- | ----------- | ------------------------------------ |
+| any branch  | Preview     | a `.vercel.app` URL, one per PR       |
+| `main`      | Staging     | https://studio.assembly-staging.com   |
+| `production`| Production  | https://studio.assembly.com           |
+
+Work only ever flows one way: a feature branch opens a PR into `main`, and
+`main` is fast-forwarded into `production` once staging looks right. Nothing is
+merged back down.
+
+Staging sits *in front of* main rather than behind it, and that is the whole
+point. The staging branch this replaced sat behind main, drifted from it, and
+was deleted for carrying nothing main lacked. In front, it cannot drift: the
+promote is always a fast-forward of main, so staging is by definition what main
+already is.
+
+- **Everyone opens a PR into `main`.** The branch rule requires one approving
   review *from the code owner*, so a teammate's approval alone will not land it.
   Approvals are dismissed on new pushes, and the newest push must be approved.
+- **Ana pushes to `main` directly.** She owns the site and is its code owner.
 - **Feature branches** branch off `main` and open PRs back into `main`.
+- **Promoting** is `git push origin main:production`, or a PR from `main` into
+  `production` when the accumulated diff is worth reading first.
 
-### Double-check before deploying
+### Promotion rebuilds — it does not move the artifact
 
-Nothing technically stops a deploy right now. Anyone on the Vercel team can push
-and ship to the live site, and the branch rules on GitHub don't reach the Vercel
-CLI. That makes this a shared habit rather than a gate, so it's worth a beat of
-care: know that what you're about to do is going live.
+Vercel's Promote button and `vercel promote` re-point the production alias at a
+build that already exists; they do not rebuild it. **Don't use them here.**
+`next.config.ts` reads `VERCEL_ENV` at build time and bakes
+`X-Robots-Tag: noindex, nofollow` into every non-production build, so promoting
+the staging artifact would deindex the live marketing site. `SITE_URL` is
+resolved at build time too. Promote by pushing the branch and letting production
+build itself — a couple of minutes, and the env-gated pieces come out right.
 
-If you're not sure it should go out yet, open a PR instead of pushing. It gets a
-preview URL, so the change can be reviewed on a real page rather than described.
-Once it looks right, merging it into `main` is what puts it live.
+### Double-check before promoting
+
+Nothing technically stops a promote. Anyone on the Vercel team can push and ship
+to the live site, and the branch rules on GitHub don't reach the Vercel CLI. That
+makes this a shared habit rather than a gate, so it's worth a beat of care: know
+that what you're about to do is going live.
+
+If you're not sure it should go out yet, leave it on `main`. Staging is a real
+URL on a real browser, which is a better review than a description — and there
+is no cost to letting it sit there.
 
 ### Never run `vercel --prod`
 
@@ -123,11 +151,13 @@ code that existed on one laptop and nowhere else.
 
 To see a change on a real URL, do one of:
 
-- `vercel` with no flags, which builds a preview deployment, or
-- push the branch, which gets Vercel to build a preview automatically.
+- `vercel` with no flags, which builds a preview deployment,
+- push the branch, which gets Vercel to build a preview automatically, or
+- merge it into `main`, which puts it on staging.
 
-Preview URLs are `.vercel.app` and sit behind Vercel SSO, so teammates can open
-them and the public cannot.
+Preview and staging URLs sit behind Vercel SSO, so teammates can open them and
+the public cannot. Staging also serves `X-Robots-Tag: noindex, nofollow`, so it
+can't compete with production in search even if the SSO gate is ever lifted.
 
 ### Verifying in a browser
 

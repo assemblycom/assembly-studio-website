@@ -32,6 +32,7 @@ import {
   IconUser,
   IconXero,
 } from "@/components/home/mock-icons";
+import { DOCS_URL } from "@/lib/constants";
 
 // One height for every section's field, sections with artwork and sections
 // still waiting on it alike — scrolling the panel should pass a steady rhythm
@@ -2176,7 +2177,7 @@ function SectionVisual({ slug }: { slug: VisualSlug }) {
 }
 
 // Docs slugs verified against the live studio docs.
-const DOCS_BASE = "https://studio.assembly.com/docs";
+const DOCS_BASE = DOCS_URL;
 
 interface PanelSection {
   heading: string;
