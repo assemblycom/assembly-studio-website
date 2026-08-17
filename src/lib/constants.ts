@@ -7,10 +7,19 @@ export const SITE_NAME = "Assembly Studio";
 export const INVALID_EMAIL_ERROR =
   "Enter a complete email address, like jane@company.com.";
 
-// Canonical host for metadata, sitemap, and robots. The Vercel host still
-// serves the site and always will; this is the address we want indexed and
-// linked, so it names the domain rather than the deployment.
-export const SITE_URL = "https://studio.assembly.com";
+// Canonical host for metadata, sitemap, robots, and the proposal shortener. The
+// Vercel host still serves the site and always will; this is the address we want
+// indexed and linked, so it names the domain rather than the deployment.
+//
+// Staging overrides it with its own host. Left hardcoded, every canonical,
+// og:url, and proposal link built on staging would name production instead —
+// and /api/shorten, which only accepts URLs whose origin matches this one, would
+// reject every proposal the staging creator produced. NEXT_PUBLIC_ because this
+// is read in client components (the proposal creator), and a bare env var is
+// undefined in the browser bundle. Unset — production, previews, local — falls
+// back to the canonical host.
+export const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://studio.assembly.com";
 
 export interface NavLink {
   label: string;
@@ -22,7 +31,10 @@ export interface NavLink {
   disabled?: boolean;
 }
 
-export const DOCS_URL = "https://studio.assembly.com/docs";
+// Served by the Mintlify rewrite in next.config.ts, which every deployment has —
+// so this follows SITE_URL rather than pinning the studio host, and staging's
+// docs links stay on staging.
+export const DOCS_URL = `${SITE_URL}/docs`;
 // The footer splits docs into its two halves, where the nav keeps one "Docs"
 // entry. Both live on assembly.com, not the studio subdomain DOCS_URL uses.
 export const GUIDE_URL = "https://assembly.com/docs";

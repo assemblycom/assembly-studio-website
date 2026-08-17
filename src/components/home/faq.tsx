@@ -26,7 +26,12 @@ function renderAnswer(text: string, links?: FAQLink[]): ReactNode {
   if (!links?.length) return text;
   let nodes: ReactNode[] = [text];
   links.forEach((link, li) => {
-    nodes = nodes.flatMap((node, ni) => {
+    // <ReactNode> spelled out rather than inferred. The two returns below are a
+    // ReactNode[] and a (string | Element)[], and left to itself TypeScript
+    // picks the type parameter from the returns on a full check and from the
+    // assignment target here on an incremental one — so the same source type
+    // checks cold and fails when Vercel restores a warm .tsbuildinfo.
+    nodes = nodes.flatMap<ReactNode>((node, ni) => {
       if (typeof node !== "string") return [node];
       const at = node.indexOf(link.label);
       if (at === -1) return [node];

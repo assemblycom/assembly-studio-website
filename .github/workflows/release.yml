@@ -1,0 +1,72 @@
+# Publishing a GitHub Release is how this site goes to production.
+#
+# `main` is staging: merging a PR deploys it to studio.assembly-staging.com.
+# Publishing a release pushes that same commit to `production`, and Vercel
+# builds the push into https://studio.assembly.com. The release notes become the
+# record of what shipped and when, which a bare `git push main:production` never
+# left behind.
+#
+# Generally based off: https://til.cazzulino.com/devops-ci-cd/push-to-protected-branch-from-github-actions
+name: Release
+
+on:
+  release:
+    types: [published]
+
+# The token is read here rather than per-step so the check below can test it.
+# `secrets` is not available in a step-level `if`; `env` is.
+env:
+  RELEASE_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+
+# Two releases published close together would race to move the same branch.
+# Queued, not cancelled: cancelling leaves production on whichever push won,
+# which is not reliably the newer one.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      # Not the built-in GITHUB_TOKEN: `production` requires a code-owner review,
+      # and the built-in token cannot bypass a branch rule no matter what
+      # permissions it is given. RELEASE_TOKEN has to belong to an identity on
+      # that rule's bypass list. Checked up front so a missing secret fails here,
+      # with a sentence explaining it, rather than as a 403 from git at the end.
+      - name: 🔍 RELEASE_TOKEN
+        if: env.RELEASE_TOKEN == ''
+        run: |
+          echo "::error::RELEASE_TOKEN is not set. It needs a token that can push to the protected \`production\` branch — see CLAUDE.md, 'Releasing'."
+          exit 1
+
+      - name: 🤘 checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ env.RELEASE_TOKEN }}
+          # merge-base needs the history behind both refs, which the default
+          # shallow clone does not have.
+          fetch-depth: 0
+
+      # A release can be tagged on any commit, including one that never went
+      # through a PR and never rendered on staging. Without this, publishing a
+      # release is the `vercel --prod` footgun again, just with better notes on
+      # it. Production only ever moves to something `main` already holds.
+      - name: 🔒 verify the release is on main
+        run: |
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" FETCH_HEAD; then
+            echo "::error::${GITHUB_SHA} is not an ancestor of main. Every release has to be tagged on a commit that reached main, so it has been reviewed and seen on staging. Merge it to main first, then re-tag."
+            exit 1
+          fi
+
+      # No --force. Production only ever fast-forwards, so a push that isn't a
+      # fast-forward means production holds a commit main doesn't — a direct
+      # push, or a hotfix — and quietly discarding it is the wrong default.
+      # To undo a bad release, use Vercel's instant rollback: it re-aliases the
+      # previous production build without rebuilding, and it is live in seconds
+      # rather than in a build.
+      - name: 🚀 push
+        run: git push origin "$GITHUB_SHA":refs/heads/production
