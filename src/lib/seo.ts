@@ -53,6 +53,24 @@ export const PAGE_SEO = {
       "Get a live walkthrough of Assembly Studio tailored to your firm — see how an app goes live inside your branded, secure client experience.",
     path: "/demo",
   },
+  aiPolicy: {
+    title: "AI Policy",
+    description:
+      "How Assembly handles workspace data across its AI capabilities: Assembly Assistant, third-party AI assistant connections via MCP, and the AI app builder.",
+    path: "/legal/ai-policy",
+  },
+  privacyPolicy: {
+    title: "Privacy Policy",
+    description:
+      "How Assembly collects, uses, safeguards, and discloses information, including your rights under GDPR, CalOPPA, and the CCPA.",
+    path: "/legal/privacy-policy",
+  },
+  termsOfService: {
+    title: "Terms of Service",
+    description:
+      "The terms and conditions governing your Assembly account and your use of the Assembly Services.",
+    path: "/legal/terms-of-service",
+  },
   // Not a page anyone searches for — this record exists for the social card. A
   // proposal is sent as a link and read in Slack or a mail client, so the
   // preview IS the first impression, and without its own record the page
