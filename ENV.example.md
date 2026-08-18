@@ -51,6 +51,21 @@ Add `ANTHROPIC_API_KEY` under **Project → Settings → Environment Variables**
 The key is only ever read server-side in the API route — it is never sent to the
 browser.
 
+## Ghost (optional) — the `/blog` archive
+
+Where the blog's posts come from. **Not set** → the site reads Ghost's public
+RSS feed, which needs no credentials but which this instance caps at the newest
+15 posts. **Set** → the Content API returns the whole archive.
+
+| Variable | Needed for | Notes |
+| --- | --- | --- |
+| `GHOST_CONTENT_API_KEY` | All posts rather than the newest 15 | Ghost admin → **Settings → Integrations → Custom** → the integration's **Content API key**. 26 characters. Read-only, so it is safe to hand around; the **Admin API key** on the same screen (the one with a colon in it) is not, and is not what this wants. |
+| `GHOST_API_URL` | Pointing at a different Ghost | Defaults to `https://copilot-blog.ghost.io`. Leave unset. |
+
+Set it in `.env.local` for local work, and in the Vercel project's environment
+variables for staging and production. Read server-side only; it never reaches
+the browser.
+
 ## Contentful (optional) — the `/templates` gallery
 
 Lets the templates be edited without a pull request. **Not set** → the site uses

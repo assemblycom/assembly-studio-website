@@ -22,7 +22,11 @@ const nextConfig: NextConfig = {
   images: {
     qualities: [75, 90, 100],
     // Template screenshots uploaded to Contentful are served from its CDN.
-    remotePatterns: [{ protocol: "https", hostname: "images.ctfassets.net" }],
+    remotePatterns: [
+      { protocol: "https", hostname: "images.ctfassets.net" },
+      // Blog feature images, served from the Ghost instance the posts live on.
+      { protocol: "https", hostname: "storage.ghost.io" },
+    ],
   },
   async rewrites() {
     return [

@@ -53,6 +53,12 @@ export const PAGE_SEO = {
       "Get a live walkthrough of Assembly Studio tailored to your firm — see how an app goes live inside your branded, secure client experience.",
     path: "/demo",
   },
+  blog: {
+    title: "Blog",
+    description:
+      "Product announcements, notes from the team, and practical guides to building client-facing apps for professional service firms.",
+    path: "/blog",
+  },
   aiPolicy: {
     title: "AI Policy",
     description:

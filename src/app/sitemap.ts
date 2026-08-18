@@ -8,6 +8,7 @@ import {
 } from "@/lib/constants";
 import { getVisibleTemplates } from "@/lib/visible-templates";
 import { CASE_STUDIES } from "@/lib/case-studies";
+import { getPosts } from "@/lib/ghost";
 
 // Pin to build time so the filesystem walk below never runs in a lambda, where
 // src/ isn't shipped.
@@ -36,6 +37,7 @@ const HINTS: Record<string, { changeFrequency: Frequency; priority: number }> = 
   "/templates": { changeFrequency: "weekly", priority: 0.8 },
   "/pricing": { changeFrequency: "weekly", priority: 0.8 },
   "/security": { changeFrequency: "monthly", priority: 0.7 },
+  "/blog": { changeFrequency: "weekly", priority: 0.7 },
   "/demo": { changeFrequency: "monthly", priority: 0.6 },
 };
 
@@ -68,7 +70,10 @@ function findStaticRoutes(dir = APP_DIR, route = ""): string[] {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const templates = await getVisibleTemplates();
+  const [templates, posts] = await Promise.all([
+    getVisibleTemplates(),
+    getPosts(),
+  ]);
   const lastModified = new Date();
 
   const entry = (path: string): MetadataRoute.Sitemap[number] => ({
@@ -85,5 +90,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...pages.map(entry),
     ...templates.map((t) => entry(`/templates/${t.slug}`)),
     ...CASE_STUDIES.map((s) => entry(`/customers/${s.slug}`)),
+    ...posts.map((post) => entry(`/blog/${post.slug}`)),
   ];
 }
