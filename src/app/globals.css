@@ -2387,7 +2387,13 @@ html[data-theme="dark"] .v63-ring-solid::before {
      leading, with the air between blocks that a 2,000-word post needs and a
      card summary doesn't. */
   .post-body {
-    color: var(--muted-foreground);
+    /* Near the page's text colour rather than the muted grey used for secondary
+       copy. Reading text this light left every <strong> — and writers mark up a
+       tenth of a post — jumping from grey to near-black, since PP Mori has no
+       true medium to carry emphasis by weight instead. Closing the gap turns
+       that flash into a lift, and matches the reference blogs, whose body copy
+       is near-black too. */
+    color: color-mix(in srgb, var(--foreground) 78%, var(--background));
     font-size: 1.0625rem;
     line-height: 1.65;
     letter-spacing: -0.01em;
@@ -2424,6 +2430,8 @@ html[data-theme="dark"] .v63-ring-solid::before {
   .post-body h4 + * {
     margin-top: 1rem;
   }
+  /* Emphasis stays at 400 like the rest of the site: PP Mori's 500 is a
+     semibold, so <strong> is carried by a step in colour against the body. */
   .post-body strong {
     font-weight: 400;
     color: var(--foreground);
@@ -2539,11 +2547,43 @@ html[data-theme="dark"] .v63-ring-solid::before {
     font-size: 0.875rem;
     letter-spacing: normal;
   }
+  /* A pull quote, not an indented paragraph: at body size behind a hairline it
+     read as a stray block of text. The size and the air around it are what mark
+     it now, so it registers at a glance. */
   .post-body blockquote {
-    margin-top: 2rem;
-    padding-left: 1.25rem;
-    border-left: 1px solid var(--border);
+    margin-top: 2.5rem;
+    /* The rule is what says "quote" at a glance — the size alone read as a
+       stray block of large text. */
+    padding-left: 1.75rem;
+    border-left: 2px solid color-mix(in srgb, var(--foreground) 18%, transparent);
+    font-size: 1.3125rem;
+    line-height: 1.45;
+    letter-spacing: -0.014em;
     color: var(--foreground);
+    text-wrap: pretty;
+  }
+  .post-body blockquote + * {
+    margin-top: 2.5rem;
+  }
+  /* The speaker sits below the quote at reading size, so the quote keeps the
+     emphasis and the credit stays a credit. */
+  .post-body blockquote footer {
+    margin-top: 1rem;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    letter-spacing: normal;
+    color: var(--muted-foreground);
+  }
+  /* Their name carries the page's text colour and the source stays muted beside
+     it, which separates the two without a second weight or an italic. */
+  .post-body blockquote cite {
+    color: var(--foreground);
+    font-style: normal;
+  }
+  @media (max-width: 47.99rem) {
+    .post-body blockquote {
+      font-size: 1.1875rem;
+    }
   }
   .post-body hr {
     margin-top: 3rem;
@@ -2604,7 +2644,7 @@ html[data-theme="dark"] .v63-ring-solid::before {
     margin-top: 2rem;
     border-collapse: collapse;
     border-top: 1px solid var(--border);
-    font-size: 0.875rem;
+    font-size: 1rem;
     letter-spacing: normal;
     /* The covers scroll with the content and the shadows are pinned to the box,
        so a shadow only shows on a side there is more table to reach. */
@@ -2643,7 +2683,15 @@ html[data-theme="dark"] .v63-ring-solid::before {
   .post-body :is(th, td):last-child {
     padding-right: 0;
   }
-  .post-body th {
+  /* The header row says "table" by being filled rather than by changing face:
+     it stays in the page's own type, and the band is what separates it from the
+     copy beneath. tbody:first-child only matches a table that shipped without a
+     thead, so a body row never picks up the header's treatment. */
+  .post-body thead th,
+  .post-body tbody:first-child tr:first-child th {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    background: var(--muted);
     color: var(--foreground);
     font-weight: 400;
   }

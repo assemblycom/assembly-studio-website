@@ -421,10 +421,14 @@ export function StudioNav({
           iOS) and the trigger, whose place the close button takes.
           pointer-events pass through to the menu underneath; only the logo
           itself stays tappable. */}
-      <header className={`${position} transition-colors ${ease} lg:hidden ${mobileMenuOpen ? "pointer-events-none z-[70]" : "z-50"}`}>
+      <header className={`${position} transition-colors ${ease} lg:hidden ${scrolled ? "bg-background" : ""} ${mobileMenuOpen ? "pointer-events-none z-[70]" : "z-50"}`}>
+        {/* The frosted pane is the at-rest look over a hero. Once scrolled the
+            bar is filled instead: on a phone the blur left page copy sliding
+            under the logo, which reads as a hole in the page rather than glass —
+            plainest of all above the post contents bar, which is opaque. */}
         <div
           aria-hidden
-          className={`pointer-events-none absolute inset-x-0 top-0 h-[135%] transition-opacity ${ease} ${scrolled ? "opacity-100" : "opacity-0"} ${mobileMenuOpen ? "invisible" : ""}`}
+          className={`pointer-events-none absolute inset-x-0 top-0 h-[135%] transition-opacity ${ease} opacity-0 ${mobileMenuOpen ? "invisible" : ""}`}
           style={navBlurStyle}
         />
         <div className={`relative z-10 flex items-center justify-between px-5 transition-[height] ${ease} ${scrolled ? "h-12" : "h-14"}`}>

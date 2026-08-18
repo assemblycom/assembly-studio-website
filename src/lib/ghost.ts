@@ -121,6 +121,39 @@ function parseCta(inner: string): PostCta | undefined {
 }
 
 /**
+ * Emphasis Ghost put around punctuation or a space alone, unwrapped. Writers
+ * bold a label and the editor takes the colon — or the space after it — with
+ * them, which leaves a lone dark speck mid-sentence; one post carries
+ * twenty-one. Only ever matches runs with no letters or digits in them.
+ */
+function unboldPunctuation(html: string): string {
+  return html.replace(/<strong>([\s:;,.!?\u2013\u2014-]*)<\/strong>/g, "$1");
+}
+
+/**
+ * A quote's attribution, lifted out of the quote body. Writers author it as a
+ * dashed line after a break, which leaves the speaker reading as one more line
+ * of what they said. As a footer the page can set it apart, and the name is
+ * marked up on its own so it need not be styled like the source beside it.
+ */
+function markQuoteAttribution(html: string): string {
+  return html.replace(
+    /<blockquote\b[^>]*>([\s\S]*?)<\/blockquote>/g,
+    (_match, inner: string) => {
+      const body = inner.replace(
+        /<br\s*\/?>\s*[—–-]\s*([^<]+?)\s*$/,
+        (_line, credit: string) => {
+          const [name, ...source] = credit.split(",");
+          const from = source.join(",").trim();
+          return `<footer><cite>${name.trim()}</cite>${from ? `, ${from}` : ""}</footer>`;
+        },
+      );
+      return `<blockquote>${body}</blockquote>`;
+    },
+  );
+}
+
+/**
  * Whitespace that a writer left inside a link, moved out of it. Ghost's editor
  * readily swallows the space before a link into the anchor, and an underline
  * drawn under a leading space reads as a stray tick ahead of the word.
@@ -139,7 +172,11 @@ function withBody(
   hasFeatureImage: boolean,
 ): { html: string; cta?: PostCta } {
   let cta: PostCta | undefined;
-  const html = trimLinkEdges(dropLeadingFigure(rawHtml, hasFeatureImage))
+  const html = unboldPunctuation(
+    markQuoteAttribution(
+      trimLinkEdges(dropLeadingFigure(rawHtml, hasFeatureImage)),
+    ),
+  )
     .replace(HTML_CARD_WRAPPER, "")
     // A post authored with two cards still gets one; the first is the one the
     // writer led with.

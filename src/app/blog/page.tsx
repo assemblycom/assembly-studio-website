@@ -27,16 +27,13 @@ export default async function BlogPage() {
       <h1 className="type-display text-foreground">Blog</h1>
 
       {featured && (
-        // The lead runs the page's full width, framed in hairlines: the cover
-        // on one side, the post's own words on the other, closing on who wrote
-        // it. The cards below repeat that frame, so the index reads as one
-        // ruled sheet rather than a row of floating tiles.
+        // The lead runs the page's full width: the cover on one side, the post's
+        // own words on the other, closing on who wrote it.
         <Link
           href={`/blog/${featured.slug}`}
-          // Stacked on a phone the lead is a card and carries an outline the
-          // whole way round; beside the type on a wider screen it is a band of
-          // the page, ruled top and bottom like the grid below it.
-          className="group mt-10 block overflow-hidden rounded-2xl border border-border transition-colors hover:bg-muted/50 md:mt-14 md:rounded-none md:border-x-0 [[data-theme=dark]_&]:border-[#383838]"
+          // A card at every width — outlined the whole way round with the
+          // corners turned, rather than a band ruled only top and bottom.
+          className="group mt-10 block overflow-hidden rounded-2xl border border-border transition-colors hover:bg-muted/50 md:mt-14 [[data-theme=dark]_&]:border-[#383838]"
         >
           <div className="grid md:grid-cols-2">
             <PostCover

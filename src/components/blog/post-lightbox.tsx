@@ -19,6 +19,11 @@ function fullSize(src: string): string {
   return src.replace(/\/size\/w\d+\//, "/");
 }
 
+// A phone already shows the image at the full width it has to give, so the
+// close-up opens at the size it started from and only hides the article around
+// it. It's a desktop affordance.
+const WIDE_ENOUGH = "(min-width: 48rem)";
+
 /**
  * A close-up for the article's own images — the cover at the top leads the post
  * and isn't part of the set. The page's body is Ghost's markup rather than
@@ -27,8 +32,24 @@ function fullSize(src: string): string {
  */
 export function PostLightbox() {
   const [open, setOpen] = useState<OpenSet | null>(null);
+  const [wide, setWide] = useState(false);
+  // Derived rather than cleared on resize: narrowing to a phone should close the
+  // close-up, and reading it off the query does that without an effect writing
+  // state back on every change.
+  const showing = wide ? open : null;
 
   useEffect(() => {
+    const query = window.matchMedia(WIDE_ENOUGH);
+    const update = () => setWide(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    // Nothing to bind on a phone.
+    if (!wide) return;
+
     const found = [
       ...document.querySelectorAll<HTMLImageElement>(".post-body img"),
     ];
@@ -54,10 +75,10 @@ export function PostLightbox() {
         image.removeEventListener("click", show);
       }
     };
-  }, []);
+  }, [wide]);
 
   useEffect(() => {
-    if (!open) return;
+    if (!showing) return;
 
     const step = (by: number) =>
       setOpen((set) =>
@@ -83,15 +104,15 @@ export function PostLightbox() {
       window.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = overflow;
     };
-  }, [open]);
+  }, [showing]);
 
-  if (!open) return null;
+  if (!showing) return null;
 
-  const shot = open.shots[open.index];
+  const shot = showing.shots[showing.index];
   const move = (by: number) =>
     setOpen({
-      ...open,
-      index: (open.index + by + open.shots.length) % open.shots.length,
+      ...showing,
+      index: (showing.index + by + showing.shots.length) % showing.shots.length,
     });
 
   return createPortal(
@@ -127,10 +148,10 @@ export function PostLightbox() {
 
       <div className="flex items-center gap-6 px-6 py-5 md:px-10">
         <span className="type-caption tabular-nums text-muted-foreground">
-          {String(open.index + 1).padStart(2, "0")}/
-          {String(open.shots.length).padStart(2, "0")}
+          {String(showing.index + 1).padStart(2, "0")}/
+          {String(showing.shots.length).padStart(2, "0")}
         </span>
-        {open.shots.length > 1 && (
+        {showing.shots.length > 1 && (
           <>
             <button
               type="button"

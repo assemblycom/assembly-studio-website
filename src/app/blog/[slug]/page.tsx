@@ -7,7 +7,6 @@ import {
   postContents,
   getPost,
   getPosts,
-  readingTime,
   splitFaq,
   withHeadingIds,
   withImageSizes,
@@ -92,6 +91,32 @@ export default async function BlogPostPage({
             showRail ? "hidden lg:flex lg:flex-col lg:gap-10" : "hidden"
           }
         >
+          {/* The way back, at the top of the rail where the reader starts. The
+              header used to carry a Blog breadcrumb; the tag and date replaced
+              it, which left a post with a rail no way back on a wide screen. */}
+          <Link
+            href="/blog"
+            className="type-body -mt-1 inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 20 20"
+              fill="none"
+              aria-hidden
+              className="shrink-0"
+            >
+              <path
+                d="M11.5 5.5 7 10l4.5 4.5"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            All posts
+          </Link>
+
           {post.cta && <PostCta cta={post.cta} />}
 
           {showToc && (
@@ -121,52 +146,93 @@ export default async function BlogPostPage({
         </div>
 
         <div>
+          {/* Only where a rail exists: the rail carries the way back on a wide
+              screen and this stands in for it below one. The announcements are a
+              centred column with nothing to hang a link off, so they lean on the
+              nav for the way out. */}
+          {showRail && (
+            <div className="mb-8 lg:hidden">
+              <Link
+                href="/blog"
+                className="type-body inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden
+                  className="shrink-0"
+                >
+                  <path
+                    d="M11.5 5.5 7 10l4.5 4.5"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                All posts
+              </Link>
+            </div>
+          )}
+
           {/* Without a rail the page has no left edge to hang off, so the
               announcements set their opening block on the column's centre line
               instead. The body below stays ranged left — centred paragraphs are
               hard to read at any length. */}
           <header className={cn(!showRail && "text-center")}>
-            <p className="type-caption text-muted-foreground">
-              <Link
-                href="/blog"
-                className="transition-colors hover:text-foreground"
-              >
-                Blog
-              </Link>
-              {post.category && (
-                <>
-                  <span className="px-2 text-foreground/30">/</span>
-                  {post.category}
-                </>
+            {/* The date, then the section as one of the site's mono tags — the
+                same chip the proposal pages draw. No
+                breadcrumb: the way back to the blog is in the nav and at the
+                foot of the page, and there is no per-section archive to link a
+                name to. */}
+            <div
+              className={cn(
+                "flex flex-wrap items-center gap-3",
+                !showRail && "justify-center",
               )}
-            </p>
-            <h1 className="type-h2 mt-4 text-balance text-foreground">
+            >
+              {post.category && (
+                <span className="rounded-sm bg-muted px-2.5 py-1 text-xs uppercase leading-none tracking-[0.06em] text-muted-foreground [font-family:var(--font-diatype-mono),ui-monospace,monospace] [[data-theme=dark]_&]:bg-white/[0.06]">
+                  {post.category}
+                </span>
+              )}
+              <p className="type-body text-muted-foreground">
+                Published {formatPostDate(post.date)}
+              </p>
+            </div>
+            {/* Leading and tracking set here rather than on type-display, which
+                nine other pages share: at 48px the token's 1.08 leaves a
+                two-line headline looking loose, where every reference blog sets
+                its post title at about 1.0. */}
+            <h1 className="type-display mt-3 text-balance leading-[1.02] tracking-[-0.03em] text-foreground">
               {post.title}
             </h1>
-            <p className="type-lead mt-5 text-pretty text-muted-foreground">
+            <p className="type-lead mt-4 text-pretty text-muted-foreground">
               {post.excerpt}
             </p>
             <div
               className={cn(
-                "mt-6 flex items-center gap-2.5",
+                "mt-5 flex items-center gap-2.5",
                 !showRail && "justify-center",
               )}
             >
               {post.authorImage && <AuthorAvatar image={post.authorImage} />}
-              <p className="type-caption text-muted-foreground">
+              <p className="type-body text-muted-foreground">
                 {/* Only the Content API knows an author's slug, so on the RSS
                     fallback the byline is plain text rather than a dead link. */}
+                By{" "}
                 {post.authorSlug ? (
                   <Link
                     href={`/blog/author/${post.authorSlug}`}
-                    className="text-foreground transition-colors hover:text-muted-foreground"
+                    className="transition-colors hover:text-foreground"
                   >
                     {post.author}
                   </Link>
                 ) : (
                   post.author
-                )}{" "}
-                · {formatPostDate(post.date)} · {readingTime(post)} min read
+                )}
               </p>
             </div>
           </header>
@@ -260,16 +326,6 @@ export default async function BlogPostPage({
               </a>
             </div>
           )}
-
-          <Link
-            href="/blog"
-            className={cn(
-              "type-caption mt-10 inline-block text-muted-foreground transition-colors hover:text-foreground",
-              showRail && "lg:hidden",
-            )}
-          >
-            ← All posts
-          </Link>
         </div>
       </div>
 
