@@ -1,7 +1,5 @@
-"use client";
-
 import { APP_URL, templateSignupUrl } from "@/lib/constants";
-import { useAuthState } from "@/lib/use-auth";
+import { AuthLink } from "@/components/ui/auth-link";
 
 /**
  * Primary CTA on a template detail page. Signed-out visitors sign up starting
@@ -18,17 +16,17 @@ export function TemplateCta({
 }: {
   template: { templateId?: string; title: string; description: string };
 }) {
-  const { authed } = useAuthState();
+  // Full width on a phone, sized to its label from sm up. At 375px the label
+  // alone is 115px in a 327px column, which read as a fragment of a row rather
+  // than as the page's primary action; the site's other mobile CTAs (hero,
+  // pricing toggle) take the column the same way.
   return (
-    <a
-      href={authed ? APP_URL : templateSignupUrl(template)}
-      // Full width on a phone, sized to its label from sm up. At 375px the label
-      // alone is 115px in a 327px column, which read as a fragment of a row
-      // rather than as the page's primary action; the site's other mobile CTAs
-      // (hero, pricing toggle) take the column the same way.
+    <AuthLink
+      authedHref={APP_URL}
+      authedLabel="Add app to workspace"
+      href={templateSignupUrl(template)}
+      label="Get started"
       className="block w-full rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background transition-opacity hover:opacity-90 sm:inline-block sm:w-auto"
-    >
-      {authed ? "Add app to workspace" : "Get started"}
-    </a>
+    />
   );
 }

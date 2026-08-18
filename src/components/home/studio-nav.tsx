@@ -16,7 +16,6 @@ import {
   type NavItem,
 } from "@/lib/constants";
 import { NavDropdown } from "@/components/layout/nav-dropdown";
-import { useAuthState } from "@/lib/use-auth";
 import { useTheme } from "@/components/theme/theme-provider";
 
 // Past this scroll distance the sticky header swaps from transparent to a
@@ -63,7 +62,6 @@ export function StudioNav({
   const [scrolled, setScrolled] = useState(false);
   // Signed-in visitors get a single "Open Assembly" action instead of the
   // Log in / Get started pair — mirrors www.assembly.com's signed-in nav.
-  const { authed } = useAuthState();
   // The menu is portaled to <body>, so it needs the client to have mounted.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -568,23 +566,29 @@ export function StudioNav({
                 </button>
               );
             })()}
-            {minimal ? null : authed ? (
-              <a href={APP_URL} className={ctaCls}>
-                Open Assembly
-              </a>
-            ) : (
+            {/* Both states ship in the markup and `data-authed` on <html>
+                picks one before paint — see globals.css. `contents` so the
+                wrapper doesn't become a flex item of its own. */}
+            {minimal ? null : (
               <>
-                {!hideDemo && (
-                  <Link href={DEMO_URL} className={linkCls}>
-                    Book a demo
-                  </Link>
-                )}
-                <a href={LOGIN_URL} className={linkCls}>
-                  Log in
-                </a>
-                <a href={SIGNUP_URL} className={ctaCls}>
-                  Get started
-                </a>
+                <span className="contents auth-only">
+                  <a href={APP_URL} className={ctaCls}>
+                    Open Assembly
+                  </a>
+                </span>
+                <span className="contents unauth-only">
+                  {!hideDemo && (
+                    <Link href={DEMO_URL} className={linkCls}>
+                      Book a demo
+                    </Link>
+                  )}
+                  <a href={LOGIN_URL} className={linkCls}>
+                    Log in
+                  </a>
+                  <a href={SIGNUP_URL} className={ctaCls}>
+                    Get started
+                  </a>
+                </span>
               </>
             )}
           </div>
@@ -713,29 +717,28 @@ export function StudioNav({
 
           {/* Bottom actions — stacked full-width so both read the same size. */}
           <div className="flex flex-col gap-3 px-5 pb-8 pt-4">
-            {authed ? (
+            <span className="contents auth-only">
               <a
                 href={APP_URL}
                 className={`flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm ${menuCta}`}
               >
                 Open Assembly
               </a>
-            ) : (
-              <>
-                <a
-                  href={SIGNUP_URL}
-                  className={`flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm ${menuCta}`}
-                >
-                  Get started
-                </a>
-                <a
-                  href={LOGIN_URL}
-                  className={`flex w-full items-center justify-center rounded-lg border px-4 py-3 text-sm ${menuDemo}`}
-                >
-                  Log in
-                </a>
-              </>
-            )}
+            </span>
+            <span className="contents unauth-only">
+              <a
+                href={SIGNUP_URL}
+                className={`flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm ${menuCta}`}
+              >
+                Get started
+              </a>
+              <a
+                href={LOGIN_URL}
+                className={`flex w-full items-center justify-center rounded-lg border px-4 py-3 text-sm ${menuDemo}`}
+              >
+                Log in
+              </a>
+            </span>
           </div>
         </div>,
         document.body,

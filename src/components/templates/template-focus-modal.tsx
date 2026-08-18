@@ -8,7 +8,7 @@ import {
 import { IconClose, IconExpand } from "@/components/templates/modal-icons";
 import type { ModalTemplate } from "@/components/templates/template-modal";
 import { APP_URL, templateSignupUrl } from "@/lib/constants";
-import { useAuthState } from "@/lib/use-auth";
+import { AuthLink } from "@/components/ui/auth-link";
 
 /**
  * Focused template quick-look — a tighter, single-column version of the
@@ -27,7 +27,6 @@ export function TemplateFocusModal({
   onClose: () => void;
 }) {
   const close = useCallback(() => onClose(), [onClose]);
-  const { authed } = useAuthState();
 
   // Esc closes; lock page scroll behind the sheet while open.
   useEffect(() => {
@@ -130,12 +129,13 @@ export function TemplateFocusModal({
                 hairline-and-bar treatment read as heavier than the content it
                 was serving; space alone separates them just as clearly. */}
             <div className="mt-7">
-              <a
-                href={authed ? APP_URL : templateSignupUrl(template)}
+              <AuthLink
+                authedHref={APP_URL}
+                authedLabel="Add app to workspace"
+                href={templateSignupUrl(template)}
+                label="Get started"
                 className="inline-block rounded-[6px] bg-foreground px-4 py-2 text-sm text-background transition-opacity hover:opacity-90"
-              >
-                {authed ? "Add app to workspace" : "Get started"}
-              </a>
+              />
             </div>
           </div>
         </div>

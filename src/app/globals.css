@@ -2712,3 +2712,26 @@ html[data-theme="dark"] .v63-ring-solid::before {
     }
   }
 }
+
+/* ============================================================
+   Auth-aware markup.
+
+   The pages are prerendered without knowing who is visiting, so any surface
+   that differs for a signed-in visitor ships BOTH variants and the pre-paint
+   script's `data-authed` on <html> (see lib/auth-script.ts) picks one before
+   first paint. Doing this in React instead meant the nav, the pricing grid and
+   the comparison table rendered signed-out and then rearranged after hydration.
+
+   Both themes, both states — this is layout, not colour, so it is deliberately
+   not scoped to a theme.
+   ============================================================ */
+[data-authed="1"] .unauth-only,
+[data-authed="0"] .auth-only {
+  display: none !important;
+}
+
+/* Before the script runs, and if it ever throws, the signed-out variant is the
+   one that shows: it is what the markup is written for. */
+html:not([data-authed]) .auth-only {
+  display: none !important;
+}

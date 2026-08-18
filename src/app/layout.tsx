@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/theme/theme-provider";
 // Imported from the plain module, never from the "use client" provider — a
 // server importer of a client export gets a throwing proxy, not the string.
 import { THEME_INIT_SCRIPT } from "@/components/theme/theme-script";
+import { AUTH_INIT_SCRIPT } from "@/lib/auth-script";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { OG_IMAGE, PAGE_SEO } from "@/lib/seo";
 import "./globals.css";
@@ -104,8 +105,9 @@ export default function RootLayout({
     <html
       lang="en"
       className={`h-full antialiased ${inter.variable}`}
-      // The pre-paint script sets data-theme on <html> before hydration, so the
-      // server markup (no attribute) and client differ by design.
+      // The pre-paint scripts set data-theme and data-authed on <html> before
+      // hydration, so the server markup (no attributes) and client differ by
+      // design.
       suppressHydrationWarning
     >
       <head>
@@ -118,7 +120,7 @@ export default function RootLayout({
             instead (see below), which is what actually lets this run before paint. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `${THEME_INIT_SCRIPT}${FONT_SWAP_SCRIPT}`,
+            __html: `${THEME_INIT_SCRIPT}${AUTH_INIT_SCRIPT}${FONT_SWAP_SCRIPT}`,
           }}
         />
         {/* Preload the PP Mori display face (used for every heading, above the

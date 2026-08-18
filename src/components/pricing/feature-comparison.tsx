@@ -235,10 +235,12 @@ const FREE_INDEX = 0;
 // minmax(0,…) on every track: a bare `1fr` is `minmax(auto, 1fr)`, so one wide
 // cell grew that row's columns — and because each row is its own grid, the row
 // then no longer lined up with the header or its neighbours.
-const GRID_5 =
-  "grid grid-cols-[minmax(0,1.6fr)_repeat(5,minmax(0,1fr))] gap-x-4";
-const GRID_4 =
-  "grid grid-cols-[minmax(0,1.6fr)_repeat(4,minmax(0,1fr))] gap-x-4";
+// Every column ships and the Free one is hidden by CSS for signed-in visitors,
+// so the track count has to change with it — hence the data-authed variant
+// rather than a runtime-picked class. Both literals appear here because
+// Tailwind can't see a class name built at runtime.
+const GRID =
+  "grid grid-cols-[minmax(0,1.6fr)_repeat(5,minmax(0,1fr))] gap-x-4 [[data-authed='1']_&]:grid-cols-[minmax(0,1.6fr)_repeat(4,minmax(0,1fr))]";
 
 function CheckIcon() {
   return (
@@ -346,14 +348,20 @@ export function FeatureComparison() {
   // the full comparison (best-in-class progressive disclosure).
   const [expanded, setExpanded] = useState(false);
   const toggle = () => setExpanded((e) => !e);
-  // Signed-in visitors don't see the Free column (matches the pricing cards).
-  const { authed } = useAuthState();
-  const columns = PLAN_NAMES.map((name, i) => ({ name, i })).filter(
-    ({ i }) => !authed || i !== FREE_INDEX,
-  );
-  const grid = columns.length === 4 ? GRID_4 : GRID_5;
-  // Keep the mobile tab selection valid when Free is hidden.
-  const activePlan = columns.some((c) => c.i === plan) ? plan : columns[0].i;
+  // Every column is rendered; the Free one carries `unauth-only` so CSS drops
+  // it for signed-in visitors before first paint (matches the pricing cards).
+  const columns = PLAN_NAMES.map((name, i) => ({
+    name,
+    i,
+    // A class, not a filter — see globals.css.
+    cls: i === FREE_INDEX ? "unauth-only" : undefined,
+  }));
+  // Behaviour, not markup, so this one genuinely needs the hook: a signed-in
+  // visitor must not be left on the Free tab once its column is hidden. `ready`
+  // gates it so the tab doesn't jump before the state is known.
+  const { authed, ready } = useAuthState();
+  const freeHidden = ready && authed;
+  const activePlan = freeHidden && plan === FREE_INDEX ? FREE_INDEX + 1 : plan;
 
   return (
     // cursor-default so hovering the comparison text shows an arrow, not the
@@ -416,13 +424,15 @@ export function FeatureComparison() {
             scroll container, and the -mb-px underline trick let it scroll up
             by a pixel-high strip. */}
         <div className="-mx-6 flex gap-6 overflow-x-auto overflow-y-hidden border-b border-border bg-background px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden [[data-theme=dark]_&]:bg-card">
-          {columns.map(({ name, i }) => (
+          {columns.map(({ name, i, cls }) => (
             <button
               key={name}
               type="button"
               aria-pressed={activePlan === i}
               onClick={() => setPlan(i)}
               className={`-mb-px shrink-0 border-b pb-3 pt-6 text-base font-medium transition-colors ${
+                cls ?? ""
+              } ${
                 activePlan === i
                   ? "border-foreground text-foreground"
                   : "border-transparent text-muted-foreground"
@@ -466,15 +476,15 @@ export function FeatureComparison() {
               semi-transparent nav once stuck; overflow-clip on the card hides
               that bar at rest. */}
           <div
-            className={`${grid} sticky top-16 z-10 -mx-6 items-end border-b border-border bg-background px-6 pb-4 pt-6 md:-mx-8 md:px-8 [[data-theme=dark]_&]:border-[#383838] [[data-theme=dark]_&]:bg-card`}
+            className={`${GRID} sticky top-16 z-10 -mx-6 items-end border-b border-border bg-background px-6 pb-4 pt-6 md:-mx-8 md:px-8 [[data-theme=dark]_&]:border-[#383838] [[data-theme=dark]_&]:bg-card`}
           >
             <span
               aria-hidden
               className="pointer-events-none absolute inset-x-0 bottom-full h-20 bg-background [[data-theme=dark]_&]:bg-card"
             />
             <div className="text-lg font-normal">Features</div>
-            {columns.map(({ name }) => (
-              <div key={name} className="text-lg font-normal">
+            {columns.map(({ name, cls }) => (
+              <div key={name} className={`text-lg font-normal ${cls ?? ""}`}>
                 {name}
               </div>
             ))}
@@ -489,11 +499,11 @@ export function FeatureComparison() {
               {group.rows.map((row) => (
                 <div
                   key={row.label}
-                  className={`${grid} items-center border-t border-border py-3.5`}
+                  className={`${GRID} items-center border-t border-border py-3.5`}
                 >
                   <RowLabel label={row.label} tooltip={row.tooltip} />
-                  {columns.map(({ i }) => (
-                    <div key={i}>
+                  {columns.map(({ i, cls }) => (
+                    <div key={i} className={cls}>
                       <CellContent value={row.values[i]} plain={row.plain} />
                     </div>
                   ))}

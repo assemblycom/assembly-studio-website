@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { APP_URL, DEMO_URL } from "@/lib/constants";
-import { useAuthState } from "@/lib/use-auth";
 
 interface PlanFeatureGroup {
   label: string;
@@ -152,6 +151,10 @@ const PLANS: Plan[] = [
   },
 ];
 
+// Signed-in visitors already have a plan, so the Free tier is noise — they see
+// only the paid upgrade paths.
+const PAID_PLANS = PLANS.filter((plan) => plan.priceMonthly > 0);
+
 type Billing = "monthly" | "yearly";
 
 // Enterprise sits BELOW the tier columns as one wide card (so adding it never
@@ -284,81 +287,32 @@ function AnimatedPrice({ value }: { value: number }) {
   );
 }
 
-export function PricingPlans() {
-  const [billing, setBilling] = useState<Billing>("yearly");
-  // Signed-in visitors already have a plan, so the Free tier is noise — drop it
-  // and show only the paid upgrade paths.
-  const { authed } = useAuthState();
-  const plans = authed ? PLANS.filter((plan) => plan.priceMonthly > 0) : PLANS;
-
+/**
+ * One self-consistent grid of plan cards.
+ *
+ * Rendered twice — once with the Free tier and once without — because the cards
+ * style their outer corners with `lg:first:`/`lg:last:`. Hiding the Free card
+ * inside a single grid with CSS would leave `:first-child` matching a card that
+ * isn't shown, so the rounded left edge would land on a hidden element and the
+ * first visible card would square off.
+ */
+function PlanGrid({
+  plans,
+  billing,
+  className,
+}: {
+  plans: Plan[];
+  billing: Billing;
+  className: string;
+}) {
   return (
-    // Cap the width only while the cards are in one column (<560px), so a lone
-    // card doesn't stretch across a small tablet. Past that the grid is two up
-    // and the cap has to lift, or the pair sits squeezed into 448px with the
-    // page's margins going to waste on either side.
-    <div className="mx-auto max-w-md min-[560px]:max-w-none">
-      {/* Billing toggle — enlarged on mobile (bigger tap targets, matches the
-          left-aligned hero); settles back to the compact size on desktop. */}
-      <div className="flex justify-start md:justify-center">
-        <div
-          role="radiogroup"
-          aria-label="Billing period"
-          className="relative grid w-full grid-cols-2 rounded-lg border border-border p-1 text-base md:inline-grid md:w-auto md:text-sm"
-        >
-          {/* Sliding thumb — carries the active-coloured labels inside a clipped
-              window, so the highlight is REVEALED as the thumb glides rather
-              than cross-fading the button text (which dipped through a
-              low-contrast state on switch — the "blink"). The inner label strip
-              counter-slides to stay aligned with the base labels below. */}
-          <span
-            aria-hidden
-            className={`pointer-events-none absolute inset-y-1 left-1 z-10 w-[calc(50%-0.25rem)] overflow-hidden rounded-md bg-foreground transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
-              billing === "yearly" ? "translate-x-full" : ""
-            }`}
-          >
-            <span
-              className={`absolute inset-0 grid w-[200%] grid-cols-2 text-background transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
-                billing === "yearly" ? "-translate-x-1/2" : ""
-              }`}
-            >
-              <span className="flex items-center justify-center">
-                <span className="hidden md:inline">Pay&nbsp;</span>Monthly
-              </span>
-              <span className="flex items-center justify-center">
-                <span className="hidden md:inline">Pay&nbsp;</span>Yearly
-              </span>
-            </span>
-          </span>
-          <button
-            role="radio"
-            aria-checked={billing === "monthly"}
-            onClick={() => setBilling("monthly")}
-            className="relative rounded-md px-5 py-2 text-center text-muted-foreground transition-colors hover:text-foreground md:px-4 md:py-1.5"
-          >
-            <span className="hidden md:inline">Pay&nbsp;</span>Monthly
-          </button>
-          <button
-            role="radio"
-            aria-checked={billing === "yearly"}
-            onClick={() => setBilling("yearly")}
-            className="relative rounded-md px-5 py-2 text-center text-muted-foreground transition-colors hover:text-foreground md:px-4 md:py-1.5"
-          >
-            <span className="hidden md:inline">Pay&nbsp;</span>Yearly
-          </button>
-        </div>
-      </div>
-
-      {/* Plans — tucked closer under the toggle on mobile; roomier on desktop.
-          Column count tracks the visible plans so hiding Free (signed-in)
-          reflows to three even columns rather than leaving a gap. */}
-      <div className="mt-5 md:mt-12 lg:overflow-hidden lg:rounded-xl">
         <div
           // Two up from 560 rather than sm's 640: between those widths a single
           // column left the cards running the full width of the page with the
           // price stranded on one side of it.
           className={`grid gap-6 min-[560px]:grid-cols-2 lg:gap-0 lg:grid-rows-[auto_auto_auto_auto_auto] ${
             plans.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"
-          }`}
+          } ${className}`}
         >
         {plans.map((plan, idx) => {
           const price = billing === "yearly" ? plan.priceYearly : plan.priceMonthly;
@@ -470,6 +424,79 @@ export function PricingPlans() {
           );
         })}
         </div>
+  );
+}
+
+export function PricingPlans() {
+  const [billing, setBilling] = useState<Billing>("yearly");
+
+  return (
+    // Cap the width only while the cards are in one column (<560px), so a lone
+    // card doesn't stretch across a small tablet. Past that the grid is two up
+    // and the cap has to lift, or the pair sits squeezed into 448px with the
+    // page's margins going to waste on either side.
+    <div className="mx-auto max-w-md min-[560px]:max-w-none">
+      {/* Billing toggle — enlarged on mobile (bigger tap targets, matches the
+          left-aligned hero); settles back to the compact size on desktop. */}
+      <div className="flex justify-start md:justify-center">
+        <div
+          role="radiogroup"
+          aria-label="Billing period"
+          className="relative grid w-full grid-cols-2 rounded-lg border border-border p-1 text-base md:inline-grid md:w-auto md:text-sm"
+        >
+          {/* Sliding thumb — carries the active-coloured labels inside a clipped
+              window, so the highlight is REVEALED as the thumb glides rather
+              than cross-fading the button text (which dipped through a
+              low-contrast state on switch — the "blink"). The inner label strip
+              counter-slides to stay aligned with the base labels below. */}
+          <span
+            aria-hidden
+            className={`pointer-events-none absolute inset-y-1 left-1 z-10 w-[calc(50%-0.25rem)] overflow-hidden rounded-md bg-foreground transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+              billing === "yearly" ? "translate-x-full" : ""
+            }`}
+          >
+            <span
+              className={`absolute inset-0 grid w-[200%] grid-cols-2 text-background transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+                billing === "yearly" ? "-translate-x-1/2" : ""
+              }`}
+            >
+              <span className="flex items-center justify-center">
+                <span className="hidden md:inline">Pay&nbsp;</span>Monthly
+              </span>
+              <span className="flex items-center justify-center">
+                <span className="hidden md:inline">Pay&nbsp;</span>Yearly
+              </span>
+            </span>
+          </span>
+          <button
+            role="radio"
+            aria-checked={billing === "monthly"}
+            onClick={() => setBilling("monthly")}
+            className="relative rounded-md px-5 py-2 text-center text-muted-foreground transition-colors hover:text-foreground md:px-4 md:py-1.5"
+          >
+            <span className="hidden md:inline">Pay&nbsp;</span>Monthly
+          </button>
+          <button
+            role="radio"
+            aria-checked={billing === "yearly"}
+            onClick={() => setBilling("yearly")}
+            className="relative rounded-md px-5 py-2 text-center text-muted-foreground transition-colors hover:text-foreground md:px-4 md:py-1.5"
+          >
+            <span className="hidden md:inline">Pay&nbsp;</span>Yearly
+          </button>
+        </div>
+      </div>
+
+      {/* Plans — tucked closer under the toggle on mobile; roomier on desktop.
+          Column count tracks the visible plans so hiding Free (signed-in)
+          reflows to three even columns rather than leaving a gap. */}
+      <div className="mt-5 md:mt-12 lg:overflow-hidden lg:rounded-xl">
+        {/* Both variants ship and `data-authed` on <html> hides one before
+            first paint (see globals.css). Choosing in an effect meant a
+            signed-in visitor watched four cards render and then reflow to
+            three. */}
+        <PlanGrid plans={PLANS} billing={billing} className="unauth-only" />
+        <PlanGrid plans={PAID_PLANS} billing={billing} className="auth-only" />
       </div>
 
       {/* Enterprise — a standalone outlined card below the plans table, detached

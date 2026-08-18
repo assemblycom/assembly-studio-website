@@ -1,62 +1,34 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AUTH_ATTRIBUTE } from "./auth-script";
+
+export { SESSION_COOKIE, DEMO_KEY } from "./auth-script";
 
 /**
- * Whether the visitor is signed in to Assembly, so marketing pages can adapt
- * (nav CTA, pricing tiers, template CTA) the way www.assembly.com does today.
+ * Whether the visitor is signed in to Assembly.
  *
- * How detection works: the app (dashboard.assembly.com) and this site
- * (studio.assembly.com) are different origins, so we can't read the app's
- * session directly. Instead the app sets a non-httpOnly cookie on the shared
- * `.assembly.com` parent domain; any page under that domain can then read it
- * client-side. This only works in production — a Vercel preview URL is not
- * under `.assembly.com`, so the cookie is never visible there.
+ * PREFER THE CSS PATH. Anything that only shows or hides markup should render
+ * both variants and tag them `.auth-only` / `.unauth-only`, which the pre-paint
+ * script in auth-script.ts resolves before first paint. This hook can't be that
+ * fast — the markup is prerendered, so React must render the signed-out variant
+ * on the server and correct after hydration, which is a visible rearrangement.
  *
- * NOTE: confirm the real cookie name with the app team (Adam) before launch —
- * SESSION_COOKIE below must match what dashboard.assembly.com actually sets.
- */
-const SESSION_COOKIE = "assembly_session";
-
-// Demo override so we can show/screenshot/share BOTH states on the Vercel
-// preview (where the real cookie is never present): add `?authed=1` or
-// `?authed=0` to any URL; the choice is remembered in localStorage until you
-// pass `?authed=clear`.
-const DEMO_KEY = "studio:demo-authed";
-
-function hasSessionCookie(): boolean {
-  return document.cookie
-    .split("; ")
-    .some((c) => c.startsWith(`${SESSION_COOKIE}=`) && c.length > SESSION_COOKIE.length + 1);
-}
-
-function resolveDemoOverride(): boolean | null {
-  const param = new URLSearchParams(window.location.search).get("authed");
-  if (param === "clear") {
-    window.localStorage.removeItem(DEMO_KEY);
-    return null;
-  }
-  if (param === "1" || param === "0") {
-    window.localStorage.setItem(DEMO_KEY, param);
-    return param === "1";
-  }
-  const stored = window.localStorage.getItem(DEMO_KEY);
-  if (stored === "1" || stored === "0") return stored === "1";
-  return null;
-}
-
-/**
- * Returns the current auth state. `ready` is false until the client has read
- * the cookie/override on mount — components render the signed-out variant on
- * the server (and for the first paint), then correct once ready.
+ * Use it only where behaviour, not markup, depends on auth — e.g. keeping a
+ * selected tab valid when its column is hidden.
+ *
+ * `ready` is false until the first effect has run. Anything rendered off
+ * `authed` must hold until then, or it will show the signed-out answer first.
  */
 export function useAuthState(): { authed: boolean; ready: boolean } {
   const [authed, setAuthed] = useState(false);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const demo = resolveDemoOverride();
-    setAuthed(demo ?? hasSessionCookie());
+    // The pre-paint script has already resolved the cookie and the demo
+    // override onto <html>, so this reads that one answer rather than
+    // duplicating the logic and risking the two disagreeing.
+    setAuthed(document.documentElement.dataset[AUTH_ATTRIBUTE] === "1");
     setReady(true);
   }, []);
 
