@@ -120,6 +120,17 @@ function parseCta(inner: string): PostCta | undefined {
   return title || description ? { title, description } : undefined;
 }
 
+/**
+ * Whitespace that a writer left inside a link, moved out of it. Ghost's editor
+ * readily swallows the space before a link into the anchor, and an underline
+ * drawn under a leading space reads as a stray tick ahead of the word.
+ */
+function trimLinkEdges(html: string): string {
+  return html
+    .replace(/(<a\b[^>]*>)(\s+)/g, "$2$1")
+    .replace(/(\s+)(<\/a>)/g, "$2$1");
+}
+
 const NO_TOC_TEMPLATE = /no-?toc|without-?toc/i;
 
 /** The post body as the page renders it, plus what the page needs to know. */
@@ -128,7 +139,7 @@ function withBody(
   hasFeatureImage: boolean,
 ): { html: string; cta?: PostCta } {
   let cta: PostCta | undefined;
-  const html = dropLeadingFigure(rawHtml, hasFeatureImage)
+  const html = trimLinkEdges(dropLeadingFigure(rawHtml, hasFeatureImage))
     .replace(HTML_CARD_WRAPPER, "")
     // A post authored with two cards still gets one; the first is the one the
     // writer led with.

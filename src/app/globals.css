@@ -2428,19 +2428,29 @@ html[data-theme="dark"] .v63-ring-solid::before {
     font-weight: 400;
     color: var(--foreground);
   }
+  /* Set the way Notion and OpenAI set a body link: no accent colour, a hairline
+     rule at the text's own weight, and a hover that lightens the whole link
+     rather than darkening a rule that was too faint to read at rest. */
   .post-body a {
     color: var(--foreground);
     text-decoration: underline;
-    text-underline-offset: 2px;
-    text-decoration-color: color-mix(
-      in srgb,
-      var(--foreground) 30%,
-      transparent
-    );
-    transition: text-decoration-color 150ms;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+    /* The offset clears most descenders; this covers the deep ones, which
+       otherwise punch gaps through the rule. */
+    text-decoration-skip-ink: none;
+    transition:
+      color 200ms,
+      text-decoration-color 200ms;
   }
   .post-body a:hover {
-    text-decoration-color: var(--foreground);
+    color: var(--muted-foreground);
+  }
+  /* Writers reach for Ghost's underline button on top of a link, which stacks a
+     second rule at its own offset and colour over the link's. The link already
+     carries one. */
+  .post-body a :is(u, ins) {
+    text-decoration: none;
   }
   /* Lists hang off an inset rather than starting at the measure, so the items
      read as a set and the marker column doesn't sit in the text's left edge. */
