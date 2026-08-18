@@ -8,6 +8,7 @@ import {
 } from "@/lib/constants";
 import { getVisibleTemplates } from "@/lib/visible-templates";
 import { CASE_STUDIES } from "@/lib/case-studies";
+import { getDefinitions } from "@/lib/definitions";
 import { getAuthors, getPosts } from "@/lib/ghost";
 
 // Pin to build time so the filesystem walk below never runs in a lambda, where
@@ -37,6 +38,7 @@ const HINTS: Record<string, { changeFrequency: Frequency; priority: number }> = 
   "/templates": { changeFrequency: "weekly", priority: 0.8 },
   "/pricing": { changeFrequency: "weekly", priority: 0.8 },
   "/security": { changeFrequency: "monthly", priority: 0.7 },
+  "/definitions": { changeFrequency: "monthly", priority: 0.5 },
   "/blog": { changeFrequency: "weekly", priority: 0.7 },
   "/demo": { changeFrequency: "monthly", priority: 0.6 },
 };
@@ -70,10 +72,11 @@ function findStaticRoutes(dir = APP_DIR, route = ""): string[] {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [templates, posts, authors] = await Promise.all([
+  const [templates, posts, authors, definitions] = await Promise.all([
     getVisibleTemplates(),
     getPosts(),
     getAuthors(),
+    getDefinitions(),
   ]);
   const lastModified = new Date();
 
@@ -93,5 +96,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...CASE_STUDIES.map((s) => entry(`/customers/${s.slug}`)),
     ...posts.map((post) => entry(`/blog/${post.slug}`)),
     ...authors.map((author) => entry(`/blog/author/${author.slug}`)),
+    ...definitions.map((d) => entry(`/definitions/${d.slug}`)),
   ];
 }

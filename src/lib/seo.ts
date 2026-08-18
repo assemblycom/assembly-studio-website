@@ -47,6 +47,18 @@ export const PAGE_SEO = {
       "Assembly is SOC 2 Type II certified and supports HIPAA, GDPR, and CCPA. Apps inherit platform authentication, permissions, and client experience boundaries.",
     path: "/security",
   },
+  brand: {
+    title: "Brand Guidelines",
+    description:
+      "Assembly logo files, naming and clear-space rules, and the brand palette \u2014 everything needed to present the Assembly brand consistently.",
+    path: "/brand",
+  },
+  definitions: {
+    title: "Definitions",
+    description:
+      "A glossary of commonly used terms across client work, billing, contracts, and the software that runs a service business.",
+    path: "/definitions",
+  },
   demo: {
     title: "Book a Demo",
     description:

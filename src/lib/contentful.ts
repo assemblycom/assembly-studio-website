@@ -53,6 +53,13 @@ const client =
 
 export const isContentfulConfigured = Boolean(client);
 
+/**
+ * The same read-only client, for the other content types this site pulls from
+ * the shared marketing space (see definitions.ts). Exported rather than
+ * re-created so there is one place the credentials are read.
+ */
+export const contentfulClient = client;
+
 function toImage(asset: Asset) {
   const file = asset.fields?.file;
   if (!file?.url) return null;
