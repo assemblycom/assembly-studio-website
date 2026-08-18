@@ -66,8 +66,19 @@ export default async function BlogPostPage({
           {post.excerpt}
         </p>
         <p className="type-caption mt-8 text-muted-foreground">
-          {post.author} · {formatPostDate(post.date)} · {readingTime(post)} min
-          read
+          {/* Only the Content API knows an author's slug, so on the RSS
+              fallback the byline is plain text rather than a dead link. */}
+          {post.authorSlug ? (
+            <Link
+              href={`/blog/author/${post.authorSlug}`}
+              className="transition-colors hover:text-foreground"
+            >
+              {post.author}
+            </Link>
+          ) : (
+            post.author
+          )}{" "}
+          · {formatPostDate(post.date)} · {readingTime(post)} min read
         </p>
       </header>
 

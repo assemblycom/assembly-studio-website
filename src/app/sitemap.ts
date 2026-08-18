@@ -8,7 +8,7 @@ import {
 } from "@/lib/constants";
 import { getVisibleTemplates } from "@/lib/visible-templates";
 import { CASE_STUDIES } from "@/lib/case-studies";
-import { getPosts } from "@/lib/ghost";
+import { getAuthors, getPosts } from "@/lib/ghost";
 
 // Pin to build time so the filesystem walk below never runs in a lambda, where
 // src/ isn't shipped.
@@ -70,9 +70,10 @@ function findStaticRoutes(dir = APP_DIR, route = ""): string[] {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [templates, posts] = await Promise.all([
+  const [templates, posts, authors] = await Promise.all([
     getVisibleTemplates(),
     getPosts(),
+    getAuthors(),
   ]);
   const lastModified = new Date();
 
@@ -91,5 +92,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...templates.map((t) => entry(`/templates/${t.slug}`)),
     ...CASE_STUDIES.map((s) => entry(`/customers/${s.slug}`)),
     ...posts.map((post) => entry(`/blog/${post.slug}`)),
+    ...authors.map((author) => entry(`/blog/author/${author.slug}`)),
   ];
 }

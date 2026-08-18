@@ -10,12 +10,17 @@ const ALL = "All";
 // readable slice and grows on request rather than shipping every card at once.
 const PAGE_SIZE = 12;
 
+/**
+ * The card grid, with tag filters where there is more than one shelf to choose
+ * between. The author pages reuse it without `categories`, since every post on
+ * one is by definition the same author and the pills would filter nothing.
+ */
 export function BlogBrowser({
   posts,
   categories,
 }: {
   posts: PostCard[];
-  categories: string[];
+  categories?: string[];
 }) {
   const [active, setActive] = useState<string>(ALL);
   const [shown, setShown] = useState(PAGE_SIZE);
@@ -31,6 +36,7 @@ export function BlogBrowser({
 
   return (
     <>
+      {categories && categories.length > 1 && (
       <div className="mb-10 flex flex-wrap gap-2">
         {[ALL, ...categories].map((filter) => (
           <button
@@ -46,6 +52,7 @@ export function BlogBrowser({
           </button>
         ))}
       </div>
+      )}
 
       <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
         {page.map((post, i) => (

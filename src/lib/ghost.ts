@@ -35,6 +35,8 @@ export interface GhostPost {
   /** The post's primary tag, e.g. "Announcements". Some posts carry none. */
   category?: string;
   author: string;
+  /** Only the Content API knows the author's slug; RSS carries just a name. */
+  authorSlug?: string;
   /** ISO date. */
   date: string;
   /** Feature image, absent on posts that have none. */
@@ -125,7 +127,15 @@ interface ContentApiPost {
   feature_image?: string | null;
   published_at?: string;
   primary_tag?: { name: string } | null;
-  primary_author?: { name: string } | null;
+  primary_author?: { name: string; slug: string } | null;
+}
+
+export interface GhostAuthor {
+  slug: string;
+  name: string;
+  bio?: string;
+  image?: string;
+  postCount: number;
 }
 
 async function fetchFromContentApi(key: string): Promise<GhostPost[]> {
@@ -161,6 +171,7 @@ async function fetchFromContentApi(key: string): Promise<GhostPost[]> {
         excerpt: post.custom_excerpt ?? post.excerpt ?? "",
         category: post.primary_tag?.name,
         author: post.primary_author?.name ?? "Assembly",
+        authorSlug: post.primary_author?.slug,
         date: post.published_at ?? new Date(0).toISOString(),
         image: post.feature_image ?? undefined,
         html: dropLeadingFigure(post.html ?? "", Boolean(post.feature_image)),
@@ -202,6 +213,60 @@ export type PostCard = Omit<GhostPost, "html">;
 
 export function toCard({ html: _html, ...card }: GhostPost): PostCard {
   return card;
+}
+
+interface ContentApiAuthor {
+  slug: string;
+  name: string;
+  bio?: string | null;
+  profile_image?: string | null;
+  count?: { posts: number };
+}
+
+/**
+ * The people who write the blog. Only the Content API exposes them, so without
+ * a key there are no author pages — the bylines simply stay unlinked.
+ */
+async function fetchAuthors(): Promise<GhostAuthor[]> {
+  if (!CONTENT_API_KEY) return [];
+
+  const response = await fetch(
+    `${GHOST_URL}/ghost/api/content/authors/` +
+      `?key=${CONTENT_API_KEY}&limit=all&include=count.posts`,
+    { next: { revalidate: REVALIDATE_SECONDS } },
+  );
+  if (!response.ok) {
+    console.error(`Ghost authors request returned ${response.status}`);
+    return [];
+  }
+
+  const { authors } = (await response.json()) as { authors: ContentApiAuthor[] };
+  return authors
+    .map((author) => ({
+      slug: author.slug,
+      name: author.name,
+      bio: author.bio ?? undefined,
+      image: author.profile_image ?? undefined,
+      postCount: author.count?.posts ?? 0,
+    }))
+    // Ghost seeds every site with a staff account that has never written
+    // anything; an author page for one would be an empty page.
+    .filter((author) => author.postCount > 0);
+}
+
+let cachedAuthors: Promise<GhostAuthor[]> | undefined;
+
+export function getAuthors(): Promise<GhostAuthor[]> {
+  cachedAuthors ??= fetchAuthors();
+  return cachedAuthors;
+}
+
+export async function getAuthor(slug: string): Promise<GhostAuthor | undefined> {
+  return (await getAuthors()).find((author) => author.slug === slug);
+}
+
+export async function getPostsByAuthor(slug: string): Promise<GhostPost[]> {
+  return (await getPosts()).filter((post) => post.authorSlug === slug);
 }
 
 export function formatPostDate(date: string): string {
