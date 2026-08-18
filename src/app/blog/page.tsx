@@ -15,7 +15,9 @@ export const metadata: Metadata = pageMetadata(PAGE_SEO.blog);
 
 export default async function BlogPage() {
   const [posts, categories] = await Promise.all([getPosts(), getCategories()]);
-  const [featured, ...rest] = posts;
+  // Ghost's own featured flag decides the lead, falling back to the newest post
+  // when nothing is flagged.
+  const featured = posts.find((post) => post.featured) ?? posts[0];
 
   return (
     <div className="mx-auto max-w-[1200px] px-6 pb-24 pt-16 md:px-10 md:pb-32 md:pt-24">
@@ -55,7 +57,11 @@ export default async function BlogPage() {
       )}
 
       <div className="mt-16 border-t border-border pt-12 [[data-theme=dark]_&]:border-[#383838] md:mt-24">
-        <BlogBrowser posts={rest.map(toCard)} categories={categories} />
+        <BlogBrowser
+          posts={posts.map(toCard)}
+          categories={categories}
+          featuredSlug={featured?.slug}
+        />
       </div>
     </div>
   );

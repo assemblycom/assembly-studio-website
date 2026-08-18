@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { isOptimizedHost } from "@/lib/image-hosts";
 
 /**
  * A post's cover: its Ghost feature image where it has one, and a set tile in
@@ -37,13 +38,23 @@ export function PostCover({
   if (image) {
     return (
       <div className={cn("relative overflow-hidden rounded-2xl bg-muted", className)}>
-        <Image
-          src={image}
-          alt=""
-          fill
-          sizes={sizes ?? "(min-width: 1024px) 380px, 100vw"}
-          className="object-cover"
-        />
+        {isOptimizedHost(image) ? (
+          <Image
+            src={image}
+            alt=""
+            fill
+            sizes={sizes ?? "(min-width: 1024px) 380px, 100vw"}
+            className="object-cover"
+          />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={image}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 size-full object-cover"
+          />
+        )}
       </div>
     );
   }

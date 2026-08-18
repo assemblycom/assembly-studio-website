@@ -9,6 +9,7 @@ import {
   getPostsByAuthor,
   toCard,
 } from "@/lib/ghost";
+import { isOptimizedHost } from "@/lib/image-hosts";
 import { pageMetadata } from "@/lib/seo";
 
 export async function generateStaticParams() {
@@ -54,15 +55,23 @@ export default async function AuthorPage({
       </p>
 
       <header className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-8">
-        {author.image && (
-          <Image
-            src={author.image}
-            alt=""
-            width={96}
-            height={96}
-            className="size-20 shrink-0 rounded-full object-cover md:size-24"
-          />
-        )}
+        {author.image &&
+          (isOptimizedHost(author.image) ? (
+            <Image
+              src={author.image}
+              alt=""
+              width={96}
+              height={96}
+              className="size-20 shrink-0 rounded-full object-cover md:size-24"
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={author.image}
+              alt=""
+              className="size-20 shrink-0 rounded-full object-cover md:size-24"
+            />
+          ))}
         <div>
           <h1 className="type-h2 text-foreground">{author.name}</h1>
           {author.bio && (

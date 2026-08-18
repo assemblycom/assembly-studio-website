@@ -13,11 +13,15 @@
  * the two produced it.
  */
 
+import { SIGNUP_URL } from "./constants";
+
 const GHOST_URL = process.env.GHOST_API_URL ?? "https://copilot-blog.ghost.io";
 const CONTENT_API_KEY = process.env.GHOST_CONTENT_API_KEY;
 
-// The Content API pages at 15 by default; this is its documented maximum.
-const API_PAGE_SIZE = 100;
+// Well under the API's 100 maximum: at 100 a page of posts came back over 5MB,
+// and Next refuses to put anything over 2MB in its data cache, so every
+// revalidation refetched the whole archive. Thirty keeps a page cacheable.
+const API_PAGE_SIZE = 30;
 
 // Ghost serves 15 posts per RSS page and 404s past the last one. The cap is a
 // backstop against paging forever if that ever stops being true.
@@ -28,6 +32,12 @@ const MAX_PAGES = 40;
 const REVALIDATE_SECONDS = 3600;
 
 export interface GhostPost {
+  /** Ghost's own "featured" flag, which decides what the index leads with. */
+  featured?: boolean;
+  /** Posts set to a no-TOC template in Ghost don't get a contents rail. */
+  showToc: boolean;
+  /** Whether the body already carries a call to action of its own. */
+  hasCta: boolean;
   slug: string;
   title: string;
   /** Ghost's excerpt, used as the standfirst and the card summary. */
@@ -70,6 +80,58 @@ function dropLeadingFigure(html: string, hasFeatureImage: boolean): string {
   return html.slice(leading[0].length).trimStart();
 }
 
+// Ghost wraps every HTML card's contents in a full document. Browsers discard
+// the wrapper when parsing a fragment, but it has to go before the CTA below
+// can be matched cleanly.
+const HTML_CARD_WRAPPER = /<\/?(?:html|head|body)>/g;
+
+// The blog's call to action is authored as an HTML card holding a custom
+// <cta> element with a title and a description. Nothing renders that element
+// on its own — and <title> inside a body is hidden by every browser — so it is
+// rewritten here into markup .post-cta can style. The action is ours to supply:
+// the card carries no link.
+const CTA_BLOCK = /<cta>([\s\S]*?)<\/cta>/g;
+
+function ctaMarkup(inner: string): string {
+  const title = inner.match(/<title>([\s\S]*?)<\/title>/)?.[1].trim() ?? "";
+  const description =
+    inner.match(/<description>([\s\S]*?)<\/description>/)?.[1].trim() ?? "";
+
+  // Ghost's authors break the description over several lines, which collapse to
+  // one run of text unless the blank lines are honoured as paragraphs.
+  const paragraphs = description
+    .split(/\n\s*\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => `<p>${line}</p>`)
+    .join("");
+
+  return (
+    `<aside class="post-cta">` +
+    (title ? `<p class="post-cta-title">${title}</p>` : "") +
+    `<div class="post-cta-body">${paragraphs}</div>` +
+    `<a class="post-cta-action" href="${SIGNUP_URL}">Get started</a>` +
+    `</aside>`
+  );
+}
+
+const NO_TOC_TEMPLATE = /no-?toc|without-?toc/i;
+
+function renderCards(html: string): string {
+  return html
+    .replace(HTML_CARD_WRAPPER, "")
+    .replace(CTA_BLOCK, (_match, inner: string) => ctaMarkup(inner));
+}
+
+/** The post body as the page renders it, plus what the page needs to know. */
+function withBody(
+  rawHtml: string,
+  hasFeatureImage: boolean,
+): { html: string; hasCta: boolean } {
+  const html = renderCards(dropLeadingFigure(rawHtml, hasFeatureImage));
+  return { html, hasCta: html.includes("post-cta") };
+}
+
 function parseItems(xml: string): GhostPost[] {
   const items = xml.match(/<item>[\s\S]*?<\/item>/g) ?? [];
   return items.flatMap((item) => {
@@ -93,7 +155,11 @@ function parseItems(xml: string): GhostPost[] {
           ? new Date(published).toISOString()
           : new Date(0).toISOString(),
         image,
-        html: dropLeadingFigure(tag(item, "content:encoded") ?? "", Boolean(image)),
+        // The feed carries neither the featured flag nor the template, so an
+        // RSS-backed post gets the defaults: a contents rail, and no claim to
+        // the index's lead slot.
+        showToc: true,
+        ...withBody(tag(item, "content:encoded") ?? "", Boolean(image)),
       },
     ];
   });
@@ -126,6 +192,8 @@ interface ContentApiPost {
   html?: string;
   feature_image?: string | null;
   published_at?: string;
+  featured?: boolean;
+  custom_template?: string | null;
   primary_tag?: { name: string } | null;
   primary_author?: { name: string; slug: string } | null;
 }
@@ -166,6 +234,8 @@ async function fetchFromContentApi(key: string): Promise<GhostPost[]> {
 
     posts.push(
       ...batch.map((post) => ({
+        featured: post.featured,
+        showToc: !NO_TOC_TEMPLATE.test(post.custom_template ?? ""),
         slug: post.slug,
         title: post.title,
         excerpt: post.custom_excerpt ?? post.excerpt ?? "",
@@ -174,7 +244,7 @@ async function fetchFromContentApi(key: string): Promise<GhostPost[]> {
         authorSlug: post.primary_author?.slug,
         date: post.published_at ?? new Date(0).toISOString(),
         image: post.feature_image ?? undefined,
-        html: dropLeadingFigure(post.html ?? "", Boolean(post.feature_image)),
+        ...withBody(post.html ?? "", Boolean(post.feature_image)),
       })),
     );
 

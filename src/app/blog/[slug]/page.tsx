@@ -10,6 +10,7 @@ import {
   withHeadingIds,
 } from "@/lib/ghost";
 import { SIGNUP_URL } from "@/lib/constants";
+import { isOptimizedHost } from "@/lib/image-hosts";
 import { pageMetadata } from "@/lib/seo";
 
 export async function generateStaticParams() {
@@ -41,6 +42,9 @@ export default async function BlogPostPage({
   if (!post) notFound();
 
   const { html, headings } = withHeadingIds(post.html);
+  // Ghost sets a no-TOC template on posts whose author didn't want a contents
+  // rail; short posts have nothing to list either way.
+  const showToc = post.showToc && headings.length > 1;
 
   return (
     <article className="mx-auto max-w-[1200px] px-6 pb-24 pt-16 md:px-10 md:pb-32 md:pt-24">
@@ -84,19 +88,32 @@ export default async function BlogPostPage({
 
       {post.image && (
         <div className="relative mx-auto mt-12 aspect-[16/9] w-full max-w-[64rem] overflow-hidden rounded-2xl bg-muted md:mt-14">
-          <Image
-            src={post.image}
-            alt=""
-            fill
-            priority
-            sizes="(min-width: 1024px) 1024px, 100vw"
-            className="object-cover"
-          />
+          {isOptimizedHost(post.image) ? (
+            <Image
+              src={post.image}
+              alt=""
+              fill
+              priority
+              sizes="(min-width: 1024px) 1024px, 100vw"
+              className="object-cover"
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={post.image}
+              alt=""
+              className="absolute inset-0 size-full object-cover"
+            />
+          )}
         </div>
       )}
 
-      <div className="mt-14 grid gap-12 md:mt-20 lg:grid-cols-[13rem_minmax(0,1fr)_13rem] lg:gap-10">
-        {headings.length > 0 && (
+      <div
+        className={`mt-14 grid gap-12 md:mt-20 lg:gap-10 ${
+          showToc ? "lg:grid-cols-[13rem_minmax(0,1fr)_13rem]" : ""
+        }`}
+      >
+        {showToc && (
           // Anchors only, no scroll tracking: on a post the list is a map
           // rather than a position indicator.
           <nav
@@ -129,21 +146,26 @@ export default async function BlogPostPage({
             dangerouslySetInnerHTML={{ __html: html }}
           />
 
-          <div className="mt-16 rounded-2xl border border-border p-8 [[data-theme=dark]_&]:border-[#383838]">
-            <h2 className="type-h4 text-foreground">
-              Build the app your firm has been describing
-            </h2>
-            <p className="type-body mt-3 max-w-md text-muted-foreground">
-              Describe it in a sentence and watch it launch inside your
-              workspace, behind your login, branded as yours.
-            </p>
-            <a
-              href={SIGNUP_URL}
-              className="mt-6 inline-block rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
-            >
-              Get started
-            </a>
-          </div>
+          {/* Most posts carry their own call to action from Ghost, and two in
+              a row reads as nagging — so this one only appears when the body
+              has none. */}
+          {!post.hasCta && (
+            <div className="mt-16 rounded-2xl border border-border p-8 [[data-theme=dark]_&]:border-[#383838]">
+              <h2 className="type-h4 text-foreground">
+                Build the app your firm has been describing
+              </h2>
+              <p className="type-body mt-3 max-w-md text-muted-foreground">
+                Describe it in a sentence and watch it launch inside your
+                workspace, behind your login, branded as yours.
+              </p>
+              <a
+                href={SIGNUP_URL}
+                className="mt-6 inline-block rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
+              >
+                Get started
+              </a>
+            </div>
+          )}
 
           <Link
             href="/blog"

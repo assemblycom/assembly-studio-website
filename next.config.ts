@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { OPTIMIZED_IMAGE_HOSTS } from "./src/lib/image-hosts";
 
 // Mintlify docs are hosted at assembly-ff8b9417.mintlify.site and proxied
 // under /docs so they appear to live on this domain (Mintlify's
@@ -22,11 +23,10 @@ const nextConfig: NextConfig = {
   images: {
     qualities: [75, 90, 100],
     // Template screenshots uploaded to Contentful are served from its CDN.
-    remotePatterns: [
-      { protocol: "https", hostname: "images.ctfassets.net" },
-      // Blog feature images, served from the Ghost instance the posts live on.
-      { protocol: "https", hostname: "storage.ghost.io" },
-    ],
+    remotePatterns: OPTIMIZED_IMAGE_HOSTS.map((hostname) => ({
+      protocol: "https" as const,
+      hostname,
+    })),
   },
   async rewrites() {
     return [
