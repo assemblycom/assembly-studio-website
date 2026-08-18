@@ -13,7 +13,6 @@
  * the two produced it.
  */
 
-import { SIGNUP_URL } from "./constants";
 
 const GHOST_URL = process.env.GHOST_API_URL ?? "https://copilot-blog.ghost.io";
 const CONTENT_API_KEY = process.env.GHOST_CONTENT_API_KEY;
@@ -36,8 +35,8 @@ export interface GhostPost {
   featured?: boolean;
   /** Posts set to a no-TOC template in Ghost don't get a contents rail. */
   showToc: boolean;
-  /** Whether the body already carries a call to action of its own. */
-  hasCta: boolean;
+  /** The call to action the writer put in the post, drawn beside the article. */
+  cta?: PostCta;
   slug: string;
   title: string;
   /** Ghost's excerpt, used as the standfirst and the card summary. */
@@ -69,13 +68,15 @@ function tag(item: string, name: string): string | undefined {
 }
 
 /**
- * Posts here open with the feature image repeated as the body's first figure.
+ * Posts here open with the feature image repeated as the body's first image.
  * The page already leads with that image, so the duplicate is dropped rather
- * than shown twice.
+ * than shown twice. Position is what identifies it: the Content API wraps it in
+ * a <figure> while the feed emits a bare <img>, and the body's copy is usually a
+ * separate upload, so its src matches nothing.
  */
 function dropLeadingFigure(html: string, hasFeatureImage: boolean): string {
   if (!hasFeatureImage) return html;
-  const leading = html.match(/^\s*<figure[\s\S]*?<\/figure>/);
+  const leading = html.match(/^\s*(?:<figure[\s\S]*?<\/figure>|<img[^>]*>)/);
   if (!leading || !leading[0].includes("<img")) return html;
   return html.slice(leading[0].length).trimStart();
 }
@@ -85,51 +86,50 @@ function dropLeadingFigure(html: string, hasFeatureImage: boolean): string {
 // can be matched cleanly.
 const HTML_CARD_WRAPPER = /<\/?(?:html|head|body)>/g;
 
-// The blog's call to action is authored as an HTML card holding a custom
-// <cta> element with a title and a description. Nothing renders that element
-// on its own — and <title> inside a body is hidden by every browser — so it is
-// rewritten here into markup .post-cta can style. The action is ours to supply:
-// the card carries no link.
+/** The call to action a post carries, as its writer worded it. */
+export interface PostCta {
+  title: string;
+  description: string;
+}
+
+// The blog's call to action is authored as an HTML card holding a custom <cta>
+// element with a title and a description. Nothing renders that element on its
+// own — and <title> inside a body is hidden by every browser — so it is lifted
+// out of the body here and drawn beside the article, where www.assembly.com's
+// blog puts it too. The action is ours to supply: the card carries no link.
 const CTA_BLOCK = /<cta>([\s\S]*?)<\/cta>/g;
 
-function ctaMarkup(inner: string): string {
-  const title = inner.match(/<title>([\s\S]*?)<\/title>/)?.[1].trim() ?? "";
-  const description =
-    inner.match(/<description>([\s\S]*?)<\/description>/)?.[1].trim() ?? "";
+function parseCta(inner: string): PostCta | undefined {
+  const part = (name: string) =>
+    decodeEntities(
+      inner.match(new RegExp(`<${name}>([\\s\\S]*?)</${name}>`))?.[1] ?? "",
+    )
+      .replace(/\s+/g, " ")
+      .trim();
 
-  // Ghost's authors break the description over several lines, which collapse to
-  // one run of text unless the blank lines are honoured as paragraphs.
-  const paragraphs = description
-    .split(/\n\s*\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => `<p>${line}</p>`)
-    .join("");
-
-  return (
-    `<aside class="post-cta">` +
-    (title ? `<p class="post-cta-title">${title}</p>` : "") +
-    `<div class="post-cta-body">${paragraphs}</div>` +
-    `<a class="post-cta-action" href="${SIGNUP_URL}">Get started</a>` +
-    `</aside>`
-  );
+  const title = part("title");
+  const description = part("description");
+  return title || description ? { title, description } : undefined;
 }
 
 const NO_TOC_TEMPLATE = /no-?toc|without-?toc/i;
-
-function renderCards(html: string): string {
-  return html
-    .replace(HTML_CARD_WRAPPER, "")
-    .replace(CTA_BLOCK, (_match, inner: string) => ctaMarkup(inner));
-}
 
 /** The post body as the page renders it, plus what the page needs to know. */
 function withBody(
   rawHtml: string,
   hasFeatureImage: boolean,
-): { html: string; hasCta: boolean } {
-  const html = renderCards(dropLeadingFigure(rawHtml, hasFeatureImage));
-  return { html, hasCta: html.includes("post-cta") };
+): { html: string; cta?: PostCta } {
+  let cta: PostCta | undefined;
+  const html = dropLeadingFigure(rawHtml, hasFeatureImage)
+    .replace(HTML_CARD_WRAPPER, "")
+    // A post authored with two cards still gets one; the first is the one the
+    // writer led with.
+    .replace(CTA_BLOCK, (_match, inner: string) => {
+      cta ??= parseCta(inner);
+      return "";
+    });
+
+  return { html, cta };
 }
 
 function parseItems(xml: string): GhostPost[] {
@@ -475,6 +475,88 @@ export function splitFaq(html: string): {
 export interface PostHeading {
   id: string;
   text: string;
+}
+
+// Headings that only announce a summary. Dropping the marker leaves the half
+// that names the section.
+const SUMMARY_MARKER =
+  /^(tl;?dr|at a glance|quick comparison|quick look|in short)[:.]?$/i;
+
+// A lead-in this short is the section's subject — a tool's name in a ranked
+// post — and what follows the colon is its pitch, which the rail doesn't need.
+const LEAD_IN_MAX_WORDS = 4;
+const LEAD_IN_MAX_CHARS = 30;
+
+function words(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/** Whether a heading opens with the post's own title, as the framing ones do. */
+function echoesTitle(text: string, title: string): boolean {
+  const split = text.indexOf(": ");
+  return split > 0 && words(title).startsWith(words(text.slice(0, split)));
+}
+
+// The rail lists a ranked post's tools in order already, so the numbers Ghost
+// puts on their headings only repeat what the list shape says.
+function withoutRank(text: string): string {
+  return text.replace(/^\d+\.\s+/, "");
+}
+
+/**
+ * A heading as the contents rail lists it. Ghost's writers build these out of
+ * two halves around a colon — the post's own title then "TL;DR", a tool's name
+ * then the case for it — and the rail keeps whichever half tells the sections
+ * apart, so an entry stays on one line.
+ */
+function headingLabel(text: string, title: string): string {
+  const label = withoutRank(text);
+  const split = label.indexOf(": ");
+  if (split < 0) return label;
+
+  const lead = label.slice(0, split);
+  const rest = label.slice(split + 2).trim();
+  if (!rest || SUMMARY_MARKER.test(rest)) return lead;
+  if (
+    lead.length <= LEAD_IN_MAX_CHARS &&
+    lead.split(" ").length <= LEAD_IN_MAX_WORDS
+  ) {
+    return lead;
+  }
+  if (echoesTitle(label, title)) return rest[0].toUpperCase() + rest.slice(1);
+  return label;
+}
+
+/**
+ * What the contents rail lists: every h2 the page draws, under a label short
+ * enough to scan. Ghost's writers open a ranked post with a TL;DR under the
+ * post's own title and then a comparison table under that title again — the
+ * first entry stands for the top of the post, and a second one only says the
+ * title back.
+ */
+export function postContents(
+  headings: PostHeading[],
+  title: string,
+): PostHeading[] {
+  const listed = new Set<string>();
+
+  return headings.flatMap((heading) => {
+    const label = headingLabel(heading.text, title);
+    if (!listed.has(words(label))) {
+      listed.add(words(label));
+      return [{ ...heading, text: label }];
+    }
+
+    // Two sections can also shorten to the same name — a post that weighs
+    // Assembly twice — and those need their full headings to stay apart.
+    const full = withoutRank(heading.text);
+    if (echoesTitle(full, title)) return [];
+    listed.add(words(full));
+    return [{ ...heading, text: full }];
+  });
 }
 
 /**

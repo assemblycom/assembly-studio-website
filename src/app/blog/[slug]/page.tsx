@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   formatPostDate,
+  postContents,
   getPost,
   getPosts,
   readingTime,
@@ -14,6 +15,9 @@ import { SIGNUP_URL } from "@/lib/constants";
 import { isOptimizedHost } from "@/lib/image-hosts";
 import { pageMetadata } from "@/lib/seo";
 import { Accordion } from "@/components/home/faq";
+import { cn } from "@/lib/utils";
+import { PostCta } from "@/components/blog/post-cta";
+import { PostTocMobile } from "@/components/blog/post-toc-mobile";
 
 export async function generateStaticParams() {
   return (await getPosts()).map((post) => ({ slug: post.slug }));
@@ -44,12 +48,19 @@ export default async function BlogPostPage({
   if (!post) notFound();
 
   const { html, headings } = withHeadingIds(post.html);
+  // Both rails list the same sections under the same labels.
+  const contents = postContents(headings, post.title);
   // The trailing FAQ is rendered as the site's accordion rather than as a run
   // of headings; the contents list still points at the heading the page draws.
   const { body, faqs, headingId } = splitFaq(html);
   // Ghost sets a no-TOC template on posts whose author didn't want a contents
-  // rail; short posts have nothing to list either way.
-  const showToc = post.showToc && headings.length > 1;
+  // rail — the announcements, in practice; short posts have nothing to list
+  // either way.
+  const showToc = post.showToc && contents.length > 1;
+  // With neither a contents list nor a card, the rail holds only the way back,
+  // which doesn't earn a column of its own — so the announcements read as a
+  // centred page instead of an article pushed off to one side.
+  const showRail = showToc || Boolean(post.cta);
 
   return (
     // Two tracks on desktop: a rail holding the way back and the contents, and
@@ -57,15 +68,23 @@ export default async function BlogPostPage({
     // lg — a contents list is a desktop affordance, and stacked above a post on
     // a phone it is just a second thing to scroll past.
     <article className="mx-auto max-w-[1600px] px-6 pb-24 pt-12 md:px-10 md:pb-32 md:pt-16">
-      <div className="lg:grid lg:grid-cols-[16rem_minmax(0,40.5rem)] lg:gap-x-[10.5rem]">
-        <div className="hidden lg:block">
-          <div className="sticky top-28 flex flex-col gap-10">
+      <div
+        className={
+          showRail
+            ? "lg:grid lg:grid-cols-[16rem_minmax(0,40.5rem)] lg:gap-x-[10.5rem]"
+            : "mx-auto max-w-[40.5rem]"
+        }
+      >
+        <div className={showRail ? "hidden lg:block" : "hidden"}>
+          <div className="sticky top-28 flex max-h-[calc(100vh-9rem)] flex-col gap-10 overflow-y-auto">
             <Link
               href="/blog"
               className="type-eyebrow text-muted-foreground transition-colors hover:text-foreground"
             >
               Back to blog
             </Link>
+
+            {post.cta && <PostCta cta={post.cta} />}
 
             {showToc && (
               // Anchors only, no scroll tracking: on a post the list is a map
@@ -75,7 +94,7 @@ export default async function BlogPostPage({
                   On this page
                 </p>
                 <ul className="border-l border-border [[data-theme=dark]_&]:border-[#383838]">
-                  {headings.map((heading) => (
+                  {contents.map((heading) => (
                     <li key={heading.id}>
                       <a
                         href={`#${heading.id}`}
@@ -131,7 +150,7 @@ export default async function BlogPostPage({
           </header>
 
           {post.image && (
-            <div className="relative mt-10 aspect-[16/9] w-full overflow-hidden bg-muted">
+            <div className="relative mt-10 aspect-[16/9] w-full overflow-hidden border border-border bg-muted [[data-theme=dark]_&]:border-[#383838]">
               {isOptimizedHost(post.image) ? (
                 <Image
                   src={post.image}
@@ -151,6 +170,8 @@ export default async function BlogPostPage({
               )}
             </div>
           )}
+
+          {showToc && <PostTocMobile headings={contents} />}
 
           {/* Ghost's own markup, restyled by .post-body in globals.css. The
               source is our CMS, not user input. */}
@@ -182,10 +203,14 @@ export default async function BlogPostPage({
             </section>
           )}
 
+          {/* The rail is gone below lg, so the writer's card closes the post
+              instead of sitting beside it. */}
+          {post.cta && <PostCta cta={post.cta} className="mt-16 lg:hidden" />}
+
           {/* Most posts carry their own call to action from Ghost, and two in
-              a row reads as nagging — so this one only appears when the body
+              a row reads as nagging — so this one only appears when the post
               has none. */}
-          {!post.hasCta && (
+          {!post.cta && (
             <div className="mt-16 rounded-lg border border-border p-8 [[data-theme=dark]_&]:border-[#383838]">
               <h2 className="type-h4 text-foreground">
                 Build the app your firm has been describing
@@ -205,7 +230,10 @@ export default async function BlogPostPage({
 
           <Link
             href="/blog"
-            className="type-caption mt-10 inline-block text-muted-foreground transition-colors hover:text-foreground lg:hidden"
+            className={cn(
+              "type-caption mt-10 inline-block text-muted-foreground transition-colors hover:text-foreground",
+              showRail && "lg:hidden",
+            )}
           >
             ← All posts
           </Link>

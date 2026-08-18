@@ -2396,6 +2396,9 @@ html[data-theme="dark"] .v63-ring-solid::before {
   }
   .post-body h2 {
     margin-top: 3.5rem;
+    /* Clears the sticky header, and on a phone the contents bar under it, so a
+       jump from the contents list doesn't land the heading behind them. */
+    scroll-margin-top: 7rem;
     color: var(--foreground);
     font-size: 1.625rem;
     line-height: 1.35;
@@ -2467,6 +2470,14 @@ html[data-theme="dark"] .v63-ring-solid::before {
     max-width: 100%;
     height: auto;
   }
+  /* Most of these are screenshots of other products' interfaces, which are white
+     to the edge — without an outline they bleed into the page. */
+  .post-body img {
+    border: 1px solid var(--border);
+  }
+  [data-theme="dark"] .post-body img {
+    border-color: #383838;
+  }
   .post-body figure img {
     margin-top: 0;
   }
@@ -2529,44 +2540,6 @@ html[data-theme="dark"] .v63-ring-solid::before {
   }
   .post-body .kg-btn:hover {
     opacity: 0.9;
-  }
-
-  /* The call to action Ghost carries as an HTML card, rewritten in ghost.ts
-     into markup that can be styled. Framed like the site's other end-of-page
-     prompts rather than a coloured banner dropped mid-article. */
-  .post-body .post-cta {
-    display: block;
-    margin-top: 2.5rem;
-    border: 1px solid var(--border);
-    border-radius: 1rem;
-    padding: 1.75rem;
-  }
-  .post-body .post-cta-title {
-    color: var(--foreground);
-    font-size: 1.125rem;
-    line-height: 1.4;
-    letter-spacing: -0.006em;
-  }
-  .post-body .post-cta-body {
-    margin-top: 0.5rem;
-  }
-  .post-body .post-cta-body p + p {
-    margin-top: 0.5rem;
-  }
-  .post-body .post-cta-action {
-    display: inline-block;
-    margin-top: 1.25rem;
-    border-radius: 0.5rem;
-    background: var(--foreground);
-    padding: 0.625rem 1.25rem;
-    color: var(--background);
-    font-size: 0.875rem;
-    text-decoration: none;
-    transition: opacity 150ms;
-  }
-  .post-body .post-cta-action:hover {
-    opacity: 0.9;
-    text-decoration: none;
   }
 
   /* Ghost tables in the comparison posts: wide, so they scroll in place rather
