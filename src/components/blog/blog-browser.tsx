@@ -204,7 +204,7 @@ export function BlogBrowser({
                 onClick={() => goTo(page)}
                 aria-label={`Page ${page}`}
                 aria-current={page === currentPage ? "page" : undefined}
-                className={`min-w-9 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                className={`h-9 min-w-9 rounded-lg border px-2.5 text-sm transition-colors ${
                   page === currentPage
                     ? "border-foreground bg-foreground text-background"
                     : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
@@ -226,7 +226,7 @@ export function BlogBrowser({
   );
 }
 
-/** Previous/next arrow, kept level with the numbered pills. */
+/** Previous/next arrow, kept the same square as the numbered keys. */
 function PageStep({
   direction,
   disabled,
@@ -241,7 +241,7 @@ function PageStep({
       onClick={onClick}
       disabled={disabled}
       aria-label={direction === "prev" ? "Previous page" : "Next page"}
-      className="flex h-9 w-9 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
+      className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
     >
       <svg
         width="15"
