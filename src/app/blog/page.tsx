@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BlogBrowser } from "@/components/blog/blog-browser";
+import { PostByline } from "@/components/blog/post-byline";
 import { PostCover } from "@/components/blog/post-cover";
 import {
   formatPostDate,
@@ -26,51 +27,51 @@ export default async function BlogPage() {
       <h1 className="type-display text-foreground">Blog</h1>
 
       {featured && (
-        // The lead, laid out as a narrow column of type against a wide cover:
-        // the label and date sit at the top of that column and the post's own
-        // words at the foot of it, so the eye lands on the title beside the
-        // middle of the image rather than at the top of the page.
+        // The lead runs the page's full width, framed in hairlines: the cover
+        // on one side, the post's own words on the other, closing on who wrote
+        // it. The cards below repeat that frame, so the index reads as one
+        // ruled sheet rather than a row of floating tiles.
         <Link
           href={`/blog/${featured.slug}`}
-          className="group mt-10 grid gap-8 md:mt-14 md:grid-cols-[minmax(0,0.44fr)_minmax(0,1fr)] md:gap-6"
+          // Stacked on a phone the lead is a card and carries an outline the
+          // whole way round; beside the type on a wider screen it is a band of
+          // the page, ruled top and bottom like the grid below it.
+          className="group mt-10 block overflow-hidden rounded-2xl border border-border transition-colors hover:bg-muted/50 md:mt-14 md:rounded-none md:border-x-0 [[data-theme=dark]_&]:border-[#383838]"
         >
-          {/* Hairlines top and bottom of the type column, aligned with the
-              cover's edges — they frame the column that would otherwise sit as
-              loose text beside a full-bleed image. */}
-          <div className="flex flex-col md:justify-between md:border-y md:border-border md:py-7 [[data-theme=dark]_&]:md:border-[#383838]">
-            <div>
-              <p className="type-eyebrow text-foreground">Featured</p>
-              <p className="type-caption mt-1.5 text-muted-foreground">
-                {formatPostDate(featured.date)}
-              </p>
-            </div>
+          <div className="grid md:grid-cols-2">
+            <PostCover
+              title={featured.title}
+              image={featured.image}
+              large
+              sizes="(min-width: 768px) 50vw, 100vw"
+              // 16:9 is what Ghost's feature images are authored at, and these
+              // covers carry the product's own wordmark — cropping to fill the
+              // frame's height cut straight through it. So the artwork keeps
+              // its shape and the type beside it centres against it.
+              className="aspect-[16/9] rounded-none"
+            />
 
-            <div className="mt-8 md:mt-0">
-              <h2 className="type-h3 text-balance text-foreground">
+            <div className="flex flex-col justify-center p-6 md:p-10">
+              <p className="type-eyebrow text-muted-foreground">Featured</p>
+              <h2 className="type-h3 mt-4 text-balance text-foreground">
                 {featured.title}
               </h2>
-              <p className="type-lead mt-5 text-pretty text-muted-foreground">
+              <p className="type-body mt-4 line-clamp-3 text-pretty text-muted-foreground">
                 {standfirst(featured)}
               </p>
+              <div className="mt-8">
+                <PostByline
+                  author={featured.author}
+                  image={featured.authorImage}
+                  date={formatPostDate(featured.date)}
+                />
+              </div>
             </div>
           </div>
-
-          <PostCover
-            title={featured.title}
-            image={featured.image}
-            large
-            sizes="(min-width: 768px) 760px, 100vw"
-            // 16:9 is the ratio Ghost's own feature images are authored at, so
-            // the box matches the artwork instead of cropping into it — these
-            // covers carry titles that a tighter crop cuts through.
-            // Square corners on the lead: at this size a radius reads as a
-            // card floating on the page rather than as the page's own artwork.
-            className="aspect-[16/9] rounded-none"
-          />
         </Link>
       )}
 
-      <div className="mt-16 pt-12 md:mt-24">
+      <div className="mt-16 md:mt-24">
         <BlogBrowser
           posts={posts.map(toCard)}
           categories={categories}

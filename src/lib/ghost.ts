@@ -46,6 +46,8 @@ export interface GhostPost {
   author: string;
   /** Only the Content API knows the author's slug; RSS carries just a name. */
   authorSlug?: string;
+  /** The author's profile picture, for the bylines on the index's cards. */
+  authorImage?: string;
   /** ISO date. */
   date: string;
   /** Feature image, absent on posts that have none. */
@@ -195,7 +197,11 @@ interface ContentApiPost {
   featured?: boolean;
   custom_template?: string | null;
   primary_tag?: { name: string } | null;
-  primary_author?: { name: string; slug: string } | null;
+  primary_author?: {
+    name: string;
+    slug: string;
+    profile_image?: string | null;
+  } | null;
 }
 
 export interface GhostAuthor {
@@ -242,6 +248,7 @@ async function fetchFromContentApi(key: string): Promise<GhostPost[]> {
         category: post.primary_tag?.name,
         author: post.primary_author?.name ?? "Assembly",
         authorSlug: post.primary_author?.slug,
+        authorImage: post.primary_author?.profile_image ?? undefined,
         date: post.published_at ?? new Date(0).toISOString(),
         image: post.feature_image ?? undefined,
         ...withBody(post.html ?? "", Boolean(post.feature_image)),
@@ -472,6 +479,21 @@ export function splitFaq(html: string): {
   return { body: html.slice(0, heading.index), faqs, headingId: id };
 }
 
+/**
+ * Ghost writes `sizes="(min-width: 720px) 720px"` on every body image, sized for
+ * its own theme's column. Ours is wider, so the browser was picking a candidate
+ * off the srcset for a 720px slot and the page stretched it — soft on any
+ * screen, softer on a retina one. The slot the page actually draws is passed in
+ * here instead.
+ */
+export function withImageSizes(html: string, sizes: string): string {
+  return html.replace(/<img\b[^>]*>/g, (tag) =>
+    /\ssizes\s*=/i.test(tag)
+      ? tag.replace(/\ssizes\s*=\s*("[^"]*"|'[^']*')/i, ` sizes="${sizes}"`)
+      : tag.replace(/<img\b/i, `<img sizes="${sizes}"`),
+  );
+}
+
 export interface PostHeading {
   id: string;
   text: string;
@@ -494,10 +516,19 @@ function words(value: string): string {
     .trim();
 }
 
-/** Whether a heading opens with the post's own title, as the framing ones do. */
-function echoesTitle(text: string, title: string): boolean {
+/**
+ * Whether a heading frames the post rather than naming a section of it: the
+ * TL;DR and the comparison table Ghost's writers open a ranked post with. Both
+ * are titled after the post — sometimes in the post's own words, sometimes in a
+ * rewording of them, which is why the marker after the colon counts too.
+ */
+function framesPost(text: string, title: string): boolean {
   const split = text.indexOf(": ");
-  return split > 0 && words(title).startsWith(words(text.slice(0, split)));
+  if (split < 0) return false;
+  return (
+    SUMMARY_MARKER.test(text.slice(split + 2).trim()) ||
+    words(title).startsWith(words(text.slice(0, split)))
+  );
 }
 
 // The rail lists a ranked post's tools in order already, so the numbers Ghost
@@ -526,24 +557,30 @@ function headingLabel(text: string, title: string): string {
   ) {
     return lead;
   }
-  if (echoesTitle(label, title)) return rest[0].toUpperCase() + rest.slice(1);
+  if (framesPost(label, title)) return rest[0].toUpperCase() + rest.slice(1);
   return label;
 }
 
 /**
  * What the contents rail lists: every h2 the page draws, under a label short
- * enough to scan. Ghost's writers open a ranked post with a TL;DR under the
- * post's own title and then a comparison table under that title again — the
- * first entry stands for the top of the post, and a second one only says the
- * title back.
+ * enough to scan. A ranked post opens with a TL;DR and then a comparison table,
+ * both titled after the post itself — the first stands for the top of the post
+ * and the rest only say it again, so only the first is listed.
  */
 export function postContents(
   headings: PostHeading[],
   title: string,
 ): PostHeading[] {
   const listed = new Set<string>();
+  let framingListed = false;
 
   return headings.flatMap((heading) => {
+    const full = withoutRank(heading.text);
+    if (framesPost(full, title)) {
+      if (framingListed) return [];
+      framingListed = true;
+    }
+
     const label = headingLabel(heading.text, title);
     if (!listed.has(words(label))) {
       listed.add(words(label));
@@ -552,8 +589,6 @@ export function postContents(
 
     // Two sections can also shorten to the same name — a post that weighs
     // Assembly twice — and those need their full headings to stay apart.
-    const full = withoutRank(heading.text);
-    if (echoesTitle(full, title)) return [];
     listed.add(words(full));
     return [{ ...heading, text: full }];
   });

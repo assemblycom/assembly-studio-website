@@ -10,13 +10,15 @@ import {
   readingTime,
   splitFaq,
   withHeadingIds,
+  withImageSizes,
 } from "@/lib/ghost";
 import { SIGNUP_URL } from "@/lib/constants";
 import { isOptimizedHost } from "@/lib/image-hosts";
 import { pageMetadata } from "@/lib/seo";
-import { Accordion } from "@/components/home/faq";
 import { cn } from "@/lib/utils";
+import { AuthorAvatar } from "@/components/blog/post-byline";
 import { PostCta } from "@/components/blog/post-cta";
+import { PostLightbox } from "@/components/blog/post-lightbox";
 import { PostTocMobile } from "@/components/blog/post-toc-mobile";
 
 export async function generateStaticParams() {
@@ -61,6 +63,12 @@ export default async function BlogPostPage({
   // which doesn't earn a column of its own — so the announcements read as a
   // centred page instead of an article pushed off to one side.
   const showRail = showToc || Boolean(post.cta);
+  // What the page actually gives an image, so the browser picks the right file
+  // off Ghost's srcset: the reading measure beside a rail, the wider breakout on
+  // the announcements.
+  const imageSizes = showRail
+    ? "(min-width: 1024px) 648px, calc(100vw - 3rem)"
+    : "(min-width: 1088px) 1024px, calc(100vw - 3rem)";
 
   return (
     // Two tracks on desktop: a rail holding the way back and the contents, and
@@ -75,43 +83,49 @@ export default async function BlogPostPage({
             : "mx-auto max-w-[40.5rem]"
         }
       >
-        <div className={showRail ? "hidden lg:block" : "hidden"}>
-          <div className="sticky top-28 flex max-h-[calc(100vh-9rem)] flex-col gap-10 overflow-y-auto">
-            <Link
-              href="/blog"
-              className="type-eyebrow text-muted-foreground transition-colors hover:text-foreground"
+        {/* The rail's top half rides with the page: the card scrolls away and
+            the contents list alone pins under the header once it reaches it.
+            The column is the grid's, so it stands as tall as the article —
+            which is the distance the list has to stick over. */}
+        <div
+          className={
+            showRail ? "hidden lg:flex lg:flex-col lg:gap-10" : "hidden"
+          }
+        >
+          {post.cta && <PostCta cta={post.cta} />}
+
+          {showToc && (
+            // Anchors only, no scroll tracking: on a post the list is a map
+            // rather than a position indicator.
+            <nav
+              aria-label="Jump to section"
+              className="sticky top-28 max-h-[calc(100vh-9rem)] overflow-y-auto"
             >
-              Back to blog
-            </Link>
-
-            {post.cta && <PostCta cta={post.cta} />}
-
-            {showToc && (
-              // Anchors only, no scroll tracking: on a post the list is a map
-              // rather than a position indicator.
-              <nav aria-label="Jump to section">
-                <p className="type-eyebrow mb-4 text-muted-foreground">
-                  On this page
-                </p>
-                <ul className="border-l border-border [[data-theme=dark]_&]:border-[#383838]">
-                  {contents.map((heading) => (
-                    <li key={heading.id}>
-                      <a
-                        href={`#${heading.id}`}
-                        className="-ml-px block border-l border-transparent py-1 pl-4 text-sm leading-6 text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
-                      >
-                        {heading.text}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            )}
-          </div>
+              <p className="type-eyebrow mb-4 text-muted-foreground">
+                On this page
+              </p>
+              <ul className="border-l border-border [[data-theme=dark]_&]:border-[#383838]">
+                {contents.map((heading) => (
+                  <li key={heading.id}>
+                    <a
+                      href={`#${heading.id}`}
+                      className="-ml-px block border-l border-transparent py-1 pl-4 text-sm leading-6 text-muted-foreground transition-colors hover:border-foreground hover:text-foreground"
+                    >
+                      {heading.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )}
         </div>
 
         <div>
-          <header>
+          {/* Without a rail the page has no left edge to hang off, so the
+              announcements set their opening block on the column's centre line
+              instead. The body below stays ranged left — centred paragraphs are
+              hard to read at any length. */}
+          <header className={cn(!showRail && "text-center")}>
             <p className="type-caption text-muted-foreground">
               <Link
                 href="/blog"
@@ -132,32 +146,48 @@ export default async function BlogPostPage({
             <p className="type-lead mt-5 text-pretty text-muted-foreground">
               {post.excerpt}
             </p>
-            <p className="type-caption mt-6 text-muted-foreground">
-              {/* Only the Content API knows an author's slug, so on the RSS
-                  fallback the byline is plain text rather than a dead link. */}
-              {post.authorSlug ? (
-                <Link
-                  href={`/blog/author/${post.authorSlug}`}
-                  className="transition-colors hover:text-foreground"
-                >
-                  {post.author}
-                </Link>
-              ) : (
-                post.author
-              )}{" "}
-              · {formatPostDate(post.date)} · {readingTime(post)} min read
-            </p>
+            <div
+              className={cn(
+                "mt-6 flex items-center gap-2.5",
+                !showRail && "justify-center",
+              )}
+            >
+              {post.authorImage && <AuthorAvatar image={post.authorImage} />}
+              <p className="type-caption text-muted-foreground">
+                {/* Only the Content API knows an author's slug, so on the RSS
+                    fallback the byline is plain text rather than a dead link. */}
+                {post.authorSlug ? (
+                  <Link
+                    href={`/blog/author/${post.authorSlug}`}
+                    className="text-foreground transition-colors hover:text-muted-foreground"
+                  >
+                    {post.author}
+                  </Link>
+                ) : (
+                  post.author
+                )}{" "}
+                · {formatPostDate(post.date)} · {readingTime(post)} min read
+              </p>
+            </div>
           </header>
 
           {post.image && (
-            <div className="relative mt-10 aspect-[16/9] w-full overflow-hidden border border-border bg-muted [[data-theme=dark]_&]:border-[#383838]">
+            <div
+              className={cn(
+                "relative mt-10 aspect-[16/9] w-full overflow-hidden rounded-2xl border border-border bg-muted [[data-theme=dark]_&]:border-[#383838]",
+                // On the announcements the cover leads the same visuals the body
+                // runs wide, so it breaks out of the reading column with them.
+                !showRail &&
+                  "ml-[50%] w-[min(100vw-3rem,64rem)] max-w-none -translate-x-1/2",
+              )}
+            >
               {isOptimizedHost(post.image) ? (
                 <Image
                   src={post.image}
                   alt=""
                   fill
                   priority
-                  sizes="(min-width: 1024px) 648px, 100vw"
+                  sizes={imageSizes}
                   className="object-cover"
                 />
               ) : (
@@ -171,13 +201,13 @@ export default async function BlogPostPage({
             </div>
           )}
 
-          {showToc && <PostTocMobile headings={contents} />}
-
           {/* Ghost's own markup, restyled by .post-body in globals.css. The
               source is our CMS, not user input. */}
           <div
-            className="post-body mt-12"
-            dangerouslySetInnerHTML={{ __html: body }}
+            className={cn("post-body mt-12", !showRail && "post-body-wide")}
+            dangerouslySetInnerHTML={{
+              __html: withImageSizes(body, imageSizes),
+            }}
           />
 
           {faqs.length > 0 && (
@@ -188,17 +218,20 @@ export default async function BlogPostPage({
               >
                 Frequently asked questions
               </h2>
-              <div className="mt-2">
-                <Accordion
-                  items={faqs.map((faq) => ({
-                    question: faq.question,
-                    answer: "",
-                    answerHtml: faq.answerHtml,
-                  }))}
-                  twoColumn={false}
-                  variant="divided"
-                  flushTop={false}
-                />
+              {/* Read, not browsed: three or four short answers at the foot of
+                  a long article are quicker to read than to open, so they sit
+                  out in the open with no rows to click and no rules between
+                  them — the same shape as the sections above. */}
+              <div className="post-body">
+                {faqs.map((faq) => (
+                  <div key={faq.question} className="mt-8">
+                    <h3 className="text-foreground">{faq.question}</h3>
+                    <div
+                      className="mt-2"
+                      dangerouslySetInnerHTML={{ __html: faq.answerHtml }}
+                    />
+                  </div>
+                ))}
               </div>
             </section>
           )}
@@ -239,6 +272,9 @@ export default async function BlogPostPage({
           </Link>
         </div>
       </div>
+
+      {showToc && <PostTocMobile headings={contents} />}
+      <PostLightbox />
     </article>
   );
 }

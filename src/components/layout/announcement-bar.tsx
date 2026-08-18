@@ -23,12 +23,14 @@ export function AnnouncementBar() {
       href={ANNOUNCEMENT.href}
       className="group block bg-[#D9ED92] text-[#111111] [[data-theme=dark]_&]:bg-[#7DA4FF]"
     >
-      <div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-center gap-x-3 gap-y-1 px-6 py-2.5 md:px-10">
-        <span className="type-caption text-center">
+      <div className="mx-auto flex max-w-[1600px] items-center justify-center gap-x-2 px-6 py-2.5 md:gap-x-3 md:px-10">
+        <span className="type-caption truncate text-center">
           {trim(ANNOUNCEMENT.text)}
         </span>
         <span className="type-caption flex shrink-0 items-center gap-1.5 text-[#111111]/55 transition-colors group-hover:text-[#111111]">
-          {ANNOUNCEMENT.cta}
+          {/* On a phone the arrow carries the invitation on its own: the band
+              is one line at every width, and the words would break it. */}
+          <span className="hidden sm:inline">{ANNOUNCEMENT.cta}</span>
           <svg
             width="13"
             height="13"

@@ -87,7 +87,7 @@ export default async function AuthorPage({
         </div>
       </header>
 
-      <div className="mt-14 border-t border-border pt-12 [[data-theme=dark]_&]:border-[#383838] md:mt-20">
+      <div className="mt-14 md:mt-20">
         <BlogBrowser posts={posts.map(toCard)} />
       </div>
     </div>

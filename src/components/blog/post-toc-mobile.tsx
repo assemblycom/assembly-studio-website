@@ -14,9 +14,14 @@ const BAR_HEIGHT = 48;
  * so the sections collapse into one line that names where you are and opens the
  * full list on tap — which makes this a position indicator rather than the map
  * the desktop rail is, so the current section tracks scroll.
+ *
+ * It rides above the page rather than sitting in it: nothing to say until the
+ * reader is in the article, so it arrives when the body reaches the header and
+ * leaves at the end of it.
  */
 export function PostTocMobile({ headings }: { headings: PostHeading[] }) {
   const [open, setOpen] = useState(false);
+  const [shown, setShown] = useState(false);
   const [activeId, setActiveId] = useState(headings[0]?.id);
 
   useEffect(() => {
@@ -24,9 +29,7 @@ export function PostTocMobile({ headings }: { headings: PostHeading[] }) {
     // An intersection observer would only speak up while a heading sits inside
     // its band, which leaves the label stale through any section longer than the
     // screen — and these posts have several.
-    let queued = false;
     const update = () => {
-      queued = false;
       const passed = headings.filter((heading) => {
         const element = document.getElementById(heading.id);
         return element
@@ -34,20 +37,26 @@ export function PostTocMobile({ headings }: { headings: PostHeading[] }) {
           : false;
       });
       setActiveId(passed.at(-1)?.id ?? headings[0]?.id);
+
+      const body = document.querySelector(".post-body");
+      if (!body) return;
+      const { top, bottom } = body.getBoundingClientRect();
+      const inArticle =
+        top <= HEADER_HEIGHT && bottom > HEADER_HEIGHT + BAR_HEIGHT;
+      setShown(inArticle);
+      // An open list can't outlive the bar it hangs from.
+      if (!inArticle) setOpen(false);
     };
 
-    const onScroll = () => {
-      if (queued) return;
-      queued = true;
-      requestAnimationFrame(update);
-    };
-
+    // Measured on the event rather than on the next frame: a dozen rects is
+    // cheap, and a frame-scheduled read goes stale wherever frames stop —
+    // a backgrounded tab, an embedded preview — leaving the bar behind the page.
     update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
     };
   }, [headings]);
 
@@ -67,12 +76,19 @@ export function PostTocMobile({ headings }: { headings: PostHeading[] }) {
   return (
     <div
       className={cn(
-        // Full-bleed out of the article's rail so the bar spans the screen the
-        // way the header above it does.
-        "sticky z-40 -mx-6 mt-12 md:-mx-10 lg:hidden",
+        // Fixed rather than in flow: in flow it held a slot in the article from
+        // the first screen, which put a bar and a gap above copy nobody had
+        // started reading.
+        "fixed inset-x-0 z-40 lg:hidden",
         "border-b border-border bg-background [[data-theme=dark]_&]:border-[#383838]",
+        "transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none",
+        shown ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0",
       )}
       style={{ top: HEADER_HEIGHT }}
+      aria-hidden={!shown}
+      // Out of reach while it is out of sight, so a tap near the top of the
+      // page hits the article and not a bar that isn't drawn.
+      inert={!shown || undefined}
     >
       <button
         type="button"

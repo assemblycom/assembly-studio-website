@@ -2470,6 +2470,23 @@ html[data-theme="dark"] .v63-ring-solid::before {
     max-width: 100%;
     height: auto;
   }
+  /* On the announcements, which run as a centred column with no rail beside
+     them, the visuals carry the story and a 40.5rem measure is too narrow to
+     read them at. They break out of the column to the width of the page's rail,
+     staying centred on it. */
+  .post-body-wide :is(figure, img) {
+    width: min(100vw - 3rem, 64rem);
+    max-width: none;
+    margin-left: 50%;
+    transform: translateX(-50%);
+  }
+  /* A figure has already been widened, so its own image just fills it. */
+  .post-body-wide figure img {
+    width: 100%;
+    margin-left: 0;
+    transform: none;
+  }
+
   /* Most of these are screenshots of other products' interfaces, which are white
      to the edge — without an outline they bleed into the page. */
   .post-body img {
