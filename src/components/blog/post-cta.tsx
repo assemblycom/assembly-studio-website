@@ -3,15 +3,6 @@ import { cn } from "@/lib/utils";
 import type { PostCta as PostCtaContent } from "@/lib/ghost";
 
 /**
- * The card is a compact aside, and these descriptions run to a paragraph. The
- * opening sentence carries the offer; the rest is usually a "get early access"
- * line the button already says.
- */
-function opening(description: string): string {
-  return description.match(/^[\s\S]*?[.!?](?=\s|$)/)?.[0] ?? description;
-}
-
-/**
  * The call to action a post's writer authored in Ghost, drawn as a card rather
  * than as a run of body text. It sits in the rail beside the article on a wide
  * screen and at the end of the post where there is no rail.
@@ -40,8 +31,8 @@ export function PostCta({
         </p>
       )}
       {cta.description && (
-        <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">
-          {opening(cta.description)}
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          {cta.description}
         </p>
       )}
 

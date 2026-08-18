@@ -2388,11 +2388,18 @@ html[data-theme="dark"] .v63-ring-solid::before {
      card summary doesn't. */
   .post-body {
     color: var(--muted-foreground);
-    font-size: 1rem;
-    line-height: 1.75;
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    letter-spacing: -0.01em;
   }
   .post-body > * + * {
     margin-top: 1.5rem;
+  }
+  /* A list is a block, not a run of paragraphs: its items sit close together
+     and the extra air goes around the outside of the set. */
+  .post-body > :is(ul, ol),
+  .post-body > :is(ul, ol) + * {
+    margin-top: 2rem;
   }
   .post-body h2 {
     margin-top: 3.5rem;
@@ -2435,33 +2442,52 @@ html[data-theme="dark"] .v63-ring-solid::before {
   .post-body a:hover {
     text-decoration-color: var(--foreground);
   }
-  .post-body ul,
-  .post-body ol {
-    padding-left: 1.25rem;
-  }
+  /* Lists hang off an inset rather than starting at the measure, so the items
+     read as a set and the marker column doesn't sit in the text's left edge. */
   .post-body ul {
     list-style: none;
-    padding-left: 0;
+    padding-left: 0.75rem;
   }
   .post-body ol {
     list-style: decimal;
+    padding-left: 2.25rem;
   }
+  /* Items sit further apart than the lines inside them, so a wrapped item still
+     reads as one item rather than the list reading as a block of broken lines. */
   .post-body li + li {
-    margin-top: 0.75rem;
+    margin-top: 1rem;
   }
-  /* The hairline marker the rest of the site uses for lists, in place of a dot. */
+  .post-body li::marker {
+    color: color-mix(in srgb, var(--foreground) 40%, transparent);
+  }
+  /* A dot rather than the hairline the rest of the site marks lists with: at a
+     reading measure the items wrap, and a dot gives each one a hard start for
+     the eye to land on where a floating rule doesn't. */
   .post-body ul > li {
     position: relative;
-    padding-left: 1.25rem;
+    padding-left: 1.5rem;
   }
   .post-body ul > li::before {
     content: "";
     position: absolute;
-    left: 0;
-    top: 0.85em;
-    width: 0.625rem;
-    height: 1px;
-    background: color-mix(in srgb, var(--foreground) 25%, transparent);
+    left: 0.125rem;
+    top: 0.62em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--foreground) 45%, transparent);
+  }
+  /* A nested list steps in and its marker steps down, the way a nested bullet
+     goes from disc to circle. */
+  .post-body li > :is(ul, ol) {
+    margin-top: 0.5rem;
+  }
+  .post-body li > ol {
+    list-style: lower-alpha;
+  }
+  .post-body li ul > li::before {
+    background: none;
+    border: 1px solid color-mix(in srgb, var(--foreground) 45%, transparent);
   }
   .post-body figure,
   .post-body img {
@@ -2500,8 +2526,8 @@ html[data-theme="dark"] .v63-ring-solid::before {
   }
   .post-body figcaption {
     margin-top: 0.75rem;
-    font-size: 0.8125rem;
-    text-align: center;
+    font-size: 0.875rem;
+    letter-spacing: normal;
   }
   .post-body blockquote {
     margin-top: 2rem;
@@ -2567,17 +2593,64 @@ html[data-theme="dark"] .v63-ring-solid::before {
     width: 100%;
     margin-top: 2rem;
     border-collapse: collapse;
+    border-top: 1px solid var(--border);
     font-size: 0.875rem;
+    letter-spacing: normal;
+    /* The covers scroll with the content and the shadows are pinned to the box,
+       so a shadow only shows on a side there is more table to reach. */
+    background:
+      linear-gradient(to right, var(--background) 60%, transparent) left center /
+        3rem 100% no-repeat local,
+      linear-gradient(to left, var(--background) 60%, transparent) right center /
+        3rem 100% no-repeat local,
+      radial-gradient(
+          farthest-side at 0 50%,
+          color-mix(in srgb, var(--foreground) 14%, transparent),
+          transparent
+        )
+        left center / 0.75rem 100% no-repeat scroll,
+      radial-gradient(
+          farthest-side at 100% 50%,
+          color-mix(in srgb, var(--foreground) 14%, transparent),
+          transparent
+        )
+        right center / 0.75rem 100% no-repeat scroll;
+  }
+  /* Rules between the rows and nothing else: a grid of boxes reads as a form,
+     and the columns already separate themselves. */
+  .post-body tr {
+    border-bottom: 1px solid var(--border);
   }
   .post-body th,
   .post-body td {
-    border: 1px solid var(--border);
-    padding: 0.625rem 0.75rem;
+    /* Below this a comparison column shreds to one word a line, which is worse
+       to read than reaching for the column by scrolling. */
+    min-width: 8rem;
+    padding: 0.625rem 1.5rem 0.625rem 0;
     text-align: left;
     vertical-align: top;
+  }
+  .post-body :is(th, td):last-child {
+    padding-right: 0;
   }
   .post-body th {
     color: var(--foreground);
     font-weight: 400;
+  }
+  /* On a phone the reading measure is the page's gutters, and a table is the one
+     block that gains from every pixel — so it runs to both edges. */
+  @media (max-width: 47.99rem) {
+    .post-body table {
+      width: calc(100% + 3rem);
+      margin-left: -1.5rem;
+    }
+    /* The gutter moves into the end cells rather than onto the table, so the
+       rules still run the table's full width instead of stopping short of it. */
+    .post-body :is(th, td):first-child {
+      padding-left: 1.5rem;
+    }
+    .post-body :is(th, td):last-child {
+      padding-right: 1.5rem;
+    }
   }
 }

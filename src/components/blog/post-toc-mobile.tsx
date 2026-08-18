@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { PostHeading } from "@/lib/ghost";
 
-// The site header is 56px tall on a phone; the bar pins directly under it, and
-// a heading has to clear both before it counts as the current section.
-const HEADER_HEIGHT = 56;
+// The nav is 56px tall at rest but settles to 48px once scrolled, and the bar
+// only ever shows while scrolled — so it pins to the settled height. Pinning to
+// the taller one left an 8px strip between the two that the article scrolled
+// through. A heading has to clear both bars before it counts as the current one.
+const HEADER_HEIGHT = 48;
 const BAR_HEIGHT = 48;
 
 /**
@@ -81,6 +83,9 @@ export function PostTocMobile({ headings }: { headings: PostHeading[] }) {
         // started reading.
         "fixed inset-x-0 z-40 lg:hidden",
         "border-b border-border bg-background [[data-theme=dark]_&]:border-[#383838]",
+        // The bar's surface carries on above itself, tucked under the nav, so
+        // the seam stays opaque through the nav's own height transition.
+        "before:absolute before:inset-x-0 before:bottom-full before:h-3 before:bg-background",
         "transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none",
         shown ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0",
       )}

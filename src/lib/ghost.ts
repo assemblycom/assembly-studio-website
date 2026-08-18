@@ -102,15 +102,21 @@ export interface PostCta {
 const CTA_BLOCK = /<cta>([\s\S]*?)<\/cta>/g;
 
 function parseCta(inner: string): PostCta | undefined {
-  const part = (name: string) =>
+  const raw = (name: string) =>
     decodeEntities(
       inner.match(new RegExp(`<${name}>([\\s\\S]*?)</${name}>`))?.[1] ?? "",
-    )
-      .replace(/\s+/g, " ")
-      .trim();
+    );
+  const collapse = (value: string) => value.replace(/\s+/g, " ").trim();
 
-  const title = part("title");
-  const description = part("description");
+  const title = collapse(raw("title"));
+  // Writers follow the offer with their own "Get early access!" line, which the
+  // card's button already says — so the description is its first line only. Cut
+  // on the break rather than on a full stop: not every offer ends in one.
+  const description = collapse(
+    raw("description")
+      .split(/\n|<br\s*\/?>/i)
+      .find((line) => line.trim()) ?? "",
+  );
   return title || description ? { title, description } : undefined;
 }
 
