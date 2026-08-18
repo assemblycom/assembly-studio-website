@@ -3,13 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  API_REFERENCE_URL,
-  DOCS_URL,
-  GUIDE_URL,
-  NAV_LINKS,
-  type NavLink,
-} from "@/lib/constants";
+import { FOOTER_GROUPS, type NavLink } from "@/lib/constants";
 import { DiaGradient } from "@/components/ui/dia-gradient";
 import { FooterVideo } from "@/components/layout/footer-video";
 import type { ThemePreference } from "@/components/theme/theme-provider";
@@ -68,20 +62,9 @@ export function FooterAurora() {
   );
 }
 
-// Two-column link set for the reveal footer: site pages under "Navigate",
-// socials under "Connect". Navigate is the nav's own list, in the nav's order —
-// the two were maintained separately and had drifted out of sequence. Disabled
-// nav items are dropped rather than rendered as dead footer links.
-// The footer has room the nav doesn't, so the single "Docs" entry expands here
-// into the two things people actually go looking for. Same-tab, like the nav's.
-const DOCS_LINKS: NavLink[] = [
-  { label: "Assembly Guide", href: GUIDE_URL, external: true },
-  { label: "API Reference", href: API_REFERENCE_URL, external: true },
-];
-
-const NAVIGATE: NavLink[] = NAV_LINKS.filter((link) => !link.disabled).flatMap(
-  (link) => (link.href === DOCS_URL ? DOCS_LINKS : [link]),
-);
+// The footer's link set: the nav's own shelves (Product, Resources, Legal, from
+// FOOTER_GROUPS) plus the socials. Kept in constants.ts so the nav and the
+// footer cannot drift apart the way the old hand-maintained pair did.
 
 // The footer's video card. Assets are self-hosted in public/ — the loop is only
 // ~86KB and the full clip is fetched only once someone presses play. TITLE IS
@@ -277,13 +260,8 @@ export function Footer({
                 video two tracks, so the frame gets bigger as the gaps close.
                 The switch keeps the far right corner. */}
             <div className="flex flex-col gap-10 lg:grid lg:grid-cols-6 lg:items-start lg:gap-x-10">
-              <div className="flex flex-col gap-10 sm:flex-row sm:gap-20 lg:col-span-2 lg:grid lg:grid-cols-2 lg:gap-x-10">
-                {(
-                  [
-                    { label: "Navigate", links: NAVIGATE },
-                    { label: "Connect", links: CONNECT },
-                  ] as const
-                ).map((col) => (
+              <div className="grid grid-cols-2 gap-x-8 gap-y-10 lg:col-span-4 lg:grid-cols-4 lg:gap-x-8">
+                {[...FOOTER_GROUPS, { label: "Connect", links: CONNECT }].map((col) => (
                   <div key={col.label} className="sm:min-w-32">
                     {/* A step above the links, not level with them: at
                         muted-foreground the label was the exact colour of the
@@ -304,7 +282,7 @@ export function Footer({
               </div>
               {/* Labelled like the link columns so the video reads as part of the
                   same set rather than as an ad dropped into the footer. */}
-              <div className="w-full lg:col-span-2 lg:col-start-3">
+              <div className="w-full lg:col-span-2 lg:col-start-5">
                 <p className={`font-mono text-xs uppercase tracking-wide ${light ? "text-foreground" : "text-white/80"}`}>
                   Watch
                 </p>
@@ -323,7 +301,7 @@ export function Footer({
                 </div>
               </div>
               {themeToggle && (
-                <div className="flex shrink-0 items-center gap-4 lg:col-start-6 lg:justify-self-end">
+                <div className="flex shrink-0 items-center gap-4 lg:col-span-6 lg:justify-self-end">
                   <ThemeSwitch toggle={themeToggle} onDark={!light} frosted />
                 </div>
               )}
@@ -360,12 +338,9 @@ export function Footer({
               </div>
             )}
           </div>
-          {[
-            { title: "Navigate", links: NAVIGATE },
-            { title: "Connect", links: CONNECT },
-          ].map((section) => (
-            <div key={section.title}>
-              <p className="text-sm font-normal">{section.title}</p>
+          {[...FOOTER_GROUPS, { label: "Connect", links: CONNECT }].map((section) => (
+            <div key={section.label}>
+              <p className="text-sm font-normal">{section.label}</p>
               <ul className="mt-3 flex flex-col gap-2">
                 {section.links.map((link) => (
                   <li key={link.label}>

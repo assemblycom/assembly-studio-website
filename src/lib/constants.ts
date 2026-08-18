@@ -40,13 +40,68 @@ export const DOCS_URL = `${SITE_URL}/docs`;
 export const GUIDE_URL = "https://assembly.com/docs";
 export const API_REFERENCE_URL = "https://assembly.com/docs/api-reference";
 
-export const NAV_LINKS: NavLink[] = [
-  { label: "Templates", href: "/templates" },
+/** A link with a line of explanation, for the nav's dropdown panels. */
+export interface NavItem extends NavLink {
+  description?: string;
+}
+
+export interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
+export type NavEntry = NavItem | NavGroup;
+
+export function isNavGroup(entry: NavEntry): entry is NavGroup {
+  return "items" in entry;
+}
+
+// Two grouped panels and two direct links. The grouping follows
+// www.assembly.com (Product / Resources / Customers / Pricing) so someone
+// arriving from there finds the same shelves, but the panels list only pages
+// that exist: the feature pages still to be written slot into Product, and
+// nothing has to be restructured when they land.
+export const NAV_ENTRIES: NavEntry[] = [
+  {
+    label: "Product",
+    items: [
+      {
+        label: "Templates",
+        href: "/templates",
+        description: "Start from a prebuilt app and reshape it by chat",
+      },
+      {
+        label: "Security",
+        href: "/security",
+        description: "Authentication and permissions, engineered in",
+      },
+    ],
+  },
+  {
+    label: "Resources",
+    items: [
+      {
+        label: "Blog",
+        href: "/blog",
+        description: "Product news, and guides for service firms",
+      },
+      // External docs, but opening in the same tab (newTab omitted) — a new tab
+      // read as a jarring context switch from a primary nav item.
+      {
+        label: "Assembly Guide",
+        href: GUIDE_URL,
+        external: true,
+        description: "How to set up and run your workspace",
+      },
+      {
+        label: "API reference",
+        href: API_REFERENCE_URL,
+        external: true,
+        description: "Build on the Assembly platform",
+      },
+    ],
+  },
   { label: "Customers", href: "/customers" },
-  { label: "Security", href: "/security" },
-  // External docs, but opens in the same tab (newTab omitted) — a new tab read
-  // as a jarring context switch for a primary nav item.
-  { label: "Docs", href: DOCS_URL, external: true },
   { label: "Pricing", href: "/pricing" },
 ];
 // The app lives at dashboard.assembly.com (app.assembly.com does not resolve).
@@ -194,3 +249,36 @@ export const TRUST_CENTER_URL = "https://security.assembly.com";
 // Review-platform listings for Assembly.
 export const G2_URL = "https://www.g2.com/products/assemblysoftware/reviews";
 export const CAPTERRA_URL = "https://www.capterra.com/p/214210/Assembly/";
+
+/** The legal pages, in the order the footer lists them. */
+export const LEGAL_LINKS: NavLink[] = [
+  { label: "Terms of service", href: "/legal/terms-of-service" },
+  { label: "Privacy policy", href: "/legal/privacy-policy" },
+  { label: "AI policy", href: "/legal/ai-policy" },
+];
+
+// The footer says more than the nav: it repeats the nav's shelves, adds the
+// destinations that don't earn a nav slot (a demo, the trust centre), and
+// carries the legal pages, which have nowhere else to live.
+export const FOOTER_GROUPS: { label: string; links: NavLink[] }[] = [
+  {
+    label: "Product",
+    links: [
+      { label: "Templates", href: "/templates" },
+      { label: "Security", href: "/security" },
+      { label: "Pricing", href: "/pricing" },
+      { label: "Book a demo", href: DEMO_URL },
+    ],
+  },
+  {
+    label: "Resources",
+    links: [
+      { label: "Blog", href: "/blog" },
+      { label: "Customers", href: "/customers" },
+      { label: "Assembly Guide", href: GUIDE_URL, external: true },
+      { label: "API reference", href: API_REFERENCE_URL, external: true },
+      { label: "Trust center", href: TRUST_CENTER_URL, external: true, newTab: true },
+    ],
+  },
+  { label: "Legal", links: LEGAL_LINKS },
+];

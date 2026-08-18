@@ -5,7 +5,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import { NAV_LINKS, APP_URL, SIGNUP_URL, LOGIN_URL, DEMO_URL } from "@/lib/constants";
+import {
+  NAV_ENTRIES,
+  isNavGroup,
+  APP_URL,
+  SIGNUP_URL,
+  LOGIN_URL,
+  DEMO_URL,
+  type NavGroup,
+  type NavItem,
+} from "@/lib/constants";
+import { NavDropdown } from "@/components/layout/nav-dropdown";
 import { useAuthState } from "@/lib/use-auth";
 import { useTheme } from "@/components/theme/theme-provider";
 
@@ -289,6 +299,60 @@ export function StudioNav({
     `${linkBase} ${
       isCurrent(href) ? (lightContent ? "text-white" : "text-foreground") : linkRest
     }`;
+  // A group reads as current while you're on any page inside it, so "Product"
+  // stays lit through /templates.
+  const groupTriggerCls = (group: NavGroup) =>
+    `${linkBase} ${
+      group.items.some((item) => isCurrent(item.href))
+        ? lightContent
+          ? "text-white"
+          : "text-foreground"
+        : linkRest
+    }`;
+  // One row of the mobile sheet. Picking a page dismisses the menu: a
+  // client-side route change leaves this overlay mounted on its own, so
+  // without it the new page loads silently behind a menu that looks like
+  // nothing happened.
+  //
+  // The current page is marked the way the desktop nav marks it — full-strength
+  // ink against muted siblings, not a heavier weight, since `font-medium` maps
+  // to PP Mori SemiBold here. An off-site link stays muted: it is never the
+  // page you are on, so at full ink it read as a second current page.
+  const renderMenuLink = (link: NavItem) => {
+    if (link.disabled) {
+      return (
+        <span aria-disabled="true" className={`block py-3 text-lg ${menuMuted}`}>
+          {link.label}
+        </span>
+      );
+    }
+    if (link.external) {
+      return (
+        <a
+          href={link.href}
+          target={link.newTab ? "_blank" : undefined}
+          rel={link.newTab ? "noopener noreferrer" : undefined}
+          onClick={() => closeMenu()}
+          className={`block py-3 text-lg ${menuMuted}`}
+        >
+          {link.label}
+        </a>
+      );
+    }
+    return (
+      <Link
+        href={link.href}
+        aria-current={isCurrent(link.href) ? "page" : undefined}
+        onClick={() => closeMenu()}
+        className={`block py-3 text-lg ${
+          isCurrent(link.href) ? menuInk : menuMuted
+        }`}
+      >
+        {link.label}
+      </Link>
+    );
+  };
+
   const disabledCls = `cursor-default whitespace-nowrap rounded-full px-2 py-1.5 text-sm lg:px-3 ${lightContent ? "text-white/50" : darkDisabled}`;
   const ctaCls = `whitespace-nowrap rounded-lg px-4 py-1.5 text-sm transition-[background-color,color,opacity] hover:opacity-90 ${
     theme === "light"
@@ -426,35 +490,44 @@ export function StudioNav({
           {/* Primary nav — centered between the two equal side columns */}
           <nav className={`flex shrink-0 justify-center ${minimal ? "hidden" : ""}`}>
             <ul className="flex items-center">
-              {NAV_LINKS.map((link) => (
-                <li key={link.href}>
-                  {link.disabled ? (
-                    <span
-                      aria-disabled="true"
-                      className={disabledCls}
-                    >
-                      {link.label}
-                    </span>
-                  ) : link.external ? (
-                    <a
-                      href={link.href}
-                      target={link.newTab ? "_blank" : undefined}
-                      rel={link.newTab ? "noopener noreferrer" : undefined}
-                      className={linkCls}
-                    >
-                      {link.label}
-                    </a>
-                  ) : (
-                    <Link
-                      href={link.href}
-                      aria-current={isCurrent(link.href) ? "page" : undefined}
-                      className={navLinkCls(link.href)}
-                    >
-                      {link.label}
-                    </Link>
-                  )}
-                </li>
-              ))}
+              {NAV_ENTRIES.map((entry) =>
+                isNavGroup(entry) ? (
+                  <li key={entry.label}>
+                    <NavDropdown
+                      group={entry}
+                      triggerClassName={groupTriggerCls(entry)}
+                      chevronClassName={
+                        lightContent ? "text-white/50" : "text-foreground/40"
+                      }
+                    />
+                  </li>
+                ) : (
+                  <li key={entry.href}>
+                    {entry.disabled ? (
+                      <span aria-disabled="true" className={disabledCls}>
+                        {entry.label}
+                      </span>
+                    ) : entry.external ? (
+                      <a
+                        href={entry.href}
+                        target={entry.newTab ? "_blank" : undefined}
+                        rel={entry.newTab ? "noopener noreferrer" : undefined}
+                        className={linkCls}
+                      >
+                        {entry.label}
+                      </a>
+                    ) : (
+                      <Link
+                        href={entry.href}
+                        aria-current={isCurrent(entry.href) ? "page" : undefined}
+                        className={navLinkCls(entry.href)}
+                      >
+                        {entry.label}
+                      </Link>
+                    )}
+                  </li>
+                ),
+              )}
             </ul>
           </nav>
 
@@ -564,53 +637,36 @@ export function StudioNav({
 
           <div ref={menuScrollRef} className={`flex flex-1 flex-col overflow-y-auto overscroll-contain border-t px-5 pt-6 ${menuBorder}`}>
             <ul className="flex flex-col gap-1">
-              {NAV_LINKS.map((link) => (
-                <li key={link.href}>
-                  {link.disabled ? (
-                    <span
-                      aria-disabled="true"
-                      className={`block py-3 text-lg ${menuMuted}`}
-                    >
-                      {link.label}
-                    </span>
-                  ) : link.external ? (
-                    <a
-                      href={link.href}
-                      target={link.newTab ? "_blank" : undefined}
-                      rel={link.newTab ? "noopener noreferrer" : undefined}
-                      onClick={() => closeMenu()}
-                      // Muted like every other non-current row, and like the
-                      // desktop nav renders it: an off-site link is never the
-                      // page you're on, so at full ink it read as a second
-                      // current page beside the real one.
-                      className={`block py-3 text-lg ${menuMuted}`}
-                    >
-                      {link.label}
-                    </a>
-                  ) : (
-                    // Picking a page dismisses the menu. A client-side route
-                    // change leaves this overlay mounted on its own, so without
-                    // this the new page loaded silently behind a menu that
-                    // looked like nothing had happened.
-                    <Link
-                      href={link.href}
-                      aria-current={isCurrent(link.href) ? "page" : undefined}
-                      onClick={() => closeMenu()}
-                      // The current page is marked the way the desktop nav marks
-                      // it: full-strength ink against muted siblings, not a
-                      // heavier weight. `font-medium` maps to PP Mori SemiBold
-                      // here, so the active row was the only bold text on the
-                      // site, and every other row was already at full ink, which
-                      // left weight doing the work alone.
-                      className={`block py-3 text-lg ${
-                        isCurrent(link.href) ? menuInk : menuMuted
-                      }`}
-                    >
-                      {link.label}
-                    </Link>
-                  )}
-                </li>
-              ))}
+              {/* The sheet has the height the bar doesn't, so a group is a
+                  labelled section with its pages under it rather than a second
+                  thing to tap open. */}
+              {NAV_ENTRIES.flatMap((entry, i) =>
+                isNavGroup(entry)
+                  ? [
+                      <li key={entry.label} className="pt-5 first:pt-0">
+                        <p
+                          className={`font-mono text-xs uppercase tracking-wide ${menuMuted}`}
+                        >
+                          {entry.label}
+                        </p>
+                      </li>,
+                      ...entry.items.map((item) => (
+                        <li key={item.href}>{renderMenuLink(item)}</li>
+                      )),
+                    ]
+                  : [
+                      // The ungrouped links need air after a group's list, or
+                      // they read as more of that group.
+                      <li
+                        key={entry.href}
+                        className={
+                          i > 0 && isNavGroup(NAV_ENTRIES[i - 1]) ? "pt-5" : ""
+                        }
+                      >
+                        {renderMenuLink(entry)}
+                      </li>,
+                    ],
+              )}
             </ul>
 
             {/* Appearance toggle — kept with the nav list (under Pricing)
