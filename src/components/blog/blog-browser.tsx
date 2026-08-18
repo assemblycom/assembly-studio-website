@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { formatPostDate, type PostCard } from "@/lib/ghost";
+import { FIELD_CLS } from "@/components/ui/select-menu";
 import { PostCover } from "./post-cover";
 
 const ALL = "All";
@@ -100,15 +101,18 @@ export function BlogBrowser({
 
       {showFilters && (
         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap gap-2">
+          {/* Only the chosen shelf is drawn as a key; the rest sit as plain
+              labels, so the row reads as one selected thing among options
+              rather than a rank of buttons competing with the cards. */}
+          <div className="flex flex-wrap items-center gap-1">
             {[ALL, ...categories].map((filter) => (
               <button
                 key={filter}
                 onClick={() => select(filter)}
-                className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
+                className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
                   active === filter
-                    ? "border-foreground bg-foreground text-background"
-                    : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 {filter}
@@ -140,7 +144,9 @@ export function BlogBrowser({
                 setCurrent(1);
               }}
               placeholder="Search posts"
-              className="w-full rounded-full border border-border bg-transparent py-1.5 pl-10 pr-4 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-foreground/40"
+              // The row is a filter bar, not a form: the field keeps the site's
+              // field styling but sits at the height of the keys beside it.
+              className={`${FIELD_CLS} !h-9 !py-0 !pl-10`}
             />
           </label>
         </div>
@@ -151,7 +157,7 @@ export function BlogBrowser({
           No posts match {query.trim() ? `“${query.trim()}”` : "that filter"}.
         </p>
       ) : (
-        <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-14">
           {page.map((post, i) => (
             <Link
               key={post.slug}
@@ -162,17 +168,14 @@ export function BlogBrowser({
                 title={post.title}
                 image={post.image}
                 tone={i + 1}
-                className="aspect-[16/10] transition-opacity group-hover:opacity-90"
+                className="aspect-[16/10]"
               />
               <p className="type-caption mt-5 text-muted-foreground">
                 {formatPostDate(post.date)} · {post.author}
               </p>
-              <h3 className="type-h4 mt-2 text-balance text-foreground">
+              <h3 className="type-h4 mt-2 line-clamp-2 text-balance text-foreground">
                 {post.title}
               </h3>
-              <p className="type-body mt-2 text-muted-foreground">
-                {post.excerpt}
-              </p>
             </Link>
           ))}
         </div>

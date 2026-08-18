@@ -6,7 +6,7 @@ import {
   formatPostDate,
   getCategories,
   getPosts,
-  readingTime,
+  standfirst,
   toCard,
 } from "@/lib/ghost";
 import { PAGE_SEO, pageMetadata } from "@/lib/seo";
@@ -20,43 +20,57 @@ export default async function BlogPage() {
   const featured = posts.find((post) => post.featured) ?? posts[0];
 
   return (
-    <div className="mx-auto max-w-[1200px] px-6 pb-24 pt-16 md:px-10 md:pb-32 md:pt-24">
+    // The same rail the nav and the demo page run on, so the page's left edge
+    // lines up with the logo above it rather than sitting inside it.
+    <div className="mx-auto max-w-[1600px] px-6 pb-20 pt-12 md:px-10 md:pb-24 md:pt-16">
       <h1 className="type-display text-foreground">Blog</h1>
 
       {featured && (
-        // Newest post, given the room the rest of the grid doesn't get.
+        // The lead, laid out as a narrow column of type against a wide cover:
+        // the label and date sit at the top of that column and the post's own
+        // words at the foot of it, so the eye lands on the title beside the
+        // middle of the image rather than at the top of the page.
         <Link
           href={`/blog/${featured.slug}`}
-          className="group mt-10 grid gap-8 md:mt-14 md:grid-cols-2 md:items-center md:gap-12"
+          className="group mt-10 grid gap-8 md:mt-14 md:grid-cols-[minmax(0,0.44fr)_minmax(0,1fr)] md:gap-6"
         >
+          {/* Hairlines top and bottom of the type column, aligned with the
+              cover's edges — they frame the column that would otherwise sit as
+              loose text beside a full-bleed image. */}
+          <div className="flex flex-col md:justify-between md:border-y md:border-border md:py-7 [[data-theme=dark]_&]:md:border-[#383838]">
+            <div>
+              <p className="type-eyebrow text-foreground">Featured</p>
+              <p className="type-caption mt-1.5 text-muted-foreground">
+                {formatPostDate(featured.date)}
+              </p>
+            </div>
+
+            <div className="mt-8 md:mt-0">
+              <h2 className="type-h3 text-balance text-foreground">
+                {featured.title}
+              </h2>
+              <p className="type-lead mt-5 text-pretty text-muted-foreground">
+                {standfirst(featured)}
+              </p>
+            </div>
+          </div>
+
           <PostCover
             title={featured.title}
             image={featured.image}
             large
-            sizes="(min-width: 768px) 560px, 100vw"
-            className="aspect-[4/3] transition-opacity group-hover:opacity-90 md:aspect-[16/11]"
+            sizes="(min-width: 768px) 760px, 100vw"
+            // 16:9 is the ratio Ghost's own feature images are authored at, so
+            // the box matches the artwork instead of cropping into it — these
+            // covers carry titles that a tighter crop cuts through.
+            // Square corners on the lead: at this size a radius reads as a
+            // card floating on the page rather than as the page's own artwork.
+            className="aspect-[16/9] rounded-none"
           />
-          <div>
-            <p className="type-caption text-muted-foreground">
-              {formatPostDate(featured.date)} · {featured.author}
-            </p>
-            <h2 className="type-h2 mt-3 text-balance text-foreground">
-              {featured.title}
-            </h2>
-            <p className="type-lead mt-4 max-w-md text-pretty text-muted-foreground">
-              {featured.excerpt}
-            </p>
-            <p className="type-caption mt-6 text-muted-foreground">
-              {readingTime(featured)} min read
-            </p>
-            <span className="type-body mt-6 inline-block text-foreground underline decoration-foreground/30 underline-offset-4 transition-colors group-hover:decoration-foreground">
-              Read post
-            </span>
-          </div>
         </Link>
       )}
 
-      <div className="mt-16 border-t border-border pt-12 [[data-theme=dark]_&]:border-[#383838] md:mt-24">
+      <div className="mt-16 pt-12 md:mt-24">
         <BlogBrowser
           posts={posts.map(toCard)}
           categories={categories}

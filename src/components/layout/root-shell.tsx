@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { StudioNav } from "@/components/home/studio-nav";
+import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { Footer } from "@/components/layout/footer";
 import { useTheme } from "@/components/theme/theme-provider";
 
@@ -67,6 +68,7 @@ export function RootShell({ children }: { children: React.ReactNode }) {
   if (pathname === "/demo") {
     return (
       <div className="flex min-h-screen flex-col bg-background">
+        <AnnouncementBar />
         {nav}
         <main id="main" className="flex-1">
           {children}
@@ -79,6 +81,7 @@ export function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <>
       <div className="flex min-h-screen flex-col bg-background">
+        <AnnouncementBar />
         {nav}
         <main id="main" className="flex-1">
           {children}

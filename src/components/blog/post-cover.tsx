@@ -37,7 +37,12 @@ export function PostCover({
 }) {
   if (image) {
     return (
-      <div className={cn("relative overflow-hidden rounded-2xl bg-muted", className)}>
+      <div
+        className={cn(
+          "relative overflow-hidden rounded-lg bg-muted",
+          className,
+        )}
+      >
         {isOptimizedHost(image) ? (
           <Image
             src={image}
@@ -62,7 +67,7 @@ export function PostCover({
   return (
     <div
       className={cn(
-        "flex overflow-hidden rounded-2xl",
+        "flex overflow-hidden rounded-lg",
         large ? "p-8 md:p-10" : "p-6",
         GROUNDS[tone % GROUNDS.length],
         className,

@@ -310,18 +310,22 @@ async function fetchAuthors(): Promise<GhostAuthor[]> {
     return [];
   }
 
-  const { authors } = (await response.json()) as { authors: ContentApiAuthor[] };
-  return authors
-    .map((author) => ({
-      slug: author.slug,
-      name: author.name,
-      bio: author.bio ?? undefined,
-      image: author.profile_image ?? undefined,
-      postCount: author.count?.posts ?? 0,
-    }))
-    // Ghost seeds every site with a staff account that has never written
-    // anything; an author page for one would be an empty page.
-    .filter((author) => author.postCount > 0);
+  const { authors } = (await response.json()) as {
+    authors: ContentApiAuthor[];
+  };
+  return (
+    authors
+      .map((author) => ({
+        slug: author.slug,
+        name: author.name,
+        bio: author.bio ?? undefined,
+        image: author.profile_image ?? undefined,
+        postCount: author.count?.posts ?? 0,
+      }))
+      // Ghost seeds every site with a staff account that has never written
+      // anything; an author page for one would be an empty page.
+      .filter((author) => author.postCount > 0)
+  );
 }
 
 let cachedAuthors: Promise<GhostAuthor[]> | undefined;
@@ -331,7 +335,9 @@ export function getAuthors(): Promise<GhostAuthor[]> {
   return cachedAuthors;
 }
 
-export async function getAuthor(slug: string): Promise<GhostAuthor | undefined> {
+export async function getAuthor(
+  slug: string,
+): Promise<GhostAuthor | undefined> {
   return (await getAuthors()).find((author) => author.slug === slug);
 }
 
@@ -354,6 +360,118 @@ export function readingTime(post: GhostPost): number {
   return Math.max(1, Math.round(words / 220));
 }
 
+/**
+ * The lead card's standfirst. Ghost's excerpt is often a single line, which
+ * leaves the featured column looking unfinished beside a full-bleed cover, so a
+ * short one is topped up from the post's own opening paragraph.
+ */
+const MIN_STANDFIRST = 90;
+const MAX_STANDFIRST = 170;
+
+export function standfirst(post: GhostPost): string {
+  if (post.excerpt.length >= MIN_STANDFIRST) return post.excerpt;
+
+  // Openings are often a single short line, so paragraphs are taken in order
+  // until there is enough of one to read as a standfirst.
+  let text = "";
+  for (const [, inner] of post.html.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)) {
+    const paragraph = decodeEntities(inner.replace(/<[^>]+>/g, ""))
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!paragraph) continue;
+    text = text ? `${text} ${paragraph}` : paragraph;
+    if (text.length >= MIN_STANDFIRST) break;
+  }
+
+  if (text.length <= post.excerpt.length) return post.excerpt;
+  if (text.length <= MAX_STANDFIRST) return text;
+
+  // Cut on a sentence where the opening runs long, and on a word where it
+  // holds no full stop inside the budget.
+  const window = text.slice(0, MAX_STANDFIRST);
+  const sentence = window.lastIndexOf(". ");
+  if (sentence > MIN_STANDFIRST) return window.slice(0, sentence + 1);
+  return `${window.slice(0, window.lastIndexOf(" "))}…`;
+}
+
+/**
+ * The handful Ghost emits: named basics plus numeric references. Some of it
+ * arrives double-encoded (`&amp;nbsp;`), so the pass repeats until the string
+ * stops changing, bounded so a pathological input can't spin.
+ */
+function decodeEntities(html: string): string {
+  let out = html;
+  for (let pass = 0; pass < 3; pass++) {
+    const next = decodeOnce(out);
+    if (next === out) break;
+    out = next;
+  }
+  return out;
+}
+
+function decodeOnce(html: string): string {
+  return html
+    .replace(/&#(\d+);/g, (_, code: string) =>
+      String.fromCharCode(Number(code)),
+    )
+    .replace(/&#x([0-9a-f]+);/gi, (_, code: string) =>
+      String.fromCharCode(parseInt(code, 16)),
+    )
+    .replace(/&nbsp;/g, " ")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+}
+
+export interface PostFaq {
+  question: string;
+  answerHtml: string;
+}
+
+/**
+ * Splits a post's trailing FAQ off the body. Ghost authors it as a "Frequently
+ * asked questions" h2 followed by an h3 per question, which reads as a wall of
+ * headings; pulled out, it can be rendered as the accordion the rest of the
+ * site uses. The heading itself stays out of both halves — the page draws it,
+ * keeping the id the contents list points at.
+ */
+export function splitFaq(html: string): {
+  body: string;
+  faqs: PostFaq[];
+  headingId: string;
+} {
+  const heading = /<h2([^>]*)>\s*Frequently asked questions\s*<\/h2>/i.exec(
+    html,
+  );
+  if (!heading) return { body: html, faqs: [], headingId: "" };
+
+  const id = /id="([^"]*)"/i.exec(heading[1])?.[1] ?? "";
+  const tail = html.slice(heading.index + heading[0].length);
+  // A later h2 would mean the FAQ isn't the last section; leave it in the body
+  // rather than swallowing what follows it.
+  if (/<h2[\s>]/i.test(tail)) return { body: html, faqs: [], headingId: "" };
+
+  const faqs: PostFaq[] = [];
+  const question = /<h3[^>]*>([\s\S]*?)<\/h3>/gi;
+  let match = question.exec(tail);
+  while (match) {
+    const next = question.exec(tail);
+    const text = decodeEntities(match[1].replace(/<[^>]+>/g, ""))
+      .replace(/\s+/g, " ")
+      .trim();
+    const answerHtml = tail
+      .slice(match.index + match[0].length, next ? next.index : undefined)
+      .trim();
+    if (text && answerHtml) faqs.push({ question: text, answerHtml });
+    match = next;
+  }
+
+  if (!faqs.length) return { body: html, faqs: [], headingId: "" };
+  return { body: html.slice(0, heading.index), faqs, headingId: id };
+}
+
 export interface PostHeading {
   id: string;
   text: string;
@@ -374,7 +492,12 @@ export function withHeadingIds(html: string): {
   const out = html.replace(
     /<h2([^>]*)>([\s\S]*?)<\/h2>/g,
     (match, attrs: string, inner: string) => {
-      const text = inner.replace(/<[^>]+>/g, "").trim();
+      // Entities have to be decoded here: the body renders this markup as HTML,
+      // but the contents list renders the same text as a plain string, where an
+      // undecoded `&#x27;` or `&amp;nbsp;` shows up verbatim.
+      const text = decodeEntities(inner.replace(/<[^>]+>/g, ""))
+        .replace(/\s+/g, " ")
+        .trim();
       if (!text) return match;
 
       const base =
@@ -388,7 +511,11 @@ export function withHeadingIds(html: string): {
       used.add(id);
 
       headings.push({ id, text });
-      return `<h2 id="${id}"${attrs}>${inner}</h2>`;
+      // Ghost sometimes ships its own id on a heading. Keeping both would emit
+      // two id attributes, and the browser honours the first — so the contents
+      // link, which points at ours, would jump nowhere.
+      const kept = attrs.replace(/\s*id\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+      return `<h2 id="${id}"${kept}>${inner}</h2>`;
     },
   );
 

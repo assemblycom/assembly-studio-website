@@ -16,6 +16,11 @@ export interface FAQEntry {
   // actually wrap carry one, and the short form has to mean the same thing.
   shortQuestion?: string;
   answer: string;
+  /**
+   * Rendered in place of `answer` when the copy comes from the CMS rather than
+   * the array above — a blog post's FAQ carries its own bold and links.
+   */
+  answerHtml?: string;
   // Substrings of the answer to turn into links (first match of each label).
   // Answers stay plain strings; links live as data alongside them.
   links?: FAQLink[];
@@ -41,7 +46,9 @@ function renderAnswer(text: string, links?: FAQLink[]): ReactNode {
         <a
           key={`${li}-${ni}`}
           href={link.href}
-          {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+          {...(external
+            ? { target: "_blank", rel: "noopener noreferrer" }
+            : {})}
           className="underline underline-offset-2 transition-colors hover:text-foreground"
         >
           {link.label}
@@ -115,6 +122,7 @@ function FAQItem({
   question,
   shortQuestion,
   answer,
+  answerHtml,
   links,
   open,
   onToggle,
@@ -153,14 +161,23 @@ function FAQItem({
               : "space-y-4 px-5 pb-4 pt-2"
           }
         >
-          {answer.split("\n\n").map((para, i) => (
-            <p
-              key={i}
-              className="type-body whitespace-pre-line text-muted-foreground"
-            >
-              {renderAnswer(para, links)}
-            </p>
-          ))}
+          {answerHtml ? (
+            // Ghost's markup, on the post body's own styles. The source is our
+            // CMS, not user input.
+            <div
+              className="post-body"
+              dangerouslySetInnerHTML={{ __html: answerHtml }}
+            />
+          ) : (
+            answer.split("\n\n").map((para, i) => (
+              <p
+                key={i}
+                className="type-body whitespace-pre-line text-muted-foreground"
+              >
+                {renderAnswer(para, links)}
+              </p>
+            ))
+          )}
         </div>
       </div>
     </div>
@@ -255,14 +272,21 @@ function FAQItem({
 // Renders the FAQ items as a single-open accordion — opening one row closes any
 // other. Handles both the two-column and single-column layouts. The open row is
 // tracked here (by question text) so only one answer shows at a time.
-function Accordion({
+export function Accordion({
   items,
   twoColumn,
   variant = "cards",
+  flushTop = true,
 }: {
   items: FAQEntry[];
   twoColumn: boolean;
   variant?: FAQVariant;
+  /**
+   * The divided list is normally ruled top by the layout above it, so the first
+   * row drops its top padding to sit against that line. A list with no rule
+   * above it keeps the padding, or the first question crowds whatever precedes.
+   */
+  flushTop?: boolean;
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const renderItem = (faq: FAQEntry) => (
@@ -290,7 +314,9 @@ function Accordion({
       );
     }
     return (
-      <div className="[&>div:first-child>button]:pt-0">{items.map(renderItem)}</div>
+      <div className={flushTop ? "[&>div:first-child>button]:pt-0" : ""}>
+        {items.map(renderItem)}
+      </div>
     );
   }
 
