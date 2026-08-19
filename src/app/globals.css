@@ -2539,6 +2539,15 @@ html[data-theme="dark"] .v63-ring-solid::before {
   [data-theme="dark"] .post-body img {
     border-color: #383838;
   }
+  /* Except the review screenshots. A G2 or Capterra review is captured as its
+     own rounded card with white around it, so the site's outline lands a second
+     contour a few pixels outside the card's own. The card is the edge; the page
+     needs to draw nothing. Matched on the alt text, which names these
+     consistently, since the filenames are UUIDs. */
+  .post-body img[alt*="review" i] {
+    border: 0;
+    border-radius: 0;
+  }
   .post-body figure img {
     margin-top: 0;
   }
@@ -2636,15 +2645,29 @@ html[data-theme="dark"] .v63-ring-solid::before {
   }
 
   /* Ghost tables in the comparison posts: wide, so they scroll in place rather
-     than pushing the page sideways. */
+     than pushing the page sideways.
+
+     The table keeps the article's measure. Letting it take the empty margin to
+     the right bought about 100px of column at the cost of the one line every
+     other block on the page shares, and a table that ends past the paragraph
+     above it reads as a mistake before it reads as roomier. A four-column
+     comparison in this measure is dense by nature, so the density is in the
+     type instead: see the size the cells set below. */
   .post-body table {
     display: block;
     overflow-x: auto;
     width: 100%;
-    margin-top: 2rem;
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
     border-collapse: collapse;
-    border-top: 1px solid var(--border);
-    font-size: 1rem;
+    /* A step under the body copy. Four columns of prose in a 40.5rem measure is
+       about 150px each; at body size that is three words to a line. The smaller
+       face fits roughly a fifth more per line, which is the difference between a
+       cell that wraps four times and one that wraps twice — and a table set
+       tighter than its surrounding copy reads as a table, not as a paragraph
+       someone ruled. */
+    font-size: 0.875rem;
+    line-height: 1.5;
     letter-spacing: normal;
     /* The covers scroll with the content and the shadows are pinned to the box,
        so a shadow only shows on a side there is more table to reach. */
@@ -2666,6 +2689,17 @@ html[data-theme="dark"] .v63-ring-solid::before {
         )
         right center / 0.75rem 100% no-repeat scroll;
   }
+  /* The qualifier lifted off a column's name (see liftHeaderNotes in lib/ghost):
+     a footnote to the table, set under it in the size the table itself uses. The
+     table's own bottom margin is what separates it from the copy, so the note
+     rides up against the last row. */
+  .post-body .table-note {
+    margin-top: -1.75rem;
+    margin-bottom: 2.5rem;
+    color: var(--muted-foreground);
+    font-size: 0.8125rem;
+    letter-spacing: normal;
+  }
   /* Rules between the rows and nothing else: a grid of boxes reads as a form,
      and the columns already separate themselves. */
   .post-body tr {
@@ -2675,25 +2709,47 @@ html[data-theme="dark"] .v63-ring-solid::before {
   .post-body td {
     /* Below this a comparison column shreds to one word a line, which is worse
        to read than reaching for the column by scrolling. */
-    min-width: 8rem;
-    padding: 0.625rem 1.5rem 0.625rem 0;
+    min-width: 7rem;
+    padding: 0.875rem 1.5rem 0.875rem 0;
     text-align: left;
     vertical-align: top;
   }
   .post-body :is(th, td):last-child {
     padding-right: 0;
   }
-  /* The header row says "table" by being filled rather than by changing face:
-     it stays in the page's own type, and the band is what separates it from the
-     copy beneath. tbody:first-child only matches a table that shipped without a
-     thead, so a body row never picks up the header's treatment. */
+  /* The header row says "table" by sitting quieter than the rows it labels — no
+     fill, just the muted ink the rest of the site uses for labels over a firmer
+     rule. A grey band read as chrome bolted onto the copy. tbody:first-child
+     only matches a table that shipped without a thead, so a body row never picks
+     up the header's treatment. */
   .post-body thead th,
   .post-body tbody:first-child tr:first-child th {
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-    background: var(--muted);
-    color: var(--foreground);
+    /* Set as a label, not as a line of the table's copy: a step down in size on
+       tight leading, so the header of a column whose name needs two lines
+       ("Starting price (billed monthly)") costs a third of what it did at body
+       size. Balanced so the second line is not one orphaned word, and hung from
+       the bottom so every column's name sits on the rule whether it took one
+       line or two. */
+    padding-top: 0;
+    padding-bottom: 0.625rem;
+    color: var(--muted-foreground);
+    /* The cells' own size. A step down as well as a shade lighter made the
+       header of a two-column pros-and-cons table look like a caption for the
+       table rather than the name of its column; the muted ink and the rule
+       under it are enough to set it apart. */
+    font-size: 0.875rem;
+    line-height: 1.35;
     font-weight: 400;
+    text-wrap: balance;
+    vertical-align: bottom;
+  }
+  .post-body thead tr,
+  .post-body tbody:first-child tr:first-child {
+    border-bottom-color: color-mix(in srgb, var(--foreground) 24%, transparent);
+  }
+  /* The first body row sits off the header rule rather than against it. */
+  .post-body thead + tbody tr:first-child :is(th, td) {
+    padding-top: 1rem;
   }
   /* On a phone the reading measure is the page's gutters, and a table is the one
      block that gains from every pixel — so it runs to both edges. */

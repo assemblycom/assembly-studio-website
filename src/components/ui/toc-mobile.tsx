@@ -15,6 +15,12 @@ export interface TocHeading {
 // through. A heading has to clear both bars before it counts as the current one.
 const HEADER_HEIGHT = 48;
 const BAR_HEIGHT = 48;
+// A heading jumped to from the list lands 16px below both bars, on the
+// scroll-margin-top the stylesheet gives it. Without that 16px in the test, the
+// heading you just tapped is not yet "passed" and the bar keeps naming the
+// section above it — the one you left.
+const LANDING_GAP = 16;
+const PASSED_AT = HEADER_HEIGHT + BAR_HEIGHT + LANDING_GAP;
 
 /**
  * The contents rail for a phone. There's no room for a list beside the body, so
@@ -63,7 +69,10 @@ export function TocMobile({
       const passed = headings.filter((heading) => {
         const element = document.getElementById(heading.id);
         return element
-          ? element.getBoundingClientRect().top <= HEADER_HEIGHT + BAR_HEIGHT
+          ? // Floored: a heading jumped to lands on a fractional pixel
+            // (112.1875 where the line is 112), and comparing the raw value
+            // leaves it one thousandth short of counting.
+            Math.floor(element.getBoundingClientRect().top) <= PASSED_AT
           : false;
       });
       setActiveId(passed.at(-1)?.id ?? headings[0]?.id);
@@ -125,7 +134,9 @@ export function TocMobile({
     >
       {!expandable ? (
         // Not a control: no chevron, nothing to press. Just the label.
-        <p className="flex h-12 w-full items-center px-6 text-sm text-foreground md:px-10">
+        // px-5, the nav's own gutter at every width this bar is drawn at, so the
+        // label starts on the same line as the wordmark above it.
+        <p className="flex h-12 w-full items-center px-5 text-sm text-foreground">
           <span className="truncate">{active?.text ?? "On this page"}</span>
         </p>
       ) : (
@@ -134,7 +145,8 @@ export function TocMobile({
         onClick={() => setOpen((wasOpen) => !wasOpen)}
         aria-expanded={open}
         aria-controls={id}
-        className="flex h-12 w-full cursor-pointer items-center justify-between gap-4 px-6 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground/40 md:px-10"
+        // px-5 to start the label under the wordmark, as above.
+        className="flex h-12 w-full cursor-pointer items-center justify-between gap-4 px-5 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground/40"
       >
         <span className="truncate text-sm text-foreground">
           {active?.text ?? "On this page"}
@@ -146,7 +158,10 @@ export function TocMobile({
           fill="none"
           aria-hidden
           className={cn(
-            "shrink-0 text-muted-foreground transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+            // The menu button above sits in its own 36px hit area, so its icon
+            // stops 8px short of the gutter. The chevron follows it in rather
+            // than the gutter, which is what puts the two on one line.
+            "mr-2 shrink-0 text-muted-foreground transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
             open && "rotate-180",
           )}
         >
@@ -177,7 +192,7 @@ export function TocMobile({
             // way out of the page, not part of it.
             className="absolute inset-x-0 top-full max-h-[70vh] overflow-y-auto overscroll-contain border-b border-border bg-background pb-6 [[data-theme=dark]_&]:border-[#383838]"
           >
-            <ul className="px-6 md:px-10">
+            <ul className="px-5">
               {headings.map((heading) => (
                 <li key={heading.id}>
                   <a

@@ -20,6 +20,23 @@ import { LegalToc } from "./legal-toc";
 const TAG_PILL =
   "rounded-sm bg-muted px-2.5 py-1 text-xs uppercase leading-none tracking-[0.06em] text-muted-foreground [font-family:var(--font-diatype-mono),ui-monospace,monospace] [[data-theme=dark]_&]:bg-white/[0.06]";
 
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
+];
+
+/**
+ * Legal tracks `lastUpdated` as MM/DD/YYYY, but the effective date beside it on
+ * the other pages is written out. Spell the slashed form to match rather than
+ * asking Legal to keep a second format in sync.
+ */
+function spellDate(value: string) {
+  const match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(value.trim());
+  if (!match) return value;
+  const month = MONTH_NAMES[Number(match[1]) - 1];
+  return month ? `${month} ${Number(match[2])}, ${match[3]}` : value;
+}
+
 /** Shared frame for every legal page: title block, contents rail, document. */
 export function LegalPage({ document: doc }: { document: LegalDocument }) {
   const entries = entriesFor(doc);
@@ -56,7 +73,7 @@ export function LegalPage({ document: doc }: { document: LegalDocument }) {
         <p className="type-caption mt-6 tabular-nums text-muted-foreground">
           {doc.effective
             ? `Effective ${doc.effective}`
-            : `Last updated ${doc.lastUpdated}`}
+            : `Last updated ${spellDate(doc.lastUpdated)}`}
         </p>
       </header>
 

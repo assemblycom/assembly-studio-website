@@ -121,6 +121,64 @@ function parseCta(inner: string): PostCta | undefined {
 }
 
 /**
+ * The emoji Ghost's writers decorate a post with — at the head of a comparison
+ * table's columns, on every item of a pros and cons list. The site draws those
+ * in its own type, where a coloured glyph is the loudest thing on the page and
+ * the words beside it already carry the meaning.
+ *
+ * Text between tags only, so an emoji inside an attribute — a URL, an alt — is
+ * left alone.
+ */
+const EMOJI =
+  /\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*\uFE0F?/gu;
+
+function stripEmoji(html: string): string {
+  return html.replace(/>([^<]+)</g, (match, text: string) => {
+    const stripped = text.replace(EMOJI, "");
+    if (stripped === text) return match;
+    // The gap the emoji left: leading space at the head of a cell or list item,
+    // and the double space where one sat mid-sentence.
+    const cleaned = stripped
+      .replace(/^(?:\s|&nbsp;)+/, "")
+      .replace(/(?:\s|&nbsp;){2,}/g, " ");
+    return `>${cleaned}<`;
+  });
+}
+
+/**
+ * A qualifier a writer put in a column's name — "Starting price (billed
+ * annually)" — moved out from under the header and set as a note beneath the
+ * table. In a column about 150px wide the parenthetical is what forces the name
+ * onto a second line, and it qualifies every figure in the column rather than
+ * the name of it. The note carries the writer's own words, so the prices keep
+ * the context that they are annual-billing rates.
+ */
+function liftHeaderNotes(html: string): string {
+  return html.replace(/<table[\s\S]*?<\/table>/gi, (table) => {
+    const notes: string[] = [];
+
+    const lifted = table.replace(
+      /(<th\b[^>]*>)([\s\S]*?)(<\/th>)/gi,
+      (match, open: string, inner: string, close: string) => {
+        const found = /^([\s\S]*?)\s*\(([^()<>]+)\)\s*$/.exec(inner);
+        if (!found) return match;
+        const [, name, note] = found;
+        if (!name.trim()) return match;
+        const text = note.trim();
+        if (!notes.includes(text)) notes.push(text);
+        return `${open}${name.trim()}${close}`;
+      },
+    );
+
+    if (!notes.length) return table;
+    const note = notes
+      .map((text) => text[0].toUpperCase() + text.slice(1))
+      .join(". ");
+    return `${lifted}<p class="table-note">${note}</p>`;
+  });
+}
+
+/**
  * Emphasis Ghost put around punctuation or a space alone, unwrapped. Writers
  * bold a label and the editor takes the colon — or the space after it — with
  * them, which leaves a lone dark speck mid-sentence; one post carries
@@ -172,11 +230,13 @@ function withBody(
   hasFeatureImage: boolean,
 ): { html: string; cta?: PostCta } {
   let cta: PostCta | undefined;
-  const html = unboldPunctuation(
+  const cleaned = unboldPunctuation(
     markQuoteAttribution(
       trimLinkEdges(dropLeadingFigure(rawHtml, hasFeatureImage)),
     ),
-  )
+  );
+
+  const html = liftHeaderNotes(stripEmoji(cleaned))
     .replace(HTML_CARD_WRAPPER, "")
     // A post authored with two cards still gets one; the first is the one the
     // writer led with.
@@ -558,10 +618,24 @@ export interface PostHeading {
 const SUMMARY_MARKER =
   /^(tl;?dr|at a glance|quick comparison|quick look|in short)[:.]?$/i;
 
-// A lead-in this short is the section's subject — a tool's name in a ranked
-// post — and what follows the colon is its pitch, which the rail doesn't need.
-const LEAD_IN_MAX_WORDS = 4;
-const LEAD_IN_MAX_CHARS = 30;
+// The pitch half of a ranked heading ("Softr: Best for client portals from
+// existing data") — the rail lists the tool, not the case for it.
+const BEST_FOR = /^best\s+for\b/i;
+
+// The two halves of a heading, however the writer joined them.
+const SPLIT = /(?::\s+|\s+[\u2013\u2014]\s+|\s+-\s+)/;
+
+// What a contents entry should read as: long enough to name the section, short
+// enough to scan down. Over this a label gets one cut, never a second.
+const TARGET_MAX_WORDS = 6;
+const MIN_HEAD_WORDS = 3;
+
+// A trailing phrase that qualifies the label rather than naming it, and a word
+// the label must not be left ending on when one is cut away.
+const TAIL_CONNECTOR =
+  /^(than|that|who|which|so|because|when|while|without|using|needing|for|with|from|into|inside|in|on|at|by)$/i;
+const WEAK_TAIL_END =
+  /^(is|are|was|were|be|been|being|help|helps|and|or|the|a|an|to|of|your|you|it|its|their)$/i;
 
 function words(value: string): string {
   return value
@@ -592,27 +666,125 @@ function withoutRank(text: string): string {
 }
 
 /**
- * A heading as the contents rail lists it. Ghost's writers build these out of
- * two halves around a colon — the post's own title then "TL;DR", a tool's name
- * then the case for it — and the rail keeps whichever half tells the sections
- * apart, so an entry stays on one line.
+ * The -ing form of a verb, for turning a heading's question into the thing the
+ * section does: "How to choose the right tool" → "Choosing the right tool".
+ * Same word, one form along — the rail never introduces a word the heading
+ * didn't already carry.
+ */
+function gerund(verb: string): string | null {
+  let v = verb.toLowerCase();
+  if (!/^[a-z]+$/.test(v)) return null;
+  // "How I researched and tested …" is the same verb in the past; back to the
+  // stem first, or it comes out "researcheding".
+  if (v.endsWith("ed") && v.length > 4) {
+    const stem = v.slice(0, -2);
+    v = /([^aeiou])\1$/.test(stem) ? stem.slice(0, -1) : stem;
+  }
+  if (v.endsWith("ie")) return `${v.slice(0, -2)}ying`;
+  if (/(?:ee|oe|ye)$/.test(v)) return `${v}ing`;
+  if (v.endsWith("e")) return `${v.slice(0, -1)}ing`;
+  if (v.length <= 5 && /[^aeiou][aeiou][^aeiouwxyh]$/.test(v)) {
+    return `${v}${v.slice(-1)}ing`;
+  }
+  return `${v}ing`;
+}
+
+function capitalize(value: string): string {
+  return value ? value[0].toUpperCase() + value.slice(1) : value;
+}
+
+function wordCount(value: string): number {
+  return value.split(/\s+/).filter(Boolean).length;
+}
+
+/**
+ * A heading asked as a question, restated as the section it names. Each shape is
+ * matched on its own rather than by stripping the first word, because dropping
+ * "Which" off "Which tool should you choose?" leaves a sentence fragment where
+ * dropping the whole frame leaves the subject.
+ */
+function dropQuestion(label: string): string {
+  let m: RegExpExecArray | null;
+  if ((m = /^how to ([a-z]+)\b(.*)$/i.exec(label))) {
+    const verb = gerund(m[1]);
+    if (verb) return capitalize(verb) + m[2];
+  }
+  if ((m = /^how i ([a-z]+)(?: and ([a-z]+))?\s.*/i.exec(label))) {
+    const first = gerund(m[1]);
+    const second = m[2] ? gerund(m[2]) : null;
+    if (first) return capitalize(first) + (second ? ` and ${second}` : "");
+  }
+  if ((m = /^(?:which|what) (.+?) should you (?:choose|pick|use)$/i.exec(label))) {
+    return capitalize(m[1]);
+  }
+  if ((m = /^why (.+)$/i.exec(label))) return capitalize(m[1]);
+  if ((m = /^what(?:'s|\u2019s| is| are) (.+)$/i.exec(label))) {
+    if (wordCount(m[1]) >= 2) return capitalize(m[1]);
+  }
+  return label;
+}
+
+/**
+ * Brings an over-long label back toward the target by dropping what qualifies it
+ * — the second half of a colon heading, then one trailing phrase. One cut only:
+ * cutting again on the next connector along takes "8 best tools for building
+ * custom apps" down to "8 best tools", which loses more than the word saves. A
+ * heading with nothing safe to drop is left as the writer set it.
+ */
+function trimTail(label: string): string {
+  let out = label;
+
+  if (wordCount(out) > TARGET_MAX_WORDS) {
+    const at = out.search(SPLIT);
+    if (at > 0) {
+      const lead = out.slice(0, at).trim();
+      if (wordCount(lead) >= 2) out = lead;
+    }
+  }
+
+  if (wordCount(out) > TARGET_MAX_WORDS) {
+    const parts = out.split(/\s+/);
+    let cut = -1;
+    for (let i = MIN_HEAD_WORDS; i < parts.length - 1; i++) {
+      if (TAIL_CONNECTOR.test(parts[i].replace(/,$/, ""))) cut = i;
+    }
+    if (cut > 0) {
+      const head = parts.slice(0, cut);
+      const last = head[head.length - 1].replace(/[,.]$/, "");
+      if (head.length >= MIN_HEAD_WORDS && !WEAK_TAIL_END.test(last)) {
+        out = head.join(" ").replace(/,$/, "");
+      }
+    }
+  }
+
+  return out;
+}
+
+/**
+ * A heading as the contents rail lists it. The rail keeps the rank Ghost's
+ * writers number a ranked post with, drops the half of a heading that pitches
+ * rather than names, and states a question as its answer — trimming what is
+ * already in the heading, never wording it afresh.
  */
 function headingLabel(text: string, title: string): string {
-  const label = withoutRank(text);
-  const split = label.indexOf(": ");
-  if (split < 0) return label;
+  const rank = /^\d+\.\s+/.exec(text)?.[0] ?? "";
+  let label = text.slice(rank.length).trim().replace(/\?+$/, "").trim();
 
-  const lead = label.slice(0, split);
-  const rest = label.slice(split + 2).trim();
-  if (!rest || SUMMARY_MARKER.test(rest)) return lead;
-  if (
-    lead.length <= LEAD_IN_MAX_CHARS &&
-    lead.split(" ").length <= LEAD_IN_MAX_WORDS
-  ) {
-    return lead;
+  const at = label.search(SPLIT);
+  if (at > 0) {
+    const separator = SPLIT.exec(label.slice(at))?.[0] ?? "";
+    const lead = label.slice(0, at).trim();
+    const rest = label.slice(at + separator.length).trim();
+    // Either half can be the throwaway one: the pitch and the summary marker
+    // follow the colon, but "TL;DR: Which alternative should you choose?" opens
+    // with it.
+    if (rest && (BEST_FOR.test(rest) || SUMMARY_MARKER.test(rest))) label = lead;
+    else if (SUMMARY_MARKER.test(lead)) label = rest;
+    else if (framesPost(label, title)) label = capitalize(rest);
   }
-  if (framesPost(label, title)) return rest[0].toUpperCase() + rest.slice(1);
-  return label;
+
+  label = dropQuestion(label.replace(/\?+$/, "").trim());
+  return rank + trimTail(label);
 }
 
 /**

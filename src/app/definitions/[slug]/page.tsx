@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import { BLOCKS, type Block, type Inline } from "@contentful/rich-text-types";
 import type { ReactNode } from "react";
-import { GridDivider, GridRails } from "@/components/ui/grid-lines";
 import { CustomersCta } from "@/components/customers/customers-cta";
 import { getDefinition, getDefinitions } from "@/lib/definitions";
 import { OG_IMAGE } from "@/lib/seo";
@@ -102,8 +101,13 @@ export default async function DefinitionPage({
 
   return (
     <>
-      <section className="px-6 pb-12 pt-16 md:pb-16 md:pt-24">
-        <div className="mx-auto max-w-3xl">
+      <section className="px-6 pb-10 pt-16 md:pb-12 md:pt-24">
+        {/* The title block reads centred over the ranged-left definition below
+            it: two lines of label and term, where a centred axis works, and the
+            body keeps its left edge for reading. Not on a phone — there the term
+            wraps to two or three lines and a centred block of them sits on no
+            edge at all, so it ranges left with the copy. */}
+        <div className="mx-auto max-w-3xl md:text-center">
           <nav aria-label="Breadcrumb" className="type-caption text-muted-foreground">
             <Link
               href="/definitions"
@@ -121,23 +125,22 @@ export default async function DefinitionPage({
         </div>
       </section>
 
-      <div className="relative">
-        <GridRails />
-        <div className="border-t border-border [[data-theme=dark]_&]:border-[#383838]" />
+      {/* One column down the middle of the page, on the same centre line and the
+          same measure as the title above it. The article used to sit in a wider
+          frame ruled with grid lines, which left the body starting to the left of
+          its own heading. */}
+      <article className="px-6 pb-20 md:pb-28">
+        {/* Straight into the definition. The "What is X?" heading that used to
+            open this column only restated the title above it; it still earns its
+            keep as the page's meta title, where the question is what someone
+            actually searched for. */}
+        <div className="mx-auto max-w-3xl">
+          {documentToReactComponents(definition.body, RENDER_OPTIONS)}
+        </div>
+      </article>
 
-        <article className="mx-auto max-w-[1200px] px-6 pb-20 pt-16 md:px-10 md:pb-28 md:pt-24">
-          <div className="max-w-3xl">
-            <h2 className="type-h3">
-              {definition.metaTitle || `What is ${definition.name}?`}
-            </h2>
-            <div className="mt-6">
-              {documentToReactComponents(definition.body, RENDER_OPTIONS)}
-            </div>
-          </div>
-        </article>
-
-        <GridDivider />
-      </div>
+      {/* Full-bleed divider before the CTA — spans edge to edge. */}
+      <div className="border-t border-border [[data-theme=dark]_&]:border-[#383838]" />
 
       {/* The site's shared closing CTA, in place of the old feature-suite promo
           block the main site appends to every definition. */}

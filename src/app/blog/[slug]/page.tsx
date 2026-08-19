@@ -11,10 +11,10 @@ import {
   withHeadingIds,
   withImageSizes,
 } from "@/lib/ghost";
-import { SIGNUP_URL } from "@/lib/constants";
 import { isOptimizedHost } from "@/lib/image-hosts";
 import { pageMetadata } from "@/lib/seo";
 import { cn } from "@/lib/utils";
+import { CustomersCta } from "@/components/customers/customers-cta";
 import { AuthorAvatar } from "@/components/blog/post-byline";
 import { PostCta } from "@/components/blog/post-cta";
 import { PostLightbox } from "@/components/blog/post-lightbox";
@@ -98,22 +98,10 @@ export default async function BlogPostPage({
             href="/blog"
             className="type-body -mt-1 inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 20 20"
-              fill="none"
-              aria-hidden
-              className="shrink-0"
-            >
-              <path
-                d="M11.5 5.5 7 10l4.5 4.5"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            {/* The font's own arrow rather than a drawn chevron: it sits on the
+                same baseline and stroke weight as the words beside it, which a
+                16px icon next to 16px type never quite does. */}
+            <span aria-hidden>&larr;</span>
             All posts
           </Link>
 
@@ -126,9 +114,9 @@ export default async function BlogPostPage({
               aria-label="Jump to section"
               className="sticky top-28 max-h-[calc(100vh-9rem)] overflow-y-auto"
             >
-              <p className="type-eyebrow mb-4 text-muted-foreground">
-                On this page
-              </p>
+              {/* No "On this page" label: a list of the post's own headings in
+                  the margin beside it says what it is. The nav keeps its
+                  accessible name above. */}
               <ul className="border-l border-border [[data-theme=dark]_&]:border-[#383838]">
                 {contents.map((heading) => (
                   <li key={heading.id}>
@@ -156,22 +144,7 @@ export default async function BlogPostPage({
                 href="/blog"
                 className="type-body inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground"
               >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  aria-hidden
-                  className="shrink-0"
-                >
-                  <path
-                    d="M11.5 5.5 7 10l4.5 4.5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <span aria-hidden>&larr;</span>
                 All posts
               </Link>
             </div>
@@ -209,13 +182,20 @@ export default async function BlogPostPage({
             <h1 className="type-display mt-3 text-balance leading-[1.02] tracking-[-0.03em] text-foreground">
               {post.title}
             </h1>
-            <p className="type-lead mt-4 text-pretty text-muted-foreground">
-              {post.excerpt}
-            </p>
+            {/* The centred announcements go straight from the headline to the
+                byline: their titles already carry the news, and a centred deck
+                under a centred title read as a second, competing headline. The
+                excerpt still does its work in the listing and the meta
+                description. */}
+            {showRail && (
+              <p className="type-lead mt-4 text-pretty text-muted-foreground">
+                {post.excerpt}
+              </p>
+            )}
             <div
               className={cn(
-                "mt-5 flex items-center gap-2.5",
-                !showRail && "justify-center",
+                "flex items-center gap-2.5",
+                showRail ? "mt-5" : "mt-6 justify-center",
               )}
             >
               {post.authorImage && <AuthorAvatar image={post.authorImage} />}
@@ -306,28 +286,24 @@ export default async function BlogPostPage({
               instead of sitting beside it. */}
           {post.cta && <PostCta cta={post.cta} className="mt-16 lg:hidden" />}
 
-          {/* Most posts carry their own call to action from Ghost, and two in
-              a row reads as nagging — so this one only appears when the post
-              has none. */}
-          {!post.cta && (
-            <div className="mt-16 rounded-lg border border-border p-8 [[data-theme=dark]_&]:border-[#383838]">
-              <h2 className="type-h4 text-foreground">
-                Build the app your firm has been describing
-              </h2>
-              <p className="type-body mt-3 max-w-md text-muted-foreground">
-                Describe it in a sentence and watch it launch inside your
-                workspace, behind your login, branded as yours.
-              </p>
-              <a
-                href={SIGNUP_URL}
-                className="mt-6 inline-block rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
-              >
-                Get started
-              </a>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Most posts carry their own call to action from Ghost, and two in a row
+          reads as nagging — so the site's closing CTA only appears when the post
+          has none. It is the same block, full width, that every other page ends
+          on rather than a card of its own inside the reading column. */}
+      {!post.cta && (
+        // Out of the page's gutters, so the rule runs edge to edge as it does on
+        // every other page that closes this way — and out of its bottom padding
+        // too, which would otherwise sit under the CTA's own and leave the
+        // button stranded in half a screen of white.
+        <div className="-mx-6 -mb-24 mt-20 md:-mx-10 md:-mb-32 md:mt-28">
+          {/* Full-bleed divider before the CTA — spans edge to edge. */}
+          <div className="border-t border-border [[data-theme=dark]_&]:border-[#383838]" />
+          <CustomersCta />
+        </div>
+      )}
 
       {showToc && (
         <TocMobile headings={contents} bodySelector=".post-body" id="post-toc-mobile" />
