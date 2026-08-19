@@ -10,6 +10,7 @@ import { getVisibleTemplates } from "@/lib/visible-templates";
 import { CASE_STUDIES } from "@/lib/case-studies";
 import { getSolutions } from "@/lib/solutions";
 import { getFeaturePages } from "@/lib/features";
+import { getOpenRoles } from "@/lib/careers";
 import { getDefinitions } from "@/lib/definitions";
 import { getAuthors, getPosts } from "@/lib/ghost";
 
@@ -74,7 +75,7 @@ function findStaticRoutes(dir = APP_DIR, route = ""): string[] {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [templates, posts, authors, definitions, solutions, features] =
+  const [templates, posts, authors, definitions, solutions, features, roles] =
     await Promise.all([
     getVisibleTemplates(),
     getPosts(),
@@ -82,6 +83,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getDefinitions(),
     getSolutions(),
     getFeaturePages(),
+    getOpenRoles(),
   ]);
   const lastModified = new Date();
 
@@ -105,6 +107,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .filter((s) => !s.noIndex)
       .map((s) => entry(`/solutions/${s.slug}`)),
     ...features.filter((f) => !f.noIndex).map((f) => entry(`/${f.slug}`)),
+    // Only roles that are open AND written up here: an Ashby-only role has no
+    // page of ours to list, and a closed one redirects to /jobs.
+    ...roles
+      .filter((role) => role.slug)
+      .map((role) => entry(`/jobs/${role.slug}`)),
     ...posts.map((post) => entry(`/blog/${post.slug}`)),
     ...authors.map((author) => entry(`/blog/author/${author.slug}`)),
     ...definitions.map((d) => entry(`/definitions/${d.slug}`)),
