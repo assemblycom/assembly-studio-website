@@ -52,16 +52,14 @@ export default async function BlogPage() {
               // the ones that do not. Where the cover is 16:9 this is identical
               // to filling, so nothing changes for most posts.
               fit="contain"
-              // 16:9 at every width, never stretched to the row: stretching it
-              // to a row the copy set left the artwork floating in 117px of
-              // empty column. Beside the copy the cover is the taller of the two
-              // and sets the row itself, so the frame is always exactly the
-              // shape of the artwork in it.
-              // self-center for the narrow end of the two-column range, where the
-              // copy runs a line or two taller than the cover: the difference
-              // splits above and below the artwork and reads as padding, instead
-              // of collecting under it as a gap.
-              className="aspect-[16/9] w-full rounded-none lg:self-center"
+              // 16:9 sets the frame's own height, and beside the copy it fills
+              // whatever the taller of the two comes to. At the wide end the
+              // cover is the taller and nothing is added; at the narrow end of
+              // the two-column range the copy runs taller, and the frame takes
+              // that height with the artwork matted on the card's own muted
+              // ground rather than floating in white with the card's corners
+              // turned around it.
+              className="aspect-[16/9] w-full rounded-none bg-muted lg:h-full"
             />
 
             {/* Centred against the cover, on a measure of its own: run the full

@@ -38,6 +38,24 @@ export async function generateMetadata({
   });
 }
 
+
+// A short hyphenated word is one word: balancing broke "AI-powered" across two
+// lines at the hyphen, which reads as a typo in a headline. Long compounds still
+// break — holding one whole would push it past the measure.
+const UNBREAKABLE_MAX = 14;
+
+function unbreakable(title: string) {
+  return title.split(/(\s+)/).map((part, i) =>
+    part.includes("-") && part.length <= UNBREAKABLE_MAX ? (
+      <span key={i} className="whitespace-nowrap">
+        {part}
+      </span>
+    ) : (
+      part
+    ),
+  );
+}
+
 export default async function BlogPostPage({
   params,
 }: {
@@ -177,7 +195,7 @@ export default async function BlogPostPage({
                 two-line headline looking loose, where every reference blog sets
                 its post title at about 1.0. */}
             <h1 className="type-display mt-3 text-balance leading-[1.02] tracking-[-0.03em] text-foreground">
-              {post.title}
+              {unbreakable(post.title)}
             </h1>
             {/* The centred announcements go straight from the headline to the
                 byline: their titles already carry the news, and a centred deck

@@ -152,8 +152,35 @@ export function BlogBrowser({
               placeholder="Search posts"
               // The row is a filter bar, not a form: the field keeps the site's
               // field styling but sits at the height of the keys beside it.
-              className={`${FIELD_CLS} !h-9 !py-0 !pl-10`}
+              // The browser's own clear glyph is suppressed — it renders in the
+              // engine's blue at its own size, which is the one control on the
+              // page the site doesn't draw. Ours sits below.
+              className={`${FIELD_CLS} !h-9 !py-0 !pl-10 !pr-9 [&::-webkit-search-cancel-button]:appearance-none`}
             />
+            {query && (
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  setCurrent(1);
+                }}
+                aria-label="Clear search"
+                className="absolute right-2.5 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-foreground/[0.06] hover:text-foreground [[data-theme=dark]_&]:hover:bg-white/[0.06]"
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  aria-hidden
+                >
+                  <path d="M6 6l12 12M18 6 6 18" />
+                </svg>
+              </button>
+            )}
           </label>
         </div>
       )}

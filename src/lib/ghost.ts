@@ -222,6 +222,25 @@ function trimLinkEdges(html: string): string {
     .replace(/(\s+)(<\/a>)/g, "$2$1");
 }
 
+/**
+ * Ghost's video card ships its own player — a row of buttons, two range inputs
+ * and a playback-rate control — that only works with Ghost's own stylesheet and
+ * script, neither of which this site loads. Left alone it renders as raw browser
+ * chrome stacked under the video. The dead controls come out and the video keeps
+ * the browser's own, which is the one player here that works.
+ *
+ * Autoplaying videos are left as they are: those are decorative loops, and
+ * controls on them would be the only chrome on the page nobody asked for.
+ */
+function nativeVideoControls(html: string): string {
+  return html
+    .replace(/<div class="kg-video-overlay"[\s\S]*?<\/figure>/g, "</figure>")
+    .replace(
+      /<video(?![^>]*\bautoplay\b)(?![^>]*\bcontrols\b)/g,
+      "<video controls",
+    );
+}
+
 const NO_TOC_TEMPLATE = /no-?toc|without-?toc/i;
 
 /** The post body as the page renders it, plus what the page needs to know. */
@@ -236,7 +255,7 @@ function withBody(
     ),
   );
 
-  const html = liftHeaderNotes(stripEmoji(cleaned))
+  const html = nativeVideoControls(liftHeaderNotes(stripEmoji(cleaned)))
     .replace(HTML_CARD_WRAPPER, "")
     // A post authored with two cards still gets one; the first is the one the
     // writer led with.
