@@ -53,6 +53,12 @@ export const PAGE_SEO = {
       "Assembly logo files, naming and clear-space rules, and the brand palette \u2014 everything needed to present the Assembly brand consistently.",
     path: "/brand",
   },
+  copilotRebrand: {
+    title: "Copilot Client Portal Software is now Assembly",
+    description:
+      "Assembly (formerly Copilot) offers a branded client portal software that helps professional service firms deliver remarkable client experiences.",
+    path: "/copilot-rebrand",
+  },
   definitions: {
     title: "Definitions",
     description:
