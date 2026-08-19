@@ -107,6 +107,7 @@ export const TERMS_OF_SERVICE: LegalDocument = {
     {
       id: "4-assembly-contracting-party",
       title: "4. Assembly Contracting Party",
+      shortTitle: "4. Contracting Party",
       sections: [
         {
           id: "4-assembly-contracting-party-intro",
@@ -172,6 +173,7 @@ export const TERMS_OF_SERVICE: LegalDocument = {
     {
       id: "7-limitation-of-liability",
       title: "7. Limitation of Liability",
+      shortTitle: "7. Liability",
       sections: [
         {
           id: "7-limitation-of-liability-intro",
@@ -196,6 +198,7 @@ export const TERMS_OF_SERVICE: LegalDocument = {
     {
       id: "8-waiver-and-complete-agreement",
       title: "8. Waiver and Complete Agreement",
+      shortTitle: "8. Waiver and Agreement",
       sections: [
         {
           id: "8-waiver-and-complete-agreement-intro",
@@ -209,6 +212,7 @@ export const TERMS_OF_SERVICE: LegalDocument = {
     {
       id: "9-intellectual-property-and-customer-content",
       title: "9. Intellectual Property and Customer Content",
+      shortTitle: "9. IP and Content",
       sections: [
         {
           id: "9-intellectual-property-and-customer-content-intro",
@@ -258,6 +262,7 @@ export const TERMS_OF_SERVICE: LegalDocument = {
     {
       id: "11-cancellation-and-termination",
       title: "11. Cancellation and Termination",
+      shortTitle: "11. Cancellation",
       sections: [
         {
           id: "11-cancellation-and-termination-intro",
@@ -284,6 +289,7 @@ export const TERMS_OF_SERVICE: LegalDocument = {
     {
       id: "12-modifications-to-the-service-and-prices",
       title: "12. Modifications to the Service and Prices",
+      shortTitle: "12. Service and Prices",
       sections: [
         {
           id: "12-modifications-to-the-service-and-prices-intro",
@@ -305,6 +311,7 @@ export const TERMS_OF_SERVICE: LegalDocument = {
     {
       id: "13-rights-of-third-parties",
       title: "13. Rights of Third Parties",
+      shortTitle: "13. Third-Party Rights",
       sections: [
         {
           id: "13-rights-of-third-parties-intro",
@@ -318,6 +325,7 @@ export const TERMS_OF_SERVICE: LegalDocument = {
     {
       id: "14-privacy-and-data-protection",
       title: "14. Privacy & Data Protection",
+      shortTitle: "14. Privacy",
       sections: [
         {
           id: "14-privacy-and-data-protection-intro",

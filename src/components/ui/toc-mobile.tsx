@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import type { PostHeading } from "@/lib/ghost";
+
+/** Anything with an anchor and a label. Structural, so both callers fit it. */
+export interface TocHeading {
+  id: string;
+  text: string;
+}
 
 // The nav is 56px tall at rest but settles to 48px once scrolled, and the bar
 // only ever shows while scrolled — so it pins to the settled height. Pinning to
@@ -12,16 +17,39 @@ const HEADER_HEIGHT = 48;
 const BAR_HEIGHT = 48;
 
 /**
- * The contents rail for a phone. There's no room for a list beside the article,
- * so the sections collapse into one line that names where you are and opens the
- * full list on tap — which makes this a position indicator rather than the map
- * the desktop rail is, so the current section tracks scroll.
+ * The contents rail for a phone. There's no room for a list beside the body, so
+ * the sections collapse into one line that names where you are and opens the full
+ * list on tap — which makes this a position indicator rather than the map the
+ * desktop rail is, so the current section tracks scroll.
  *
  * It rides above the page rather than sitting in it: nothing to say until the
- * reader is in the article, so it arrives when the body reaches the header and
+ * reader is in the body, so it arrives when the body reaches the header and
  * leaves at the end of it.
+ *
+ * Shared by the blog posts and the legal pages. `bodySelector` is how it finds
+ * the region it belongs to — the only thing that differed between the two, and
+ * the reason this was a blog-only component until now.
  */
-export function PostTocMobile({ headings }: { headings: PostHeading[] }) {
+export function TocMobile({
+  headings,
+  bodySelector,
+  id = "toc-mobile",
+  expandable = true,
+}: {
+  headings: TocHeading[];
+  /** CSS selector for the body region this bar tracks, e.g. ".post-body". */
+  bodySelector: string;
+  /** Distinct per page, so two bars could never share an id. */
+  id?: string;
+  /**
+   * Whether tapping the bar opens the full list. False on the legal pages, where
+   * the contents run to twenty-one entries — long enough that the panel became a
+   * scrolling list inside a scrolling document, which is worse than no panel. The
+   * bar still earns its place there as a position indicator: it says which of
+   * twenty-one parts you are currently reading.
+   */
+  expandable?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const [shown, setShown] = useState(false);
   const [activeId, setActiveId] = useState(headings[0]?.id);
@@ -40,7 +68,7 @@ export function PostTocMobile({ headings }: { headings: PostHeading[] }) {
       });
       setActiveId(passed.at(-1)?.id ?? headings[0]?.id);
 
-      const body = document.querySelector(".post-body");
+      const body = document.querySelector(bodySelector);
       if (!body) return;
       const { top, bottom } = body.getBoundingClientRect();
       const inArticle =
@@ -60,18 +88,18 @@ export function PostTocMobile({ headings }: { headings: PostHeading[] }) {
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
-  }, [headings]);
+  }, [headings, bodySelector]);
 
   // Escape closes, as it does for any menu; the list is long enough that
   // scrolling past it is not a way out.
   useEffect(() => {
-    if (!open) return;
+    if (!open || !expandable) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open]);
+  }, [open, expandable]);
 
   const active = headings.find((heading) => heading.id === activeId);
 
@@ -95,11 +123,17 @@ export function PostTocMobile({ headings }: { headings: PostHeading[] }) {
       // page hits the article and not a bar that isn't drawn.
       inert={!shown || undefined}
     >
+      {!expandable ? (
+        // Not a control: no chevron, nothing to press. Just the label.
+        <p className="flex h-12 w-full items-center px-6 text-sm text-foreground md:px-10">
+          <span className="truncate">{active?.text ?? "On this page"}</span>
+        </p>
+      ) : (
       <button
         type="button"
         onClick={() => setOpen((wasOpen) => !wasOpen)}
         aria-expanded={open}
-        aria-controls="post-toc-mobile"
+        aria-controls={id}
         className="flex h-12 w-full cursor-pointer items-center justify-between gap-4 px-6 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground/40 md:px-10"
       >
         <span className="truncate text-sm text-foreground">
@@ -125,8 +159,9 @@ export function PostTocMobile({ headings }: { headings: PostHeading[] }) {
           />
         </svg>
       </button>
+      )}
 
-      {open && (
+      {expandable && open && (
         <>
           {/* Tapping the article behind the open list closes it, the way
               tapping outside any menu does. */}
@@ -136,7 +171,7 @@ export function PostTocMobile({ headings }: { headings: PostHeading[] }) {
             aria-hidden
           />
           <nav
-            id="post-toc-mobile"
+            id={id}
             aria-label="Jump to section"
             // Drawn over the article rather than pushing it down: the list is a
             // way out of the page, not part of it.

@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 import { AuthorAvatar } from "@/components/blog/post-byline";
 import { PostCta } from "@/components/blog/post-cta";
 import { PostLightbox } from "@/components/blog/post-lightbox";
-import { PostTocMobile } from "@/components/blog/post-toc-mobile";
+import { TocMobile } from "@/components/ui/toc-mobile";
 
 export async function generateStaticParams() {
   return (await getPosts()).map((post) => ({ slug: post.slug }));
@@ -329,7 +329,9 @@ export default async function BlogPostPage({
         </div>
       </div>
 
-      {showToc && <PostTocMobile headings={contents} />}
+      {showToc && (
+        <TocMobile headings={contents} bodySelector=".post-body" id="post-toc-mobile" />
+      )}
       <PostLightbox />
     </article>
   );

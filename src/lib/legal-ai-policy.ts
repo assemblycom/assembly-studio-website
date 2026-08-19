@@ -113,6 +113,7 @@ export const AI_POLICY: LegalDocument = {
     {
       id: "part-2-third-party-ai-assistant-connections-via-mcp",
       title: "Part 2 — Third-Party AI Assistant Connections via MCP",
+      shortTitle: "Part 2 — MCP Connections",
       sections: [
         {
           id: "part-2-third-party-ai-assistant-connections-via-mcp-what-the-mcp-is",

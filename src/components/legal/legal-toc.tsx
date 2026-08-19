@@ -2,29 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
-import type { LegalDocument } from "./legal-document";
-
-interface TocEntry {
-  id: string;
-  label: string;
-  /** Sub-headings sit indented under the numbered section they belong to. */
-  nested: boolean;
-}
-
-function entriesFor(doc: LegalDocument): TocEntry[] {
-  return doc.parts.flatMap((part) => {
-    const sections = part.sections
-      .filter((section) => section.heading)
-      .map((section) => ({
-        id: section.id,
-        label: section.heading as string,
-        nested: part.title !== null,
-      }));
-    return part.title
-      ? [{ id: part.id, label: part.title, nested: false }, ...sections]
-      : sections;
-  });
-}
+import { entriesFor, type LegalDocument } from "./legal-document";
 
 /**
  * Sidebar contents for a legal page. These documents are long enough that
@@ -60,18 +38,26 @@ export function LegalToc({ document: doc }: { document: LegalDocument }) {
       aria-label="On this page"
       className="lg:sticky lg:top-28 lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto"
     >
-      <p className="type-caption mb-4 text-muted-foreground">On this page</p>
-      <ul className="border-l border-border [[data-theme=dark]_&]:border-[#383838]">
+      {/* No visible heading — the list reads as a contents list from its
+          position and content. The nav keeps its aria-label, which is what names
+          the landmark for a screen reader. */}
+      {/* No rail and no marker line — the current entry is the one at full
+          foreground against the rest at muted, and the list sits flush on the
+          left so it reads as the page's outer edge. Nested entries keep a small
+          indent, which is the only hierarchy left once the rule is gone. */}
+      <ul>
         {entries.map((entry) => (
           <li key={entry.id}>
             <a
               href={`#${entry.id}`}
               className={cn(
-                "type-caption -ml-px block border-l py-1.5 transition-colors",
-                entry.nested ? "pl-7" : "pl-4",
+                // Generous pitch: ~13px of copy on a 32px rhythm, so a
+                // twenty-entry list still reads as a list of distinct places
+                // rather than a block of text.
+                "type-caption block py-[0.4375rem] transition-colors",
                 active === entry.id
-                  ? "border-foreground text-foreground"
-                  : "border-transparent text-muted-foreground hover:text-foreground",
+                  ? "text-foreground"
+                  : "text-muted-foreground hover:text-foreground",
               )}
             >
               {entry.label}
