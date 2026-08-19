@@ -126,12 +126,23 @@ export function StudioNav({
   // trigger sat there looking pressed long after the menu had gone. Only the
   // closes that came from the keyboard ask for focus back.
   const restoreFocusRef = useRef(false);
+  const mobileHeaderRef = useRef<HTMLElement>(null);
+  // Where the sheet starts. The header is sticky at the top of the page but the
+  // announcement band sits above it in flow, so at the top of a page the header
+  // is 40px down — and the sheet, which shows that header's own logo through
+  // from above, has to start where the header does or the logo lands below the
+  // sheet's close button instead of beside it. Scrolling is locked while the
+  // sheet is open, so the value it opens with holds for its whole life.
+  const [menuTop, setMenuTop] = useState(0);
   const closeMenu = (restoreFocus = false) => {
     restoreFocusRef.current = restoreFocus;
     setMobileMenuOpen(false);
   };
   useEffect(() => {
     if (!mobileMenuOpen) return;
+    setMenuTop(
+      Math.max(0, Math.round(mobileHeaderRef.current?.getBoundingClientRect().top ?? 0)),
+    );
     const prev = document.documentElement.style.overflow;
     document.documentElement.style.overflow = "hidden";
     const preventTouch = (e: TouchEvent) => {
@@ -422,14 +433,23 @@ export function StudioNav({
           iOS) and the trigger, whose place the close button takes.
           pointer-events pass through to the menu underneath; only the logo
           itself stays tappable. */}
-      <header className={`${position} transition-colors ${ease} lg:hidden ${scrolled ? "bg-background" : ""} ${mobileMenuOpen ? "pointer-events-none z-[70]" : "z-50"}`}>
-        {/* The frosted pane is the at-rest look over a hero. Once scrolled the
-            bar is filled instead: on a phone the blur left page copy sliding
-            under the logo, which reads as a hole in the page rather than glass —
-            plainest of all above the post contents bar, which is opaque. */}
+      {/* The fill and the blur below both snap rather than cross-fade while the
+          contents bar is up. Fading between them left ~450ms of a translucent
+          bar sitting directly on an opaque one, which is long enough to catch on
+          any scroll that brings the bar in — the page copy showed through the
+          nav as a blurred ghost. It is tied to the attribute, not to `scrolled`,
+          so the fill cannot lag the bar it is covering for either. */}
+      <header ref={mobileHeaderRef} className={`${position} transition-colors ${ease} lg:hidden [[data-toc-bar]_&]:bg-background [[data-toc-bar]_&]:transition-none ${mobileMenuOpen ? "pointer-events-none z-[70]" : "z-50"}`}>
+        {/* The frosted pane: a blur that fades out over the content below rather
+            than stopping on an edge, so the bar has no bottom to speak of.
+            The one page that cannot have it is a post or a policy, where the
+            contents bar is drawn directly under the nav — a blur has nothing to
+            fade into against an opaque bar, and the two together read as a hole
+            in the page. There the bar fills instead, and the edge is the point.
+            (data-toc-bar is set on <html> by ui/toc-mobile while that bar shows.) */}
         <div
           aria-hidden
-          className={`pointer-events-none absolute inset-x-0 top-0 h-[135%] transition-opacity ${ease} opacity-0 ${mobileMenuOpen ? "invisible" : ""}`}
+          className={`pointer-events-none absolute inset-x-0 top-0 h-[135%] transition-opacity ${ease} [[data-toc-bar]_&]:opacity-0 [[data-toc-bar]_&]:transition-none ${mobileMenuOpen ? "invisible" : ""}`}
           style={navBlurStyle}
         />
         <div className={`relative z-10 flex items-center justify-between px-5 transition-[height] ${ease} ${scrolled ? "h-12" : "h-14"}`}>
@@ -608,7 +628,8 @@ export function StudioNav({
           aria-modal="true"
           aria-label="Menu"
           tabIndex={-1}
-          className={`fixed inset-0 z-[60] flex flex-col outline-none lg:hidden ${menuSurface}`}
+          className={`fixed inset-x-0 bottom-0 z-[60] flex flex-col outline-none lg:hidden ${menuSurface}`}
+          style={{ top: menuTop }}
         >
           {/* Match the mobile header's padding (px-5) and height exactly so the
               logo stays put when the menu opens — it must not shift.
@@ -647,35 +668,17 @@ export function StudioNav({
           </div>
 
           <div ref={menuScrollRef} className={`flex flex-1 flex-col overflow-y-auto overscroll-contain border-t px-5 pt-6 ${menuBorder}`}>
+            {/* One flat list. Six links do not need sorting into named
+                sections, and the labels cost more height than the grouping
+                bought — the sheet is the whole nav, so everything in it is one
+                tap either way. The groups stay on the desktop bar, where they
+                are what the dropdowns hang off. */}
             <ul className="flex flex-col gap-1">
-              {/* The sheet has the height the bar doesn't, so a group is a
-                  labelled section with its pages under it rather than a second
-                  thing to tap open. */}
-              {NAV_ENTRIES.flatMap((entry, i) =>
-                isNavGroup(entry)
-                  ? [
-                      <li key={entry.label} className="pb-1 pt-6 first:pt-0">
-                        <p className={`font-mono text-xs ${menuMuted}`}>
-                          {entry.label}
-                        </p>
-                      </li>,
-                      ...entry.items.map((item) => (
-                        <li key={item.href}>{renderMenuLink(item)}</li>
-                      )),
-                    ]
-                  : [
-                      // The ungrouped links need air after a group's list, or
-                      // they read as more of that group.
-                      <li
-                        key={entry.href}
-                        className={
-                          i > 0 && isNavGroup(NAV_ENTRIES[i - 1]) ? "pt-6" : ""
-                        }
-                      >
-                        {renderMenuLink(entry)}
-                      </li>,
-                    ],
-              )}
+              {NAV_ENTRIES.flatMap((entry) =>
+                isNavGroup(entry) ? entry.items : [entry],
+              ).map((link) => (
+                <li key={link.href}>{renderMenuLink(link)}</li>
+              ))}
             </ul>
 
             {/* Appearance toggle — kept with the nav list (under Pricing)

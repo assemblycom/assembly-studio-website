@@ -99,6 +99,20 @@ export function TocMobile({
     };
   }, [headings, bodySelector]);
 
+  // Tells the nav that a bar is drawn directly under it. The nav's own chrome is
+  // a blur that fades out over the content below, which has nothing to fade into
+  // when an opaque bar starts where it ends — so on these pages, and only while
+  // the bar is actually shown, the nav fills instead. Set on <html> because the
+  // nav is a sibling of this component's page, not an ancestor.
+  useEffect(() => {
+    if (!shown) return;
+    const root = document.documentElement;
+    root.dataset.tocBar = "true";
+    return () => {
+      delete root.dataset.tocBar;
+    };
+  }, [shown]);
+
   // Escape closes, as it does for any menu; the list is long enough that
   // scrolling past it is not a way out.
   useEffect(() => {
@@ -119,7 +133,11 @@ export function TocMobile({
         // the first screen, which put a bar and a gap above copy nobody had
         // started reading.
         "fixed inset-x-0 z-40 lg:hidden",
-        "border-b border-border bg-background [[data-theme=dark]_&]:border-[#383838]",
+        // A hairline lighter than the site's border token in both themes: this
+        // one runs the full width directly under the nav, where the shared
+        // border reads as a rule drawn across the page rather than the edge of a
+        // bar. #383838 on the near-black ground was the loudest of the two.
+        "border-b border-border/60 bg-background [[data-theme=dark]_&]:border-white/[0.08]",
         // The bar's surface carries on above itself, tucked under the nav, so
         // the seam stays opaque through the nav's own height transition.
         "before:absolute before:inset-x-0 before:bottom-full before:h-3 before:bg-background",

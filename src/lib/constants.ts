@@ -93,12 +93,6 @@ export const NAV_ENTRIES: NavEntry[] = [
         external: true,
         description: "How to set up and run your workspace",
       },
-      {
-        label: "API reference",
-        href: API_REFERENCE_URL,
-        external: true,
-        description: "Build on the Assembly platform",
-      },
     ],
   },
   { label: "Customers", href: "/customers" },
