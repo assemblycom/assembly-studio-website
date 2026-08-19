@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { TemplatesBrowser } from "@/components/templates/templates-browser";
 import { TemplatesCta } from "@/components/templates/templates-cta";
 import { getVisibleTemplates } from "@/lib/visible-templates";
-import { SIGNUP_URL } from "@/lib/constants";
+import { APP_URL, SIGNUP_URL } from "@/lib/constants";
+import { AuthLink } from "@/components/ui/auth-link";
 import { PAGE_SEO, pageMetadata } from "@/lib/seo";
 
 // Re-resolved against Contentful every few minutes rather than only at deploy.
@@ -29,12 +30,16 @@ export default async function TemplatesPage() {
             <h1 className="type-display text-balance">
               Start from an app template
             </h1>
-            <a
+            {/* Nothing template-specific to carry here, so a signed-in
+                visitor goes where the nav sends them rather than to a signup
+                screen they already completed. */}
+            <AuthLink
+              authedHref={APP_URL}
+              authedLabel="Open Assembly"
               href={SIGNUP_URL}
+              label="Get started"
               className="mx-auto mt-8 block w-full max-w-xs rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background transition-opacity hover:opacity-90 sm:mx-0 sm:inline-block sm:w-auto"
-            >
-              Get started
-            </a>
+            />
           </div>
           {/* A full section step under the header, not a paragraph's worth: the
               filter row is the top of a different thing, and at the old step it

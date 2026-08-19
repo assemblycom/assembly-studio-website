@@ -1,4 +1,5 @@
-import { SIGNUP_URL } from "@/lib/constants";
+import { APP_URL, SIGNUP_URL } from "@/lib/constants";
+import { AuthLink } from "@/components/ui/auth-link";
 
 // Plain closing CTA — the floating cursor-parallax chips were removed; just the
 // pitch and one action, mirroring the customers/pricing/security pages. The copy
@@ -19,12 +20,15 @@ export function TemplatesCta() {
         <br className="hidden sm:inline" />
         Run and build everything in one place.
       </p>
-      <a
+      {/* The one action closes on where the visitor already stands: a signed-in
+          reader has no signup left to do. */}
+      <AuthLink
+        authedHref={APP_URL}
+        authedLabel="Open Assembly"
         href={SIGNUP_URL}
+        label="Get started"
         className="mx-auto mt-8 block w-full max-w-xs rounded-lg bg-foreground px-5 py-2.5 text-center text-sm text-background transition-opacity hover:opacity-90 sm:inline-block sm:w-auto"
-      >
-        Get started
-      </a>
+      />
     </section>
   );
 }
