@@ -16,7 +16,6 @@ import { pageMetadata } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 import { CustomersCta } from "@/components/customers/customers-cta";
 import { AuthorAvatar } from "@/components/blog/post-byline";
-import { PostCta } from "@/components/blog/post-cta";
 import { PostLightbox } from "@/components/blog/post-lightbox";
 import { TocMobile } from "@/components/ui/toc-mobile";
 
@@ -58,10 +57,10 @@ export default async function BlogPostPage({
   // rail — the announcements, in practice; short posts have nothing to list
   // either way.
   const showToc = post.showToc && contents.length > 1;
-  // With neither a contents list nor a card, the rail holds only the way back,
-  // which doesn't earn a column of its own — so the announcements read as a
-  // centred page instead of an article pushed off to one side.
-  const showRail = showToc || Boolean(post.cta);
+  // Without a contents list the rail holds only the way back, which doesn't earn
+  // a column of its own — so the announcements read as a centred page instead of
+  // an article pushed off to one side.
+  const showRail = showToc;
   // What the page actually gives an image, so the browser picks the right file
   // off Ghost's srcset: the reading measure beside a rail, the wider breakout on
   // the announcements.
@@ -104,8 +103,6 @@ export default async function BlogPostPage({
             <span aria-hidden>&larr;</span>
             All posts
           </Link>
-
-          {post.cta && <PostCta cta={post.cta} />}
 
           {showToc && (
             // Anchors only, no scroll tracking: on a post the list is a map
@@ -282,28 +279,21 @@ export default async function BlogPostPage({
             </section>
           )}
 
-          {/* The rail is gone below lg, so the writer's card closes the post
-              instead of sitting beside it. */}
-          {post.cta && <PostCta cta={post.cta} className="mt-16 lg:hidden" />}
-
         </div>
       </div>
 
-      {/* Most posts carry their own call to action from Ghost, and two in a row
-          reads as nagging — so the site's closing CTA only appears when the post
-          has none. It is the same block, full width, that every other page ends
-          on rather than a card of its own inside the reading column. */}
-      {!post.cta && (
-        // Out of the page's gutters, so the rule runs edge to edge as it does on
-        // every other page that closes this way — and out of its bottom padding
-        // too, which would otherwise sit under the CTA's own and leave the
-        // button stranded in half a screen of white.
-        <div className="-mx-6 -mb-24 mt-20 md:-mx-10 md:-mb-32 md:mt-28">
-          {/* Full-bleed divider before the CTA — spans edge to edge. */}
-          <div className="border-t border-border [[data-theme=dark]_&]:border-[#383838]" />
-          <CustomersCta />
-        </div>
-      )}
+      {/* Every post closes on the site's own CTA, the same block behind the same
+          divider that every other page ends on. Ghost's writers author their own
+          card per post; those are still parsed out of the body (so the markup
+          never lands mid-article) but they are not drawn — a bespoke promo box
+          inside the reading column was a second, off-system call to action. */}
+      {/* Out of the page's gutters, so the rule runs edge to edge — and out of
+          its bottom padding too, which would otherwise sit under the CTA's own
+          and leave the button stranded in half a screen of white. */}
+      <div className="-mx-6 -mb-24 mt-20 md:-mx-10 md:-mb-32 md:mt-28">
+        <div className="border-t border-border [[data-theme=dark]_&]:border-[#383838]" />
+        <CustomersCta />
+      </div>
 
       {showToc && (
         <TocMobile headings={contents} bodySelector=".post-body" id="post-toc-mobile" />

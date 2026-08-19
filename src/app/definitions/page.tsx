@@ -42,8 +42,13 @@ export default async function DefinitionsPage() {
                   className="grid gap-6 md:grid-cols-[minmax(0,8rem)_minmax(0,1fr)] md:gap-16"
                 >
                   {/* The letter is a landmark, not a heading anyone reads as
-                      prose, so it sits muted beside its terms. */}
-                  <h2 className="type-h3 text-muted-foreground md:self-start">
+                      prose, so it sits muted beside its terms. On the near-black
+                      ground it goes brighter than its terms instead:
+                      muted there is #8f8f8f against terms at #d9d9d9, which left
+                      the landmark dimmer than the list it heads. Light mode keeps
+                      the muted letter, where the terms are near-black and the
+                      contrast already runs the other way. */}
+                  <h2 className="type-h3 text-muted-foreground md:self-start [[data-theme=dark]_&]:text-white">
                     {group.letter}
                   </h2>
                   <ul className="grid gap-x-10 gap-y-4 sm:grid-cols-2">

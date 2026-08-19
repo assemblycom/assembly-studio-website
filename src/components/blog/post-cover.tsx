@@ -26,6 +26,7 @@ export function PostCover({
   large = false,
   sizes,
   className,
+  fit = "cover",
 }: {
   title: string;
   image?: string;
@@ -34,12 +35,24 @@ export function PostCover({
   large?: boolean;
   sizes?: string;
   className?: string;
+  /**
+   * "cover" fills the frame and crops what does not fit, which is right for the
+   * grid, where every tile has to be the same shape. "contain" fits the whole
+   * image in, for the lead card: those covers carry the product's wordmark and
+   * are authored at whatever shape the designer chose, so a frame that crops
+   * takes a bite out of the artwork at exactly the widths where the card is
+   * widest.
+   */
+  fit?: "cover" | "contain";
 }) {
   if (image) {
     return (
       <div
         className={cn(
-          "relative overflow-hidden rounded-lg bg-muted",
+          "relative overflow-hidden rounded-lg",
+          // A contained image is letterboxed by definition, so it sits on the
+          // card's own ground rather than on a panel that would frame the bands.
+          fit === "contain" ? "bg-transparent" : "bg-muted",
           className,
         )}
       >
@@ -49,7 +62,7 @@ export function PostCover({
             alt=""
             fill
             sizes={sizes ?? "(min-width: 1024px) 380px, 100vw"}
-            className="object-cover"
+            className={fit === "contain" ? "object-contain" : "object-cover"}
           />
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
@@ -57,7 +70,10 @@ export function PostCover({
             src={image}
             alt=""
             loading="lazy"
-            className="absolute inset-0 size-full object-cover"
+            className={cn(
+              "absolute inset-0 size-full",
+              fit === "contain" ? "object-contain" : "object-cover",
+            )}
           />
         )}
       </div>

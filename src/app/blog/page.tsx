@@ -35,25 +35,50 @@ export default async function BlogPage() {
           // corners turned, rather than a band ruled only top and bottom.
           className="group mt-10 block overflow-hidden rounded-2xl border border-border transition-colors hover:bg-muted/50 md:mt-14 [[data-theme=dark]_&]:border-[#383838]"
         >
-          <div className="grid md:grid-cols-2">
+          {/* Stacked on a phone and a tablet, side by side from lg. The cover's
+              height is nine sixteenths of its column and the copy's is however
+              tall the title, standfirst and byline come out; below lg the copy is
+              much the taller of the two, which either left a gap under the cover
+              or, filling, cropped the artwork to close it. */}
+          <div className="grid lg:grid-cols-2">
             <PostCover
               title={featured.title}
               image={featured.image}
               large
-              sizes="(min-width: 768px) 50vw, 100vw"
-              // 16:9 is what Ghost's feature images are authored at, and these
-              // covers carry the product's own wordmark — cropping to fill the
-              // frame's height cut straight through it. So the artwork keeps
-              // its shape and the type beside it centres against it.
-              className="aspect-[16/9] rounded-none"
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              // Fitted, not filled. The frame is 16:9 because that is what Ghost
+              // authors covers at, but not every cover obeys it, and these carry
+              // the product's wordmark — filling cropped straight through it on
+              // the ones that do not. Where the cover is 16:9 this is identical
+              // to filling, so nothing changes for most posts.
+              fit="contain"
+              // 16:9 at every width, never stretched to the row: stretching it
+              // to a row the copy set left the artwork floating in 117px of
+              // empty column. Beside the copy the cover is the taller of the two
+              // and sets the row itself, so the frame is always exactly the
+              // shape of the artwork in it.
+              // self-center for the narrow end of the two-column range, where the
+              // copy runs a line or two taller than the cover: the difference
+              // splits above and below the artwork and reads as padding, instead
+              // of collecting under it as a gap.
+              className="aspect-[16/9] w-full rounded-none lg:self-center"
             />
 
+            {/* Centred against the cover, on a measure of its own: run the full
+                half of a 1600 card, the standfirst was a 700px line with the
+                title alone above it and the byline stranded at the bottom. */}
             <div className="flex flex-col justify-center p-6 md:p-10">
               <p className="type-eyebrow text-muted-foreground">Featured</p>
-              <h2 className="type-h3 mt-4 text-balance text-foreground">
+              {/* The page's lead, so it takes the scale's h2 step (28px, 36px
+                  from md) rather than the h3 the grid cards below it use — at
+                  h3 the title read smaller than the cover above it deserved,
+                  most obviously where the card stacks and the artwork is the
+                  full width of the page. The standfirst takes the lead step
+                  with it. */}
+              <h2 className="type-h2 mt-4 max-w-lg text-balance text-foreground">
                 {featured.title}
               </h2>
-              <p className="type-body mt-4 line-clamp-3 text-pretty text-muted-foreground">
+              <p className="type-lead mt-4 line-clamp-3 max-w-lg text-pretty text-muted-foreground">
                 {standfirst(featured)}
               </p>
               <div className="mt-8">

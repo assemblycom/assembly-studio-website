@@ -2394,7 +2394,13 @@ html[data-theme="dark"] .v63-ring-solid::before {
        that flash into a lift, and matches the reference blogs, whose body copy
        is near-black too. */
     color: color-mix(in srgb, var(--foreground) 78%, var(--background));
-    font-size: 1.0625rem;
+    /* One step over the site's reading size (type-body: 15px, 16px from md),
+       because this is long-form and the measure is wider than any UI column —
+       and it steps at the same breakpoint the rest of the scale does, so a post
+       set beside a page of site copy reads as the same system one size up.
+       It used to be a flat 17px at every width, which was the only type on the
+       site that did not respond. */
+    font-size: 1rem; /* 16px */
     line-height: 1.65;
     letter-spacing: -0.01em;
   }
@@ -2413,15 +2419,18 @@ html[data-theme="dark"] .v63-ring-solid::before {
        jump from the contents list doesn't land the heading behind them. */
     scroll-margin-top: 7rem;
     color: var(--foreground);
-    font-size: 1.625rem;
-    line-height: 1.35;
+    /* type-h3's steps (22px, 30px from md): a post's section head is the same
+       rank as an H3 anywhere else on the site. */
+    font-size: 1.375rem; /* 22px */
+    line-height: 1.25;
     letter-spacing: -0.015em;
   }
+  /* type-h4, which does not step: it is already the size the body grows into. */
   .post-body h3,
   .post-body h4 {
     margin-top: 2.5rem;
     color: var(--foreground);
-    font-size: 1.25rem;
+    font-size: 1.125rem; /* 18px */
     line-height: 1.4;
     letter-spacing: -0.006em;
   }
@@ -2546,7 +2555,6 @@ html[data-theme="dark"] .v63-ring-solid::before {
      consistently, since the filenames are UUIDs. */
   .post-body img[alt*="review" i] {
     border: 0;
-    border-radius: 0;
   }
   .post-body figure img {
     margin-top: 0;
@@ -2565,7 +2573,7 @@ html[data-theme="dark"] .v63-ring-solid::before {
        stray block of large text. */
     padding-left: 1.75rem;
     border-left: 2px solid color-mix(in srgb, var(--foreground) 18%, transparent);
-    font-size: 1.3125rem;
+    font-size: 1.1875rem; /* 19px, stepping to 22px with the body below */
     line-height: 1.45;
     letter-spacing: -0.014em;
     color: var(--foreground);
@@ -2750,6 +2758,18 @@ html[data-theme="dark"] .v63-ring-solid::before {
   /* The first body row sits off the header rule rather than against it. */
   .post-body thead + tbody tr:first-child :is(th, td) {
     padding-top: 1rem;
+  }
+  /* The post's own scale steps where the site's does. */
+  @media (min-width: 48rem) {
+    .post-body {
+      font-size: 1.0625rem; /* 17px */
+    }
+    .post-body h2 {
+      font-size: 1.875rem; /* 30px */
+    }
+    .post-body blockquote {
+      font-size: 1.375rem; /* 22px */
+    }
   }
   /* On a phone the reading measure is the page's gutters, and a table is the one
      block that gains from every pixel — so it runs to both edges. */
