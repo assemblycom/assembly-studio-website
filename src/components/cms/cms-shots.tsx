@@ -2,10 +2,10 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import type { SolutionFeature, SolutionImage } from "@/lib/solutions";
+import type { PageFeature, PageImage } from "@/lib/cms-page";
 
 /**
- * The CMS imagery on the /solutions pages.
+ * The CMS imagery on the Contentful-backed marketing pages.
  *
  * These assets are already art-directed — each one carries its own ground,
  * rounded corners and cropping, composed to sit full-bleed in a section. So they
@@ -20,7 +20,7 @@ export function Shot({
   eager = false,
   className = "",
 }: {
-  image: SolutionImage;
+  image: PageImage;
   sizes: string;
   priority?: boolean;
   /**
@@ -56,7 +56,7 @@ export function Shot({
  * invoice and message text inside them is unreadable — which defeats the point
  * of showing the product at all.
  */
-export function FeatureTabs({ features }: { features: SolutionFeature[] }) {
+export function FeatureTabs({ features }: { features: PageFeature[] }) {
   const [active, setActive] = useState(0);
   const current = features[active];
 

@@ -9,6 +9,7 @@ import {
 import { getVisibleTemplates } from "@/lib/visible-templates";
 import { CASE_STUDIES } from "@/lib/case-studies";
 import { getSolutions } from "@/lib/solutions";
+import { getFeaturePages } from "@/lib/features";
 import { getDefinitions } from "@/lib/definitions";
 import { getAuthors, getPosts } from "@/lib/ghost";
 
@@ -73,12 +74,14 @@ function findStaticRoutes(dir = APP_DIR, route = ""): string[] {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [templates, posts, authors, definitions, solutions] = await Promise.all([
+  const [templates, posts, authors, definitions, solutions, features] =
+    await Promise.all([
     getVisibleTemplates(),
     getPosts(),
     getAuthors(),
     getDefinitions(),
     getSolutions(),
+    getFeaturePages(),
   ]);
   const lastModified = new Date();
 
@@ -101,6 +104,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...solutions
       .filter((s) => !s.noIndex)
       .map((s) => entry(`/solutions/${s.slug}`)),
+    ...features.filter((f) => !f.noIndex).map((f) => entry(`/${f.slug}`)),
     ...posts.map((post) => entry(`/blog/${post.slug}`)),
     ...authors.map((author) => entry(`/blog/author/${author.slug}`)),
     ...definitions.map((d) => entry(`/definitions/${d.slug}`)),

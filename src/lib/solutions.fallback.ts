@@ -9,7 +9,7 @@
 // pointing at asset URLs that could be replaced or unpublished independently. The ninth page,
 // small-business-smb-client-portal, is deliberately absent: it is noIndex in
 // Contentful, so it has no business being served from a stale local copy.
-import type { Solution } from "./solutions";
+import type { CmsPage } from "./cms-page";
 import {
   DEMO_URL,
   GUIDE_URL,
@@ -17,7 +17,7 @@ import {
   TRUST_CENTER_URL,
 } from "./constants";
 
-export const FALLBACK_SOLUTIONS: Solution[] = [
+export const FALLBACK_SOLUTIONS: CmsPage[] = [
   {
     slug: "accounting-client-portal",
     seo: {
