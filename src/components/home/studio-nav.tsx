@@ -319,7 +319,7 @@ export function StudioNav({
   const renderMenuLink = (link: NavItem) => {
     if (link.disabled) {
       return (
-        <span aria-disabled="true" className={`block py-3 text-lg ${menuMuted}`}>
+        <span aria-disabled="true" className={`block py-2.5 text-lg ${menuMuted}`}>
           {link.label}
         </span>
       );
@@ -331,7 +331,7 @@ export function StudioNav({
           target={link.newTab ? "_blank" : undefined}
           rel={link.newTab ? "noopener noreferrer" : undefined}
           onClick={() => closeMenu()}
-          className={`block py-3 text-lg ${menuMuted}`}
+          className={`block py-2.5 text-lg ${menuInk}`}
         >
           {link.label}
         </a>
@@ -342,8 +342,11 @@ export function StudioNav({
         href={link.href}
         aria-current={isCurrent(link.href) ? "page" : undefined}
         onClick={() => closeMenu()}
-        className={`block py-3 text-lg ${
-          isCurrent(link.href) ? menuInk : menuMuted
+        // Every item in the page's own ink: a whole menu set in muted grey read
+        // as a list of things that were not available. The page you are on is
+        // the one that changes, and it changes weight rather than colour.
+        className={`block py-2.5 text-lg ${menuInk} ${
+          isCurrent(link.href) ? "font-medium" : ""
         }`}
       >
         {link.label}
@@ -651,10 +654,8 @@ export function StudioNav({
               {NAV_ENTRIES.flatMap((entry, i) =>
                 isNavGroup(entry)
                   ? [
-                      <li key={entry.label} className="pt-5 first:pt-0">
-                        <p
-                          className={`font-mono text-xs uppercase tracking-wide ${menuMuted}`}
-                        >
+                      <li key={entry.label} className="pb-1 pt-6 first:pt-0">
+                        <p className={`font-mono text-xs ${menuMuted}`}>
                           {entry.label}
                         </p>
                       </li>,
@@ -668,7 +669,7 @@ export function StudioNav({
                       <li
                         key={entry.href}
                         className={
-                          i > 0 && isNavGroup(NAV_ENTRIES[i - 1]) ? "pt-5" : ""
+                          i > 0 && isNavGroup(NAV_ENTRIES[i - 1]) ? "pt-6" : ""
                         }
                       >
                         {renderMenuLink(entry)}
