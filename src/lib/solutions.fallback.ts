@@ -4,7 +4,9 @@
 // is a floor, not a second place to edit: a copy change made here and not in
 // Contentful is invisible the moment the CMS answers again.
 //
-// Generated from the same entries this site queries. The ninth page,
+// Generated from the same entries this site queries. It carries no imagery:
+// the screenshots are CMS assets, so a fallback render is copy-only rather than
+// pointing at asset URLs that could be replaced or unpublished independently. The ninth page,
 // small-business-smb-client-portal, is deliberately absent: it is noIndex in
 // Contentful, so it has no business being served from a stale local copy.
 import type { Solution } from "./solutions";
@@ -24,6 +26,7 @@ export const FALLBACK_SOLUTIONS: Solution[] = [
     },
     noIndex: false,
     hero: {
+      layout: "left",
       title: "The accounting client portal your clients won't ignore",
       description: "Built for how accountants work and designed for how clients think — so your branded portal becomes the hub your clients actually return to. Onboarding, file requests, contracts, billing, and messaging in one place.",
       ctas: [{ label: "Get started", href: SIGNUP_URL }],
@@ -206,6 +209,7 @@ export const FALLBACK_SOLUTIONS: Solution[] = [
     },
     noIndex: false,
     hero: {
+      layout: "left",
       title: "Run a modern, tech-enabled consulting firm.",
       description: "Differentiate your consulting firm with a white-label portal that gives your clients a one-stop shop to access dashboards, submit tickets, send messages, make payments, and more.",
       ctas: [{ label: "Get started", href: SIGNUP_URL }],
@@ -378,6 +382,7 @@ export const FALLBACK_SOLUTIONS: Solution[] = [
     },
     noIndex: false,
     hero: {
+      layout: "left",
       title: "Client portal software for modern designers",
       description: "Design firms should care about the client-facing software they use. Make onboarding and client engagement feel modern, on-brand, and differentiated with Assembly.",
       ctas: [{ label: "Get started", href: SIGNUP_URL }],
@@ -534,6 +539,7 @@ export const FALLBACK_SOLUTIONS: Solution[] = [
     },
     noIndex: false,
     hero: {
+      layout: "left",
       title: "Client portal software for modern freelancers",
       description: "Differentiate your business with a white-label portal to manage customers and projects seamlessly.",
       ctas: [{ label: "Get started", href: SIGNUP_URL }],
@@ -680,6 +686,7 @@ export const FALLBACK_SOLUTIONS: Solution[] = [
     },
     noIndex: false,
     hero: {
+      layout: "left",
       title: "Run a modern, tech-enabled law firm",
       description: "Differentiate your law firm with a secure portal that gives your clients a one-stop shop to upload files, sign contracts, send messages, access dashboards, and more.",
       ctas: [{ label: "Get started", href: SIGNUP_URL }],
@@ -844,6 +851,7 @@ export const FALLBACK_SOLUTIONS: Solution[] = [
     },
     noIndex: false,
     hero: {
+      layout: "center",
       title: "A modern client portal for marketing agencies",
       description: "Differentiate your agency with a white-label portal to manage customers and projects seamlessly.",
       ctas: [{ label: "Get started", href: SIGNUP_URL }, { label: "Book a demo", href: DEMO_URL }],
@@ -990,6 +998,7 @@ export const FALLBACK_SOLUTIONS: Solution[] = [
     },
     noIndex: false,
     hero: {
+      layout: "left",
       title: "Modernize your property management business",
       description: "Give clients a custom portal to communicate with your team, make payments, sign contracts, schedule viewings, submit requests, and more.",
       ctas: [{ label: "Get started", href: SIGNUP_URL }],
@@ -1154,6 +1163,7 @@ export const FALLBACK_SOLUTIONS: Solution[] = [
     },
     noIndex: false,
     hero: {
+      layout: "left",
       title: "Flexible customer portal software for tech firms",
       description: "Integrate a fully custom client-facing customer portal, with out-of-the box billing, notifications, messaging, and eSignatures, and integrate with custom applications via API.",
       ctas: [{ label: "Get started", href: SIGNUP_URL }],

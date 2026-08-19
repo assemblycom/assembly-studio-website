@@ -34,6 +34,24 @@ export interface SolutionCta {
   href: string;
 }
 
+/**
+ * A screenshot or photo from the CMS. Dimensions are required because next/image
+ * needs the intrinsic ratio, and these assets range from portrait hero shots to
+ * very wide product captures — a fixed aspect would crop most of them.
+ */
+export interface SolutionImage {
+  url: string;
+  alt: string;
+  width: number;
+  height: number;
+}
+
+/** A small app glyph on a grid card. Always SVG in the CMS. */
+export interface SolutionIcon {
+  url: string;
+  alt: string;
+}
+
 /** One capability within a feature section — "Invoicing", "eSignatures". */
 export interface SolutionFeature {
   label: string;
@@ -41,6 +59,8 @@ export interface SolutionFeature {
   body: string;
   /** A case study or product page, when the entry links one. */
   href?: string;
+  /** The product screenshot this capability was paired with in the CMS. */
+  image?: SolutionImage;
 }
 
 export interface SolutionQuote {
@@ -60,6 +80,7 @@ export interface SolutionGridItem {
   title: string;
   description: string;
   href?: string;
+  icon?: SolutionIcon;
 }
 
 /**
@@ -75,6 +96,11 @@ export interface SolutionFeatureSection {
   quote?: SolutionQuote;
   /** A video the entry links, shown as a link out rather than an embed. */
   video?: string;
+  /**
+   * The section's own visual, used when its tabs carry no copy to switch between
+   * — several sections in the CMS are a title, a lead, and one screenshot.
+   */
+  image?: SolutionImage;
 }
 
 export interface SolutionGridSection {
@@ -91,6 +117,7 @@ export interface SolutionStorySection {
   body: string;
   stats: SolutionStat[];
   caseStudy?: string;
+  image?: SolutionImage;
 }
 
 export interface SolutionFaqSection {
@@ -122,7 +149,18 @@ export interface Solution {
    * out of the sitemap, and `robots: { index: false }` on the page.
    */
   noIndex: boolean;
-  hero: { title: string; description: string; ctas: SolutionCta[] };
+  hero: {
+    title: string;
+    description: string;
+    ctas: SolutionCta[];
+    image?: SolutionImage;
+    /**
+     * The CMS hero type. "left" sets the copy beside its banner, which is how
+     * eight of the nine are authored and what their portrait banners need;
+     * "center" leads with centred copy over a wide banner.
+     */
+    layout: "left" | "center";
+  };
   sections: SolutionSection[];
   /** Absent on the one page whose entry has no CTA section. */
   closing?: { title: string; description?: string; ctas: SolutionCta[] };
@@ -167,6 +205,55 @@ function contentType(value: unknown): string | null {
 
 function linkedEntries(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
+}
+
+interface AssetFile {
+  url?: unknown;
+  contentType?: unknown;
+  details?: { image?: { width?: number; height?: number } };
+}
+
+function assetFile(raw: unknown): { f: Fields; file: AssetFile } | null {
+  const f = fields(raw);
+  const file = f?.file as AssetFile | undefined;
+  // An unpublished asset resolves to a bare link with no fields at all.
+  return f && file && typeof file.url === "string" ? { f, file } : null;
+}
+
+// Contentful serves protocol-relative asset URLs.
+function assetUrl(url: unknown): string {
+  const value = String(url);
+  return value.startsWith("//") ? `https:${value}` : value;
+}
+
+/**
+ * Alt text, preferring the asset's own description over its filename-derived
+ * title. Falls back to the surrounding entry's name, so a shot is never
+ * announced as "Screen.jpg".
+ */
+function altText(f: Fields, fallback: string): string {
+  return text(f.description) ?? text(f.title) ?? fallback;
+}
+
+function image(raw: unknown, fallbackAlt: string): SolutionImage | undefined {
+  const resolved = assetFile(raw);
+  if (!resolved) return undefined;
+  const dimensions = resolved.file.details?.image;
+  // Without intrinsic dimensions next/image cannot lay the shot out, and these
+  // range from portrait to ultra-wide, so no single fallback ratio would do.
+  if (!dimensions?.width || !dimensions.height) return undefined;
+  return {
+    url: assetUrl(resolved.file.url),
+    alt: altText(resolved.f, fallbackAlt),
+    width: dimensions.width,
+    height: dimensions.height,
+  };
+}
+
+function icon(raw: unknown, fallbackAlt: string): SolutionIcon | undefined {
+  const resolved = assetFile(raw);
+  if (!resolved) return undefined;
+  return { url: assetUrl(resolved.file.url), alt: altText(resolved.f, fallbackAlt) };
 }
 
 // ── Normalizations ───────────────────────────────────────────────────────────
@@ -265,7 +352,12 @@ function gridItems(raw: unknown): SolutionGridItem[] {
     const title = heading(f.title);
     const description = text(f.description);
     if (!title || !description) continue;
-    items.push({ title, description, href: normalizeLink(f.url) });
+    items.push({
+      title,
+      description,
+      href: normalizeLink(f.url),
+      icon: icon(f.image, `${title} icon`),
+    });
   }
   return items;
 }
@@ -286,6 +378,9 @@ function featureSection(f: Fields): SolutionFeatureSection | null {
   const features: SolutionFeature[] = [];
   let pullQuote: SolutionQuote | undefined;
   let video: string | undefined;
+  // Kept aside so a section whose tabs carry no copy still shows its screenshot
+  // rather than rendering as a bare title.
+  let sectionImage: SolutionImage | undefined;
 
   for (const tab of linkedEntries(f.tabs)) {
     const t = fields(tab);
@@ -299,13 +394,16 @@ function featureSection(f: Fields): SolutionFeatureSection | null {
 
     const label = text(t.title);
     const body = text(t.description);
+    const shot = image(t.image, label ? `${label} in Assembly` : title);
+    if (shot && !sectionImage) sectionImage = shot;
+
     // A tab with no copy was a screenshot slot, and one that just restates the
     // section's own title and lead only read as distinct beside that screenshot.
     if (!label || !body) continue;
     const tabHeading = heading(t.subTitle) ?? label;
     if (tabHeading === title || body === description) continue;
 
-    features.push({ label, heading: tabHeading, body, href: link });
+    features.push({ label, heading: tabHeading, body, href: link, image: shot });
   }
 
   return {
@@ -316,6 +414,9 @@ function featureSection(f: Fields): SolutionFeatureSection | null {
     features: features.length ? features : undefined,
     quote: pullQuote,
     video,
+    // Only when the tabs produced no capability list of their own; otherwise each
+    // capability carries its own shot and a section-level one would duplicate.
+    image: features.length ? undefined : sectionImage,
   };
 }
 
@@ -342,6 +443,7 @@ function storySection(f: Fields): SolutionStorySection | null {
     body,
     stats: stats(f.highlights),
     caseStudy: slug && CASE_STUDY_SLUGS.has(slug) ? slug : undefined,
+    image: image(f.caseStudyImage, text(f.name) ?? "Assembly customer"),
   };
 }
 
@@ -422,6 +524,11 @@ function toSolution(entry: Entry<never>): Solution | null {
       title: heroTitle,
       description: text(heroFields.heroDescription) ?? "",
       ctas: ctas(heroFields),
+      image: image(heroFields.banner1, heroTitle),
+      // The CMS spells these "Hero - Left" / "Hero - Center".
+      layout: text(heroFields.type)?.toLowerCase().includes("center")
+        ? "center"
+        : "left",
     },
     sections: content
       .map(toSection)
