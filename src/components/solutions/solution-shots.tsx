@@ -5,65 +5,70 @@ import { useState } from "react";
 import type { SolutionFeature, SolutionImage } from "@/lib/solutions";
 
 /**
- * The product screenshots on the /solutions pages.
+ * The CMS imagery on the /solutions pages.
  *
- * Every shot is light product UI, so it needs a ground of its own or it bleeds
- * into the page — the same warm off-white the case-study screenshots and the
- * templates gallery sit on, and the neutral dark surface in dark mode. Reused
- * rather than restyled so a shot here reads the same as one in a story.
+ * These assets are already art-directed — each one carries its own ground,
+ * rounded corners and cropping, composed to sit full-bleed in a section. So they
+ * get no pad and no hairline: the case-study screenshot treatment exists for
+ * BARE product shots that would otherwise bleed into the page, and wrapping an
+ * already-framed composition in it reads as a frame inside a frame.
  */
-const PAD =
-  "rounded-2xl p-3 md:p-5 [[data-theme=light]_&]:bg-[#F5F5F0] [[data-theme=dark]_&]:bg-[#1C1C1C]";
-const SHOT =
-  "w-full rounded-lg border border-black/[0.08] md:rounded-xl [[data-theme=dark]_&]:border-white/[0.08]";
-
 export function Shot({
   image,
   sizes,
   priority = false,
+  eager = false,
   className = "",
 }: {
   image: SolutionImage;
   sizes: string;
   priority?: boolean;
+  /**
+   * Fetch even while hidden. next/image lazy-loads by default, and a lazy image
+   * inside a `hidden` panel never enters the viewport, so it would only start
+   * downloading the moment its tab is opened — the blank box this avoids.
+   */
+  eager?: boolean;
   className?: string;
 }) {
   return (
-    <div className={`${PAD} ${className}`}>
-      <Image
-        src={image.url}
-        alt={image.alt}
-        width={image.width}
-        height={image.height}
-        quality={90}
-        sizes={sizes}
-        priority={priority}
-        className={SHOT}
-      />
-    </div>
+    <Image
+      src={image.url}
+      alt={image.alt}
+      width={image.width}
+      height={image.height}
+      quality={90}
+      sizes={sizes}
+      priority={priority}
+      {...(eager && !priority ? { loading: "eager" as const } : {})}
+      className={`w-full rounded-xl ${className}`}
+    />
   );
 }
 
 /**
- * A capability list beside its screenshot, switched by a tab strip — the shape
- * these sections are authored as in the CMS, where each tab pairs copy with one
- * shot. Rendering all of them stacked would run a single section to six
- * full-width screenshots.
+ * A capability list switched by a tab strip — the shape these sections are
+ * authored as in the CMS, where each tab pairs copy with one shot. Stacking them
+ * all would run a single section to six full-width screenshots.
  *
- * Follows the strip on the homepage's How it works: one outlined, overflow-hidden
- * shell, segments divided by hairlines, the visual inside it. No auto-advance —
- * that section is a story that plays itself, this is a list you browse.
+ * The shot sits BELOW its copy rather than beside it. These are wide
+ * compositions (~2.2:1) of dense product UI, and at half the column width the
+ * invoice and message text inside them is unreadable — which defeats the point
+ * of showing the product at all.
  */
 export function FeatureTabs({ features }: { features: SolutionFeature[] }) {
   const [active, setActive] = useState(0);
   const current = features[active];
 
   return (
-    <div className="mt-12 overflow-hidden rounded-[20px] border border-border [[data-theme=dark]_&]:border-white/15 [[data-theme=dark]_&]:bg-white/[0.04]">
+    <div className="mt-12 overflow-hidden rounded-[20px] border border-border [[data-theme=dark]_&]:border-white/15">
+      {/* Tabs size to their labels rather than stretching edge to edge: three
+          short words spread across 1100px read as table headers, not tabs.
+          Scrolls on a phone instead of wrapping to a ragged block. */}
       <div
         role="tablist"
         aria-label="Capabilities"
-        className="grid grid-cols-2 divide-x divide-y divide-border [[data-theme=dark]_&]:divide-white/15 sm:flex sm:divide-y-0"
+        className="flex overflow-x-auto border-b border-border [[data-theme=dark]_&]:border-white/15"
       >
         {features.map((feature, i) => (
           <button
@@ -72,11 +77,15 @@ export function FeatureTabs({ features }: { features: SolutionFeature[] }) {
             role="tab"
             aria-selected={active === i}
             onClick={() => setActive(i)}
-            // Focus fills the segment rather than ringing it: these are segments
-            // of one strip inside a rounded, overflow-hidden shell, so an outline
-            // is either clipped at the corner or floats free of the dividers.
-            className={`flex-1 cursor-pointer px-4 py-3.5 text-sm outline-none transition-colors hover:bg-foreground/[0.03] focus-visible:bg-foreground/[0.06] ${
-              active === i ? "text-foreground" : "text-muted-foreground"
+            // The active tab is marked by the rule under it picking up the
+            // foreground, the way a tab bar reads — no filled pill, which is
+            // this site's language for a selected chip, not a selected tab.
+            // Focus fills the segment: an outline inside a rounded,
+            // overflow-hidden shell gets clipped at the corner.
+            className={`shrink-0 cursor-pointer border-b px-5 py-3.5 text-sm outline-none transition-colors focus-visible:bg-foreground/[0.06] ${
+              active === i
+                ? "border-foreground text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
             }`}
           >
             {feature.label}
@@ -84,10 +93,8 @@ export function FeatureTabs({ features }: { features: SolutionFeature[] }) {
         ))}
       </div>
 
-      {/* The panel is padded by the shell, and the shot brings its own ground, so
-          the two radii stay concentric rather than stacking a third curve. */}
-      <div className="grid items-center gap-8 border-t border-border p-4 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] md:gap-10 md:p-6 [[data-theme=dark]_&]:border-white/15">
-        <div>
+      <div className="p-5 md:p-8">
+        <div className="max-w-2xl">
           <p className="type-eyebrow text-muted-foreground">{current.label}</p>
           <h3 className="type-h4 mt-3 text-foreground">{current.heading}</h3>
           <p className="type-body mt-2 text-muted-foreground">{current.body}</p>
@@ -100,16 +107,22 @@ export function FeatureTabs({ features }: { features: SolutionFeature[] }) {
             </a>
           )}
         </div>
-        {current.image ? (
-          <Shot
-            image={current.image}
-            sizes="(min-width: 768px) 600px, 100vw"
-            // Keyed so switching tabs swaps the element instead of reusing one
-            // <img> — without it the previous shot stays painted at the new
-            // shot's intrinsic ratio until the new file arrives.
-            key={current.image.url}
-          />
-        ) : null}
+        {/* Every shot is mounted and only the active one shown, so all of them
+            are fetched on load and switching a tab is instant. Rendering just the
+            active one left an empty panel for as long as the new file took to
+            arrive — and these are megabyte-scale PNGs. */}
+        {features.map((feature, i) =>
+          feature.image ? (
+            <div key={feature.label} className={i === active ? "" : "hidden"}>
+              <Shot
+                image={feature.image}
+                sizes="(min-width: 1200px) 1040px, 100vw"
+                eager
+                className="mt-8"
+              />
+            </div>
+          ) : null,
+        )}
       </div>
     </div>
   );

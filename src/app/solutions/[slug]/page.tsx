@@ -184,8 +184,8 @@ function FeatureSection({ section }: { section: SolutionFeatureSection }) {
       )}
 
       {section.features?.length === 1 && (
-        <div className="mt-12 grid items-center gap-8 md:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] md:gap-12">
-          <div>
+        <div className="mt-12">
+          <div className="max-w-2xl">
             <p className="type-eyebrow text-muted-foreground">
               {section.features[0].label}
             </p>
@@ -207,7 +207,8 @@ function FeatureSection({ section }: { section: SolutionFeatureSection }) {
           {section.features[0].image && (
             <Shot
               image={section.features[0].image}
-              sizes="(min-width: 768px) 600px, 100vw"
+              sizes="(min-width: 1200px) 1120px, 100vw"
+              className="mt-8"
             />
           )}
         </div>
@@ -223,7 +224,7 @@ function FeatureSection({ section }: { section: SolutionFeatureSection }) {
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`${section.title} — watch the video`}
-            className="mt-12 block"
+            className="mt-12 block transition-opacity hover:opacity-90"
           >
             <Shot
               image={section.image}
@@ -243,6 +244,19 @@ function FeatureSection({ section }: { section: SolutionFeatureSection }) {
     </Band>
   );
 }
+
+// A muted-fill card that is also a link. The step is a nudge within the same
+// tone, the way the case-study screenshot pad moves (#F5F5F0 → #EFEFE9 light,
+// #1C1C1C → #222222 dark) — and dark --muted IS that pad's dark surface, so it
+// reuses the same landing value. foreground/10 was wrong twice over: far too
+// heavy a jump, and it is the site's ACTIVE filter-chip fill, so a hovered card
+// read as a selected one.
+//
+// Light lives in the base and dark in the scoped override, because the server
+// markup carries no data-theme at all — the pre-paint script adds it — so a
+// [data-theme=light] rule would not apply to the first paint.
+const CARD_HOVER =
+  "transition-colors hover:bg-[#EFF0F3] [[data-theme=dark]_&]:hover:bg-[#222222]";
 
 function GridSection({ section }: { section: SolutionGridSection }) {
   return (
@@ -297,7 +311,7 @@ function GridSection({ section }: { section: SolutionGridSection }) {
               {...(external
                 ? { target: "_blank", rel: "noopener noreferrer" }
                 : {})}
-              className={`${shell} transition-colors hover:bg-foreground/10`}
+              className={`${shell} ${CARD_HOVER}`}
             >
               {body}
             </a>
@@ -348,7 +362,7 @@ function StorySection({ section }: { section: SolutionStorySection }) {
             height={section.image.height}
             quality={90}
             sizes="(min-width: 768px) 480px, 100vw"
-            className="w-full rounded-2xl"
+            className="w-full rounded-xl"
           />
         )}
       </div>
@@ -407,7 +421,7 @@ function Hero({ hero }: { hero: Solution["hero"] }) {
               image={hero.image}
               sizes="(min-width: 1200px) 1120px, 100vw"
               priority
-              className="mt-14 text-left"
+              className="mt-14"
             />
           )}
         </div>
