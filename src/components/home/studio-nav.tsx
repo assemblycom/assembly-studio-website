@@ -15,7 +15,7 @@ import {
   type NavGroup,
   type NavItem,
 } from "@/lib/constants";
-import { NavDropdown } from "@/components/layout/nav-dropdown";
+import { NavDropdown, NavDropdownGroup } from "@/components/layout/nav-dropdown";
 import { useTheme } from "@/components/theme/theme-provider";
 
 // Past this scroll distance the sticky header swaps from transparent to a
@@ -514,6 +514,9 @@ export function StudioNav({
 
           {/* Primary nav — centered between the two equal side columns */}
           <nav className={`flex shrink-0 justify-center ${minimal ? "hidden" : ""}`}>
+            {/* One shared open-panel state for the row: switching triggers is a
+                single move instead of two animations racing. */}
+            <NavDropdownGroup>
             <ul className="flex items-center">
               {NAV_ENTRIES.map((entry) =>
                 isNavGroup(entry) ? (
@@ -521,9 +524,6 @@ export function StudioNav({
                     <NavDropdown
                       group={entry}
                       triggerClassName={groupTriggerCls(entry)}
-                      chevronClassName={
-                        lightContent ? "text-white/50" : "text-foreground/40"
-                      }
                     />
                   </li>
                 ) : (
@@ -554,6 +554,7 @@ export function StudioNav({
                 ),
               )}
             </ul>
+            </NavDropdownGroup>
           </nav>
 
           {/* Account actions — right. */}

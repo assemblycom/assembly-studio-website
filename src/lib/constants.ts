@@ -56,27 +56,13 @@ export function isNavGroup(entry: NavEntry): entry is NavGroup {
   return "items" in entry;
 }
 
-// Two grouped panels and two direct links. The grouping follows
-// www.assembly.com (Product / Resources / Customers / Pricing) so someone
-// arriving from there finds the same shelves, but the panels list only pages
-// that exist: the feature pages still to be written slot into Product, and
-// nothing has to be restructured when they land.
+// One grouped panel and four direct links. Templates and Security are their
+// own links rather than a Product panel: two items behind a trigger is a panel
+// that costs a hover to read what it could have just said. Resources stays a
+// group because one of its two is off-site docs.
 export const NAV_ENTRIES: NavEntry[] = [
-  {
-    label: "Product",
-    items: [
-      {
-        label: "Templates",
-        href: "/templates",
-        description: "Start from a prebuilt app and reshape it by chat",
-      },
-      {
-        label: "Security",
-        href: "/security",
-        description: "Authentication and permissions, engineered in",
-      },
-    ],
-  },
+  { label: "Templates", href: "/templates" },
+  { label: "Security", href: "/security" },
   {
     label: "Resources",
     items: [
