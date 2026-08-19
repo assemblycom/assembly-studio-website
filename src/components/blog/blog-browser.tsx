@@ -104,12 +104,18 @@ export function BlogBrowser({
           {/* Only the chosen shelf is drawn as a key; the rest sit as plain
               labels, so the row reads as one selected thing among options
               rather than a rank of buttons competing with the cards. */}
-          <div className="flex flex-wrap items-center gap-1">
+          {/* One line at every width. Wrapped, the shelves broke to a second row
+              on a phone and the selected key sat alone above the rest, which
+              read as two groups; scrolling keeps them one row of options. The
+              gutters are negative-margined back out so the first and last chip
+              still line up with the cards, and the scrollbar is hidden because
+              the row is short enough to swipe. */}
+          <div className="-mx-6 flex items-center gap-1 overflow-x-auto px-6 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
             {[ALL, ...categories].map((filter) => (
               <button
                 key={filter}
                 onClick={() => select(filter)}
-                className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
+                className={`shrink-0 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm transition-colors ${
                   active === filter
                     ? "bg-foreground text-background"
                     : "text-muted-foreground hover:text-foreground"
