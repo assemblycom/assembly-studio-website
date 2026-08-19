@@ -10,6 +10,7 @@ import { getVisibleTemplates } from "@/lib/visible-templates";
 import { CASE_STUDIES } from "@/lib/case-studies";
 import { getSolutions } from "@/lib/solutions";
 import { getFeaturePages } from "@/lib/features";
+import { getComparisons } from "@/lib/comparisons";
 import { getOpenRoles } from "@/lib/careers";
 import { getDefinitions } from "@/lib/definitions";
 import { getAuthors, getPosts } from "@/lib/ghost";
@@ -42,6 +43,7 @@ const HINTS: Record<string, { changeFrequency: Frequency; priority: number }> = 
   "/pricing": { changeFrequency: "weekly", priority: 0.8 },
   "/security": { changeFrequency: "monthly", priority: 0.7 },
   "/definitions": { changeFrequency: "monthly", priority: 0.5 },
+  "/comparison": { changeFrequency: "monthly", priority: 0.7 },
   "/blog": { changeFrequency: "weekly", priority: 0.7 },
   "/demo": { changeFrequency: "monthly", priority: 0.6 },
 };
@@ -75,14 +77,23 @@ function findStaticRoutes(dir = APP_DIR, route = ""): string[] {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [templates, posts, authors, definitions, solutions, features, roles] =
-    await Promise.all([
+  const [
+    templates,
+    posts,
+    authors,
+    definitions,
+    solutions,
+    features,
+    comparisons,
+    roles,
+  ] = await Promise.all([
     getVisibleTemplates(),
     getPosts(),
     getAuthors(),
     getDefinitions(),
     getSolutions(),
     getFeaturePages(),
+    getComparisons(),
     getOpenRoles(),
   ]);
   const lastModified = new Date();
@@ -107,6 +118,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .filter((s) => !s.noIndex)
       .map((s) => entry(`/solutions/${s.slug}`)),
     ...features.filter((f) => !f.noIndex).map((f) => entry(`/${f.slug}`)),
+    ...comparisons
+      .filter((c) => !c.noIndex)
+      .map((c) => entry(`/comparison/${c.slug}`)),
     // Only roles that are open AND written up here: an Ashby-only role has no
     // page of ours to list, and a closed one redirects to /jobs.
     ...roles

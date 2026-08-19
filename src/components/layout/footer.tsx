@@ -260,7 +260,7 @@ export function Footer({
                 video two tracks, so the frame gets bigger as the gaps close.
                 The switch keeps the far right corner. */}
             <div className="flex flex-col gap-10 lg:grid lg:grid-cols-6 lg:items-start lg:gap-x-10">
-              <div className="grid grid-cols-2 gap-x-8 gap-y-10 lg:col-span-4 lg:grid-cols-4 lg:gap-x-8">
+              <div className="grid grid-cols-2 gap-x-8 gap-y-10 lg:col-span-4 lg:grid-cols-5 lg:gap-x-6">
                 {[...FOOTER_GROUPS, { label: "Connect", links: CONNECT }].map((col) => (
                   <div key={col.label} className="sm:min-w-32">
                     {/* A step above the links, not level with them: at
@@ -321,7 +321,7 @@ export function Footer({
   return (
     <footer className="bg-background">
       <div className="mx-auto max-w-7xl px-6 py-16">
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-6">
           <div className="col-span-2 md:col-span-1">
             <Image
               src="/images/logo-mark.svg"

@@ -8,8 +8,9 @@ import { getCmsPage, getCmsPages, type CmsPageSet } from "./cms-page";
  * own.
  *
  * Explicit rather than "every pageTemplate without a prefix": that content type
- * also holds the comparison pages, the university articles and the glossary, none
- * of which belong on this site yet.
+ * also holds the home page, the university articles and the affiliate/experts
+ * pages, none of which belong on this site. (The comparison pages are NOT in it —
+ * they have their own types; see comparisons.ts.)
  */
 const FEATURE_SLUGS = [
   "client-portal",

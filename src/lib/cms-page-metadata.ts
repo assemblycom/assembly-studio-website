@@ -1,7 +1,16 @@
 import type { Metadata } from "next";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { OG_IMAGE } from "@/lib/seo";
-import type { CmsPage } from "@/lib/cms-page";
+
+/**
+ * What this needs off a CMS page: its SEO pair and its No Index flag. Structural
+ * rather than one model's type, because two unrelated Contentful models feed it
+ * — `pageTemplate` (solutions, features) and the comparison pages.
+ */
+export interface CmsSeoSource {
+  seo: { title: string; description: string };
+  noIndex: boolean;
+}
 
 /**
  * Metadata for a CMS-backed page. Not pageMetadata(): that reads PAGE_SEO, which
@@ -9,7 +18,7 @@ import type { CmsPage } from "@/lib/cms-page";
  * Same shape written out — the tab title takes the layout's
  * "Assembly Studio | %s" template, which openGraph does not apply itself.
  */
-export function cmsPageMetadata(page: CmsPage, path: string): Metadata {
+export function cmsPageMetadata(page: CmsSeoSource, path: string): Metadata {
   const { title, description } = page.seo;
   return {
     title,

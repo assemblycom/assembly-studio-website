@@ -282,5 +282,19 @@ export const FOOTER_GROUPS: { label: string; links: NavLink[] }[] = [
       { label: "Trust center", href: TRUST_CENTER_URL, external: true, newTab: true },
     ],
   },
+  // The headline competitors, not all nine: the full set lives on /comparison,
+  // and a footer column that runs longer than the ones beside it stops reading as
+  // a column. Compare is footer-only by design — it earns a shelf for search
+  // traffic without taking a slot in the primary nav.
+  {
+    label: "Compare",
+    links: [
+      { label: "Compare all", href: "/comparison" },
+      { label: "vs Moxo", href: "/comparison/assembly-vs-moxo-alternative" },
+      { label: "vs SuiteDash", href: "/comparison/assembly-vs-suitedash-alternative" },
+      { label: "vs HoneyBook", href: "/comparison/assembly-vs-honeybook-alternative" },
+      { label: "vs SmartVault", href: "/comparison/assembly-vs-smartvault-alternative" },
+    ],
+  },
   { label: "Legal", links: LEGAL_LINKS },
 ];
