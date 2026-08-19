@@ -277,6 +277,7 @@ export const FOOTER_GROUPS: { label: string; links: NavLink[] }[] = [
       { label: "Customers", href: "/customers" },
       { label: "Brand", href: "/brand" },
       { label: "Definitions", href: "/definitions" },
+      { label: "Careers", href: "/jobs" },
       { label: "Assembly Guide", href: GUIDE_URL, external: true },
       { label: "API reference", href: API_REFERENCE_URL, external: true },
       { label: "Trust center", href: TRUST_CENTER_URL, external: true, newTab: true },
