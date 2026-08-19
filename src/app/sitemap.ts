@@ -8,6 +8,7 @@ import {
 } from "@/lib/constants";
 import { getVisibleTemplates } from "@/lib/visible-templates";
 import { CASE_STUDIES } from "@/lib/case-studies";
+import { getSolutions } from "@/lib/solutions";
 import { getDefinitions } from "@/lib/definitions";
 import { getAuthors, getPosts } from "@/lib/ghost";
 
@@ -72,11 +73,12 @@ function findStaticRoutes(dir = APP_DIR, route = ""): string[] {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [templates, posts, authors, definitions] = await Promise.all([
+  const [templates, posts, authors, definitions, solutions] = await Promise.all([
     getVisibleTemplates(),
     getPosts(),
     getAuthors(),
     getDefinitions(),
+    getSolutions(),
   ]);
   const lastModified = new Date();
 
@@ -94,6 +96,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...pages.map(entry),
     ...templates.map((t) => entry(`/templates/${t.slug}`)),
     ...CASE_STUDIES.map((s) => entry(`/customers/${s.slug}`)),
+    // One solution page is No Index in Contentful; its page carries the matching
+    // robots directive, so listing it here would contradict the page itself.
+    ...solutions
+      .filter((s) => !s.noIndex)
+      .map((s) => entry(`/solutions/${s.slug}`)),
     ...posts.map((post) => entry(`/blog/${post.slug}`)),
     ...authors.map((author) => entry(`/blog/author/${author.slug}`)),
     ...definitions.map((d) => entry(`/definitions/${d.slug}`)),
