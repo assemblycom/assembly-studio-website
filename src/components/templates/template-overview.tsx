@@ -21,15 +21,38 @@ const OPTIONS: Options = {
     ),
   },
   renderNode: {
+    // Every level Contentful offers is mapped, not just the three the first
+    // templates happened to use. An unmapped level falls through to a bare tag,
+    // and the reset leaves that with no margin at all — which is how "Key
+    // Benefits" (an H6) ended up sitting flush against the paragraph above it,
+    // reading as a stray line of body copy rather than as the head of the list
+    // under it.
+    //
+    // The space is deliberately asymmetric: more above a head than below it, so
+    // each one groups with the block it introduces instead of floating between
+    // two. Below is the following block's own mt-5.
     // first:mt-0 so the opening "About this template" sits tight to the gallery.
+    [BLOCKS.HEADING_1]: (_node, children) => (
+      <h1 className="type-h3 mt-14 first:mt-0">{children}</h1>
+    ),
     [BLOCKS.HEADING_2]: (_node, children) => (
       <h2 className="type-h3 mt-14 first:mt-0">{children}</h2>
     ),
     [BLOCKS.HEADING_3]: (_node, children) => (
-      <h3 className="mt-12 text-lg font-medium md:mt-14">{children}</h3>
+      <h3 className="mt-12 text-lg font-medium first:mt-0 md:mt-14">{children}</h3>
     ),
     [BLOCKS.HEADING_4]: (_node, children) => (
-      <h4 className="mt-10 text-base font-medium">{children}</h4>
+      <h4 className="mt-10 text-base font-medium first:mt-0">{children}</h4>
+    ),
+    // The two smallest levels are the ones the app templates actually use for
+    // their section labels ("Overview", "Key Benefits"). They stay at the body's
+    // size and weight — full ink against the paragraphs' foreground/80 is
+    // already what separates them — and earn their place with the space above.
+    [BLOCKS.HEADING_5]: (_node, children) => (
+      <h5 className="mt-9 text-base first:mt-0 md:text-[1.0625rem]">{children}</h5>
+    ),
+    [BLOCKS.HEADING_6]: (_node, children) => (
+      <h6 className="mt-9 text-base first:mt-0 md:text-[1.0625rem]">{children}</h6>
     ),
     [BLOCKS.PARAGRAPH]: (_node, children) => (
       <p className="mt-5 text-base leading-[1.75] text-foreground/80 first:mt-0 md:mt-6 md:text-[1.0625rem] md:leading-[1.85]">

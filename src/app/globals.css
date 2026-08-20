@@ -2020,6 +2020,20 @@ html[data-theme="dark"] .v63-ring-solid::before {
   --v69-well-2: #cfcfc0;
 }
 
+/* On the templates page a cover IS the card, so the widest inset the covers are
+   drawn with (p-4, 16px at the design size) reads as a margin around the widget
+   rather than as the widget's own padding — the white panel floats in the middle
+   of the tile instead of filling it. Brought in to 10px. The covers already drawn
+   tighter (p-3, p-3.5) keep their step; they never had the problem.
+
+   Hung off the utility class because the inset is set per cover, in 29 of them,
+   and the alternative is the same value written 29 times. Scoped to
+   .template-mock so the home hero, which sizes and pads these itself, is
+   untouched. */
+.template-mock > .p-4 {
+  padding: 0.625rem;
+}
+
 /* The gallery used to force every mock size onto a coarse three-step scale from
    here with !important, back when the covers carried ad-hoc sizes. The mocks now
    run one ladder of their own (see MOCK TYPE SCALE in hero-v71.tsx), and the

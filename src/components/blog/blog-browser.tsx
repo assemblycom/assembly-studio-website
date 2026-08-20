@@ -109,8 +109,8 @@ export function BlogBrowser({
                 // scroller crops it.
                 className={`type-caption inline-flex h-8 shrink-0 items-center whitespace-nowrap rounded-lg px-3 leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground/40 ${
                   active === filter
-                    ? "bg-foreground/[0.10] text-foreground"
-                    : "bg-transparent text-muted-foreground active:bg-foreground/[0.08] [@media(hover:hover)]:hover:bg-foreground/[0.05] [@media(hover:hover)]:hover:text-foreground"
+                    ? "bg-border text-foreground"
+                    : "bg-transparent text-muted-foreground active:bg-border [@media(hover:hover)]:hover:bg-muted [@media(hover:hover)]:hover:text-foreground"
                 }`}
               >
                 {filter}

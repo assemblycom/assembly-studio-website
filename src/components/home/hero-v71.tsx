@@ -2272,6 +2272,27 @@ function CardExport() {
   );
 }
 
+// The folder mark the two folder-view covers share. Files and design approvals
+// are drawn as the same object — a band naming the folder over rows that fill the
+// card — so they carry the same glyph rather than one outline and one solid.
+// Outline is the pair's: filled, at 16px on a coloured band, it read as a dark
+// chip sitting beside the label instead of as a folder.
+function FolderGlyph({ className }: { className: string }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M2 4.5A1.5 1.5 0 0 1 3.5 3h2.2l1.3 1.6h5.5A1.5 1.5 0 0 1 14 6.1v5.4A1.5 1.5 0 0 1 12.5 13h-9A1.5 1.5 0 0 1 2 11.5z" />
+    </svg>
+  );
+}
+
 // Files — a folder and what is in it, set as the design-approvals folder view
 // is: a band naming the folder over rows that fill the card. It was a thin
 // coloured strip over two rows and a half-empty pane, which read as a card with
@@ -2290,9 +2311,7 @@ function CardFiles() {
           lime-in-light, periwinkle-in-dark pair every accent in the set runs —
           with the type on ink, since both fills are light. */}
       <div className="flex shrink-0 items-center gap-2 px-5 py-4 [[data-theme=light]_&]:bg-[#D9ED92] [[data-theme=dark]_&]:bg-[#7DA4FF]">
-        <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-[#1B1B1B]" fill="currentColor" aria-hidden>
-          <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4.1a1.5 1.5 0 0 1 1.06.44L11 6.78h8.5A1.5 1.5 0 0 1 21 8.28v9.22a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5Z" />
-        </svg>
+        <FolderGlyph className="size-4 shrink-0 text-[#1B1B1B]" />
         <span className="truncate text-[13px] leading-none text-[#1B1B1B] max-sm:[.template-mock-gallery_&]:text-[12px]">
           Important
         </span>
@@ -2400,14 +2419,9 @@ function CardHelpdesk() {
   return (
     <div className="flex h-full items-stretch bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
       <span className="flex w-full flex-col overflow-hidden rounded-xl border border-black/[0.08] bg-[#FFFFFF] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
-        <span className="flex items-center gap-2 px-3 py-2.5">
+        <span className="flex items-center px-3 py-2.5">
           <span className="min-w-0 flex-1 truncate text-[13px] leading-none text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[12px]">
             Welcome to the portal
-          </span>
-          <span className="flex shrink-0 gap-[3px]" aria-hidden>
-            {[0, 1, 2].map((i) => (
-              <span key={i} className="size-[3px] rounded-full bg-muted-foreground/60" />
-            ))}
           </span>
         </span>
         <span className="flex flex-1 items-start border-t border-black/[0.07] px-3 pt-2.5 [[data-theme=dark]_&]:border-white/[0.09]">
@@ -2675,10 +2689,13 @@ function CardQuickBooks() {
     <div className="flex h-full items-center justify-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
       <span className="flex size-[104px] items-center justify-center rounded-[26px] bg-[var(--v69-well)] [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.09)]">
         {/* The approved mark, path for path, filled from one currentColor so it
-            tracks the theme instead of carrying the file's own grey. */}
+            tracks the theme instead of carrying the file's own grey. Held back on
+            the templates page, where the warm covers put it on a lighter tile
+            than the hero does and full muted ink read as the darkest thing in the
+            rail — the mark should name the integration, not announce it. */}
         <svg
           viewBox="0 0 34 34"
-          className="size-[58px] text-muted-foreground"
+          className="size-[58px] text-muted-foreground [[data-theme=light]_.template-mock_&]:text-muted-foreground/45"
           fill="currentColor"
           aria-hidden
         >
@@ -3742,17 +3759,9 @@ function CardDesignApprovals() {
           — a warm grey in light, a lifted grey in dark — with the type in the
           theme's own ink and a hairline closing the band. */}
       <div className="flex items-center gap-2 bg-[var(--v69-ink)] px-5 py-4 [[data-theme=light]_&]:bg-[#EDEDE6] [[data-theme=light]_&]:shadow-[inset_0_-1px_0_rgba(16,24,40,0.07)] [[data-theme=dark]_&]:bg-[#343434] [[data-theme=dark]_&]:shadow-[inset_0_-1px_0_rgba(255,255,255,0.08)]">
-        <svg
-          viewBox="0 0 16 16"
+        <FolderGlyph
           className={`size-4 ${ON_INK} [[data-theme=light]_&]:text-[var(--v69-ink)] [[data-theme=dark]_&]:text-[#EDEDED]`}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.4"
-          strokeLinejoin="round"
-          aria-hidden
-        >
-          <path d="M2 4.5A1.5 1.5 0 0 1 3.5 3h2.2l1.3 1.6h5.5A1.5 1.5 0 0 1 14 6.1v5.4A1.5 1.5 0 0 1 12.5 13h-9A1.5 1.5 0 0 1 2 11.5z" />
-        </svg>
+        />
         <span
           className={`text-[13px] font-normal ${ON_INK} [[data-theme=light]_&]:text-[var(--v69-ink)] [[data-theme=dark]_&]:text-[#EDEDED]`}
         >

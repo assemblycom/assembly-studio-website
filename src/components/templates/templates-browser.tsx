@@ -363,13 +363,19 @@ export function TemplatesBrowser({ templates }: Props) {
             >
               {/* Selection reads as selection, not as a call to action: the filled
               chips are gone from the resting state, so the strip is a row of
-              quiet labels with the current one held on a wash of the foreground.
-              That wash is the site's own selected-state idiom — the nav and footer
-              segmented controls both mark the current option with
-              bg-foreground/[0.06–0.10] and no outline — so the strip stops being a
-              one-off. The active chip used to take the solid foreground fill, the
-              same black pill the primary buttons wear, which made the filter you
-              had already applied look like the thing to click next. */}
+              quiet labels with the current one held on a grey.
+              Both greys are the page's own tokens — --muted on hover, --border a
+              step up for the selection — rather than an alpha of the foreground.
+              A foreground wash mixes a cool near-black into whatever is behind it
+              and lands on a grey that belongs to no scale: it read as a one-off
+              even though three surfaces used the same value. The two named greys
+              are the only ones the page has, which is what makes them the ladder.
+              (The nav's and footer's appearance switches keep their washes: those
+              thumbs sit on a frosted bed and over the footer aurora, where an
+              opaque token would cut a hole in the gradient.)
+              The active chip before that took the solid foreground fill, the same
+              black pill the primary buttons wear, which made the filter you had
+              already applied look like the thing to click next. */}
               {categories.map((cat) => {
                 const active =
                   cat === ALL ? selected === null : selected === cat;
@@ -387,8 +393,8 @@ export function TemplatesBrowser({ templates }: Props) {
                     // there is nothing for the scroller to crop.
                     className={`type-caption inline-flex h-8 shrink-0 items-center whitespace-nowrap rounded-lg px-3 leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground/40 ${
                       active
-                        ? "bg-foreground/[0.10] text-foreground"
-                        : "bg-transparent text-muted-foreground active:bg-foreground/[0.08] [@media(hover:hover)]:hover:bg-foreground/[0.05] [@media(hover:hover)]:hover:text-foreground"
+                        ? "bg-border text-foreground"
+                        : "bg-transparent text-muted-foreground active:bg-border [@media(hover:hover)]:hover:bg-muted [@media(hover:hover)]:hover:text-foreground"
                     }`}
                   >
                     {cat}
@@ -469,14 +475,15 @@ export function TemplatesBrowser({ templates }: Props) {
                     {!BLEED_COVERS.has(template.slug) && (
                       <div
                         aria-hidden
-                        // One hairline, same weight on every cover. It used to also
-                        // carry a 1px white inner ring: invisible on the pale mocks,
-                        // but a bright second line on the dark ones, so the rail
-                        // looked like it had two different border weights in it. The
-                        // two soft dark insets stay — they fall off before they reach
-                        // the middle and read as depth, not as an edge. Light only:
-                        // the dark surface has no hairline to catch a highlight.
-                        className="pointer-events-none absolute inset-0 rounded-[14px] border border-border/45 sm:rounded-[20px] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05),inset_0_8px_20px_-10px_rgba(0,0,0,0.07)] [[data-theme=dark]_&]:border-transparent [[data-theme=dark]_&]:shadow-none"
+                        // One hairline and nothing else. It used to also carry a 1px
+                        // white inner ring: invisible on the pale mocks, but a bright
+                        // second line on the dark ones, so the rail looked like it had
+                        // two different border weights in it. The two soft dark insets
+                        // went the same way — on the warm light covers they shaded the
+                        // widget's own ground and read as a vignette rather than as
+                        // depth. Light only: the dark surface has no hairline to catch
+                        // a highlight.
+                        className="pointer-events-none absolute inset-0 rounded-[14px] border border-border/45 sm:rounded-[20px] [[data-theme=dark]_&]:border-transparent"
                       />
                     )}
                   </div>
