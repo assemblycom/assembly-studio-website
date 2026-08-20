@@ -38,31 +38,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   );
 }
 
-/** One labelled fact about the app, with the line that explains it. */
-function Fact({
-  label,
-  value,
-  note,
-}: {
-  label: string;
-  value: string;
-  note: string;
-}) {
-  return (
-    <div>
-      <dt className="type-caption text-muted-foreground">{label}</dt>
-      <dd className="type-body mt-1 text-foreground">{value}</dd>
-      <dd className="type-caption mt-1 text-muted-foreground">{note}</dd>
-    </div>
-  );
-}
-
 export default async function EmbedPage({ params }: Props) {
   const { slug } = await params;
   const embed = await getEmbed(slug);
   if (!embed) notFound();
-
-  const clientFacing = embed.audience === "Client";
 
   return (
     <>
@@ -120,25 +99,6 @@ export default async function EmbedPage({ params }: Props) {
           )}
         </div>
       </section>
-
-      <div className="px-6">
-        <dl className="mx-auto grid max-w-3xl gap-8 border-y border-border py-6 sm:grid-cols-2 [[data-theme=dark]_&]:border-[#383838]">
-          <Fact
-            label="Type"
-            value="Embed"
-            note="Assembly embeds any external app that doesn't block embedding."
-          />
-          <Fact
-            label="App visibility"
-            value={clientFacing ? "Client" : "Internal"}
-            note={
-              clientFacing
-                ? "Client-facing apps are visible to clients as well as your team."
-                : "Internal apps are visible to your team only."
-            }
-          />
-        </dl>
-      </div>
 
       {/* The setup prose, as the CMS holds it: an Overview and the step-by-step
           App Setup in one rich-text field. */}
