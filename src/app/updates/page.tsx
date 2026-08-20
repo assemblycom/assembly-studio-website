@@ -7,6 +7,8 @@ import {
   getUpdates,
   markStandaloneLinks,
   normalizeEntryHeadings,
+  relinkDeadDocs,
+  withCroppedScreenshots,
 } from "@/lib/ghost";
 import { PAGE_SEO, pageMetadata } from "@/lib/seo";
 
@@ -96,7 +98,11 @@ export default async function UpdatesPage({
                     __html: markStandaloneLinks(
                       dropEmptyParagraphs(
                         dropUnservableFigures(
-                          normalizeEntryHeadings(entry.html),
+                          relinkDeadDocs(
+                            withCroppedScreenshots(
+                              normalizeEntryHeadings(entry.html),
+                            ),
+                          ),
                         ),
                       ),
                     ),

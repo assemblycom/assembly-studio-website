@@ -739,6 +739,91 @@ export function dropUnservableFigures(html: string): string {
     );
 }
 
+// Every docs link written before the docs moved is dead. ReadMe served them at
+// docs.assembly.com/reference/* (and docs.joinportal.com/* before the rename);
+// the docs now live under assembly.com/docs, where the reference is split a page
+// per endpoint. Nothing redirects, so an entry from 2024 sends readers to a 404.
+//
+// Keyed by legacy path because the two dead hosts used the same paths. A path
+// without an entry falls back to the section root rather than being guessed at.
+const DEAD_DOC_HOSTS = ["docs.assembly.com", "docs.joinportal.com"];
+const DOCS_ROOT = "https://assembly.com/docs";
+const DOC_PATHS: Record<string, string> = {
+  "/": "",
+  "/reference/introduction": "/api-reference/introduction",
+  "/reference/getting-started-introduction": "/api-reference/introduction",
+  "/reference/pagination": "/api-reference/pagination",
+  "/reference/audit-log": "/api-reference/events/list-audit-events",
+  "/reference/custom-fields": "/api-reference/resources/custom-fields",
+  "/reference/tasks": "/api-reference/resources/tasks",
+  "/reference/notifications": "/api-reference/resources/notifications",
+  "/reference/messages": "/api-reference/resources/messages",
+  "/reference/message-channels": "/api-reference/resources/message-channels",
+  "/reference/files": "/api-reference/resources/files",
+  "/reference/create-a-file": "/api-reference/files/create-a-file",
+  "/reference/webhooks-events": "/api-reference/webhooks/events",
+  "/docs/custom-apps-overview": "/building-new-apps/introduction",
+  "/docs/marketplace-apps-overview": "/building-new-apps/introduction",
+  "/page/authenticated-extensions": "/embeds-and-links/url-parameters",
+};
+// An unmapped /reference/* page was still an API page, so it lands on the API
+// reference rather than the top of the docs.
+const REFERENCE_FALLBACK = "/api-reference/introduction";
+
+export function relinkDeadDocs(html: string): string {
+  return html.replace(/href="([^"]*)"/gi, (whole, href: string) => {
+    let url: URL;
+    try {
+      url = new URL(href, DOCS_ROOT);
+    } catch {
+      return whole;
+    }
+    if (!DEAD_DOC_HOSTS.includes(url.hostname)) return whole;
+    const path = url.pathname.replace(/\/$/, "") || "/";
+    const target =
+      DOC_PATHS[path] ??
+      (path.startsWith("/reference/") ? REFERENCE_FALLBACK : "");
+    // Ghost's own ?ref= tracking param goes with the dead URL it was on.
+    return `href="${DOCS_ROOT}${target}"`;
+  });
+}
+
+// A handful of changelog screenshots were exported with their own 1px frame
+// baked into the canvas. The page draws its own outline around every screenshot
+// (see .post-body img), so those land a second contour a pixel inside the
+// first — the same double edge the review-screenshot rule dodges, except here
+// the frame is in the pixels rather than in the CSS. Removing our outline is not
+// the fix: the baked frame is a different grey at a different radius.
+//
+// So the file is re-served cropped past its own frame. Ghost's copy can't be
+// edited, so the crop lives in public/ and the entry's <img> is pointed at it —
+// which also means dropping the Ghost srcset, since those are the uncropped
+// renditions of the same picture.
+const CROPPED_SCREENSHOTS: Record<string, { src: string; width: number; height: number }> = {
+  // "Messages API", September 14 2023.
+  "2023/09/marma.jpg": {
+    src: "/images/updates/messages-api.jpg",
+    width: 1984,
+    height: 1234,
+  },
+};
+
+export function withCroppedScreenshots(html: string): string {
+  return html.replace(/<img\b[^>]*>/gi, (tag) => {
+    const key = Object.keys(CROPPED_SCREENSHOTS).find((path) =>
+      tag.includes(path),
+    );
+    if (!key) return tag;
+    const { src, width, height } = CROPPED_SCREENSHOTS[key];
+    return tag
+      .replace(/\ssrcset\s*=\s*("[^"]*"|'[^']*')/i, "")
+      .replace(/\ssizes\s*=\s*("[^"]*"|'[^']*')/i, "")
+      .replace(/\ssrc\s*=\s*("[^"]*"|'[^']*')/i, ` src="${src}"`)
+      .replace(/\swidth\s*=\s*("[^"]*"|'[^']*')/i, ` width="${width}"`)
+      .replace(/\sheight\s*=\s*("[^"]*"|'[^']*')/i, ` height="${height}"`);
+  });
+}
+
 export function withImageSizes(html: string, sizes: string): string {
   return html.replace(/<img\b[^>]*>/g, (tag) =>
     /\ssizes\s*=/i.test(tag)
