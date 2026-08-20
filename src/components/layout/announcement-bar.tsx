@@ -9,11 +9,17 @@ function trim(text: string): string {
 }
 
 /**
- * The band across the top of every page in the shell, in the site's own accent
- * — the same pair the covers and the hero use, so it reads as the brand rather
- * than as a system notice. It scrolls away with the page: the nav below it is
- * sticky, the band is not, so it announces once and then leaves the header to
- * do its job.
+ * The band across the top of every page in the shell. It scrolls away with the
+ * page: the nav below it is sticky, the band is not, so it announces once and
+ * then leaves the header to do its job.
+ *
+ * Light runs a quiet neutral, not the covers' lime: a full band of accent is the
+ * loudest thing above the fold, and it was shouting over the hero it sits on. No
+ * rule under it — the step from the band's ground to the white nav above the fold
+ * is the edge, and a hairline on top of that step drew a second, darker line
+ * where only one was wanted. Dark keeps the periwinkle — on the near-black ground it
+ * is the one thing marking the band as the band, and a neutral there would read
+ * as another surface level rather than as a notice.
  */
 export function AnnouncementBar() {
   if (!ANNOUNCEMENT) return null;
@@ -21,7 +27,7 @@ export function AnnouncementBar() {
   return (
     <Link
       href={ANNOUNCEMENT.href}
-      className="group block bg-[#D9ED92] text-[#111111] [[data-theme=dark]_&]:bg-[#7DA4FF]"
+      className="group block bg-muted text-foreground [[data-theme=dark]_&]:bg-[#7DA4FF] [[data-theme=dark]_&]:text-[#111111]"
     >
       {/* A set height rather than padding around a line box: type-caption's 1.5
           leading on 13px is 19.5px, so padding left the band 39.5px tall and the
@@ -33,7 +39,10 @@ export function AnnouncementBar() {
         <span className="type-caption truncate text-center leading-5">
           {trim(ANNOUNCEMENT.text)}
         </span>
-        <span className="type-caption flex shrink-0 items-center gap-1.5 leading-5 text-[#111111]/55 transition-colors group-hover:text-[#111111]">
+        {/* Dark states its ink literally rather than in tokens: the band there is
+            periwinkle, and --foreground on it is the near-white the rest of the
+            dark page uses, which vanishes. */}
+        <span className="type-caption flex shrink-0 items-center gap-1.5 leading-5 text-foreground/55 transition-colors group-hover:text-foreground [[data-theme=dark]_&]:text-[#111111]/55 [[data-theme=dark]_&]:group-hover:text-[#111111]">
           {/* On a phone the arrow carries the invitation on its own: the band
               is one line at every width, and the words would break it. */}
           <span className="hidden sm:inline">{ANNOUNCEMENT.cta}</span>

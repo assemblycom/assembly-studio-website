@@ -453,6 +453,25 @@ export async function getPost(slug: string): Promise<GhostPost | undefined> {
   return (await getPosts()).find((post) => post.slug === slug);
 }
 
+/** Just enough of a post to name it and link to it. */
+export type PostRef = { slug: string; title: string };
+
+/**
+ * The newest post Ghost has flagged "featured" — what the nav's Resources panel
+ * closes on.
+ *
+ * Falls back to the newest post when nothing is flagged, so the strip is never
+ * an empty row: an editor forgetting the flag should cost the panel its "here is
+ * the latest thing" line, not leave a gap in the chrome. Returns only the slug
+ * and the title because the consumer is a client component — a whole PostCard
+ * would serialise every field of the post into the payload of every page.
+ */
+export async function getFeaturedPost(): Promise<PostRef | null> {
+  const posts = await getPosts();
+  const post = posts.find((p) => p.featured) ?? posts[0];
+  return post ? { slug: post.slug, title: post.title } : null;
+}
+
 /** Every tag in use, in the order the newest post carrying it appears. */
 export async function getCategories(): Promise<string[]> {
   const posts = await getPosts();

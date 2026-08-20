@@ -15,7 +15,12 @@ import {
   type NavGroup,
   type NavItem,
 } from "@/lib/constants";
-import { NavDropdown, NavDropdownGroup } from "@/components/layout/nav-dropdown";
+import {
+  NavBarFill,
+  NavDropdown,
+  NavDropdownGroup,
+  NavMegaPanel,
+} from "@/components/layout/nav-dropdown";
 import { useTheme } from "@/components/theme/theme-provider";
 
 // Past this scroll distance the sticky header swaps from transparent to a
@@ -141,12 +146,16 @@ export function StudioNav({
   useEffect(() => {
     if (!mobileMenuOpen) return;
     setMenuTop(
-      Math.max(0, Math.round(mobileHeaderRef.current?.getBoundingClientRect().top ?? 0)),
+      Math.max(
+        0,
+        Math.round(mobileHeaderRef.current?.getBoundingClientRect().top ?? 0),
+      ),
     );
     const prev = document.documentElement.style.overflow;
     document.documentElement.style.overflow = "hidden";
     const preventTouch = (e: TouchEvent) => {
-      if (!menuScrollRef.current?.contains(e.target as Node)) e.preventDefault();
+      if (!menuScrollRef.current?.contains(e.target as Node))
+        e.preventDefault();
     };
     document.addEventListener("touchmove", preventTouch, { passive: false });
     return () => {
@@ -239,20 +248,22 @@ export function StudioNav({
   // it lives at rest as a transparent hairline so scrolling only transitions its
   // COLOR (transparent → hairline) — never its width, and never from the
   // inherited currentColor, which flashed a bright line for a frame.
-  // Progressive frosted blur (à la Nothing's nav): a masked backdrop-blur that
-  // fades out below the bar instead of ending on a hairline border. It extends
-  // past the bar height so the blur eases off gradually over the content below.
-  const darkSurface = !(softGlass || !darkTop);
-  const navBlurStyle: CSSProperties = {
-    backdropFilter: "blur(11px)",
-    WebkitBackdropFilter: "blur(11px)",
-    background: `linear-gradient(to bottom, ${
-      darkSurface ? "rgba(14,14,16,0.5)" : "rgba(255,255,255,0.88)"
-    } 0%, transparent 100%)`,
-    maskImage:
-      "linear-gradient(to bottom, #000 0%, #000 42%, transparent 100%)",
-    WebkitMaskImage:
-      "linear-gradient(to bottom, #000 0%, #000 42%, transparent 100%)",
+  // A clean strip: the page's own ground, and nothing else.
+  //
+  // This was a masked backdrop-blur that faded out below the bar — no edge, the
+  // blur easing off over the content. It read as messy in practice: a half-blurred
+  // half-legible band of page copy sat in the bar, every line of it a different
+  // amount of ghost depending on where the scroll had stopped, and the pane had to
+  // hang 35% past the bar for the fade, which put it over anything the header
+  // dropped below itself.
+  //
+  // --background rather than a fill of its own, so the bar is the same colour as
+  // the page it sits on: dark mode had it a step lighter (#0e0e10 on #0a0a0a),
+  // which drew a band across the top of every page. And no bottom rule — with the
+  // bar and the page the same colour there is nothing to divide, and the rule was
+  // the only thing making the bar a separate object.
+  const navStripStyle: CSSProperties = {
+    background: "var(--background)",
   };
 
   // One shared easing/duration for the rest→pill transition so every animated
@@ -289,8 +300,12 @@ export function StudioNav({
   // flips to dark in dark mode, which would make the light-content nav vanish.
   // The dark-content branch keeps the tokens so it tracks the theme correctly.
   // whitespace-nowrap keeps every label on one line so the pill never wraps.
-  const darkLink = softGlass ? "text-foreground/90 hover:text-foreground" : "text-muted-foreground hover:text-foreground";
-  const darkDisabled = softGlass ? "text-foreground/90" : "text-muted-foreground";
+  const darkLink = softGlass
+    ? "text-foreground/90 hover:text-foreground"
+    : "text-muted-foreground hover:text-foreground";
+  const darkDisabled = softGlass
+    ? "text-foreground/90"
+    : "text-muted-foreground";
   const linkBase =
     "whitespace-nowrap rounded-full px-2 py-1.5 text-sm transition-colors lg:px-3";
   const linkRest = lightContent ? "text-white/70 hover:text-white" : darkLink;
@@ -306,7 +321,11 @@ export function StudioNav({
   // and the muted one kept it.
   const navLinkCls = (href: string) =>
     `${linkBase} ${
-      isCurrent(href) ? (lightContent ? "text-white" : "text-foreground") : linkRest
+      isCurrent(href)
+        ? lightContent
+          ? "text-white"
+          : "text-foreground"
+        : linkRest
     }`;
   // A group reads as current while you're on any page inside it, so "Product"
   // stays lit through /templates.
@@ -325,12 +344,16 @@ export function StudioNav({
   //
   // The current page is marked the way the desktop nav marks it — full-strength
   // ink against muted siblings, not a heavier weight, since `font-medium` maps
-  // to PP Mori SemiBold here. An off-site link stays muted: it is never the
-  // page you are on, so at full ink it read as a second current page.
+  // to PP Mori SemiBold here and the bolded row was the heaviest type on the
+  // sheet. An off-site link stays muted: it is never the page you are on, so at
+  // full ink it read as a second current page.
   const renderMenuLink = (link: NavItem) => {
     if (link.disabled) {
       return (
-        <span aria-disabled="true" className={`block py-2.5 text-lg ${menuMuted}`}>
+        <span
+          aria-disabled="true"
+          className={`block py-2.5 text-lg ${menuMuted}`}
+        >
           {link.label}
         </span>
       );
@@ -342,7 +365,7 @@ export function StudioNav({
           target={link.newTab ? "_blank" : undefined}
           rel={link.newTab ? "noopener noreferrer" : undefined}
           onClick={() => closeMenu()}
-          className={`block py-2.5 text-lg ${menuInk}`}
+          className={`block py-2.5 text-lg ${menuMuted}`}
         >
           {link.label}
         </a>
@@ -353,11 +376,11 @@ export function StudioNav({
         href={link.href}
         aria-current={isCurrent(link.href) ? "page" : undefined}
         onClick={() => closeMenu()}
-        // Every item in the page's own ink: a whole menu set in muted grey read
-        // as a list of things that were not available. The page you are on is
-        // the one that changes, and it changes weight rather than colour.
-        className={`block py-2.5 text-lg ${menuInk} ${
-          isCurrent(link.href) ? "font-medium" : ""
+        // The colour token is swapped, not appended — same as navLinkCls above,
+        // where two text-* utilities on one element tie on specificity and
+        // stylesheet order picks the winner.
+        className={`block py-2.5 text-lg ${
+          isCurrent(link.href) ? menuInk : menuMuted
         }`}
       >
         {link.label}
@@ -383,11 +406,17 @@ export function StudioNav({
   const menuBorder = darkTop ? "border-white/10" : "border-border";
   const menuMuted = darkTop ? "text-white/50" : "text-muted-foreground";
   const menuInk = darkTop ? "text-white" : "text-foreground";
-  const menuCta = darkTop ? "bg-white text-neutral-900" : "bg-foreground text-background";
-  const menuDemo = darkTop ? "border-white/20 text-white" : "border-foreground/20 text-foreground";
+  const menuCta = darkTop
+    ? "bg-white text-neutral-900"
+    : "bg-foreground text-background";
+  const menuDemo = darkTop
+    ? "border-white/20 text-white"
+    : "border-foreground/20 text-foreground";
   // The selected segment of the in-menu Appearance switch — a soft fill that
   // reads on either menu ground, mirroring the desktop toggle's knob.
-  const menuSegActive = darkTop ? "bg-white/10 text-white" : "bg-foreground/[0.06] text-foreground";
+  const menuSegActive = darkTop
+    ? "bg-white/10 text-white"
+    : "bg-foreground/[0.06] text-foreground";
 
   // The nav logo — a clean white SVG mark.
   const logoMark = (
@@ -439,20 +468,23 @@ export function StudioNav({
           any scroll that brings the bar in — the page copy showed through the
           nav as a blurred ghost. It is tied to the attribute, not to `scrolled`,
           so the fill cannot lag the bar it is covering for either. */}
-      <header ref={mobileHeaderRef} className={`${position} transition-colors ${ease} lg:hidden [[data-toc-bar]_&]:bg-background [[data-toc-bar]_&]:transition-none ${mobileMenuOpen ? "pointer-events-none z-[70]" : "z-50"}`}>
-        {/* The frosted pane: a blur that fades out over the content below rather
-            than stopping on an edge, so the bar has no bottom to speak of.
-            The one page that cannot have it is a post or a policy, where the
-            contents bar is drawn directly under the nav — a blur has nothing to
-            fade into against an opaque bar, and the two together read as a hole
-            in the page. There the bar fills instead, and the edge is the point.
+      <header
+        ref={mobileHeaderRef}
+        className={`${position} transition-colors ${ease} lg:hidden [[data-toc-bar]_&]:bg-background [[data-toc-bar]_&]:transition-none ${mobileMenuOpen ? "pointer-events-none z-[70]" : "z-50"}`}
+      >
+        {/* The strip. Dropped on a post or a policy, where the contents bar is
+            drawn directly under the nav: two stacked strips with two hairlines
+            read as a double rule, so there the header's own bg-background carries
+            the bar and the contents bar owns the edge.
             (data-toc-bar is set on <html> by ui/toc-mobile while that bar shows.) */}
         <div
           aria-hidden
-          className={`pointer-events-none absolute inset-x-0 top-0 h-[135%] transition-opacity ${ease} [[data-toc-bar]_&]:opacity-0 [[data-toc-bar]_&]:transition-none ${mobileMenuOpen ? "invisible" : ""}`}
-          style={navBlurStyle}
+          className={`pointer-events-none absolute inset-x-0 top-0 h-full transition-opacity ${ease} [[data-toc-bar]_&]:opacity-0 [[data-toc-bar]_&]:transition-none ${mobileMenuOpen ? "invisible" : ""}`}
+          style={navStripStyle}
         />
-        <div className={`relative z-10 flex items-center justify-between px-5 transition-[height] ${ease} ${scrolled ? "h-12" : "h-14"}`}>
+        <div
+          className={`relative z-10 flex items-center justify-between px-5 transition-[height] ${ease} ${scrolled ? "h-12" : "h-14"}`}
+        >
           <Link
             href="/"
             onClick={(e) => {
@@ -468,286 +500,370 @@ export function StudioNav({
               the logo beside it already goes home. It stays on desktop, where
               there's room for it. */}
           {minimal ? null : (
-          <button
-            ref={menuTriggerRef}
-            onClick={() => setMobileMenuOpen(true)}
-            aria-label="Open menu"
-            aria-expanded={mobileMenuOpen}
-            aria-controls="mobile-menu"
-            className={`flex size-9 items-center justify-center transition-[color,opacity] ${ease} active:opacity-60 ${lightContent ? "text-white" : "text-foreground"} ${mobileMenuOpen ? "invisible" : ""}`}
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-              <circle cx="5" cy="5" r="1.6" />
-              <circle cx="12" cy="5" r="1.6" />
-              <circle cx="19" cy="5" r="1.6" />
-              <circle cx="5" cy="12" r="1.6" />
-              <circle cx="12" cy="12" r="1.6" />
-              <circle cx="19" cy="12" r="1.6" />
-              <circle cx="5" cy="19" r="1.6" />
-              <circle cx="12" cy="19" r="1.6" />
-              <circle cx="19" cy="19" r="1.6" />
-            </svg>
-          </button>
+            <button
+              ref={menuTriggerRef}
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open menu"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
+              className={`flex size-9 items-center justify-center transition-[color,opacity] ${ease} active:opacity-60 ${lightContent ? "text-white" : "text-foreground"} ${mobileMenuOpen ? "invisible" : ""}`}
+            >
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden
+              >
+                <circle cx="5" cy="5" r="1.6" />
+                <circle cx="12" cy="5" r="1.6" />
+                <circle cx="19" cy="5" r="1.6" />
+                <circle cx="5" cy="12" r="1.6" />
+                <circle cx="12" cy="12" r="1.6" />
+                <circle cx="19" cy="12" r="1.6" />
+                <circle cx="5" cy="19" r="1.6" />
+                <circle cx="12" cy="19" r="1.6" />
+                <circle cx="19" cy="19" r="1.6" />
+              </svg>
+            </button>
           )}
         </div>
       </header>
 
       {/* Desktop header — full-bleed bar: transparent at the top, frosted
           full-width surface with a hairline bottom border on scroll */}
-      <header className={`${position} z-50 hidden transition-colors ${ease} lg:block`}>
-        <div
-          aria-hidden
-          className={`pointer-events-none absolute inset-x-0 top-0 h-[135%] transition-opacity ${ease} ${scrolled ? "opacity-100" : "opacity-0"}`}
-          style={navBlurStyle}
-        />
-        <div
-          className={`relative z-10 mx-auto flex items-center ${contentRail} ${scrolled ? "h-14" : "h-16"}`}
-          style={{ transition: rowTransition }}
-        >
-          {/* Three balanced columns keep the nav truly centred while the equal
+      <header
+        className={`${position} z-50 hidden transition-colors ${ease} lg:block`}
+      >
+        {/* The provider wraps the bar AND the sheet below it: the panel is a
+            sibling of the triggers now, not a child, so they have to share one
+            open-state from above both. */}
+        <NavDropdownGroup>
+          <div
+            aria-hidden
+            className={`pointer-events-none absolute inset-x-0 top-0 h-full transition-opacity ${ease} ${scrolled ? "opacity-100" : "opacity-0"}`}
+            style={navStripStyle}
+          />
+          {!minimal && <NavBarFill />}
+          <div
+            className={`relative z-10 mx-auto flex items-center ${contentRail} ${scrolled ? "h-14" : "h-16"}`}
+            style={{ transition: rowTransition }}
+          >
+            {/* Three balanced columns keep the nav truly centred while the equal
               side columns guarantee it never crowds the logo or the actions. */}
-          <div className="flex flex-1 items-center">
-          <Link href="/" onClick={onLogoClick} className="flex items-center">
-            {logoMark}
-          </Link>
-          </div>
+            <div className="flex flex-1 items-center">
+              <Link
+                href="/"
+                onClick={onLogoClick}
+                className="flex items-center"
+              >
+                {logoMark}
+              </Link>
+            </div>
 
-          {/* Primary nav — centered between the two equal side columns */}
-          <nav className={`flex shrink-0 justify-center ${minimal ? "hidden" : ""}`}>
-            {/* One shared open-panel state for the row: switching triggers is a
-                single move instead of two animations racing. */}
-            <NavDropdownGroup>
-            <ul className="flex items-center">
-              {NAV_ENTRIES.map((entry) =>
-                isNavGroup(entry) ? (
-                  <li key={entry.label}>
-                    <NavDropdown
-                      group={entry}
-                      triggerClassName={groupTriggerCls(entry)}
-                    />
-                  </li>
-                ) : (
-                  <li key={entry.href}>
-                    {entry.disabled ? (
-                      <span aria-disabled="true" className={disabledCls}>
-                        {entry.label}
-                      </span>
-                    ) : entry.external ? (
-                      <a
-                        href={entry.href}
-                        target={entry.newTab ? "_blank" : undefined}
-                        rel={entry.newTab ? "noopener noreferrer" : undefined}
-                        className={linkCls}
-                      >
-                        {entry.label}
-                      </a>
-                    ) : (
-                      <Link
-                        href={entry.href}
-                        aria-current={isCurrent(entry.href) ? "page" : undefined}
-                        className={navLinkCls(entry.href)}
-                      >
-                        {entry.label}
-                      </Link>
-                    )}
-                  </li>
-                ),
-              )}
-            </ul>
-            </NavDropdownGroup>
-          </nav>
-
-          {/* Account actions — right. */}
-          <div className="flex flex-1 items-center justify-end gap-1.5">
-            {themeToggle && (() => {
-              const light = themeToggle.theme === "light";
-              // A bare icon glyph (no ring — the outlined circle read heavy in
-              // the nav). It shows the mode you'd switch TO: a moon in light, a
-              // sun in dark, with only a soft hover fill like the nav links.
-              // Shown whenever the centered desktop nav is (lg+). Below lg the
-              // whole bar collapses to the hamburger, whose menu carries an
-              // Appearance switch instead.
-              const ink = lightContent
-                ? "text-white/70 hover:text-white hover:bg-white/10"
-                : "text-foreground/60 hover:text-foreground hover:bg-foreground/[0.06]";
-              return (
-                <button
-                  type="button"
-                  onClick={themeToggle.onToggle}
-                  aria-label={light ? "Switch to dark theme" : "Switch to light theme"}
-                  className={`mr-1.5 hidden size-8 items-center justify-center rounded-lg transition-colors lg:flex ${ink}`}
-                >
-                  {light ? (
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                    </svg>
+            {/* Primary nav — centered between the two equal side columns */}
+            <nav
+              className={`flex shrink-0 justify-center ${minimal ? "hidden" : ""}`}
+            >
+              <ul className="flex items-center">
+                {NAV_ENTRIES.map((entry) =>
+                  isNavGroup(entry) ? (
+                    <li key={entry.label}>
+                      <NavDropdown
+                        group={entry}
+                        triggerClassName={groupTriggerCls(entry)}
+                      />
+                    </li>
                   ) : (
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                      <circle cx="12" cy="12" r="4" />
-                      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-                    </svg>
-                  )}
-                </button>
-              );
-            })()}
-            {/* Both states ship in the markup and `data-authed` on <html>
+                    <li key={entry.href}>
+                      {entry.disabled ? (
+                        <span aria-disabled="true" className={disabledCls}>
+                          {entry.label}
+                        </span>
+                      ) : entry.external ? (
+                        <a
+                          href={entry.href}
+                          target={entry.newTab ? "_blank" : undefined}
+                          rel={entry.newTab ? "noopener noreferrer" : undefined}
+                          className={linkCls}
+                        >
+                          {entry.label}
+                        </a>
+                      ) : (
+                        <Link
+                          href={entry.href}
+                          aria-current={
+                            isCurrent(entry.href) ? "page" : undefined
+                          }
+                          className={navLinkCls(entry.href)}
+                        >
+                          {entry.label}
+                        </Link>
+                      )}
+                    </li>
+                  ),
+                )}
+              </ul>
+            </nav>
+
+            {/* Account actions — right. */}
+            <div className="flex flex-1 items-center justify-end gap-1.5">
+              {themeToggle &&
+                (() => {
+                  const light = themeToggle.theme === "light";
+                  // A bare icon glyph (no ring — the outlined circle read heavy in
+                  // the nav). It shows the mode you'd switch TO: a moon in light, a
+                  // sun in dark, with only a soft hover fill like the nav links.
+                  // Shown whenever the centered desktop nav is (lg+). Below lg the
+                  // whole bar collapses to the hamburger, whose menu carries an
+                  // Appearance switch instead.
+                  const ink = lightContent
+                    ? "text-white/70 hover:text-white hover:bg-white/10"
+                    : "text-foreground/60 hover:text-foreground hover:bg-foreground/[0.06]";
+                  return (
+                    <button
+                      type="button"
+                      onClick={themeToggle.onToggle}
+                      aria-label={
+                        light ? "Switch to dark theme" : "Switch to light theme"
+                      }
+                      className={`mr-1.5 hidden size-8 items-center justify-center rounded-lg transition-colors lg:flex ${ink}`}
+                    >
+                      {light ? (
+                        <svg
+                          width="15"
+                          height="15"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.7"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden
+                        >
+                          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                      ) : (
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.7"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden
+                        >
+                          <circle cx="12" cy="12" r="4" />
+                          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+                        </svg>
+                      )}
+                    </button>
+                  );
+                })()}
+              {/* Both states ship in the markup and `data-authed` on <html>
                 picks one before paint — see globals.css. `contents` so the
                 wrapper doesn't become a flex item of its own. */}
-            {minimal ? null : (
-              <>
-                <span className="contents auth-only">
-                  <a href={APP_URL} className={ctaCls}>
-                    Open Assembly
-                  </a>
-                </span>
-                <span className="contents unauth-only">
-                  {!hideDemo && (
-                    <Link href={DEMO_URL} className={linkCls}>
-                      Book a demo
-                    </Link>
-                  )}
-                  <a href={LOGIN_URL} className={linkCls}>
-                    Log in
-                  </a>
-                  <a href={SIGNUP_URL} className={ctaCls}>
-                    Get started
-                  </a>
-                </span>
-              </>
-            )}
+              {minimal ? null : (
+                <>
+                  <span className="contents auth-only">
+                    <a href={APP_URL} className={ctaCls}>
+                      Open Assembly
+                    </a>
+                  </span>
+                  <span className="contents unauth-only">
+                    {!hideDemo && (
+                      <Link href={DEMO_URL} className={linkCls}>
+                        Book a demo
+                      </Link>
+                    )}
+                    <a href={LOGIN_URL} className={linkCls}>
+                      Log in
+                    </a>
+                    <a href={SIGNUP_URL} className={ctaCls}>
+                      Get started
+                    </a>
+                  </span>
+                </>
+              )}
+            </div>
           </div>
-        </div>
+
+          {/* The grouped entries' panel. A child of the sticky header, so
+            `inset-x-0 top-full` puts it flush under the bar at full viewport
+            width with nothing to measure. */}
+          {!minimal && (
+            <NavMegaPanel entries={NAV_ENTRIES} railClassName={contentRail} />
+          )}
+        </NavDropdownGroup>
       </header>
 
       {/* Mobile full-screen menu — portaled to <body> so it escapes the home
           content wrapper's stacking context (z-10) and paints above the nav. */}
-      {mounted && mobileMenuOpen && createPortal(
-        <div
-          ref={menuRef}
-          id="mobile-menu"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Menu"
-          tabIndex={-1}
-          className={`fixed inset-x-0 bottom-0 z-[60] flex flex-col outline-none lg:hidden ${menuSurface}`}
-          style={{ top: menuTop }}
-        >
-          {/* Match the mobile header's padding (px-5) and height exactly so the
+      {mounted &&
+        mobileMenuOpen &&
+        createPortal(
+          <div
+            ref={menuRef}
+            id="mobile-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu"
+            tabIndex={-1}
+            className={`fixed inset-x-0 bottom-0 z-[60] flex flex-col outline-none lg:hidden ${menuSurface}`}
+            style={{ top: menuTop }}
+          >
+            {/* Match the mobile header's padding (px-5) and height exactly so the
               logo stays put when the menu opens — it must not shift.
               The hairline lives on the panel below rather than as a border-b
               here: heights are border-box, so a border on this row shrank its
               content box to 55px and lifted both glyphs half a pixel against
               the header they're meant to replace. */}
-          <div className={`flex shrink-0 items-center justify-between px-5 ${scrolled ? "h-12" : "h-14"}`}>
-            {/* No logo here — the header's own one shows through from above (see
+            <div
+              className={`flex shrink-0 items-center justify-between px-5 ${scrolled ? "h-12" : "h-14"}`}
+            >
+              {/* No logo here — the header's own one shows through from above (see
                 the header comment). This just reserves its 22px so the close
                 button lands exactly where the trigger was. */}
-            <div aria-hidden className="w-[22px]" />
-            <div className="flex items-center gap-4">
-              <button
-                // detail === 0 means the click came from Enter/Space rather
-                // than a pointer, which is the case that wants focus back.
-                onClick={(e) => closeMenu(e.detail === 0)}
-                aria-label="Close menu"
-                // Same size-9 box as the hamburger it replaces — without it the
-                // glyph sat flush to the gutter and the icon visibly hopped 7px
-                // sideways the moment the menu opened.
-                className={`flex size-9 items-center justify-center ${menuInk}`}
-              >
-                <svg
-                  width="22"
-                  height="22"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
+              <div aria-hidden className="w-[22px]" />
+              <div className="flex items-center gap-4">
+                <button
+                  // detail === 0 means the click came from Enter/Space rather
+                  // than a pointer, which is the case that wants focus back.
+                  onClick={(e) => closeMenu(e.detail === 0)}
+                  aria-label="Close menu"
+                  // Same size-9 box as the hamburger it replaces — without it the
+                  // glyph sat flush to the gutter and the icon visibly hopped 7px
+                  // sideways the moment the menu opened.
+                  className={`flex size-9 items-center justify-center ${menuInk}`}
                 >
-                  <path d="M6 6l12 12M6 18L18 6" />
-                </svg>
-              </button>
+                  <svg
+                    width="22"
+                    height="22"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  >
+                    <path d="M6 6l12 12M6 18L18 6" />
+                  </svg>
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div ref={menuScrollRef} className={`flex flex-1 flex-col overflow-y-auto overscroll-contain border-t px-5 pt-6 ${menuBorder}`}>
-            {/* One flat list. Six links do not need sorting into named
+            <div
+              ref={menuScrollRef}
+              className={`flex flex-1 flex-col overflow-y-auto overscroll-contain border-t px-5 pt-6 ${menuBorder}`}
+            >
+              {/* One flat list. Six links do not need sorting into named
                 sections, and the labels cost more height than the grouping
                 bought — the sheet is the whole nav, so everything in it is one
                 tap either way. The groups stay on the desktop bar, where they
                 are what the dropdowns hang off. */}
-            <ul className="flex flex-col gap-1">
-              {NAV_ENTRIES.flatMap((entry) =>
-                isNavGroup(entry) ? entry.items : [entry],
-              ).map((link) => (
-                <li key={link.href}>{renderMenuLink(link)}</li>
-              ))}
-            </ul>
+              <ul className="flex flex-col gap-1">
+                {NAV_ENTRIES.flatMap((entry) =>
+                  isNavGroup(entry) ? entry.items : [entry],
+                ).map((link) => (
+                  <li key={link.href}>{renderMenuLink(link)}</li>
+                ))}
+              </ul>
 
-            {/* Appearance toggle — kept with the nav list (under Pricing)
+              {/* Appearance toggle — kept with the nav list (under Pricing)
                 rather than pinned to the bottom of the sheet. */}
-            {themeToggle && (() => {
-              const light = themeToggle.theme === "light";
-              const segCls = (active: boolean) =>
-                `flex size-6 items-center justify-center rounded-full transition-colors ${active ? menuSegActive : menuMuted}`;
-              return (
-                <div className="mt-3">
-                  <div className={`inline-flex items-center gap-0.5 rounded-full border p-0.5 ${menuBorder}`} role="group" aria-label="Appearance">
-                    <button
-                      type="button"
-                      onClick={() => { if (!light) themeToggle.onToggle(); }}
-                      aria-pressed={light}
-                      aria-label="Light theme"
-                      className={segCls(light)}
-                    >
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                        <circle cx="12" cy="12" r="4" />
-                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { if (light) themeToggle.onToggle(); }}
-                      aria-pressed={!light}
-                      aria-label="Dark theme"
-                      className={segCls(!light)}
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
+              {themeToggle &&
+                (() => {
+                  const light = themeToggle.theme === "light";
+                  const segCls = (active: boolean) =>
+                    `flex size-6 items-center justify-center rounded-full transition-colors ${active ? menuSegActive : menuMuted}`;
+                  return (
+                    <div className="mt-3">
+                      <div
+                        className={`inline-flex items-center gap-0.5 rounded-full border p-0.5 ${menuBorder}`}
+                        role="group"
+                        aria-label="Appearance"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!light) themeToggle.onToggle();
+                          }}
+                          aria-pressed={light}
+                          aria-label="Light theme"
+                          className={segCls(light)}
+                        >
+                          <svg
+                            width="15"
+                            height="15"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.7"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden
+                          >
+                            <circle cx="12" cy="12" r="4" />
+                            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (light) themeToggle.onToggle();
+                          }}
+                          aria-pressed={!light}
+                          aria-label="Dark theme"
+                          className={segCls(!light)}
+                        >
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.7"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden
+                          >
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()}
+            </div>
 
-          {/* Bottom actions — stacked full-width so both read the same size. */}
-          <div className="flex flex-col gap-3 px-5 pb-8 pt-4">
-            <span className="contents auth-only">
-              <a
-                href={APP_URL}
-                className={`flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm ${menuCta}`}
-              >
-                Open Assembly
-              </a>
-            </span>
-            <span className="contents unauth-only">
-              <a
-                href={SIGNUP_URL}
-                className={`flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm ${menuCta}`}
-              >
-                Get started
-              </a>
-              <a
-                href={LOGIN_URL}
-                className={`flex w-full items-center justify-center rounded-lg border px-4 py-3 text-sm ${menuDemo}`}
-              >
-                Log in
-              </a>
-            </span>
-          </div>
-        </div>,
-        document.body,
-      )}
+            {/* Bottom actions — stacked full-width so both read the same size. */}
+            <div className="flex flex-col gap-3 px-5 pb-8 pt-4">
+              <span className="contents auth-only">
+                <a
+                  href={APP_URL}
+                  className={`flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm ${menuCta}`}
+                >
+                  Open Assembly
+                </a>
+              </span>
+              <span className="contents unauth-only">
+                <a
+                  href={SIGNUP_URL}
+                  className={`flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm ${menuCta}`}
+                >
+                  Get started
+                </a>
+                <a
+                  href={LOGIN_URL}
+                  className={`flex w-full items-center justify-center rounded-lg border px-4 py-3 text-sm ${menuDemo}`}
+                >
+                  Log in
+                </a>
+              </span>
+            </div>
+          </div>,
+          document.body,
+        )}
     </>
   );
 }

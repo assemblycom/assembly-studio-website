@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { Inter, La_Belle_Aurore } from "next/font/google";
 import { RootShell } from "@/components/layout/root-shell";
+import { FeaturedPostProvider } from "@/components/layout/featured-post";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 // Imported from the plain module, never from the "use client" provider — a
 // server importer of a client export gets a throwing proxy, not the string.
 import { THEME_INIT_SCRIPT } from "@/components/theme/theme-script";
 import { AUTH_INIT_SCRIPT } from "@/lib/auth-script";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import { getFeaturedPost } from "@/lib/ghost";
 import { OG_IMAGE, PAGE_SEO } from "@/lib/seo";
 import "./globals.css";
 
@@ -106,11 +108,16 @@ const STRUCTURED_DATA = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Read here rather than in the nav so the strip is server-rendered with the
+  // page instead of popping in. Ghost's fetches are revalidate-cached and deduped
+  // per request, so this costs the layout nothing after the first hit.
+  const featured = await getFeaturedPost();
+
   return (
     <html
       lang="en"
@@ -180,7 +187,9 @@ export default function RootLayout({
       </head>
       <body className="min-h-full overflow-x-clip font-sans">
         <ThemeProvider>
-          <RootShell>{children}</RootShell>
+          <FeaturedPostProvider post={featured}>
+            <RootShell>{children}</RootShell>
+          </FeaturedPostProvider>
         </ThemeProvider>
       </body>
     </html>

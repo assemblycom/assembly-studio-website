@@ -48,6 +48,12 @@ export interface NavItem extends NavLink {
 export interface NavGroup {
   label: string;
   items: NavItem[];
+  /**
+   * Close the panel on a strip naming the latest featured article. Only earns
+   * its place under a panel of reading — under Product it would be a non
+   * sequitur.
+   */
+  showFeatured?: boolean;
 }
 
 export type NavEntry = NavItem | NavGroup;
@@ -65,6 +71,7 @@ export const NAV_ENTRIES: NavEntry[] = [
   { label: "Security", href: "/security" },
   {
     label: "Resources",
+    showFeatured: true,
     items: [
       {
         label: "Blog",
