@@ -2555,19 +2555,56 @@ html[data-theme="dark"] .v63-ring-solid::before {
 
   /* A few entries open on a line of scene-setting ("Here's what we've recently
      rolled out") before their first section head. Left as body copy it reads as
-     a stray sentence where the entry's title should be, so it takes the colour
-     and size of a standfirst and becomes the opening line it was written as. */
+     a stray sentence where the entry's title should be, so it takes the full ink
+     and becomes the opening line it was written as. It stays at the body's own
+     SIZE: a third size above the body, under a section head that is already a
+     step above it, made the top of every entry a stack of three ranks before any
+     content began. */
   .updates-entry > p:first-child {
     color: var(--foreground);
-    font-size: 1.125rem;
-    line-height: 1.5;
-    letter-spacing: -0.006em;
   }
 
   /* Against a standfirst the following section head is a step down the page,
      not a break from the block above — the full 3.5rem reads as a gap. */
   .updates-entry > p:first-child + h2 {
     margin-top: 2.5rem;
+  }
+
+  /* ── The changelog's heading ranks ──────────────────────────────────────
+     A blog post is ONE article on its own page, so its section head can be a
+     display size. A changelog page is thirty entries stacked under one h1, each
+     with its own sections and sub-sections, and the blog's ranks put four type
+     sizes inside a single entry — 30px head, 20px standfirst, 18px sub-head,
+     17px body. The 18 and the 17 are a pixel apart, so the sub-head did not read
+     as a rank at all, while the 30 read as a page title thirty times down the
+     page.
+     Two sizes now carry the whole entry: the section head, and the body. The
+     third rank is made of INK and PROXIMITY instead of a third size — a sub-head
+     is body-sized in full foreground, sitting tight to the paragraph it opens
+     with clear air above it. Scoped to .updates-entry so /blog keeps the
+     long-form scale it was drawn for. */
+  /* The size itself is the blog's 22px on a phone — at that width it is already
+     only a step over the body. It is the DESKTOP step (see below) that had to
+     come down. What changes here is the air above it: a section break inside an
+     entry that is one of thirty on the page. */
+  .updates-entry h2 {
+    margin-top: 4rem;
+    line-height: 1.3;
+  }
+  /* A real step over the body rather than the body's own size: set level with it
+     and carried by ink alone, a sub-head read as a bolded sentence rather than as
+     a heading. */
+  .updates-entry :is(h3, h4) {
+    margin-top: 3rem;
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.35;
+    letter-spacing: -0.012em;
+  }
+  /* Tighter than the 1rem a section head takes: a sub-head belongs to the
+     paragraph under it, and most of these open on a screenshot. The air goes
+     ABOVE the head, between one section and the last, where it marks the break. */
+  .updates-entry :is(h3, h4) + * {
+    margin-top: 0.75rem;
   }
 
   /* Most of these are screenshots of other products' interfaces, which are white
@@ -2832,10 +2869,16 @@ html[data-theme="dark"] .v63-ring-solid::before {
     .post-body blockquote {
       font-size: 1.375rem; /* 22px */
     }
-    /* Steps with the body it opens, so it stays a clear size above it rather
-       than the single pixel 18px leaves it at this width. */
-    .updates-entry > p:first-child {
-      font-size: 1.25rem; /* 20px */
+    /* The changelog's own head, a clear step over the 17px body without
+       reaching the blog's 30px display size. The sub-head needs nothing here:
+       it is set in em and follows the body up on its own. */
+    .updates-entry h2 {
+      margin-top: 4.5rem;
+      font-size: 1.5rem; /* 24px */
+    }
+    .updates-entry :is(h3, h4) {
+      margin-top: 3.5rem;
+      font-size: 1.1875rem; /* 19px */
     }
   }
   /* On a phone the reading measure is the page's gutters, and a table is the one

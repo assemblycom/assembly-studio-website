@@ -7,9 +7,11 @@ import { FIELD_CLS } from "@/components/ui/select-menu";
 import { PostByline } from "./post-byline";
 
 const ALL = "All";
-// The archive runs to hundreds of posts, so the grid shows one readable page at
-// a time rather than every card at once.
-const PAGE_SIZE = 12;
+// The archive runs to hundreds of posts, so the grid pages rather than showing
+// every card at once. Twelve made 31 pages of a 370-post archive, which put the
+// paginator to work for anyone browsing rather than searching; sixty is five
+// pages, which is a run you can actually walk.
+const PAGE_SIZE = 60;
 // Pages either side of the current one before the run collapses to an ellipsis.
 const PAGE_WINDOW = 1;
 

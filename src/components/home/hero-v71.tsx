@@ -2577,6 +2577,62 @@ function CardMessages() {
   );
 }
 
+// Payments — the moment the app exists for: an invoice that has been paid. The
+// amount is the figure the card is built around, with the status chip and the
+// timestamp saying it landed, which is the one fact either side checks.
+const PAYMENT = {
+  invoice: "Invoice 1042",
+  amount: "$2,400",
+  cents: ".00",
+  paidAt: "Nov 24 at 10 AM",
+};
+
+function CardPayments() {
+  return (
+    <div className="v69-plot-grid v69-plot-grid--dots flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+      <span className="block w-full overflow-hidden rounded-xl border border-black/[0.08] bg-[#FFFFFF] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
+        <span className="flex items-center gap-2 px-3 py-2.5">
+          <span
+            className={`min-w-0 flex-1 truncate text-[13px] leading-none text-[var(--v69-ink)] ${MOCK_UPSCALED_BODY} max-sm:[.template-mock-gallery_&]:text-[12px]`}
+          >
+            {PAYMENT.invoice}
+          </span>
+          {/* Same status chip the contract cover uses — the covers' one live
+              colour, lime in light and periwinkle in dark. A green of its own
+              would be the only hue in the rail. */}
+          <span
+            className="shrink-0 rounded-md bg-[#D9ED92] px-2 py-1 text-[10px] uppercase leading-none tracking-wide text-[#1B1B1B] [[data-theme=dark]_&]:bg-[#7DA4FF] max-sm:[.template-mock-gallery_&]:text-[9px]"
+            style={MOCK_MONO}
+          >
+            Paid
+          </span>
+        </span>
+        {/* The amount sits below the rule, the way the contract's signature does:
+            the row above names the record, the panel below carries the thing that
+            settled it. */}
+        <span className="block border-t border-black/[0.07] px-3 pb-3 pt-2 [[data-theme=dark]_&]:border-white/[0.09]">
+          <span
+            className="flex items-baseline text-[26px] leading-none tracking-tight text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[22px]"
+            style={MOCK_MONO}
+          >
+            {PAYMENT.amount}
+            {/* The cents held a step down and off full ink, so the figure reads
+                as one amount rather than as two numbers. */}
+            <span className="text-[0.62em] text-[var(--v69-ink)]/55">
+              {PAYMENT.cents}
+            </span>
+          </span>
+          <span
+            className={`mt-1.5 block truncate text-[10px] leading-none text-muted-foreground ${MOCK_UPSCALED_META}`}
+          >
+            Paid {PAYMENT.paidAt}
+          </span>
+        </span>
+      </span>
+    </div>
+  );
+}
+
 // Xero — the one screen the integration is: picking which Xero account an
 // Assembly line maps to. A searchable list says "this connects two systems" in
 // a way a logo cannot.
@@ -3789,6 +3845,7 @@ export function V69CardMock({ slug }: { slug: string }) {
   if (slug === "tasks") return <CardTasks />;
   if (slug === "profile-manager") return <CardProfileManager />;
   if (slug === "messaging-app") return <CardMessages />;
+  if (slug === "billing-app") return <CardPayments />;
   if (slug === "xero") return <CardXero />;
   if (slug === "quickbooks") return <CardQuickBooks />;
   if (slug === "block-builder-game") return <CardBlockGame />;

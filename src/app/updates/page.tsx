@@ -55,10 +55,14 @@ export default async function UpdatesPage({
         </p>
 
         {/* The blog's filter row, as links. Scrolls on a phone rather than
-            wrapping, so the years stay one row of options. */}
+            wrapping, so the years stay one row of options.
+            Pulled left by the chip's own 12px of padding at every width, so the
+            first YEAR sits on the page's rail with the h1 and the line under it.
+            Aligning the chip's BOX instead left its label indented past the
+            heading, and the row read as one notch out of the column. */}
         <nav
           aria-label="Filter updates by year"
-          className="-mx-6 mt-10 flex items-center gap-1 overflow-x-auto px-6 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:px-0 md:mt-12 [&::-webkit-scrollbar]:hidden"
+          className="-ml-6 -mr-6 mt-10 flex items-center gap-1 overflow-x-auto pl-3 pr-6 [-ms-overflow-style:none] [scrollbar-width:none] sm:-ml-3 sm:mr-0 sm:pl-0 sm:pr-0 md:mt-12 [&::-webkit-scrollbar]:hidden"
         >
           {years.map((year) => (
             <Link
