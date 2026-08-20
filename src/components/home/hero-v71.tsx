@@ -817,13 +817,14 @@ function CardProposal() {
             <div
               key={title}
               // Flat fills in both skins, no ramp, no lip, no cast shadow: the
-              // rows are a plain step off the panel. Light takes the card face's
-              // own F5F5F0 so it reads as a cutout down to it; dark steps a
-              // notch brighter than the panel instead, since a darker step there
-              // read as a hole punched through the glass.
+              // rows are a plain step off the panel. Light is white, the same
+              // surface the onboarding wizard's tile uses, so a control reads the
+              // same wherever it sits on the rail; dark steps a notch brighter
+              // than the panel instead, since a darker step there read as a hole
+              // punched through the glass.
               // No ring in either skin: the fill already steps off the panel, so
               // a hairline only drew a box around each row.
-              className="flex items-center justify-between rounded-lg bg-white px-3 py-3.5 ring-0 [[data-theme=light]_&]:bg-[var(--v69-card)] [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2] [[data-theme=dark]_&]:bg-[#3A3A3A]"
+              className="flex items-center justify-between rounded-lg bg-white px-3 py-3.5 ring-0 [[data-theme=dark]_&]:bg-[#3A3A3A]"
             >
               <div className="text-[11px] font-normal leading-tight text-[var(--v69-ink)]">
                 {title}
@@ -865,11 +866,13 @@ function CardChat() {
           the shared hairline, its own contents pinned to the corners. Its radius
           is the card's 16px less the 8px it is inset by, so the two sets of
           corners run parallel instead of the inner one reading rounder. */}
-      <div className="v69-chat-field flex h-full flex-col rounded-lg bg-[var(--v69-inner)] p-2.5 ring-1 ring-[rgba(16,24,40,0.06)] [.template-mock_&]:ring-[rgba(16,24,40,0.10)] [[data-theme=dark]_&]:bg-[#2E2E2E] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.12)] [[data-theme=dark]_.template-mock_&]:ring-[rgba(255,255,255,0.20)]">
+      <div className="v69-chat-field flex h-full flex-col rounded-lg bg-[var(--v69-inner)] p-2.5 [[data-theme=dark]_&]:bg-[#2E2E2E]">
         <div className="flex items-center">
-          <span
-            className={`whitespace-nowrap text-[11px] leading-none text-muted-foreground ${MOCK_UPSCALED_META}`}
-          >
+          {/* No MOCK_UPSCALED_META: that 9px rung was drawn for a gallery box
+              that scales its cover up, and this one renders near 1:1, so the
+              placeholder came out a third smaller than the 13px every other
+              cover sets its own primary line at. */}
+          <span className="whitespace-nowrap text-[13px] leading-none text-muted-foreground max-sm:[.template-mock-gallery_&]:text-[12px]">
             {CHAT_PLACEHOLDER}
           </span>
           {/* The caret sits after the placeholder rather than before it, so the
@@ -1904,7 +1907,7 @@ function CardTodo() {
     <div className="flex h-full flex-col bg-[var(--v69-card)]">
       {/* The band, its glyph and its hairline are the approvals card's, to the
           value — see CardDesignApprovals for why neither theme inverts it. */}
-      <div className="flex items-center gap-2 bg-[var(--v69-ink)] px-5 py-4 [[data-theme=light]_&]:bg-[#EDEDE6] [[data-theme=light]_&]:shadow-[inset_0_-1px_0_rgba(16,24,40,0.07)] [[data-theme=dark]_&]:bg-[#343434] [[data-theme=dark]_&]:shadow-[inset_0_-1px_0_rgba(255,255,255,0.08)]">
+      <div className="flex items-center gap-2 bg-[var(--v69-ink)] px-5 py-4 [[data-theme=light]_&]:bg-[#ebebeb] [[data-theme=light]_&]:shadow-[inset_0_-1px_0_rgba(16,24,40,0.07)] [[data-theme=dark]_&]:bg-[#343434] [[data-theme=dark]_&]:shadow-[inset_0_-1px_0_rgba(255,255,255,0.08)]">
         {/* No glyph: the word "To do" already says list, and the ticked box next
             to it was a second thing to read in a two-word band. */}
         <span
@@ -2052,13 +2055,13 @@ function CardVoiceAI() {
         // on both skins — translucent over the ramp with a lit top lip, an inward
         // shadow and an outer falloff in light; a specular band, a vertical
         // light-to-shade fall and refracted lips down the edges in dark.
-        // Light steps up to #FBFBF7 now that the ramp is gone: at #F7F7F3 on the
+        // Light steps up to #fafafa now that the ramp is gone: at #F7F7F3 on the
         // gallery's #F5F5F0 face the panel had nothing left to separate it, and
         // the edge is a value step here rather than an outline.
         // Radius matched to the gallery frame's own (14px) rather than the 20 it
         // had: sitting inside the card's inset, a rounder corner than the frame's
         // read as a second, softer card laid on the first.
-        className={`relative flex flex-1 flex-col overflow-hidden rounded-[14px] bg-[var(--v69-well)] px-4 pb-4 pt-3 [[data-theme=light]_&]:bg-[#FBFBF7] [[data-theme=dark]_&]:bg-[#2E2E2E]`}
+        className={`relative flex flex-1 flex-col overflow-hidden rounded-[14px] bg-[var(--v69-well)] px-4 pb-4 pt-3 [[data-theme=light]_&]:bg-[#fafafa] [[data-theme=dark]_&]:bg-[#2E2E2E]`}
       >
         {/* Bars fade out at the trailing edge only (mask, not a gradient
             overlay, so it works regardless of what's behind) — reads as a
@@ -2200,7 +2203,7 @@ function CardDeliverable({
           neutral bloom that used to sit in the bottom corner is gone with the flat
           fill it was there to lift; over a ramp it read as a smudge. */}
       <div
-        className="relative flex flex-1 flex-col justify-end overflow-hidden rounded-2xl p-3.5 [--muted-foreground:#3F444C] [[data-theme=dark]_&]:[--v69-card:#F7F7F2] [[data-theme=dark]_&]:[--v69-ink:#262626] [[data-theme=dark]_&]:[--v69-well:#F7F7F2]"
+        className="relative flex flex-1 flex-col justify-end overflow-hidden rounded-2xl p-3.5 [--muted-foreground:#3F444C] [[data-theme=dark]_&]:[--v69-card:#f5f5f5] [[data-theme=dark]_&]:[--v69-ink:#262626] [[data-theme=dark]_&]:[--v69-well:#f5f5f5]"
         // Sprayed, like the case-status cover, but on its own artwork: the panel
         // is one long blend rather than stacked bands, so it takes the coarse
         // two-hue spatter (spray-panel.svg) instead of the cover's fine dust.
@@ -2595,13 +2598,12 @@ function CardMessages() {
 }
 
 // Payments — the moment the app exists for: an invoice that has been paid. The
-// amount is the figure the card is built around, with the status chip and the
-// timestamp saying it landed, which is the one fact either side checks.
+// amount is the figure the card is built around, with the status chip saying it
+// landed, which is the one fact either side checks.
 const PAYMENT = {
   invoice: "Invoice 1042",
   amount: "$2,400",
   cents: ".00",
-  paidAt: "Nov 24 at 10 AM",
 };
 
 function CardPayments() {
@@ -2638,11 +2640,6 @@ function CardPayments() {
             <span className="text-[0.62em] text-[var(--v69-ink)]/55">
               {PAYMENT.cents}
             </span>
-          </span>
-          <span
-            className={`mt-1.5 block truncate text-[10px] leading-none text-muted-foreground ${MOCK_UPSCALED_META}`}
-          >
-            Paid {PAYMENT.paidAt}
           </span>
         </span>
       </span>
@@ -2772,7 +2769,7 @@ function CardContract() {
             signature rather than as another field. */}
         <span className="block border-t border-black/[0.07] px-3 pb-3 pt-1.5 [[data-theme=dark]_&]:border-white/[0.09]">
           <span
-            className="block truncate border-b border-black/[0.16] pb-1 text-[26px] leading-[1.15] text-[var(--v69-ink)] [[data-theme=dark]_&]:border-white/25 max-sm:[.template-mock-gallery_&]:text-[22px]"
+            className="block truncate border-b border-black/[0.16] text-[26px] leading-[0.95] text-[var(--v69-ink)] [[data-theme=dark]_&]:border-white/25 max-sm:[.template-mock-gallery_&]:text-[22px]"
             style={MOCK_SIGNATURE}
           >
             Adrian Chen
@@ -3117,9 +3114,8 @@ const PIPELINE_SERIES = [
 ];
 const PIPELINE_PLOT_W = 100;
 const PIPELINE_PLOT_H = 40;
-// The series occupies the left of the plot; from there a dashed rule carries the
-// last value out to the edge — the period is only part run, which is what the
-// reference's dashed continuation says.
+// The series occupies the left of the plot and the tinted floor carries its last
+// value out to the edge on its own: the period is only part run.
 const PIPELINE_DATA_W = 52;
 const PIPELINE_LAST_Y = PIPELINE_SERIES[PIPELINE_SERIES.length - 1];
 // Ruled verticals behind the line. Evenly pitched across the full width, so they
@@ -3199,18 +3195,6 @@ function CardDealsPipeline() {
             vectorEffect="non-scaling-stroke"
           />
         ))}
-        {/* The period's remainder: the last value carried out to the edge as a
-            dashed rule, so the card says how far through the period it is. */}
-        <line
-          x1={PIPELINE_DATA_W}
-          y1={PIPELINE_LAST_Y}
-          x2={PIPELINE_PLOT_W}
-          y2={PIPELINE_LAST_Y}
-          stroke={INK_MID}
-          strokeWidth="1"
-          strokeDasharray="4 4"
-          vectorEffect="non-scaling-stroke"
-        />
         <path
           d={PIPELINE_LINE_D}
           fill="none"
@@ -3717,7 +3701,7 @@ function CardEvents() {
         {/* Dark takes an explicit fill rather than --v69-well: on the gallery's
             dark skin that token lands within a step of the card face, so the
             body of the card disappeared and only the lime band read. */}
-        <div className="flex gap-2.5 bg-[var(--v69-well)] px-3.5 py-3 [[data-theme=light]_&]:bg-[#FBFBF7] [[data-theme=dark]_&]:bg-[#343434]">
+        <div className="flex gap-2.5 bg-[var(--v69-well)] px-3.5 py-3 [[data-theme=light]_&]:bg-[#fafafa] [[data-theme=dark]_&]:bg-[#343434]">
           {/* The marker the reference runs down the left of the title — the other
               brand hue, so the card carries both and neither has to shout. */}
           <span
@@ -3761,7 +3745,7 @@ function CardDesignApprovals() {
           of the card rather than a header. Both are now a soft step off the panel
           — a warm grey in light, a lifted grey in dark — with the type in the
           theme's own ink and a hairline closing the band. */}
-      <div className="flex items-center gap-2 bg-[var(--v69-ink)] px-5 py-4 [[data-theme=light]_&]:bg-[#EDEDE6] [[data-theme=light]_&]:shadow-[inset_0_-1px_0_rgba(16,24,40,0.07)] [[data-theme=dark]_&]:bg-[#343434] [[data-theme=dark]_&]:shadow-[inset_0_-1px_0_rgba(255,255,255,0.08)]">
+      <div className="flex items-center gap-2 bg-[var(--v69-ink)] px-5 py-4 [[data-theme=light]_&]:bg-[#ebebeb] [[data-theme=light]_&]:shadow-[inset_0_-1px_0_rgba(16,24,40,0.07)] [[data-theme=dark]_&]:bg-[#343434] [[data-theme=dark]_&]:shadow-[inset_0_-1px_0_rgba(255,255,255,0.08)]">
         <FolderGlyph
           className={`size-4 ${ON_INK} [[data-theme=light]_&]:text-[var(--v69-ink)] [[data-theme=dark]_&]:text-[#EDEDED]`}
         />
