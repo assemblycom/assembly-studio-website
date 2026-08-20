@@ -2964,3 +2964,46 @@ html[data-theme="dark"] .v63-ring-solid::before {
 html:not([data-authed]) .auth-only {
   display: none !important;
 }
+
+/* ============================================================
+   Demo video scrubber.
+
+   The track itself is painted inline by the component (a gradient whose stop is
+   the playhead), so all that's left is the thumb — which has no Tailwind
+   utility and no cross-browser shorthand, hence the vendor pair.
+
+   Deliberately unthemed: the bar sits on video, which is dark in both themes.
+   ============================================================ */
+.dv-range::-webkit-slider-thumb {
+  appearance: none;
+  height: 0.75rem;
+  width: 0.75rem;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.4);
+  /* Held back until the bar is engaged, so the resting state is a clean line. */
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+.dv-range::-moz-range-thumb {
+  height: 0.75rem;
+  width: 0.75rem;
+  border: 0;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.4);
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+.group\/dv:hover .dv-range:not(:disabled)::-webkit-slider-thumb,
+.dv-range:focus-visible::-webkit-slider-thumb {
+  opacity: 1;
+}
+.group\/dv:hover .dv-range:not(:disabled)::-moz-range-thumb,
+.dv-range:focus-visible::-moz-range-thumb {
+  opacity: 1;
+}
+.dv-range:focus-visible {
+  outline: 2px solid rgb(255 255 255 / 0.7);
+  outline-offset: 3px;
+}

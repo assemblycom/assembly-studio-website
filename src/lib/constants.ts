@@ -238,6 +238,41 @@ export const DEMO_URL = "/demo";
 export const DEMO_VIDEO_URL = "https://www.youtube.com/@assembly";
 export const TRUST_CENTER_URL = "https://security.assembly.com";
 
+// The desktop app builds, served from our CDN. "latest" is a stable alias the
+// release process re-points, so these never need updating per version.
+const DESKTOP_CDN = "https://cdn.assembly.com/desktop";
+export const DESKTOP_DOWNLOADS: {
+  label: string;
+  platform: string;
+  href: string;
+}[] = [
+  {
+    label: "Download for Mac (Apple silicon)",
+    platform: "macOS, Apple silicon",
+    href: `${DESKTOP_CDN}/Assembly-latest-macos-arm64.dmg`,
+  },
+  {
+    label: "Download for Mac (Intel)",
+    platform: "macOS, Intel",
+    href: `${DESKTOP_CDN}/Assembly-latest-macos-x64.dmg`,
+  },
+  {
+    label: "Download for Windows",
+    platform: "Windows 10 and later, 64-bit",
+    href: `${DESKTOP_CDN}/Assembly-latest-windows-x64.exe`,
+  },
+];
+
+// The partner programs run on PartnerStack: applications, tracking, and payouts
+// all live there, so both pages hand off rather than collecting anything here.
+const PARTNERSTACK_APPLY = "https://dash.partnerstack.com/application?company=assembly";
+export const AFFILIATE_APPLY_URL = `${PARTNERSTACK_APPLY}&group=affiliates`;
+export const EXPERT_APPLY_URL = `${PARTNERSTACK_APPLY}&group=experts`;
+// The Experts directory is still served by the old marketing site; point at it
+// there until that page moves too.
+export const EXPERTS_DIRECTORY_URL = "https://assembly.com/experts";
+export const PARTNERSHIPS_EMAIL = "partnerships@assembly.com";
+
 // Review-platform listings for Assembly.
 export const G2_URL = "https://www.g2.com/products/assemblysoftware/reviews";
 export const CAPTERRA_URL = "https://www.capterra.com/p/214210/Assembly/";
@@ -249,46 +284,82 @@ export const LEGAL_LINKS: NavLink[] = [
   { label: "AI policy", href: "/legal/ai-policy" },
 ];
 
-// The footer says more than the nav: it repeats the nav's shelves, adds the
-// destinations that don't earn a nav slot (a demo, the trust centre), and
-// carries the legal pages, which have nowhere else to live.
-export const FOOTER_GROUPS: { label: string; links: NavLink[] }[] = [
-  {
-    label: "Product",
-    links: [
-      { label: "Templates", href: "/templates" },
-      { label: "Security", href: "/security" },
-      { label: "Pricing", href: "/pricing" },
-      { label: "Book a demo", href: DEMO_URL },
-    ],
-  },
-  {
-    label: "Resources",
-    links: [
-      { label: "Blog", href: "/blog" },
-      { label: "Updates", href: "/updates" },
-      { label: "Customers", href: "/customers" },
-      { label: "Brand", href: "/brand" },
-      { label: "Definitions", href: "/definitions" },
-      // About and Careers are hidden from the footer for now; both pages are
-      // still live at /about and /jobs.
-      // { label: "About", href: "/about" },
-      // { label: "Careers", href: "/jobs" },
-      { label: "Assembly Guide", href: GUIDE_URL, external: true },
-      { label: "API reference", href: API_REFERENCE_URL, external: true },
-      { label: "Trust center", href: TRUST_CENTER_URL, external: true, newTab: true },
-      // The HTML sitemap. Its own reason to exist is a crawler following links
-      // rather than the XML index, so it has to be linked from somewhere on
-      // every page — which is what the footer is.
-      { label: "Sitemap", href: "/sitemap" },
-    ],
-  },
+/**
+ * The footer, as columns of labelled groups.
+ *
+ * A column can hold more than one group, which is the whole point of the shape:
+ * Resources had grown to ten links and stopped reading as a column at all — it
+ * ran to twice the height of its neighbours and turned the row into a ladder
+ * with three stubs beside it. Splitting the overflow into its own sub-heading
+ * (Developers under Resources, Partners under Company) keeps every column a
+ * similar height AND says what each run of links is, which one long list of ten
+ * never did.
+ *
+ * Kept here rather than in the footer component so the nav and the footer cannot
+ * drift apart the way the old hand-maintained pair did.
+ */
+export interface FooterGroup {
+  label: string;
+  links: NavLink[];
+}
+
+export const FOOTER_COLUMNS: FooterGroup[][] = [
+  [
+    {
+      label: "Product",
+      links: [
+        { label: "Templates", href: "/templates" },
+        { label: "Security", href: "/security" },
+        { label: "Pricing", href: "/pricing" },
+        { label: "Book a demo", href: DEMO_URL },
+        { label: "Desktop app", href: "/download" },
+      ],
+    },
+  ],
+  [
+    {
+      label: "Resources",
+      links: [
+        { label: "Blog", href: "/blog" },
+        { label: "Updates", href: "/updates" },
+        { label: "Customers", href: "/customers" },
+        { label: "Definitions", href: "/definitions" },
+      ],
+    },
+    {
+      label: "Developers",
+      links: [
+        { label: "Assembly Guide", href: GUIDE_URL, external: true },
+        { label: "API reference", href: API_REFERENCE_URL, external: true },
+      ],
+    },
+  ],
+  [
+    {
+      label: "Company",
+      links: [
+        { label: "Brand", href: "/brand" },
+        // About and Careers are hidden from the footer for now; both pages are
+        // still live at /about and /jobs.
+        // { label: "About", href: "/about" },
+        // { label: "Careers", href: "/jobs" },
+        { label: "Trust center", href: TRUST_CENTER_URL, external: true, newTab: true },
+        // The HTML sitemap. Its own reason to exist is a crawler following links
+        // rather than the XML index, so it has to be linked from somewhere on
+        // every page — which is what the footer is.
+        { label: "Sitemap", href: "/sitemap" },
+      ],
+    },
+    {
+      label: "Partners",
+      links: [
+        { label: "Experts program", href: "/experts-program" },
+        { label: "Affiliates program", href: "/affiliates-program" },
+      ],
+    },
+  ],
   // Compare is hidden from the footer for now. The pages themselves are still
   // live and linked from /comparison; put the column back by uncommenting it.
-  // The headline competitors, not all nine: the full set lives on /comparison,
-  // and a footer column that runs longer than the ones beside it stops reading as
-  // a column. Compare is footer-only by design — it earns a shelf for search
-  // traffic without taking a slot in the primary nav.
   // {
   //   label: "Compare",
   //   links: [
@@ -299,5 +370,5 @@ export const FOOTER_GROUPS: { label: string; links: NavLink[] }[] = [
   //     { label: "vs SmartVault", href: "/comparison/assembly-vs-smartvault-alternative" },
   //   ],
   // },
-  { label: "Legal", links: LEGAL_LINKS },
+  [{ label: "Legal", links: LEGAL_LINKS }],
 ];

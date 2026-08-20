@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FOOTER_GROUPS, type NavLink } from "@/lib/constants";
+import { FOOTER_COLUMNS, type FooterGroup, type NavLink } from "@/lib/constants";
 import { DiaGradient } from "@/components/ui/dia-gradient";
 import type { ThemePreference } from "@/components/theme/theme-provider";
 
@@ -76,6 +76,13 @@ const CONNECT: NavLink[] = [
   },
   { label: "Instagram", href: "https://instagram.com/assembly", external: true, newTab: true },
   { label: "YouTube", href: "https://www.youtube.com/@assembly", external: true, newTab: true },
+];
+
+// The socials are the last column. They live here rather than in constants
+// because nothing but the footer shows them.
+const COLUMNS: FooterGroup[][] = [
+  ...FOOTER_COLUMNS,
+  [{ label: "Connect", links: CONNECT }],
 ];
 
 function FooterLink({
@@ -252,22 +259,32 @@ export function Footer({
                 corner. */}
             <div className="flex flex-col gap-10 lg:grid lg:grid-cols-6 lg:items-start lg:gap-x-10">
               <div className="grid grid-cols-2 gap-x-8 gap-y-10 lg:col-span-6 lg:grid-cols-5 lg:gap-x-6">
-                {[...FOOTER_GROUPS, { label: "Connect", links: CONNECT }].map((col) => (
-                  <div key={col.label} className="sm:min-w-32">
-                    {/* A step above the links, not level with them: at
-                        muted-foreground the label was the exact colour of the
-                        items under it, so on a phone — where the columns stack
-                        into one list — nothing marked where a category began. */}
-                    <p className={`font-mono text-xs uppercase tracking-wide ${light ? "text-foreground" : "text-white/80"}`}>
-                      {col.label}
-                    </p>
-                    <ul className="mt-4 flex flex-col gap-1.5">
-                      {col.links.map((link) => (
-                        <li key={link.label}>
-                          <FooterLink link={link} className={linkCls} />
-                        </li>
-                      ))}
-                    </ul>
+                {COLUMNS.map((column) => (
+                  // A column can hold more than one group; the second sits under
+                  // the first with its own label, the way a long shelf is split
+                  // rather than left to run twice its neighbours' height.
+                  <div
+                    key={column[0].label}
+                    className="flex flex-col gap-8 sm:min-w-32"
+                  >
+                    {column.map((group) => (
+                      <div key={group.label}>
+                        {/* A step above the links, not level with them: at
+                            muted-foreground the label was the exact colour of the
+                            items under it, so on a phone — where the columns stack
+                            into one list — nothing marked where a category began. */}
+                        <p className={`font-mono text-xs uppercase tracking-wide ${light ? "text-foreground" : "text-white/80"}`}>
+                          {group.label}
+                        </p>
+                        <ul className="mt-4 flex flex-col gap-1.5">
+                          {group.links.map((link) => (
+                            <li key={link.label}>
+                              <FooterLink link={link} className={linkCls} />
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>
@@ -309,19 +326,23 @@ export function Footer({
               </div>
             )}
           </div>
-          {[...FOOTER_GROUPS, { label: "Connect", links: CONNECT }].map((section) => (
-            <div key={section.label}>
-              <p className="text-sm font-normal">{section.label}</p>
-              <ul className="mt-3 flex flex-col gap-2">
-                {section.links.map((link) => (
-                  <li key={link.label}>
-                    <FooterLink
-                      link={link}
-                      className="inline-block py-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                    />
-                  </li>
-                ))}
-              </ul>
+          {COLUMNS.map((column) => (
+            <div key={column[0].label} className="flex flex-col gap-6">
+              {column.map((section) => (
+                <div key={section.label}>
+                  <p className="text-sm font-normal">{section.label}</p>
+                  <ul className="mt-3 flex flex-col gap-2">
+                    {section.links.map((link) => (
+                      <li key={link.label}>
+                        <FooterLink
+                          link={link}
+                          className="inline-block py-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
           ))}
         </div>

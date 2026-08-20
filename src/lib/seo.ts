@@ -77,6 +77,30 @@ export const PAGE_SEO = {
       "Get a live walkthrough of Assembly tailored to your firm — see how an app goes live inside your branded, secure client experience.",
     path: "/demo",
   },
+  download: {
+    title: "Download the Desktop App",
+    description:
+      "Install the Assembly desktop app on Mac or Windows so your team can manage clients and catch every notification without a browser tab open.",
+    path: "/download",
+  },
+  affiliatesProgram: {
+    title: "Affiliate Program",
+    description:
+      "Refer Assembly to your audience and earn 20% of all referred payments for a year, with no cap on what you can earn.",
+    path: "/affiliates-program",
+  },
+  expertsProgram: {
+    title: "Experts Program",
+    description:
+      "Agencies and freelancers who set up Assembly workspaces and build custom apps earn recurring revenue share and a listing in our Experts directory.",
+    path: "/experts-program",
+  },
+  demoVideo: {
+    title: "Demo Video",
+    description:
+      "Watch a walkthrough of Assembly: build the client apps your firm needs by chat, and launch them production-ready inside a branded client portal.",
+    path: "/demo-video",
+  },
   blog: {
     title: "Blog",
     description:
