@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getUpdates, normalizeEntryHeadings } from "@/lib/ghost";
+import {
+  dropUnservableFigures,
+  getUpdates,
+  normalizeEntryHeadings,
+} from "@/lib/ghost";
 import { PAGE_SEO, pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata(PAGE_SEO.updates);
@@ -97,7 +101,9 @@ export default async function UpdatesPage({
                 <div
                   className="post-body updates-entry"
                   dangerouslySetInnerHTML={{
-                    __html: normalizeEntryHeadings(entry.html),
+                    __html: dropUnservableFigures(
+                      normalizeEntryHeadings(entry.html),
+                    ),
                   }}
                 />
               </div>

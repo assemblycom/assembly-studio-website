@@ -664,6 +664,24 @@ export function normalizeEntryHeadings(html: string): string {
   return html.replace(/<(\/?)h3([\s>])/gi, "<$1h2$2");
 }
 
+// The 2020–21 changelog was imported from the pre-Ghost changelog, whose
+// screenshots were served through that site's own image proxy. The host is gone
+// and the bucket behind it no longer serves public reads, so every one of those
+// figures renders as a broken box with its alt text sitting above the identical
+// caption. None of them are recoverable, so they come out of the entry rather
+// than being drawn as a hole in it.
+const DEAD_IMAGE_HOST = "updates.joinportal.com";
+
+export function dropUnservableFigures(html: string): string {
+  return html
+    .replace(/<figure\b[^>]*>[\s\S]*?<\/figure>/gi, (figure) =>
+      figure.includes(DEAD_IMAGE_HOST) ? "" : figure,
+    )
+    .replace(/<img\b[^>]*>/gi, (img) =>
+      img.includes(DEAD_IMAGE_HOST) ? "" : img,
+    );
+}
+
 export function withImageSizes(html: string, sizes: string): string {
   return html.replace(/<img\b[^>]*>/g, (tag) =>
     /\ssizes\s*=/i.test(tag)
