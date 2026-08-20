@@ -1068,6 +1068,12 @@ html[data-theme="dark"] .v63-ring-solid::before {
   --v69-well: #1f1f1f;
   --v69-well-2: #191919;
   --v69-chip: #2e2e2e;
+  /* The surfaces above were flipped for dark but the ink on them was not, so
+     every cover's primary text — the filename, the date, the amount — kept its
+     light value (#101828) and sat near-black on a #262626 panel. The hero rail
+     already carries this value on .v76-card-row; the gallery was simply missing
+     it. */
+  --v69-ink: #f2f3f5;
 }
 
 /* On-colour skin — reskins a light mock to sit on a full-bleed coloured card
@@ -2540,6 +2546,13 @@ html[data-theme="dark"] .v63-ring-solid::before {
     transform: none;
   }
 
+  /* A changelog entry is one of many stacked down a page, and the rule and the
+     date beside it already open it — so its leading heading drops the 3.5rem it
+     would carry as a section break inside a single article. */
+  .updates-entry > :first-child {
+    margin-top: 0;
+  }
+
   /* Most of these are screenshots of other products' interfaces, which are white
      to the edge — without an outline they bleed into the page. */
   .post-body img {
@@ -2558,6 +2571,17 @@ html[data-theme="dark"] .v63-ring-solid::before {
   }
   .post-body figure img {
     margin-top: 0;
+  }
+  /* Ghost's inline <code>. Mono set at the body's own size reads a step larger
+     beside PP Mori, so it comes down; the tint is what marks it as code, since
+     the change of family alone did not register. Mixed from the foreground, so
+     it follows the theme without a second value to keep in sync. */
+  .post-body code {
+    padding: 0.1em 0.35em;
+    border-radius: 0.3rem;
+    background: color-mix(in srgb, var(--foreground) 6%, transparent);
+    color: var(--foreground);
+    font-size: 0.9em;
   }
   .post-body figcaption {
     margin-top: 0.75rem;
@@ -2614,13 +2638,34 @@ html[data-theme="dark"] .v63-ring-solid::before {
   .post-body .kg-video-card {
     margin-top: 2rem;
   }
-  .post-body iframe,
-  .post-body video {
+  /* An oEmbed iframe carries the provider's own dimensions — YouTube sends
+     200x113 — and has no intrinsic ratio to restore, so its shape is stated
+     rather than inferred. */
+  .post-body iframe {
     width: 100%;
     aspect-ratio: 16 / 9;
     height: auto;
     border-radius: 1rem;
     display: block;
+  }
+  /* Video is sized from its own dimensions instead, and that is load-bearing.
+     Ghost's video card paints the poster behind the frame as a cover
+     background, so a clip of any other ratio letterboxed inside a 16:9 box and
+     the poster showed through the bars — which reads as a video sitting on top
+     of a screenshot. */
+  .post-body video {
+    width: 100%;
+    height: auto;
+    border-radius: 1rem;
+    display: block;
+  }
+  /* The same outline every image carries. Without it, video and embeds were the
+     only media on the page with no edge drawn round them. */
+  .post-body :is(video, iframe) {
+    border: 1px solid var(--border);
+  }
+  [data-theme="dark"] .post-body :is(video, iframe) {
+    border-color: #383838;
   }
   /* Ghost ships galleries as rows of flexed images with intrinsic ratios. */
   .post-body .kg-gallery-row {
