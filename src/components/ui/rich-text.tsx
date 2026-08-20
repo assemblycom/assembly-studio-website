@@ -24,6 +24,21 @@ const OPTIONS = {
     [BLOCKS.HEADING_3]: (_node: Block | Inline, children: ReactNode) => (
       <h3 className="type-h4 mt-10 text-foreground first:mt-0">{children}</h3>
     ),
+    // The deeper levels all take the same step. Editors reach for whichever one
+    // looks right in the CMS editor — the embed entries set their section titles
+    // as heading-6 — and left unhandled they fell through to the browser's
+    // default, which is small, tight and bold: the one weight the site never
+    // uses. They are sub-headings within a section either way, so the step below
+    // H3 is the right size for all three.
+    [BLOCKS.HEADING_4]: (_node: Block | Inline, children: ReactNode) => (
+      <h4 className="type-h4 mt-10 text-foreground first:mt-0">{children}</h4>
+    ),
+    [BLOCKS.HEADING_5]: (_node: Block | Inline, children: ReactNode) => (
+      <h5 className="type-h4 mt-10 text-foreground first:mt-0">{children}</h5>
+    ),
+    [BLOCKS.HEADING_6]: (_node: Block | Inline, children: ReactNode) => (
+      <h6 className="type-h4 mt-10 text-foreground first:mt-0">{children}</h6>
+    ),
     [BLOCKS.PARAGRAPH]: (_node: Block | Inline, children: ReactNode) => {
       // Entries separate paragraphs with empty ones; rendering those as real
       // paragraphs doubles every gap.

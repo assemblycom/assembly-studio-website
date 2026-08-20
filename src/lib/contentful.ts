@@ -12,6 +12,7 @@ import type { Document } from "@contentful/rich-text-types";
 // and it should appear without a deploy.
 const CONTENT_TYPE = "partnerApps";
 const APP_TEMPLATE = "App Template";
+const EMBED = "Embed";
 
 const SPACE_ID = process.env.CONTENTFUL_SPACE_ID;
 const DELIVERY_TOKEN = process.env.CONTENTFUL_DELIVERY_TOKEN;
@@ -46,6 +47,39 @@ export interface AppTemplateEntry {
   isHidden: boolean;
   featured: boolean;
   order?: number;
+}
+
+/**
+ * One embeddable third-party app — Calendly, Zoom Scheduler, a Databox board.
+ * The same `partnerApps` type the templates come from, filed under a different
+ * App Type: an embed is not built in Assembly, it is an external tool shown
+ * inside the client experience, so it carries a website and setup prose rather
+ * than screenshots and a template id.
+ */
+export interface EmbedEntry {
+  slug: string;
+  /** Contentful "Name" — the H1. */
+  name: string;
+  /** Contentful "Description" — the card line and the page's lede. */
+  description?: string;
+  /** Contentful "App Overview" — the Overview and App Setup prose in one field. */
+  overview?: Document;
+  /** Contentful "Product Icon", falling back to "Icon". The service's own mark. */
+  icon?: {
+    url: string;
+    title: string;
+    width?: number;
+    height?: number;
+  };
+  /**
+   * Contentful "Apps Type": who sees the app once installed — "Client" for
+   * client-facing, "Internal" for the team only.
+   */
+  audience?: string;
+  /** The service's own site. */
+  website?: string;
+  /** Listed or not. A hidden embed keeps its page, like a hidden template. */
+  isHidden: boolean;
 }
 
 const client =
@@ -153,4 +187,77 @@ async function fetchAppTemplates(): Promise<AppTemplateEntry[]> {
 export async function getAppTemplate(slug: string): Promise<AppTemplateEntry | null> {
   const all = await getAppTemplates();
   return all.find((t) => t.slug === slug) ?? null;
+}
+
+function toEmbed(entry: Entry<never>): EmbedEntry | null {
+  const f = entry.fields as Record<string, unknown>;
+  const slug = typeof f.slug === "string" ? f.slug : null;
+  const name = typeof f.name === "string" ? f.name : null;
+  if (!slug || !name) return null;
+
+  // Most entries carry both marks and they are the same file; productIcon is the
+  // one the directory has always shown.
+  const icon = toImage((f.productIcon ?? f.icon) as Asset) ?? undefined;
+
+  return {
+    slug,
+    name,
+    description: typeof f.description === "string" ? f.description : undefined,
+    overview: (f.appOverview as Document) ?? undefined,
+    icon: icon ?? undefined,
+    audience: typeof f.appsType === "string" ? f.appsType : undefined,
+    website: typeof f.website === "string" ? f.website : undefined,
+    isHidden: f.isHidden === true,
+  };
+}
+
+// Its own cache rather than a shared one keyed by type: the two catalogues are
+// queried by different pages, and one warming the other's entry would hand it a
+// list filtered for somebody else. Same minute-long bound as the templates
+// cache, for the same reason — see above.
+let embedCache: { at: number; value: Promise<EmbedEntry[]> } | null = null;
+
+/**
+ * Every published Embed, hidden ones included — the flag is applied where the
+ * listing is built, so a hidden embed still has a page.
+ *
+ * Empty when Contentful isn't configured or is unreachable. Unlike the templates
+ * there is no committed copy behind these, so the directory says as much rather
+ * than rendering a gallery that is silently missing half its entries.
+ */
+export function getEmbeds(): Promise<EmbedEntry[]> {
+  if (process.env.NODE_ENV !== "production") return fetchEmbeds();
+  if (!embedCache || Date.now() - embedCache.at > CACHE_MS) {
+    embedCache = { at: Date.now(), value: fetchEmbeds() };
+  }
+  return embedCache.value;
+}
+
+async function fetchEmbeds(): Promise<EmbedEntry[]> {
+  if (!client) return [];
+  try {
+    const res = await client.getEntries({
+      content_type: CONTENT_TYPE,
+      "fields.appType": EMBED,
+      include: 2,
+      limit: 200,
+      order: ["fields.name"],
+    });
+    return res.items
+      .map((item) => toEmbed(item as Entry<never>))
+      .filter((embed): embed is EmbedEntry => Boolean(embed));
+  } catch (error) {
+    console.warn("Contentful embed fetch failed:", error);
+    return [];
+  }
+}
+
+export async function getEmbed(slug: string): Promise<EmbedEntry | null> {
+  const all = await getEmbeds();
+  return all.find((embed) => embed.slug === slug) ?? null;
+}
+
+/** The directory listing: everything not hidden in the CMS. */
+export async function getListedEmbeds(): Promise<EmbedEntry[]> {
+  return (await getEmbeds()).filter((embed) => !embed.isHidden);
 }

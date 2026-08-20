@@ -59,6 +59,12 @@ export const PAGE_SEO = {
       "Assembly (formerly Copilot) offers a branded client portal software that helps professional service firms deliver remarkable client experiences.",
     path: "/copilot-rebrand",
   },
+  embeds: {
+    title: "Embeds",
+    description:
+      "Every external app you can embed in your Assembly client experience \u2014 scheduling, dashboards, design review, support \u2014 with setup steps for each.",
+    path: "/embeds/directory",
+  },
   definitions: {
     title: "Definitions",
     description:

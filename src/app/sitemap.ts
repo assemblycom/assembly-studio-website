@@ -10,6 +10,7 @@ import { getVisibleTemplates } from "@/lib/visible-templates";
 import { CASE_STUDIES } from "@/lib/case-studies";
 import { getSolutions } from "@/lib/solutions";
 import { getFeaturePages } from "@/lib/features";
+import { getListedEmbeds } from "@/lib/contentful";
 import { getComparisons } from "@/lib/comparisons";
 import { getOpenRoles } from "@/lib/careers";
 import { getDefinitions } from "@/lib/definitions";
@@ -86,6 +87,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     features,
     comparisons,
     roles,
+    embeds,
   ] = await Promise.all([
     getVisibleTemplates(),
     getPosts(),
@@ -95,6 +97,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     getFeaturePages(),
     getComparisons(),
     getOpenRoles(),
+    getListedEmbeds(),
   ]);
   const lastModified = new Date();
 
@@ -129,5 +132,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...posts.map((post) => entry(`/blog/${post.slug}`)),
     ...authors.map((author) => entry(`/blog/author/${author.slug}`)),
     ...definitions.map((d) => entry(`/definitions/${d.slug}`)),
+    // Hidden embeds are left out the way hidden templates are: the page exists,
+    // but nothing of ours points at it.
+    ...embeds.map((e) => entry(`/embeds/directory/${e.slug}`)),
   ];
 }
