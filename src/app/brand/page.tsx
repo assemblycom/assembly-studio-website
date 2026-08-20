@@ -59,20 +59,20 @@ const ASSETS: BrandAssetProps[] = [
   },
 ];
 
-// The palette the site actually renders: the lime and the periwinkle carry every
-// accent moment (hero composer ring, aurora, data marks), so they are the pair
+// The palette the site actually renders: Zest and Haze carry every accent
+// moment (hero composer ring, aurora, data marks), so they are the pair
 // documented here rather than the blue the main site was built on.
 const COLORS: BrandColor[] = [
   { name: "Off-black", rgb: "RGB 16, 16, 16", hex: "#101010", ink: "#ffffff" },
   {
-    name: "Assembly lime",
+    name: "Zest",
     rgb: "RGB 217, 237, 146",
     hex: "#D9ED92",
     ink: "#262626",
     outlined: true,
   },
   {
-    name: "Assembly periwinkle",
+    name: "Haze",
     rgb: "RGB 125, 164, 255",
     hex: "#7DA4FF",
     ink: "#101010",
@@ -159,9 +159,8 @@ export default function BrandPage() {
             <div className="md:self-start">
               <h2 className="type-h3">Colors</h2>
               <p className="type-body mt-4 text-muted-foreground">
-                Off-black carries the type and the interface. The lime and the
-                periwinkle are accents, used sparingly for emphasis and never as
-                a page ground.
+                Off-black carries the type and the interface. Zest and Haze are
+                accents, used sparingly for emphasis and never as a page ground.
               </p>
             </div>
 
