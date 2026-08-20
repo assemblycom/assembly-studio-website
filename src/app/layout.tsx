@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, La_Belle_Aurore } from "next/font/google";
 import { RootShell } from "@/components/layout/root-shell";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 // Imported from the plain module, never from the "use client" provider — a
@@ -16,6 +16,16 @@ import "./globals.css";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+  display: "swap",
+});
+
+// The hand on a signed contract, used by the Contracts preview card and nowhere
+// else. A signature is the one thing on these cards that must not look typeset,
+// and there is no handwritten face among the site's own three.
+const laBelleAurore = La_Belle_Aurore({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-signature",
   display: "swap",
 });
 
@@ -104,7 +114,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`h-full antialiased ${inter.variable}`}
+      className={`h-full antialiased ${inter.variable} ${laBelleAurore.variable}`}
       // The pre-paint scripts set data-theme and data-authed on <html> before
       // hydration, so the server markup (no attributes) and client differ by
       // design.

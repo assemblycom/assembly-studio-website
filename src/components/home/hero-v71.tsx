@@ -196,6 +196,11 @@ const INK_SOLID = ink(70); // solid surfaces: checks, bubbles, CTAs, selected ra
 const MOCK_MONO = {
   fontFamily: "var(--font-diatype-mono), ui-monospace, monospace",
 } as const;
+// La Belle Aurore, loaded in the root layout. Only the contract cover uses it:
+// a signature is the one thing on these covers that must not look typeset.
+const MOCK_SIGNATURE = {
+  fontFamily: "var(--font-signature), cursive",
+} as const;
 // The unit tag beside a metric — the chip idiom the gallery's category tags use.
 // Layout (where it sits in its header) stays with the caller. The shared cool
 // grey all but disappeared on light mode's warm off-white face, so light takes a
@@ -2235,6 +2240,231 @@ function CardDeliverable({
 // the library reads as a place things are filed, and the single row says what a
 // filed thing looks like. The row reuses the onboarding cover's glass pane, so
 // the two raised surfaces in the gallery are the same material.
+// Exporter — a job in flight. The app is a single action with a wait attached,
+// so the cover draws the wait: a named file, a meter, and how far along it is.
+function CardExport() {
+  const pct = 68;
+  return (
+    <div className="v69-plot-grid v69-plot-grid--lines flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+      <span className="block w-full rounded-xl border border-black/[0.08] bg-[#FFFFFF] px-3 py-2.5 [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
+        <span className="block truncate text-[13px] leading-none text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[12px]">
+          Clients.csv
+        </span>
+        {/* The meter takes the periwinkle every other meter in the set runs in,
+            rather than a green of its own. */}
+        <span className="mt-2.5 block h-[5px] w-full overflow-hidden rounded-full bg-[var(--v69-well)] [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.16)]">
+          <span
+            className="block h-full rounded-full bg-[#7DA4FF]"
+            style={{ width: `${pct}%` }}
+          />
+        </span>
+        <span className="mt-2.5 flex items-baseline justify-between text-[11px] leading-none text-muted-foreground max-sm:[.template-mock-gallery_&]:text-[10px]">
+          <span>Exporting…</span>
+          <span className="tabular-nums">{pct}%</span>
+        </span>
+      </span>
+    </div>
+  );
+}
+
+// Files — a folder and what is in it. Two zones rather than a panel on a ground:
+// a file list fills its pane in the product, and floating it on texture made it
+// read as one record rather than as a place things are kept.
+function CardFiles() {
+  const files = ["Brand_Handoff.svg", "Receipts_Jun_2026.pdf"];
+  return (
+    <div className="flex h-full flex-col bg-[var(--v69-card)]">
+      {/* The folder band takes the covers' periwinkle: it is the one coloured
+          thing here, and it is what says "folder" before any filename is read. */}
+      <div className="flex shrink-0 items-center gap-2 bg-[#7DA4FF] px-3.5 py-2.5">
+        <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-[#1B1B1B]" fill="currentColor" aria-hidden>
+          <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4.1a1.5 1.5 0 0 1 1.06.44L11 6.78h8.5A1.5 1.5 0 0 1 21 8.28v9.22a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5Z" />
+        </svg>
+        <span className="truncate text-[13px] leading-none text-[#1B1B1B] max-sm:[.template-mock-gallery_&]:text-[12px]">
+          Important
+        </span>
+      </div>
+      <div className="flex-1 bg-[#FFFFFF] [[data-theme=light]_.template-mock_&]:bg-[#FAFAF7] [[data-theme=dark]_&]:bg-[#1F1F1F]">
+        {files.map((name) => (
+          // Ruled between rows, the way a file list is: the rule is what makes
+          // two names read as a list rather than as a paragraph.
+          <div
+            key={name}
+            className="flex items-center gap-2 border-b border-black/[0.07] px-3.5 py-2.5 [[data-theme=dark]_&]:border-white/[0.09]"
+          >
+            <span className="min-w-0 flex-1 truncate text-[12px] leading-none text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[11px]">
+              {name}
+            </span>
+            <span className="flex shrink-0 gap-[3px]" aria-hidden>
+              {[0, 1, 2].map((i) => (
+                <span key={i} className="size-[3px] rounded-full bg-muted-foreground/60" />
+              ))}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Forms — the form being filled in, caught mid-answer. A blank form says the app
+// collects information; a form with a name and an address in it says whose.
+function CardForms() {
+  return (
+    <div className="v69-plot-grid v69-plot-grid--dots flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+      <span className="block w-full space-y-2">
+        {["Jamie Rivera", "jamie@acmestudio.com"].map((value, i) => (
+          <span
+            key={value}
+            className="flex items-center rounded-xl border border-black/[0.08] bg-[#FFFFFF] px-3 py-2.5 [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]"
+          >
+            <span className="min-w-0 flex-1 truncate text-[13px] leading-none text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[12px]">
+              {value}
+            </span>
+            {/* The caret sits in the field being typed into — the one mark that
+                turns two filled boxes into someone answering. */}
+            {i === 1 && (
+              <span className="ml-px block h-3.5 w-px shrink-0 bg-[var(--v69-ink)]" aria-hidden />
+            )}
+          </span>
+        ))}
+      </span>
+    </div>
+  );
+}
+
+// Helpdesk — an article being written, not a list of them. The app's own screen
+// is an editor, and the empty body under a filled title is what it looks like.
+function CardHelpdesk() {
+  return (
+    <div className="flex h-full items-stretch bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+      <span className="flex w-full flex-col overflow-hidden rounded-xl border border-black/[0.08] bg-[#FFFFFF] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
+        <span className="flex items-center gap-2 px-3 py-2.5">
+          <span className="min-w-0 flex-1 truncate text-[13px] leading-none text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[12px]">
+            Welcome to the portal
+          </span>
+          <span className="flex shrink-0 gap-[3px]" aria-hidden>
+            {[0, 1, 2].map((i) => (
+              <span key={i} className="size-[3px] rounded-full bg-muted-foreground/60" />
+            ))}
+          </span>
+        </span>
+        <span className="flex flex-1 items-start border-t border-black/[0.07] px-3 pt-2.5 [[data-theme=dark]_&]:border-white/[0.09]">
+          <span className="mr-px block h-3.5 w-px shrink-0 bg-[var(--v69-ink)]" aria-hidden />
+          <span className="text-[12px] leading-none text-muted-foreground max-sm:[.template-mock-gallery_&]:text-[11px]">
+            Add more information
+          </span>
+        </span>
+      </span>
+    </div>
+  );
+}
+
+// Home — the client's own landing row in the sidebar, with what is waiting for
+// them on it. The count is the point: Home is where a client is told there is
+// something to do.
+function CardHome() {
+  return (
+    <div className="flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+      {/* The selected state of a nav row — a well rather than a panel, because a
+          sidebar row is recessed into its rail, not floated above it. */}
+      <span className="flex w-full items-center gap-2.5 rounded-xl bg-[var(--v69-well)] px-3 py-2.5 [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.1)]">
+        <svg
+          viewBox="0 0 24 24"
+          className="size-4 shrink-0 text-muted-foreground"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z" />
+          <path d="M9.5 20v-5h5v5" />
+        </svg>
+        <span className="min-w-0 flex-1 truncate text-[13px] leading-none text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[12px]">
+          Home
+        </span>
+        <span className="shrink-0 rounded-md bg-[#7DA4FF] px-1.5 py-1 text-[11px] leading-none tabular-nums text-[#1B1B1B] max-sm:[.template-mock-gallery_&]:text-[10px]">
+          3
+        </span>
+      </span>
+    </div>
+  );
+}
+
+// Autoresponder — the one setting the app exists for: when the automatic reply
+// fires. A select showing its current value says what the app does in a way a
+// list of features does not.
+function CardAutoresponder() {
+  return (
+    // Hatched rather than ruled or plotted: the object here is a setting, not a
+    // record at a position, which is what the plotted ground is for.
+    <div className="v69-hatch-ground flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+      <span className="block w-full">
+        <span className="block text-[11px] leading-none text-muted-foreground max-sm:[.template-mock-gallery_&]:text-[10px]">
+          Enable auto responses
+        </span>
+        {/* Opaque like every other panel in the set — through a translucent one
+            the hatch ran straight across the control. */}
+        <span className="mt-2 flex items-center gap-2 rounded-xl border border-black/[0.08] bg-[#FFFFFF] px-3 py-2.5 [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
+          <span className="min-w-0 flex-1 truncate text-[13px] leading-none text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[12px]">
+            Outside working hours
+          </span>
+          <svg
+            viewBox="0 0 24 24"
+            className="size-3.5 shrink-0 text-muted-foreground"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </span>
+      </span>
+    </div>
+  );
+}
+
+// Contracts — the finished state: a named agreement, signed. The signature is
+// the whole point of the app, so it is the thing the cover draws.
+function CardContract() {
+  return (
+    <div className="v69-plot-grid v69-plot-grid--dots flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+      <span className="block w-full overflow-hidden rounded-xl border border-black/[0.08] bg-[#FFFFFF] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
+        <span className="flex items-center gap-2 px-3 py-2.5">
+          <span className="min-w-0 flex-1 truncate text-[13px] leading-none text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[12px]">
+            Service Agreement
+          </span>
+          {/* The status chip takes the covers' one live colour — lime in light,
+              periwinkle in dark — rather than a green of its own, so it reads as
+              the same marker the case-status cover uses. */}
+          <span
+            className="shrink-0 rounded-md bg-[#D9ED92] px-2 py-1 text-[10px] uppercase leading-none tracking-wide text-[#1B1B1B] [[data-theme=dark]_&]:bg-[#7DA4FF] max-sm:[.template-mock-gallery_&]:text-[9px]"
+            style={MOCK_MONO}
+          >
+            Signed
+          </span>
+        </span>
+        {/* The signing line, ruled the way the paper one is: the hand sits ON a
+            rule rather than in a second box, which is what makes it read as a
+            signature rather than as another field. */}
+        <span className="block border-t border-black/[0.07] px-3 pb-3 pt-1.5 [[data-theme=dark]_&]:border-white/[0.09]">
+          <span
+            className="block truncate border-b border-black/[0.16] pb-1 text-[26px] leading-[1.15] text-[var(--v69-ink)] [[data-theme=dark]_&]:border-white/25 max-sm:[.template-mock-gallery_&]:text-[22px]"
+            style={MOCK_SIGNATURE}
+          >
+            Adrian Chen
+          </span>
+        </span>
+      </span>
+    </div>
+  );
+}
+
 function CardTeamGuides() {
   const file = { name: "Team handbook.pdf", meta: "18 guides", size: "12MB" };
   const readPct = 76;
@@ -3307,6 +3537,13 @@ export function V69CardMock({ slug }: { slug: string }) {
   if (slug === "mass-messenger") return <CardMassMessenger />;
   if (slug === "jargon-quest") return <CardJargonQuest />;
   if (slug === "internal-resource-library") return <CardTeamGuides />;
+  if (slug === "message-autoresponder") return <CardAutoresponder />;
+  if (slug === "contracts-app") return <CardContract />;
+  if (slug === "exporter") return <CardExport />;
+  if (slug === "files-app") return <CardFiles />;
+  if (slug === "forms-app") return <CardForms />;
+  if (slug === "helpdesk-app") return <CardHelpdesk />;
+  if (slug === "client-home") return <CardHome />;
   if (slug === "block-builder-game") return <CardBlockGame />;
   return <TemplateMock slug={slug} />;
 }
