@@ -231,8 +231,8 @@ export function Footer({
     // inline-block + vertical padding keeps each row a comfortable tap target
     // on touch screens — the bare 15px text line was easy to miss-tap.
     const linkCls = light
-      ? "inline-block py-1 text-[15px] text-muted-foreground transition-colors hover:text-foreground"
-      : "inline-block py-1 text-[15px] text-white/60 transition-colors hover:text-white";
+      ? "inline-block py-1 text-[15px] text-foreground transition-colors hover:text-muted-foreground"
+      : "inline-block py-1 text-[15px] text-white transition-colors hover:text-white/70";
     // The dark face runs on the page's own ground rather than its own #101010,
     // which sat a clear step lighter than the #0a0a0a everything above it uses.
     // Only ever taken in dark mode (light={!dark} at the call site), so
@@ -269,11 +269,10 @@ export function Footer({
                   >
                     {column.map((group) => (
                       <div key={group.label}>
-                        {/* A step above the links, not level with them: at
-                            muted-foreground the label was the exact colour of the
-                            items under it, so on a phone — where the columns stack
-                            into one list — nothing marked where a category began. */}
-                        <p className={`font-mono text-xs uppercase tracking-wide ${light ? "text-foreground" : "text-white/80"}`}>
+                        {/* Set in PP Mori at link size, greyed back: the label
+                            reads as a quiet category marker above its items rather
+                            than a mono eyebrow competing with them. */}
+                        <p className={`text-[15px] ${light ? "text-muted-foreground" : "text-white/45"}`}>
                           {group.label}
                         </p>
                         <ul className="mt-4 flex flex-col gap-1.5">

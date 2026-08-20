@@ -10,6 +10,8 @@ export interface BrandColor {
   ink: string;
   /** Swatches this pale need an edge to separate them from the page ground. */
   outlined?: boolean;
+  /** Near-black swatches only need that edge on the dark ground. */
+  outlinedOnDark?: boolean;
 }
 
 const COPIED_MS = 1400;
@@ -40,6 +42,10 @@ export function BrandColorCard({ color }: { color: BrandColor }) {
       <div
         className={`flex aspect-[4/3] items-end rounded-xl p-5 ${
           color.outlined ? "border border-border" : ""
+        } ${
+          color.outlinedOnDark
+            ? "[[data-theme=dark]_&]:border [[data-theme=dark]_&]:border-[#383838]"
+            : ""
         }`}
         style={{ backgroundColor: color.hex, color: color.ink }}
       >

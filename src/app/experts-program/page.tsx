@@ -62,16 +62,12 @@ const STEPS: ProgramStep[] = [
 
 const FAQS: FAQEntry[] = [
   {
-    question:
-      "Will I earn revenue share retroactively if I joined the program later?",
-    shortQuestion: "Is revenue share retroactive?",
+    question: "Is revenue share retroactive if I join later?",
     answer:
       "No. Revenue share only applies to workspaces referred or joined after you're in the program.",
   },
   {
-    question:
-      "What if a customer adds seats or upgrades after their first invoice?",
-    shortQuestion: "What about seats and upgrades?",
+    question: "What if a customer adds seats or upgrades later?",
     answer:
       "Rewards are generated for every new transaction, and that includes both seat upgrades and plan upgrades.",
   },
@@ -94,7 +90,7 @@ export default function ExpertsProgramPage() {
   return (
     <ProgramPage
       title="Assembly Experts Program"
-      lede="Agencies and freelancers who set up Assembly workspaces, or build custom solutions for their clients, earn a recurring revenue share, get listed in our Experts directory, and join an exclusive Slack group."
+      lede="Agencies and freelancers who set up Assembly workspaces or build custom client solutions earn a recurring revenue share, an Experts directory listing, and access to an exclusive Slack group."
       actions={[
         { label: "Apply now", href: EXPERT_APPLY_URL, external: true },
         {
@@ -105,12 +101,6 @@ export default function ExpertsProgramPage() {
       ]}
       categoriesHeading="Made for agencies and freelancers who help firms succeed on Assembly"
       categories={CATEGORIES}
-      quote={{
-        quote:
-          "Our design and technology studio runs on Assembly and we've loved building custom functionality on top of the platform. The APIs, SDK, and design kit are best-in-class.",
-        name: "Sujan Shrestha",
-        role: "Founder and CTO, Outside",
-      }}
       stepsHeading="Apply now, get accepted tomorrow, and start earning"
       steps={STEPS}
       faqs={FAQS}

@@ -58,8 +58,7 @@ const STEPS: ProgramStep[] = [
 
 const FAQS: FAQEntry[] = [
   {
-    question: "How do I create, track, and promote my affiliate link?",
-    shortQuestion: "How do I track my link?",
+    question: "How do I create, track, and promote my link?",
     answer:
       "You can create multiple links and see your stats in your PartnerStack dashboard. Once you have your personalized link, promote it wherever you publish: your blog, your social profiles, your site, your videos. The more places the better.\n\nWhenever you post about Assembly, your message has to make it obvious that you have a financially compensated relationship with us. All promotions need to be FTC compliant.",
   },
@@ -69,9 +68,7 @@ const FAQS: FAQEntry[] = [
       "A net new workspace that upgrades to a paid plan within 180 days of clicking your affiliate link. Commissions are paid on a last-click basis, so your link has to be the last touch point before the signup.",
   },
   {
-    question:
-      "What if a customer adds seats or upgrades after their first invoice?",
-    shortQuestion: "What about seats and upgrades?",
+    question: "What if a customer adds seats or upgrades later?",
     answer:
       "Rewards are generated for every new transaction, and that includes both seat upgrades and plan upgrades.",
   },
@@ -93,18 +90,12 @@ export default function AffiliatesProgramPage() {
   return (
     <ProgramPage
       title="Assembly Affiliate Program"
-      lede="Refer Assembly to your friends and followers, and earn 20% of all referred payments for a year. There's no limit to how much you can earn."
+      lede="Refer Assembly to friends and followers and earn 20% of every referred payment for a year, with no cap on your earnings."
       actions={[
         { label: "Apply now", href: AFFILIATE_APPLY_URL, external: true },
       ]}
       categoriesHeading="For people with an audience that can benefit from Assembly"
       categories={CATEGORIES}
-      quote={{
-        quote:
-          "Assembly is a super flexible client portal solution. They have an interesting take on the client experience layer.",
-        name: "Jason Staats",
-        role: "Founder, Realize CPA",
-      }}
       stepsHeading="Apply now, get accepted tomorrow, and start earning"
       steps={STEPS}
       faqs={FAQS}

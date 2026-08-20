@@ -18,7 +18,9 @@ const SECONDARY_BUTTON =
 
 export default function DemoVideoPage() {
   return (
-    <section className="px-6 pb-24 pt-20 md:px-10 md:pb-32 md:pt-28">
+    // The page ends on the video, so it keeps a tighter tail than the sections
+    // pages: the standard pb-32 left a screen of empty white above the footer.
+    <section className="px-6 pb-16 pt-20 md:px-10 md:pb-20 md:pt-28">
       <div className="mx-auto max-w-[1600px]">
         <div className="mx-auto max-w-3xl text-center">
           <h1 className="type-display text-balance">
@@ -28,7 +30,7 @@ export default function DemoVideoPage() {
             Watch a walkthrough of Assembly, from building an app by chat to the
             branded client portal your clients log in to.
           </p>
-          <div className="mt-8 flex w-full max-w-xs flex-col items-stretch gap-3 sm:mx-auto sm:w-auto sm:max-w-none sm:flex-row sm:justify-center">
+          <div className="mx-auto mt-8 flex w-full max-w-xs flex-col items-stretch gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:justify-center">
             <a href={SIGNUP_URL} className={PRIMARY_BUTTON}>
               Get started
             </a>

@@ -63,7 +63,13 @@ const ASSETS: BrandAssetProps[] = [
 // moment (hero composer ring, aurora, data marks), so they are the pair
 // documented here rather than the blue the main site was built on.
 const COLORS: BrandColor[] = [
-  { name: "Off-black", rgb: "RGB 16, 16, 16", hex: "#101010", ink: "#ffffff" },
+  {
+    name: "Off-black",
+    rgb: "RGB 16, 16, 16",
+    hex: "#101010",
+    ink: "#ffffff",
+    outlinedOnDark: true,
+  },
   {
     name: "Zest",
     rgb: "RGB 217, 237, 146",
@@ -171,8 +177,6 @@ export default function BrandPage() {
             </div>
           </div>
         </section>
-
-        <GridDivider />
       </div>
     </>
   );

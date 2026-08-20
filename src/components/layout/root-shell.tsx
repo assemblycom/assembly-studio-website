@@ -7,6 +7,10 @@ import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { Footer } from "@/components/layout/footer";
 import { useTheme } from "@/components/theme/theme-provider";
 
+// Pages whose content is shorter than a viewport, so main must not be stretched
+// to fill one (see the branch below).
+const SHORT_PAGES = new Set(["/demo", "/demo-video"]);
+
 /**
  * Every page in this shell ends in the reveal footer — a single black sheet
  * closing on the brand aurora (the gradient lives inside the footer itself,
@@ -63,9 +67,10 @@ export function RootShell({ children }: { children: React.ReactNode }) {
     return <div className="min-h-screen bg-background">{children}</div>;
   }
 
-  // Short pages (the demo form) keep the reveal footer in normal flow so it
-  // rises to the bottom of the content instead of sitting a full screen below.
-  if (pathname === "/demo") {
+  // Short pages (the demo form, the walkthrough) keep the reveal footer in
+  // normal flow so it rises to the bottom of the content instead of sitting a
+  // full screen below.
+  if (SHORT_PAGES.has(pathname)) {
     return (
       <div className="flex min-h-screen flex-col bg-background">
         <AnnouncementBar />
