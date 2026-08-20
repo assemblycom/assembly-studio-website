@@ -655,13 +655,28 @@ export function splitFaq(html: string): {
  * Most changelog entries head their sections with <h3> and never use an <h2>:
  * the level is the writer's habit rather than a hierarchy, and left alone those
  * heads render a pixel larger than the body text beside them while the entries
- * that do use <h2> get a proper one. Where an entry has no <h2> at all, its
- * <h3>s are its top level and are promoted to say so. An entry that uses both
- * is already ranked, and is left alone.
+ * that do use <h2> get a proper one. So the entry's first heading sets its top
+ * level: where that is an <h3>, every heading shifts up a step.
+ *
+ * Testing whether an <h2> appears anywhere instead would leave the one entry
+ * that opens with <h3> feature sections and then closes with an <h2>
+ * "Improvements" ranked upside down, the features a size below the fixes list.
  */
 export function normalizeEntryHeadings(html: string): string {
-  if (/<h2[\s>]/i.test(html)) return html;
-  return html.replace(/<(\/?)h3([\s>])/gi, "<$1h2$2");
+  if (/<h([1-6])[^>]*>/i.exec(html)?.[1] !== "3") return html;
+  return html
+    .replace(/<(\/?)h3([\s>])/gi, "<$1h2$2")
+    .replace(/<(\/?)h4([\s>])/gi, "<$1h3$2");
+}
+
+// Ghost's editor leaves an empty paragraph behind wherever a writer pressed
+// return past the end of a block, usually under an image. It draws as a hole in
+// the entry, so it comes out.
+export function dropEmptyParagraphs(html: string): string {
+  return html.replace(
+    /<p\b[^>]*>(?:\s|&nbsp;|<br\s*\/?>)*<\/p>/gi,
+    "",
+  );
 }
 
 // The 2020–21 changelog was imported from the pre-Ghost changelog, whose

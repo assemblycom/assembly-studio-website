@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import {
+  dropEmptyParagraphs,
   dropUnservableFigures,
   getUpdates,
   normalizeEntryHeadings,
@@ -101,8 +102,8 @@ export default async function UpdatesPage({
                 <div
                   className="post-body updates-entry"
                   dangerouslySetInnerHTML={{
-                    __html: dropUnservableFigures(
-                      normalizeEntryHeadings(entry.html),
+                    __html: dropEmptyParagraphs(
+                      dropUnservableFigures(normalizeEntryHeadings(entry.html)),
                     ),
                   }}
                 />

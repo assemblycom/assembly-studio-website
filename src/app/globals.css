@@ -2553,6 +2553,23 @@ html[data-theme="dark"] .v63-ring-solid::before {
     margin-top: 0;
   }
 
+  /* A few entries open on a line of scene-setting ("Here's what we've recently
+     rolled out") before their first section head. Left as body copy it reads as
+     a stray sentence where the entry's title should be, so it takes the colour
+     and size of a standfirst and becomes the opening line it was written as. */
+  .updates-entry > p:first-child {
+    color: var(--foreground);
+    font-size: 1.125rem;
+    line-height: 1.5;
+    letter-spacing: -0.006em;
+  }
+
+  /* Against a standfirst the following section head is a step down the page,
+     not a break from the block above — the full 3.5rem reads as a gap. */
+  .updates-entry > p:first-child + h2 {
+    margin-top: 2.5rem;
+  }
+
   /* Most of these are screenshots of other products' interfaces, which are white
      to the edge — without an outline they bleed into the page. */
   .post-body img {
@@ -2814,6 +2831,11 @@ html[data-theme="dark"] .v63-ring-solid::before {
     }
     .post-body blockquote {
       font-size: 1.375rem; /* 22px */
+    }
+    /* Steps with the body it opens, so it stays a clear size above it rather
+       than the single pixel 18px leaves it at this width. */
+    .updates-entry > p:first-child {
+      font-size: 1.25rem; /* 20px */
     }
   }
   /* On a phone the reading measure is the page's gutters, and a table is the one
