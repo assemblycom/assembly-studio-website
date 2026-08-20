@@ -41,7 +41,7 @@ export const FROZEN_COMPARISONS: ComparisonPage[] = [
       "alt": "Canopy Logo Icon Small"
     },
     "image": {
-      "url": "/images/cms/7BAJI3hf4PafoZm9fbg9fN-copilot_vs_honeybook.webp",
+      "url": "/images/cms/7BAJI3hf4PafoZm9fbg9fN-assembly_vs_honeybook.webp",
       "alt": "Honeybook",
       "width": 1170,
       "height": 1020
@@ -424,7 +424,7 @@ export const FROZEN_COMPARISONS: ComparisonPage[] = [
       "alt": "Dubsado Icon Small"
     },
     "image": {
-      "url": "/images/cms/7BAJI3hf4PafoZm9fbg9fN-copilot_vs_honeybook.webp",
+      "url": "/images/cms/7BAJI3hf4PafoZm9fbg9fN-assembly_vs_honeybook.webp",
       "alt": "Honeybook",
       "width": 1170,
       "height": 1020
@@ -836,7 +836,7 @@ export const FROZEN_COMPARISONS: ComparisonPage[] = [
       "alt": "Honeybook-smallLogo"
     },
     "image": {
-      "url": "/images/cms/7BAJI3hf4PafoZm9fbg9fN-copilot_vs_honeybook.webp",
+      "url": "/images/cms/7BAJI3hf4PafoZm9fbg9fN-assembly_vs_honeybook.webp",
       "alt": "Honeybook",
       "width": 1170,
       "height": 1020
@@ -1099,7 +1099,7 @@ export const FROZEN_COMPARISONS: ComparisonPage[] = [
       "alt": "Karbon-smallLogo"
     },
     "image": {
-      "url": "/images/cms/7BAJI3hf4PafoZm9fbg9fN-copilot_vs_honeybook.webp",
+      "url": "/images/cms/7BAJI3hf4PafoZm9fbg9fN-assembly_vs_honeybook.webp",
       "alt": "Honeybook",
       "width": 1170,
       "height": 1020
@@ -1360,7 +1360,7 @@ export const FROZEN_COMPARISONS: ComparisonPage[] = [
       "alt": "Moxo-smallLogo"
     },
     "image": {
-      "url": "/images/cms/5SwIS8Ge2MxBl1UDNZscHN-copilot_vs_moxo.webp",
+      "url": "/images/cms/5SwIS8Ge2MxBl1UDNZscHN-assembly_vs_moxo.webp",
       "alt": "Moxo",
       "width": 1170,
       "height": 1020
@@ -1568,7 +1568,7 @@ export const FROZEN_COMPARISONS: ComparisonPage[] = [
       "alt": "Sharefile-smallLogo"
     },
     "image": {
-      "url": "/images/cms/1ldrEyUOmDcZkfP2TmnXYZ-copilot_vs_sharefile.webp",
+      "url": "/images/cms/1ldrEyUOmDcZkfP2TmnXYZ-assembly_vs_sharefile.webp",
       "alt": "ShareFile",
       "width": 1170,
       "height": 1020
@@ -1651,7 +1651,7 @@ export const FROZEN_COMPARISONS: ComparisonPage[] = [
       "alt": "Smartvault-smallLogo"
     },
     "image": {
-      "url": "/images/cms/7lzRypTDersxmnKu6FeNGu-copilot_vs_smartvault.webp",
+      "url": "/images/cms/7lzRypTDersxmnKu6FeNGu-assembly_vs_smartvault.webp",
       "alt": "SmartVault",
       "width": 1170,
       "height": 1020
