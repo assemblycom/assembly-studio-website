@@ -9,7 +9,7 @@ import { Section } from "@/components/ui/section";
 // floats in the whitespace above the shortest bar. Same copy as before —
 // only the composition changed.
 //
-// Carried by Advertai Marketing, the first Assembly Studio firm with a full
+// Carried by Advertai Marketing, the first Assembly firm with a full
 // story behind it — the attribution, portrait, and stats are theirs, and the
 // link goes to their case study rather than the customers index.
 // ─────────────────────────────────────────────────────────────────────────

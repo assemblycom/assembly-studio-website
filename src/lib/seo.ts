@@ -18,7 +18,7 @@ export { OG_IMAGE } from "./og";
 // sitemap all read from here, so the copy can only be written once.
 export const PAGE_SEO = {
   home: {
-    title: "Assembly Studio AI App Builder",
+    title: "Assembly AI App Builder",
     description:
       "Vibe code the apps your firm needs, and they launch production-ready — secure, authenticated, and built for professional services firms, not a throwaway prototype.",
     path: "/",
@@ -26,7 +26,7 @@ export const PAGE_SEO = {
   customers: {
     title: "Customers",
     description:
-      "See how accounting, legal, real estate, and consulting firms use Assembly Studio to run their client experience — from onboarding through billing and reporting.",
+      "See how accounting, legal, real estate, and consulting firms use Assembly to run their client experience — from onboarding through billing and reporting.",
     path: "/customers",
   },
   templates: {
@@ -74,7 +74,7 @@ export const PAGE_SEO = {
   demo: {
     title: "Book a Demo",
     description:
-      "Get a live walkthrough of Assembly Studio tailored to your firm — see how an app goes live inside your branded, secure client experience.",
+      "Get a live walkthrough of Assembly tailored to your firm — see how an app goes live inside your branded, secure client experience.",
     path: "/demo",
   },
   blog: {
@@ -133,7 +133,7 @@ export function pageMetadata(
   image: typeof OG_IMAGE = OG_IMAGE,
 ): Metadata {
   // The homepage title already carries the brand; every other page gets it via
-  // the "Assembly Studio | %s" template, which openGraph does not apply itself.
+  // the "Assembly | %s" template, which openGraph does not apply itself.
   const socialTitle = path === "/" ? title : `${SITE_NAME} | ${title}`;
   return {
     title,

@@ -54,7 +54,7 @@ const MAX_TEXTAREA_H = 180;
 const EDGE_FADE = 22;
 
 // Shared typewriter driver so every hero's composer can show the same animated
-// "Assembly Studio build …" placeholder. Returns the currently-typed example;
+// "Assembly build …" placeholder. Returns the currently-typed example;
 // pass `active=false` (e.g. once the user starts typing) to freeze it.
 export const TYPEWRITER_PREFIX = PH_PREFIX;
 export function useAssemblyTypewriter(

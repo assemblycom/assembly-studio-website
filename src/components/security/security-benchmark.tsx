@@ -1,13 +1,13 @@
 import { Fragment } from "react";
 
 // Seed-style capability matrix: each row is one capability, and a filled dot
-// means the builder has it, an outline dot means it doesn't. Assembly Studio is
+// means the builder has it, an outline dot means it doesn't. Assembly is
 // the featured column — raised on its own lighter panel with a pill label — so
 // the eye lands there first. The point the table makes: apps built on Assembly
 // INHERIT the platform's controls, so these capabilities come for free rather
 // than being scaffolded into (and maintained in) each generated app.
 
-const ASSEMBLY = "Assembly Studio";
+const ASSEMBLY = "Assembly";
 const OTHER = "Other";
 
 type Row = { capability: string; assembly: boolean; other: boolean };

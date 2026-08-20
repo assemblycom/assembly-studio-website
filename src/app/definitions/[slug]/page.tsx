@@ -31,7 +31,7 @@ export async function generateMetadata({
   const description = definition.metaDescription;
   const url = `${SITE_URL}/definitions/${definition.slug}`;
 
-  // The tab title gets the brand from the root layout's "Assembly Studio | %s"
+  // The tab title gets the brand from the root layout's "Assembly | %s"
   // template; openGraph does not apply that template, so it carries its own.
   return {
     title,

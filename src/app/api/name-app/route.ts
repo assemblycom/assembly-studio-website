@@ -13,7 +13,7 @@ const MIN_INPUT_CHARS = 12;
 // headline can't turn into a sentence.
 const MAX_NAME_CHARS = 40;
 
-const SYSTEM_PROMPT = `You name apps built on Assembly Studio — client-facing software (client portals, intake forms, dashboards, trackers, approval flows, proposals, resource libraries).
+const SYSTEM_PROMPT = `You name apps built on Assembly — client-facing software (client portals, intake forms, dashboards, trackers, approval flows, proposals, resource libraries).
 
 Given a description of an app, return the name it would be listed under.
 

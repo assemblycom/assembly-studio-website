@@ -11,7 +11,7 @@ const COMPLETION_MODEL = "claude-haiku-4-5";
 const MAX_INPUT_CHARS = 200;
 const MIN_INPUT_CHARS = 3;
 
-const SYSTEM_PROMPT = `You are an inline autocomplete for the prompt box of Assembly Studio — an AI app builder for client-facing software (client portals, intake forms, dashboards, trackers, approval flows, proposals, resource libraries).
+const SYSTEM_PROMPT = `You are an inline autocomplete for the prompt box of Assembly — an AI app builder for client-facing software (client portals, intake forms, dashboards, trackers, approval flows, proposals, resource libraries).
 
 The user is typing a description of an app they want to build. Continue their text into ONE specific, well-formed prompt. A strong prompt names what the app does, the key fields or data it handles, and the outcome it produces.
 

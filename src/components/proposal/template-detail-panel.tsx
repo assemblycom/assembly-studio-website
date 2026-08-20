@@ -117,7 +117,7 @@ export function TemplateDetailPanel({
           </p>
           <p className="type-body mt-4 text-foreground/80">
             Start from this template and describe what you want changed.
-            Assembly Studio reshapes it to your firm, then publishes it to your
+            Assembly reshapes it to your firm, then publishes it to your
             client portal in minutes.
           </p>
 

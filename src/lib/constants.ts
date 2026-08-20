@@ -1,4 +1,4 @@
-export const SITE_NAME = "Assembly Studio";
+export const SITE_NAME = "Assembly";
 
 // Shared so the same mistake reads the same way on every form. An error should
 // say what a good answer looks like, not just that this one was rejected:

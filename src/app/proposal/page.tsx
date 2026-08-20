@@ -56,7 +56,7 @@ export async function generateMetadata({
   return {
     ...base,
     // Absolute so the tab reads "Client intake for Véronique" rather than
-    // wearing the root layout's "Assembly Studio | %s" template. The document is
+    // wearing the root layout's "Assembly | %s" template. The document is
     // the client's, and the brand is already all over the page itself.
     title: { absolute: title },
     openGraph: { ...base.openGraph, title },

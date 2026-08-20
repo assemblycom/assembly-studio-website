@@ -82,7 +82,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "capital-one-luxury-travel",
     company: "Capital One Luxury Travel",
     seoDescription:
-      "How Capital One Luxury Travel weighed build vs. buy, then used Assembly Studio to onboard 1,100+ hotel partners and grow client experience adoption.",
+      "How Capital One Luxury Travel weighed build vs. buy, then used Assembly to onboard 1,100+ hotel partners and grow client experience adoption.",
     industry: "Travel & Hospitality",
     featured: true,
     image: "/images/customers/capital-one-hero.jpg",
@@ -204,12 +204,12 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "sargent-cpa",
     company: "Sargent CPAs",
     seoDescription:
-      "How Sargent CPAs built custom client apps with Assembly Studio, consolidated third-party tools, and kept a portal that feels like the firm.",
+      "How Sargent CPAs built custom client apps with Assembly, consolidated third-party tools, and kept a portal that feels like the firm.",
     industry: "Accounting & Advisory",
     headline:
-      "How Sargent CPAs Built a Custom Client Experience with Assembly Studio",
+      "How Sargent CPAs Built a Custom Client Experience with Assembly",
     summary:
-      "Sargent CPAs is an accounting firm built on close client relationships. Operations Manager Anthony Drozd explains how Assembly Studio lets their team offer a warm, custom-branded client experience and replace third-party software.",
+      "Sargent CPAs is an accounting firm built on close client relationships. Operations Manager Anthony Drozd explains how Assembly lets their team offer a warm, custom-branded client experience and replace third-party software.",
     stats: [
       { value: "100+", label: "clients in one portal" },
       { value: "2", label: "custom apps built with Studio" },
@@ -218,7 +218,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     challenge:
       "Sargent CPAs is a boutique accounting and advisory practice whose growth comes entirely through referrals, so every client relationship carries outsized weight. The team spent a long time assessing accounting-specific platforms like TaxDome and Canopy, but on the client side those felt corporate rather than inviting, and the firm's differentiation is warmth.",
     solution:
-      "Assembly became the single front door for client interaction: communications, task lists, document intake, e-signatures, and billing in one branded environment. Behind it, Assembly's API and Automations took the repetitive mechanics of a tax practice off the team's plate, and Assembly Studio let Anthony build client-facing apps, starting with a meeting manager that syncs to the team's Google Calendar.",
+      "Assembly became the single front door for client interaction: communications, task lists, document intake, e-signatures, and billing in one branded environment. Behind it, Assembly's API and Automations took the repetitive mechanics of a tax practice off the team's plate, and Assembly let Anthony build client-facing apps, starting with a meeting manager that syncs to the team's Google Calendar.",
     results: [
       "Over 100 clients managed in one branded portal",
       "Three or more third-party tools consolidated into Assembly",
@@ -237,7 +237,7 @@ export const CASE_STUDIES: CaseStudy[] = [
         "Invoicing",
         "Forms",
         "Automations",
-        "Assembly Studio",
+        "Assembly",
         "Airtable",
         "QuickBooks",
         "Google Calendar",
@@ -297,7 +297,7 @@ export const CASE_STUDIES: CaseStudy[] = [
       },
       {
         type: "heading",
-        text: "Building Custom Experiences Inside Assembly Studio",
+        text: "Building Custom Experiences Inside Assembly",
       },
       {
         type: "paragraph",
@@ -351,7 +351,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "valuenode-accounting",
     company: "ValueNode Accounting",
     seoDescription:
-      "How ValueNode Accounting built a fully digital CPA practice on Assembly Studio's client experience platform.",
+      "How ValueNode Accounting built a fully digital CPA practice on Assembly's client experience platform.",
     industry: "Accounting & CPA",
     image: "/images/customers/valuenode-accounting.jpg",
     headline:
@@ -456,7 +456,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "metta-health",
     company: "Metta Health",
     seoDescription:
-      "How Metta Health runs HIPAA-compliant patient authorizations at scale inside its Assembly Studio client experience.",
+      "How Metta Health runs HIPAA-compliant patient authorizations at scale inside its Assembly client experience.",
     industry: "Healthcare",
     image: "/images/customers/metta-health.jpg",
     headline:
@@ -546,7 +546,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "orca-accounting",
     company: "Orca Accounting",
     seoDescription:
-      "How Orca Accounting scaled 4.5x in seven months by running its client experience on Assembly Studio.",
+      "How Orca Accounting scaled 4.5x in seven months by running its client experience on Assembly.",
     industry: "Accounting",
     image: "/images/customers/orca-hero.jpg",
     headline:
@@ -744,7 +744,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "zen-aegis",
     company: "Zen Aegis",
     seoDescription:
-      "How Zen Aegis saves clients 40+ hours a week with a streamlined Assembly Studio client experience.",
+      "How Zen Aegis saves clients 40+ hours a week with a streamlined Assembly client experience.",
     industry: "Professional Services",
     image: "/images/customers/zen-aegis-hero2.jpg",
     headline:
@@ -836,7 +836,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "ditto-by-dbc",
     company: "Ditto by DBC",
     seoDescription:
-      "How Ditto by DBC uses Assembly Studio to scale secure, data-driven marketing campaigns across its client experience.",
+      "How Ditto by DBC uses Assembly to scale secure, data-driven marketing campaigns across its client experience.",
     industry: "Marketing & Design",
     image: "/images/customers/ditto-by-dbc.jpg",
     headline:
@@ -927,7 +927,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "vacation-rental-license",
     company: "Vacation Rental License",
     seoDescription:
-      "How Vacation Rental License streamlined client operations by building on Assembly Studio's client experience.",
+      "How Vacation Rental License streamlined client operations by building on Assembly's client experience.",
     industry: "Real Estate & Licensing",
     headline:
       "How Vacation Rental License Streamlines Client Operations with Assembly",
@@ -1091,7 +1091,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "heritage-law-partners",
     company: "Heritage Law Partners",
     seoDescription:
-      "How Heritage Law Partners delivers exceptional client service through its Assembly Studio client experience.",
+      "How Heritage Law Partners delivers exceptional client service through its Assembly client experience.",
     industry: "Legal & Estate Planning",
     image: "/images/customers/heritage-law-partners.jpg",
     headline:
@@ -1182,7 +1182,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     slug: "durrick-designs",
     company: "Durrick Designs",
     seoDescription:
-      "How Durrick Designs centralized client collaboration in one branded Assembly Studio client experience.",
+      "How Durrick Designs centralized client collaboration in one branded Assembly client experience.",
     industry: "Web Development & Design",
     headline:
       "How Durrick Designs Centralizes Client Collaboration with Assembly",
@@ -1275,12 +1275,12 @@ export const CASE_STUDIES: CaseStudy[] = [
     company: "Advertai Marketing",
     image: "/images/customers/advertai-marketing.jpg",
     seoDescription:
-      "How Advertai Marketing replaced five tools with five apps built on Assembly Studio, and made its client experience the reason agencies pick it.",
+      "How Advertai Marketing replaced five tools with five apps built on Assembly, and made its client experience the reason agencies pick it.",
     industry: "Marketing",
     headline:
       "How Advertai Marketing Differentiates with Assembly’s Client Experience",
     summary:
-      "Garrett Leonard’s digital agency came to Assembly to fix scattered client communication, then used Assembly Studio to replace its supporting tool stack and make client experience the reason partners pick it.",
+      "Garrett Leonard’s digital agency came to Assembly to fix scattered client communication, then used Assembly to replace its supporting tool stack and make client experience the reason partners pick it.",
     stats: [
       { value: "5+", label: "apps built" },
       { value: "5+", label: "tools eliminated" },
@@ -1289,7 +1289,7 @@ export const CASE_STUDIES: CaseStudy[] = [
     challenge:
       "Advertai Marketing helps businesses and brands around the world build and strengthen their digital presence, working directly with businesses while also white-labeling fulfillment for other agencies, where every partner can bring multiple client projects at once. ClickUp handled internal tasks but had no client-facing layer, so intake ran through Google Forms, feedback through Markup.io, files through Google Drive, and everything else over email.",
     solution:
-      "Advertai gave every client and agency partner one branded portal with its CRM structured to mirror the partner model, then used Assembly Studio to build the missing half: a message center that unifies Assembly messages, Gmail, ClickUp due dates and billing history, plus in-house replacements for design feedback, SEO reporting, onboarding and project provisioning.",
+      "Advertai gave every client and agency partner one branded portal with its CRM structured to mirror the partner model, then used Assembly to build the missing half: a message center that unifies Assembly messages, Gmail, ClickUp due dates and billing history, plus in-house replacements for design feedback, SEO reporting, onboarding and project provisioning.",
     results: [
       "Built five or more custom apps in a few weeks each",
       "Retiring Markup.io, Google Drive, Bright Local, Keyword.com and Google Forms",
@@ -1352,7 +1352,7 @@ export const CASE_STUDIES: CaseStudy[] = [
       },
       {
         type: "heading",
-        text: "Building the Missing Half: Advertai on Assembly Studio",
+        text: "Building the Missing Half: Advertai on Assembly",
       },
       {
         type: "paragraph",
@@ -1408,7 +1408,7 @@ export const CASE_STUDIES: CaseStudy[] = [
       },
       {
         type: "quote",
-        text: "We’ve been able to build out apps in just a few weeks that I don’t know if we could have done within five to ten years before Assembly Studio. It’s allowed me to create automations and workflows that I didn’t realize were going to be possible.",
+        text: "We’ve been able to build out apps in just a few weeks that I don’t know if we could have done within five to ten years before Assembly. It’s allowed me to create automations and workflows that I didn’t realize were going to be possible.",
         attribution: "Garrett Leonard, Founder, Advertai Marketing",
       },
       {
@@ -1450,7 +1450,7 @@ export const CASE_STUDIES: CaseStudy[] = [
       },
       {
         type: "quote",
-        text: "Assembly Studio is something I’d definitely recommend to other agency owners, and really any business looking to not only make things easier for them, but make the experience a lot better for the clients they work with.",
+        text: "Assembly is something I’d definitely recommend to other agency owners, and really any business looking to not only make things easier for them, but make the experience a lot better for the clients they work with.",
         attribution: "Garrett Leonard, Founder, Advertai Marketing",
       },
     ],

@@ -16,7 +16,7 @@ export interface CmsSeoSource {
  * Metadata for a CMS-backed page. Not pageMetadata(): that reads PAGE_SEO, which
  * is one record per statically-authored page, and these come from Contentful.
  * Same shape written out — the tab title takes the layout's
- * "Assembly Studio | %s" template, which openGraph does not apply itself.
+ * "Assembly | %s" template, which openGraph does not apply itself.
  */
 export function cmsPageMetadata(page: CmsSeoSource, path: string): Metadata {
   const { title, description } = page.seo;

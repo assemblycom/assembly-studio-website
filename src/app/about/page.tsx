@@ -169,7 +169,7 @@ export default async function AboutPage() {
                 files, and follow along, and a dashboard where the firm runs it.
               </p>
               <p className="type-lead mt-5 text-pretty text-muted-foreground">
-                Assembly Studio is the next step. Rather than asking firms to
+                Assembly is the next step. Rather than asking firms to
                 settle for the features we shipped, it lets them describe the app
                 their firm actually needs and have it built — production-ready,
                 authenticated, and inside the portal their clients already use.

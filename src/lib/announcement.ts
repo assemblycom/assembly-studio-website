@@ -16,7 +16,7 @@ export const ANNOUNCEMENT: {
   href: string;
   cta: string;
 } | null = {
-  text: "Introducing Assembly Studio, our AI app builder",
+  text: "Introducing our AI app builder",
   href: "/blog/assembly-studio",
   cta: "Read now",
 };

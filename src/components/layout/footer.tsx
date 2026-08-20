@@ -292,7 +292,7 @@ export function Footer({
           <div className="col-span-2 md:col-span-1">
             <Image
               src="/images/logo-mark.svg"
-              alt="Assembly Studio"
+              alt="Assembly"
               width={28}
               height={28}
             />

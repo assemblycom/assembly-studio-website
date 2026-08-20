@@ -53,10 +53,10 @@ export function Comparison() {
     <Section id="comparison">
       <div className="text-center">
         <h2 className="type-h2">
-          Why Assembly Studio
+          Why Assembly
         </h2>
         <p className="type-lead mx-auto mt-4 max-w-2xl text-muted-foreground">
-          See how Assembly Studio compares to other AI workflow platforms.
+          See how Assembly compares to other AI workflow platforms.
         </p>
       </div>
 
@@ -66,7 +66,7 @@ export function Comparison() {
             <tr className="border-b border-border">
               <th className="pb-4 text-left font-medium">Feature</th>
               <th className="pb-4 text-center font-medium">
-                Assembly Studio
+                Assembly
               </th>
               <th className="pb-4 text-center font-medium text-muted-foreground">
                 Others

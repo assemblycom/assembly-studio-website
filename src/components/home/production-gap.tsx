@@ -14,7 +14,7 @@ import { IconBrandMark } from "@/components/home/mock-icons";
 const EYEBROW = "Beyond generation";
 const HEADING = "Generation is the easy part";
 const BODY =
-  "Assembly Studio apps ship inside your unified client experience, integrated, branded, and secured by the platform from the moment you publish.";
+  "Assembly apps ship inside your unified client experience, integrated, branded, and secured by the platform from the moment you publish.";
 
 // Active-region highlight — a quiet surface fill (the sidebar/URL step up a
 // notch when their step is active). No outline, no ring.

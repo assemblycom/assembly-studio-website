@@ -3230,7 +3230,7 @@ function CardCommsApp() {
             value instead, which at #383838 on a #262626 face is a clear step. */}
         <div className="relative rounded-[18px] px-4 py-3 [[data-theme=light]_&]:bg-[#D9ED92] [[data-theme=dark]_&]:bg-[#383838]">
           <span className={`block text-[13px] font-normal leading-snug text-[#1B1B1B] [[data-theme=dark]_&]:text-[var(--v69-ink)] ${MOCK_UPSCALED_BODY}`}>
-            Studio is live for the whole team
+            Assembly is live for the whole team
           </span>
           {/* The tail, drawn as a shape rather than a rotated square: a square
               corner poking out of an 18px radius read as a glitch at cover size. */}
@@ -3832,7 +3832,7 @@ function V71Nav() {
           New
         </span>
         <span className="truncate">
-          Assembly Studio builds client-facing apps in minutes.
+          Assembly builds client-facing apps in minutes.
         </span>
       </div>
       <div className="flex justify-center px-4 pt-4">

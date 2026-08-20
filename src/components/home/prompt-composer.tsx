@@ -53,7 +53,7 @@ const upperFirst = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : 
 // you can build, typed out character by character (typewriter). Typing stops
 // the moment the user types (the placeholder is gone by then). Examples mirror
 // the prompt ideas above.
-const PLACEHOLDER_PREFIX = "Assembly Studio build ";
+const PLACEHOLDER_PREFIX = "Assembly build ";
 const PLACEHOLDER_EXAMPLES = [
   "a client intake form",
   "a client engagement dashboard",

@@ -393,7 +393,7 @@ export function StudioNav({
   const logoMark = (
     <Image
       src="/images/logo-mark.svg"
-      alt="Assembly Studio"
+      alt="Assembly"
       width={22}
       height={22}
       priority

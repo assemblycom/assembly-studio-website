@@ -64,12 +64,12 @@ const FAQS: FAQEntry[] = [
   {
     question: "What can I actually build?",
     answer:
-      "Two kinds of apps: client-facing apps and internal tools. Think onboarding wizards, document collection, project trackers, approval workflows, client dashboards. Apps can use AI too — like an assistant that answers client questions from your firm's own docs.\n\nClient-facing apps are where Assembly Studio is strongest — every app has two sides, so your team works in your dashboard while each client gets their own view inside your branded client experience.",
+      "Two kinds of apps: client-facing apps and internal tools. Think onboarding wizards, document collection, project trackers, approval workflows, client dashboards. Apps can use AI too — like an assistant that answers client questions from your firm's own docs.\n\nClient-facing apps are where Assembly is strongest — every app has two sides, so your team works in your dashboard while each client gets their own view inside your branded client experience.",
   },
   {
-    question: "How is Assembly Studio different?",
+    question: "How is Assembly different?",
     answer:
-      "Other AI builders spin up slick prototypes that are difficult to make production-ready — and often never make it in front of a client. Assembly Studio closes that gap.\n\nBecause Assembly has a CRM and client experience foundation built in, the apps you describe go live where your team and clients already are — hosting, authentication, permissions, payments, notifications, and branding all handled securely for you. You build the part that's distinctly yours; Assembly already runs the rest.",
+      "Other AI builders spin up slick prototypes that are difficult to make production-ready — and often never make it in front of a client. Assembly closes that gap.\n\nBecause Assembly has a CRM and client experience foundation built in, the apps you describe go live where your team and clients already are — hosting, authentication, permissions, payments, notifications, and branding all handled securely for you. You build the part that's distinctly yours; Assembly already runs the rest.",
   },
   {
     question: "Do I need to know how to code?",
@@ -102,9 +102,9 @@ const FAQS: FAQEntry[] = [
       "Yes — and security on Assembly is platform infrastructure, not something the AI generates. Clients sign in with secure magic links or Google. Roles and permissions are maintained by the platform, and a structural boundary separates what your team sees from what your clients see — no prompt can cross it. Every app is born inside these protections. Full details on our security page.",
   },
   {
-    question: "What is Assembly Studio not good for?",
+    question: "What is Assembly not good for?",
     answer:
-      "Public-facing sites. Assembly Studio builds apps for authenticated experiences — your team and your logged-in clients. Marketing websites, public directories, and consumer apps are better built elsewhere.",
+      "Public-facing sites. Assembly builds apps for authenticated experiences — your team and your logged-in clients. Marketing websites, public directories, and consumer apps are better built elsewhere.",
   },
   {
     question: "Who owns what I build?",
