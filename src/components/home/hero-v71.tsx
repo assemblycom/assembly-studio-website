@@ -220,6 +220,11 @@ const MOCK_SIGNATURE = {
 const MOCK_UNIT_TAG =
   "shrink-0 whitespace-nowrap rounded-md bg-[var(--v69-inner)] px-2 py-1 text-[11px] uppercase leading-none tracking-wide text-muted-foreground [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_&]:text-[#4A4A4A] [[data-theme=light]_.template-mock_&]:bg-[#E4E4DA] [[data-theme=light]_.template-mock_&]:text-[#4E4F46] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.11)] [[data-theme=dark]_&]:text-[#C9C9C9]";
 
+// The panel face the forms cover's field rows and their remove controls share,
+// so a row and the button beside it are cut from one material.
+const FORM_PANEL =
+  "rounded-xl border border-black/[0.08] bg-[#FFFFFF] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]";
+
 // ─── Cover type ramp ────────────────────────────────────────────────────
 // Four steps for every piece of UI text on a cover, in the mocks' own design px.
 // The covers were drawn one at a time and had accumulated twenty-one sizes
@@ -2267,16 +2272,24 @@ function CardExport() {
   );
 }
 
-// Files — a folder and what is in it. Two zones rather than a panel on a ground:
-// a file list fills its pane in the product, and floating it on texture made it
-// read as one record rather than as a place things are kept.
+// Files — a folder and what is in it, set as the design-approvals folder view
+// is: a band naming the folder over rows that fill the card. It was a thin
+// coloured strip over two rows and a half-empty pane, which read as a card with
+// something missing rather than as a place things are kept.
+const FILE_ROWS = [
+  { name: "Brand_Handoff.svg", meta: "2.4 MB" },
+  { name: "Receipts_Jun_2026.pdf", meta: "1.1 MB" },
+  { name: "Statement_of_Work.pdf", meta: "860 KB" },
+];
+
 function CardFiles() {
-  const files = ["Brand_Handoff.svg", "Receipts_Jun_2026.pdf"];
   return (
     <div className="flex h-full flex-col bg-[var(--v69-card)]">
-      {/* The folder band takes the covers' periwinkle: it is the one coloured
-          thing here, and it is what says "folder" before any filename is read. */}
-      <div className="flex shrink-0 items-center gap-2 bg-[#7DA4FF] px-3.5 py-2.5">
+      {/* The band is the folder, and it runs on the approvals band's metrics so
+          the two folder views are the same object. Coloured only in light — the
+          lime-in-light, periwinkle-in-dark pair every accent in the set runs —
+          with the type on ink, since both fills are light. */}
+      <div className="flex shrink-0 items-center gap-2 px-5 py-4 [[data-theme=light]_&]:bg-[#D9ED92] [[data-theme=dark]_&]:bg-[#7DA4FF]">
         <svg viewBox="0 0 24 24" className="size-4 shrink-0 text-[#1B1B1B]" fill="currentColor" aria-hidden>
           <path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4.1a1.5 1.5 0 0 1 1.06.44L11 6.78h8.5A1.5 1.5 0 0 1 21 8.28v9.22a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5Z" />
         </svg>
@@ -2284,22 +2297,20 @@ function CardFiles() {
           Important
         </span>
       </div>
-      <div className="flex-1 bg-[#FFFFFF] [[data-theme=light]_.template-mock_&]:bg-[#FAFAF7] [[data-theme=dark]_&]:bg-[#1F1F1F]">
-        {files.map((name) => (
-          // Ruled between rows, the way a file list is: the rule is what makes
-          // two names read as a list rather than as a paragraph.
+      {/* Rails on the rows, last one included, so the list stops on a line
+          rather than in mid-air — the approvals list's own rule. */}
+      <div className="pt-2">
+        {FILE_ROWS.map((file) => (
           <div
-            key={name}
-            className="flex items-center gap-2 border-b border-black/[0.07] px-3.5 py-2.5 [[data-theme=dark]_&]:border-white/[0.09]"
+            key={file.name}
+            className="border-b px-5 py-3 [[data-theme=light]_&]:border-black/[0.07] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.14)]"
           >
-            <span className="min-w-0 flex-1 truncate text-[12px] leading-none text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[11px]">
-              {name}
-            </span>
-            <span className="flex shrink-0 gap-[3px]" aria-hidden>
-              {[0, 1, 2].map((i) => (
-                <span key={i} className="size-[3px] rounded-full bg-muted-foreground/60" />
-              ))}
-            </span>
+            <div className="truncate text-[13px] leading-none text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[12px]">
+              {file.name}
+            </div>
+            <div className="mt-1.5 truncate text-[11px] leading-none tabular-nums text-muted-foreground">
+              {file.meta}
+            </div>
           </div>
         ))}
       </div>
@@ -2307,25 +2318,75 @@ function CardFiles() {
   );
 }
 
-// Forms — the form being filled in, caught mid-answer. A blank form says the app
-// collects information; a form with a name and an address in it says whose.
+// Forms — the form being built, not the form being filled in. The app's own
+// screen is a field list on a plotted canvas: a row per question, its type on
+// the left and the control that removes it alongside, which says the app makes
+// forms rather than merely holding one.
+const FORM_FIELDS = [
+  {
+    label: "Phone number",
+    // Handset, drawn to the same 24-box the other cover glyphs use.
+    path: "M6.5 3h3l1.5 4-2 1.5a11 11 0 0 0 6.5 6.5L17 13l4 1.5v3a2.5 2.5 0 0 1-2.8 2.5A16.5 16.5 0 0 1 3.5 5.8A2.5 2.5 0 0 1 6 3Z",
+  },
+  {
+    label: "Date",
+    path: "M4.5 6.5h15v13h-15zM8 3.5v3M16 3.5v3M4.5 10.5h15",
+  },
+];
+
 function CardForms() {
   return (
-    <div className="v69-plot-grid v69-plot-grid--dots flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    // v69-cover-column is the phone treatment: the rows are held to the width
+    // they were drawn at rather than stretching across the wider frame.
+    <div className="v69-cover-column v69-plot-grid v69-plot-grid--dots flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
       <span className="block w-full space-y-2">
-        {["Jamie Rivera", "jamie@acmestudio.com"].map((value, i) => (
-          <span
-            key={value}
-            className="flex items-center rounded-xl border border-black/[0.08] bg-[#FFFFFF] px-3 py-2.5 [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]"
-          >
-            <span className="min-w-0 flex-1 truncate text-[13px] leading-none text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[12px]">
-              {value}
+        {FORM_FIELDS.map((field) => (
+          <span key={field.label} className="flex items-stretch gap-2">
+            {/* Opaque, like every other panel in the set: through a translucent
+                one the dot field ran straight across the row. */}
+            <span className={`flex min-w-0 flex-1 items-center gap-2.5 ${FORM_PANEL} px-2.5 py-2`}>
+              {/* The type tile takes the covers' periwinkle — the one coloured
+                  mark here, since what the row says is which kind of answer it
+                  collects. */}
+              <span
+                className="flex size-[22px] shrink-0 items-center justify-center rounded-[7px] bg-[#7DA4FF]"
+                aria-hidden
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="size-[13px] text-[#1B1B1B]"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d={field.path} />
+                </svg>
+              </span>
+              <span className="min-w-0 flex-1 truncate text-[13px] leading-none text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[12px]">
+                {field.label}
+              </span>
             </span>
-            {/* The caret sits in the field being typed into — the one mark that
-                turns two filled boxes into someone answering. */}
-            {i === 1 && (
-              <span className="ml-px block h-3.5 w-px shrink-0 bg-[var(--v69-ink)]" aria-hidden />
-            )}
+            {/* The remove control, as its own panel beside the row rather than a
+                glyph inside it — that separation is what makes the pair read as a
+                builder instead of a filled-in field. */}
+            <span
+              className={`flex w-[34px] shrink-0 items-center justify-center ${FORM_PANEL}`}
+              aria-hidden
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="size-[14px] text-muted-foreground"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M4.5 7h15M9.5 7V4.5h5V7M6.5 7l1 12.5h9l1-12.5M10.5 10.5v6M13.5 10.5v6" />
+              </svg>
+            </span>
           </span>
         ))}
       </span>
@@ -2388,6 +2449,187 @@ function CardHome() {
         <span className="shrink-0 rounded-md bg-[#7DA4FF] px-1.5 py-1 text-[11px] leading-none tabular-nums text-[#1B1B1B] max-sm:[.template-mock-gallery_&]:text-[10px]">
           3
         </span>
+      </span>
+    </div>
+  );
+}
+
+// Tasks — one column off the board, with what is in it. The app is a board of
+// named columns, so the cover shows a column head and the tasks under it: the
+// unticked circles say these are waiting, and the date says when for.
+const TASKS_ROWS = [
+  { title: "Update email", due: "Apr 4" },
+  { title: "Share design files", due: "Apr 4" },
+];
+
+function CardTasks() {
+  return (
+    <div className="v69-cover-column flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+      <span className="block w-full overflow-hidden rounded-xl border border-black/[0.08] bg-[#FFFFFF] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
+        {/* The column head takes the covers' periwinkle in both themes, the way
+            the Home row's count does — a column's colour is what identifies it on
+            a board, so it is the one thing here that carries hue. */}
+        <span className="block bg-[#7DA4FF] px-3 py-2.5">
+          <span className="block truncate text-[13px] leading-none text-[#1B1B1B] max-sm:[.template-mock-gallery_&]:text-[12px]">
+            Todo
+          </span>
+        </span>
+        {TASKS_ROWS.map((row, i) => (
+          <span
+            key={row.title}
+            className={`flex items-center gap-2.5 px-3 py-2.5 ${
+              i > 0
+                ? "border-t border-black/[0.07] [[data-theme=dark]_&]:border-white/[0.09]"
+                : ""
+            }`}
+          >
+            {/* An outline, not a tick: an open circle is the whole reason a task
+                is on this column rather than in a done one. */}
+            <span
+              className="size-[14px] shrink-0 rounded-full border border-black/[0.18] [[data-theme=dark]_&]:border-white/[0.28]"
+              aria-hidden
+            />
+            <span className="min-w-0 flex-1 truncate text-[13px] leading-none text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[12px]">
+              {row.title}
+            </span>
+            <span className="shrink-0 text-[11px] leading-none tabular-nums text-muted-foreground">
+              {row.due}
+            </span>
+          </span>
+        ))}
+      </span>
+    </div>
+  );
+}
+
+// Profile manager — the client records the app keeps, one row each: who they
+// are and which company they belong to. Initials rather than photographs, the
+// way the intake cover does it: the gallery is drawn art throughout, and a face
+// is the one thing on it that would read as a real person.
+const PROFILE_ROWS = [
+  { initials: "CW", name: "Chuck Wilford", company: "GoDo" },
+  { initials: "BS", name: "Brooklyn Simmons", company: "Service Symphony" },
+  { initials: "KT", name: "Kenny Tse", company: "Service Symphony" },
+];
+
+function CardProfileManager() {
+  return (
+    <div className="flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+      <span className="block w-full overflow-hidden rounded-xl border border-black/[0.08] bg-[#FFFFFF] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
+        {PROFILE_ROWS.map((person, i) => (
+          <span
+            key={person.name}
+            className={`flex items-center gap-2.5 px-3 py-2.5 ${
+              i > 0
+                ? "border-t border-black/[0.07] [[data-theme=dark]_&]:border-white/[0.09]"
+                : ""
+            }`}
+          >
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--v69-well)] text-[11px] leading-none text-[var(--v69-ink)] [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_&]:text-[#5B5C53] [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.12)]">
+              {person.initials}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-[13px] leading-none text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[12px]">
+                {person.name}
+              </span>
+              <span className="mt-1.5 block truncate text-[10px] leading-none text-muted-foreground">
+                {person.company}
+              </span>
+            </span>
+          </span>
+        ))}
+      </span>
+    </div>
+  );
+}
+
+// Messages — one message arriving, with who sent it. The app is a thread, and a
+// single incoming bubble is the smallest true picture of one; the neutral fill
+// and left-hand tail are the discussion cover's incoming bubble, so a message
+// looks the same wherever the set draws one.
+function CardMessages() {
+  return (
+    <div className="v69-cover-column flex h-full items-center bg-[var(--v69-card)] p-4">
+      <span className="flex w-full items-end gap-2">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--v69-well)] text-[11px] leading-none text-[var(--v69-ink)] [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_&]:text-[#5B5C53] [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.12)]">
+          GK
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="mb-1.5 block truncate pl-1 text-[11px] leading-none text-muted-foreground">
+            Gus Kelly
+          </span>
+          <span className="relative block rounded-[16px] bg-[var(--v69-inner)] px-3.5 py-2.5 [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=dark]_&]:bg-[#343434]">
+            <span className="block text-[13px] leading-snug text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[12px]">
+              I&rsquo;ve reviewed the proposal. Everything looks good!
+            </span>
+            <svg
+              viewBox="0 0 14 14"
+              className="absolute -bottom-px left-2 size-3.5 -translate-x-1/2 scale-x-[-1] text-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:text-[#E7E7DE] [[data-theme=dark]_&]:text-[#343434]"
+              fill="currentColor"
+              aria-hidden
+            >
+              <path d="M0 0h6c0 6 3 10.5 8 12.5C7.5 14.5 2 11 0 5Z" />
+            </svg>
+          </span>
+        </span>
+      </span>
+    </div>
+  );
+}
+
+// Xero — the one screen the integration is: picking which Xero account an
+// Assembly line maps to. A searchable list says "this connects two systems" in
+// a way a logo cannot.
+const XERO_OPTIONS = ["Exclude from mapping", "Logo Design", "Marketing Overhaul"];
+
+function CardXero() {
+  return (
+    <div className="v69-cover-column v69-plot-grid v69-plot-grid--dots flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+      <span className="block w-full overflow-hidden rounded-xl border border-black/[0.08] bg-[#FFFFFF] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
+        {/* The caret in the empty field is the one mark that makes this a list
+            being searched rather than a menu sitting open. */}
+        <span className="flex items-center border-b border-black/[0.07] px-3 py-2.5 [[data-theme=dark]_&]:border-white/[0.09]">
+          <span className="mr-px block h-3.5 w-px shrink-0 bg-[var(--v69-ink)]" aria-hidden />
+          <span className="min-w-0 flex-1 truncate text-[13px] leading-none text-muted-foreground max-sm:[.template-mock-gallery_&]:text-[12px]">
+            Search
+          </span>
+        </span>
+        {XERO_OPTIONS.map((option, i) => (
+          <span
+            key={option}
+            className={`block truncate px-3 py-2.5 text-[13px] leading-none text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[12px] ${
+              i > 0
+                ? "border-t border-black/[0.07] [[data-theme=dark]_&]:border-white/[0.09]"
+                : ""
+            }`}
+          >
+            {option}
+          </span>
+        ))}
+      </span>
+    </div>
+  );
+}
+
+// QuickBooks — the integration's own mark on a tile, which is what an
+// integration is: the other product, brought in. Drawn in the covers' neutral
+// ink rather than Intuit's green, so it sits in the set with everything else.
+function CardQuickBooks() {
+  return (
+    <div className="flex h-full items-center justify-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+      <span className="flex size-[104px] items-center justify-center rounded-[26px] bg-[var(--v69-well)] [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.09)]">
+        {/* The approved mark, path for path, filled from one currentColor so it
+            tracks the theme instead of carrying the file's own grey. */}
+        <svg
+          viewBox="0 0 34 34"
+          className="size-[58px] text-muted-foreground"
+          fill="currentColor"
+          aria-hidden
+        >
+          <path d="M23.6245 11.7004V14.3502C24.9838 14.3502 26.2743 15.7095 26.2743 17.6538C26.2743 19.5982 24.9838 20.9575 23.6245 20.9575H20.9747V7.72571H18.3249V23.6073H23.6245C26.6528 23.6073 28.9241 20.8198 28.9241 17.6538C28.9241 14.4879 26.6528 11.7004 23.6245 11.7004Z" />
+          <path d="M10.3755 10.3755C7.34717 10.3755 5.07591 13.163 5.07591 16.3289C5.07591 19.4949 7.34717 22.2824 10.3755 22.2824V19.6326C9.0162 19.6326 7.72571 18.2733 7.72571 16.3289C7.72571 14.3846 9.0162 13.0253 10.3755 13.0253H13.0253V26.2571H15.6751V10.3755H10.3755Z" />
+          <path d="M17 0C7.62247 0 0 7.62247 0 17C0 26.3775 7.62247 34 17 34C26.3775 34 34 26.3775 34 17C34 7.62247 26.3603 0 17 0ZM17 30.9545C9.2915 30.9717 3.02834 24.6913 3.02834 17C3.02834 9.30871 9.2915 3.01113 17 3.01113C24.7085 3.01113 30.9717 9.2915 30.9717 16.9828C30.9717 24.6741 24.6913 30.9545 17 30.9545Z" />
+        </svg>
       </span>
     </div>
   );
@@ -3544,6 +3786,11 @@ export function V69CardMock({ slug }: { slug: string }) {
   if (slug === "forms-app") return <CardForms />;
   if (slug === "helpdesk-app") return <CardHelpdesk />;
   if (slug === "client-home") return <CardHome />;
+  if (slug === "tasks") return <CardTasks />;
+  if (slug === "profile-manager") return <CardProfileManager />;
+  if (slug === "messaging-app") return <CardMessages />;
+  if (slug === "xero") return <CardXero />;
+  if (slug === "quickbooks") return <CardQuickBooks />;
   if (slug === "block-builder-game") return <CardBlockGame />;
   return <TemplateMock slug={slug} />;
 }
