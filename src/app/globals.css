@@ -2651,8 +2651,12 @@ html[data-theme="dark"] .v63-ring-solid::before {
   .post-body img {
     border: 1px solid var(--border);
   }
+  /* Quieter in dark than the shared --border (#383838): that value is tuned to
+     stay legible as a divider on the near-black ground, and around a full-bleed
+     photograph it read as a frame drawn on top of the picture rather than as its
+     edge. The same white-at-low-alpha the dark cards outline themselves with. */
   [data-theme="dark"] .post-body img {
-    border-color: #383838;
+    border-color: rgba(255, 255, 255, 0.08);
   }
   /* Except the review screenshots. A G2 or Capterra review is captured as its
      own rounded card with white around it, so the site's outline lands a second
