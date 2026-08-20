@@ -1,47 +1,27 @@
-import { getCmsPage, getCmsPages, type CmsPageSet } from "./cms-page";
+import { FROZEN_FEATURES } from "./features.frozen";
 
 /**
  * The feature pages, served at the top level on the same URLs assembly.com uses
- * (/client-portal, /invoicing, …) — so they are matched by an explicit slug list
- * rather than a prefix. The list is the marketing site's own Products menu, minus
- * "AI app builder", which already points at this site rather than a page of its
- * own.
+ * (/client-portal, /invoicing, …). They came out of Contentful and are now held
+ * in features.frozen.ts: the copy is ours to edit in the repo, and the imagery
+ * sits in public/images/cms rather than on the CMS's CDN.
  *
- * Explicit rather than "every pageTemplate without a prefix": that content type
- * also holds the home page, the university articles and the affiliate/experts
- * pages, none of which belong on this site. (The comparison pages are NOT in it —
- * they have their own types; see comparisons.ts.)
+ * The frozen set is also the slug list. There used to be a hand-kept array of
+ * slugs beside the query, which was one more place for the two to disagree.
+ *
+ * Still async: the pages that call these were written against a CMS read, and a
+ * promise costs nothing to keep. /templates is the one family still read live —
+ * see contentful.ts.
  */
-const FEATURE_SLUGS = [
-  "client-portal",
-  "client-management",
-  "platform",
-  "client-onboarding-system",
-  "esignature",
-  "store",
-  "invoicing",
-  "file-sharing",
-  "client-communication-tool",
-] as const;
-
-const FEATURES: CmsPageSet = {
-  name: "feature pages",
-  filter: { "fields.slug[in]": FEATURE_SLUGS.join(",") },
-  // No committed copy: unlike the solutions set these were migrated after the
-  // CMS became the source, so there is no frozen snapshot to fall back to. A CMS
-  // outage 404s them rather than serving a stale hand-maintained duplicate.
-  fallback: [],
-};
-
-export function getFeaturePages() {
-  return getCmsPages(FEATURES);
+export async function getFeaturePages() {
+  return FROZEN_FEATURES;
 }
 
-export function getFeaturePage(slug: string) {
-  return getCmsPage(FEATURES, slug);
+export async function getFeaturePage(slug: string) {
+  return FROZEN_FEATURES.find((page) => page.slug === slug) ?? null;
 }
 
 /** Whether a top-level slug is one of ours, for the root route's params. */
 export function isFeatureSlug(slug: string): boolean {
-  return (FEATURE_SLUGS as readonly string[]).includes(slug);
+  return FROZEN_FEATURES.some((page) => page.slug === slug);
 }

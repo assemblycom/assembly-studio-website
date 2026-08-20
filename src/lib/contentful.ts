@@ -4,6 +4,12 @@ import type { Document } from "@contentful/rich-text-types";
 // The marketing space's app catalogue. It holds Embed, App, Core app and
 // Marketplace app entries alongside the templates, so every query filters on
 // App Type — nothing else belongs in this gallery.
+//
+// THIS IS THE LAST LIVE CMS READ ON THE SITE. Every other family — the feature
+// pages, /solutions, /comparison, /definitions, /jobs, the team — was frozen
+// into a src/lib/*.frozen.ts module, so their copy is edited here in the repo.
+// The templates gallery stays live on purpose: marketing publishes a template
+// and it should appear without a deploy.
 const CONTENT_TYPE = "partnerApps";
 const APP_TEMPLATE = "App Template";
 

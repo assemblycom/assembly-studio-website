@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "freeze-cms": "npx --yes tsx --env-file=.env.local scripts/freeze-cms.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.109.1",

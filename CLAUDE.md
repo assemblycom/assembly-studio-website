@@ -228,6 +228,36 @@ All of it runs off `src/lib/seo.ts` and `src/lib/og.tsx`.
   `src/app/sitemap.ts` with a reason, and give the page `robots: { index: false }`
   so the two can't disagree.
 
+## Page copy: frozen, not fetched
+
+Every marketing family except the templates gallery used to be read live from
+Contentful. It no longer is. The copy and the imagery were taken out of the CMS
+and committed:
+
+| Pages | Frozen in |
+| --- | --- |
+| Feature pages (`/client-portal`, `/invoicing`, …) | `src/lib/features.frozen.ts` |
+| `/solutions/*` | `src/lib/solutions.frozen.ts` |
+| `/comparison` and `/comparison/*` | `src/lib/comparison-index.frozen.ts`, `src/lib/comparisons.frozen.ts` |
+| `/definitions/*` | `src/lib/definitions.frozen.ts` |
+| `/jobs` copy and role descriptions | `src/lib/careers-page.frozen.ts`, `src/lib/job-listings.frozen.ts` |
+| `/about` team | `src/lib/team.frozen.ts` |
+
+**So a copy change is an edit to a `.frozen.ts` file and a deploy.** Editing the
+Contentful entry does nothing — nothing reads it.
+
+- **Imagery lives in `public/images/cms`**, pulled down through Contentful's
+  image API at 2400px webp. The CDN is out of the loop too, so an asset being
+  replaced or unpublished in the CMS can't change or break a page.
+- **`scripts/freeze-cms.mts` (`npm run freeze-cms`) generated these files.** It
+  is a one-time tool kept for reference. Re-running it overwrites hand edits with
+  whatever the CMS still holds, which by now is the older copy — so don't, unless
+  you are deliberately re-taking a family.
+- **Two live sources remain, both on purpose.** `src/lib/contentful.ts` serves
+  the templates gallery, because marketing publishing a template should not need
+  a deploy; and `src/lib/careers.ts` reads the Ashby job board, because a closed
+  role has to stop listing. `src/lib/ghost.ts` (the blog) was never Contentful.
+
 ## Adding a New Page
 1. Create `src/app/<page-name>/page.tsx`
 2. Add an entry to `PAGE_SEO` in `src/lib/seo.ts` and export

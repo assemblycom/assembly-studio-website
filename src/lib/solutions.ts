@@ -1,19 +1,18 @@
-import { getCmsPage, getCmsPages, type CmsPageSet } from "./cms-page";
-import { FALLBACK_SOLUTIONS } from "./solutions.fallback";
+import { FROZEN_SOLUTIONS } from "./solutions.frozen";
 
-// The industry landing pages, filed in the CMS under a "solutions/" slug prefix
-// that the route drops. Nine entries today, one of them noIndex.
-const SOLUTIONS: CmsPageSet = {
-  name: "solutions",
-  filter: { "fields.slug[match]": "solutions/" },
-  prefix: "solutions/",
-  fallback: FALLBACK_SOLUTIONS,
-};
-
-export function getSolutions() {
-  return getCmsPages(SOLUTIONS);
+/**
+ * The industry landing pages. They came out of Contentful — where they were
+ * filed under a "solutions/" slug prefix the route dropped — and now live in
+ * solutions.frozen.ts, imagery and all. One of the nine is noIndex, which the
+ * frozen copy carries the way the CMS did.
+ *
+ * This replaces solutions.fallback.ts, which held the same copy as a floor for
+ * a CMS outage. There is no CMS read left to fall back from.
+ */
+export async function getSolutions() {
+  return FROZEN_SOLUTIONS;
 }
 
-export function getSolution(slug: string) {
-  return getCmsPage(SOLUTIONS, slug);
+export async function getSolution(slug: string) {
+  return FROZEN_SOLUTIONS.find((page) => page.slug === slug) ?? null;
 }
