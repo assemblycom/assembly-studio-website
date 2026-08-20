@@ -12,6 +12,15 @@ import type { Document } from "@contentful/rich-text-types";
 // and it should appear without a deploy.
 const CONTENT_TYPE = "partnerApps";
 const APP_TEMPLATE = "App Template";
+/**
+ * The core apps the product ships — Helpdesk, Autoresponder, Tasks, Files and
+ * the rest. A separate App Type in the CMS, but the same catalogue the product's
+ * own Add-an-App picker reads, and the gallery lists both so the site shows what
+ * the product actually offers rather than the templates alone. They carry a
+ * "Classic" category, which is where the gallery's Classic filter comes from.
+ */
+const CORE_APP = "App";
+const GALLERY_APP_TYPES = [APP_TEMPLATE, CORE_APP];
 const EMBED = "Embed";
 
 const SPACE_ID = process.env.CONTENTFUL_SPACE_ID;
@@ -171,7 +180,7 @@ async function fetchAppTemplates(): Promise<AppTemplateEntry[]> {
   try {
     const res = await client.getEntries({
       content_type: CONTENT_TYPE,
-      "fields.appType": APP_TEMPLATE,
+      "fields.appType[in]": GALLERY_APP_TYPES,
       include: 2,
       limit: 200,
     });

@@ -48,19 +48,51 @@ export interface Template {
   hasVideo?: boolean;
 }
 
-// Category order is intentional — it drives the order of the filter tabs.
+// Category order is intentional — it drives the order of the filter tabs. A
+// category the CMS uses but this list omits still gets a tab, appended after
+// these; listing one here is how it gets a deliberate position instead.
+// "Classic", "Support" and "Internal" come from the product's core apps, which
+// the gallery lists alongside the templates.
 export const TEMPLATE_CATEGORIES = [
   "Onboarding",
+  "Classic",
   "Dashboards",
   "Trackers",
   "Approvals",
   "Requests",
+  "Support",
   "Proposals",
   "AI assistants",
   "Community",
+  "Internal",
   "Knowledge base",
   "Education",
 ] as const;
+
+/**
+ * Card copy for the product's core apps, which come from the CMS rather than
+ * from the array below. Their CMS descriptions are written for the product's own
+ * app picker and run to three or four lines under a gallery card; the committed
+ * templates all carry a single line, and these match them. The fuller CMS copy
+ * still leads each app's detail page.
+ *
+ * The card column is 246px, which is about 34 characters — keep them under it.
+ */
+export const CORE_APP_SUBTITLE: Record<string, string> = {
+  "helpdesk-app": "A searchable client knowledge base",
+  "message-autoresponder": "Auto-reply outside working hours",
+  "contracts-app": "Get contracts signed online",
+  "files-app": "Share files and folders securely",
+  "forms-app": "Forms that collect client info",
+  "billing-app": "Branded invoices clients can pay",
+  "messaging-app": "Secure client messaging",
+  "tasks": "Assign tasks to clients and team",
+  "client-home": "A personalized client homepage",
+  "profile-manager": "Clients update their own details",
+  "exporter": "Export your message history",
+  "quickbooks": "Sync invoices to QuickBooks",
+  "xero": "Sync invoices to Xero",
+};
 
 // Industry tags for the secondary filter, alphabetical.
 export const TEMPLATE_INDUSTRIES = [

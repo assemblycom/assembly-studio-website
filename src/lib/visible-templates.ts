@@ -1,7 +1,12 @@
 import "server-only";
 
 import { getAppTemplates, type AppTemplateEntry } from "./contentful";
-import { TEMPLATES, VISIBLE_TEMPLATES, type Template } from "./templates";
+import {
+  CORE_APP_SUBTITLE,
+  TEMPLATES,
+  VISIBLE_TEMPLATES,
+  type Template,
+} from "./templates";
 
 /**
  * Contentful is the catalogue, and a published App Template entry has two
@@ -35,7 +40,7 @@ function fromEntry(entry: AppTemplateEntry): Template {
   return {
     slug: entry.slug,
     title: entry.name,
-    description: entry.subtitle ?? "",
+    description: CORE_APP_SUBTITLE[entry.slug] ?? entry.subtitle ?? "",
     icon: "",
     category: entry.category ?? "",
     longDescription: "",
