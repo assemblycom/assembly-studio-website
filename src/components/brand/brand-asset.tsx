@@ -31,7 +31,12 @@ export function BrandAsset({ title, description, files }: BrandAssetProps) {
               className={`flex h-44 items-center justify-center rounded-xl px-6 ${
                 file.ground === "light"
                   ? "border border-border bg-[#f5f5f0]"
-                  : "bg-[#101010]"
+                  // In dark mode the dark tile is all but the page ground, so it
+                  // gets a hairline of its own. A ring, not a border, so it
+                  // doesn't add the 1px the light tile's border does and throw
+                  // the two tiles out of alignment. Light mode is untouched:
+                  // there the dark tile is already its own shape on white.
+                  : "bg-[#101010] [[data-theme=dark]_&]:ring-1 [[data-theme=dark]_&]:ring-inset [[data-theme=dark]_&]:ring-white/15"
               }`}
             >
               <Image
