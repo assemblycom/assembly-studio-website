@@ -83,9 +83,6 @@ export default async function SitemapPage() {
       {/* Centred from the desktop breakpoint up: the title sat alone against a
           wide empty right half. Narrow screens stay left-aligned with the lists. */}
       <h1 className="type-display text-foreground md:text-center">Sitemap</h1>
-      <p className="type-lead mt-4 max-w-xl text-pretty text-muted-foreground md:mx-auto md:text-center">
-        Every page on the site, in one place.
-      </p>
 
       <div className="mt-14 flex flex-col gap-12 md:mt-20 md:gap-16">
         <Section heading="Pages" urls={main} />
