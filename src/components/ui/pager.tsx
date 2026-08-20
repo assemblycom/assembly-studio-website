@@ -160,7 +160,7 @@ export function Pager({
 // The quiet outline button the site already uses for a secondary action (see the
 // templates rail's "See all" and the gallery's reset), carrying the same chevron
 // the numbered paginator's steps do.
-// A square holding just the chevron on a phone, label and all from sm. At 375px
+// A square holding just the chevron on a phone, the label alone from sm. At 375px
 // two labelled buttons either broke "Previous page" onto two lines inside its own
 // pill or, held on one line, filled the row end to end; the chevron alone says
 // the same thing in a control the thumb can still hit.
@@ -169,6 +169,9 @@ const STEP_BUTTON =
 // The label the square drops. Hidden rather than absent so the markup carries it
 // once; the link's own aria-label is what a screen reader reads either way.
 const STEP_LABEL = "hidden sm:inline";
+// The chevron is the phone-only stand-in for that label, so it leaves once the
+// label arrives: a labelled button reads cleaner without a redundant arrow.
+const STEP_ICON = "inline-flex sm:hidden";
 
 /**
  * Previous/next only, no numbering — the changelog's paginator.
@@ -206,7 +209,9 @@ export function PrevNextPager({
           aria-label="Previous page"
           className={STEP_BUTTON}
         >
-          <StepIcon direction="prev" />
+          <span className={STEP_ICON}>
+            <StepIcon direction="prev" />
+          </span>
           <span className={STEP_LABEL}>Previous page</span>
         </Link>
       ) : (
@@ -219,7 +224,9 @@ export function PrevNextPager({
           className={STEP_BUTTON}
         >
           <span className={STEP_LABEL}>Next page</span>
-          <StepIcon direction="next" />
+          <span className={STEP_ICON}>
+            <StepIcon direction="next" />
+          </span>
         </Link>
       ) : (
         <span />
