@@ -402,7 +402,9 @@ export function StudioNav({
   // flashing a white overlay. Use the site's canonical dark background (#0a0a0b,
   // the dark --background token) so the menu reads as the exact same black as the
   // page behind it, not a lighter charcoal.
-  const menuSurface = darkTop ? "bg-[#0a0a0b] text-white" : "bg-background";
+  // bg-background, not a hex a digit off it: the sheet was #0a0a0b against a
+  // #0a0a0a page, which is a difference with no reason to exist.
+  const menuSurface = darkTop ? "bg-background text-white" : "bg-background";
   const menuBorder = darkTop ? "border-white/10" : "border-border";
   const menuMuted = darkTop ? "text-white/50" : "text-muted-foreground";
   const menuInk = darkTop ? "text-white" : "text-foreground";

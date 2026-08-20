@@ -226,10 +226,14 @@ export function Footer({
     const linkCls = light
       ? "inline-block py-1 text-[15px] text-muted-foreground transition-colors hover:text-foreground"
       : "inline-block py-1 text-[15px] text-white/60 transition-colors hover:text-white";
+    // The dark face runs on the page's own ground rather than its own #101010,
+    // which sat a clear step lighter than the #0a0a0a everything above it uses.
+    // Only ever taken in dark mode (light={!dark} at the call site), so
+    // bg-background is the dark ground here, never white.
     return (
       <footer
         className={`footer-reveal relative overflow-hidden ${
-          light ? "bg-background text-foreground" : "bg-[#101010] text-white"
+          light ? "bg-background text-foreground" : "bg-background text-white"
         }`}
       >
         {/* Container matches the nav rail (max-w-[1600px] px-6 md:px-10) so the
