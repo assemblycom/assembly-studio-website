@@ -40,6 +40,11 @@ export const DOCS_URL = `${SITE_URL}/docs`;
 export const GUIDE_URL = "https://assembly.com/docs";
 export const API_REFERENCE_URL = "https://assembly.com/docs/api-reference";
 
+// Shared because the footer's socials and the changelog's follow link are the
+// same account, and the two drifting apart is the failure mode a second copy
+// invites.
+export const X_URL = "https://x.com/assemblycom";
+
 /** A link with a line of explanation, for the nav's dropdown panels. */
 export interface NavItem extends NavLink {
   description?: string;

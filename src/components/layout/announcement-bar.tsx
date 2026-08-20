@@ -41,13 +41,14 @@ export function AnnouncementBar() {
           others. 40px, with the line itself on whole-pixel leading, centres at
           any density. */}
       <div className="mx-auto flex h-10 max-w-[1600px] items-center justify-center gap-x-2 px-6 md:gap-x-3 md:px-10">
+        {/* Mirrors the arrow's width (and the gap before it) so the words sit
+            centred rather than the words-plus-arrow. The arrow is too light to
+            balance its own 21px, which read as the copy being shifted left. */}
+        <span aria-hidden className="w-[13px] shrink-0" />
         <span className="type-caption truncate text-center leading-5">
           {trim(ANNOUNCEMENT.text)}
         </span>
         <span className="type-caption flex shrink-0 items-center gap-1.5 leading-5 text-foreground/55 transition-colors group-hover:text-foreground">
-          {/* On a phone the arrow carries the invitation on its own: the band
-              is one line at every width, and the words would break it. */}
-          <span className="hidden sm:inline">{ANNOUNCEMENT.cta}</span>
           <svg
             width="13"
             height="13"

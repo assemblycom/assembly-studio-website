@@ -27,6 +27,41 @@ import { useTheme } from "@/components/theme/theme-provider";
 // frosted surface.
 const SCROLL_THRESHOLD = 40;
 
+// The mobile nav glyph, one 3x3 dot grid in both states. Open, the four
+// edge-centre dots drop out and the five on the diagonals are left standing as
+// an X: closing is the same grid with dots taken away rather than a different
+// icon swapped in.
+const NAV_DOTS = [5, 12, 19].flatMap((cy) => [5, 12, 19].map((cx) => [cx, cy]));
+
+// The dots an X keeps — both diagonals of the grid.
+const X_DOTS = new Set(["5,5", "19,5", "12,12", "5,19", "19,19"]);
+
+function NavDots({ shape }: { shape: "grid" | "x" }) {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden
+    >
+      {NAV_DOTS.map(([cx, cy]) => {
+        const key = `${cx},${cy}`;
+        return (
+          <circle
+            key={key}
+            cx={cx}
+            cy={cy}
+            r="1.6"
+            className="transition-opacity duration-200"
+            opacity={shape === "grid" || X_DOTS.has(key) ? 1 : 0}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
 export function StudioNav({
   fullWidth = false,
   darkTop = false,
@@ -484,23 +519,7 @@ export function StudioNav({
               aria-controls="mobile-menu"
               className={`flex size-9 items-center justify-center transition-[color,opacity] ${ease} active:opacity-60 ${lightContent ? "text-white" : "text-foreground"} ${mobileMenuOpen ? "invisible" : ""}`}
             >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                aria-hidden
-              >
-                <circle cx="5" cy="5" r="1.6" />
-                <circle cx="12" cy="5" r="1.6" />
-                <circle cx="19" cy="5" r="1.6" />
-                <circle cx="5" cy="12" r="1.6" />
-                <circle cx="12" cy="12" r="1.6" />
-                <circle cx="19" cy="12" r="1.6" />
-                <circle cx="5" cy="19" r="1.6" />
-                <circle cx="12" cy="19" r="1.6" />
-                <circle cx="19" cy="19" r="1.6" />
-              </svg>
+              <NavDots shape="grid" />
             </button>
           )}
         </div>
@@ -692,10 +711,9 @@ export function StudioNav({
           >
             {/* Match the mobile header's padding (px-5) and height exactly so the
               logo stays put when the menu opens — it must not shift.
-              The hairline lives on the panel below rather than as a border-b
-              here: heights are border-box, so a border on this row shrank its
-              content box to 55px and lifted both glyphs half a pixel against
-              the header they're meant to replace. */}
+              No hairline under this row: the sheet is one white surface, and a
+              rule there split it into a header and a body that nothing else in
+              the menu echoed. */}
             <div
               className={`flex shrink-0 items-center justify-between px-5 ${scrolled ? "h-12" : "h-14"}`}
             >
@@ -714,23 +732,14 @@ export function StudioNav({
                   // sideways the moment the menu opened.
                   className={`flex size-9 items-center justify-center ${menuInk}`}
                 >
-                  <svg
-                    width="22"
-                    height="22"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                  >
-                    <path d="M6 6l12 12M6 18L18 6" />
-                  </svg>
+                  <NavDots shape="x" />
                 </button>
               </div>
             </div>
 
             <div
               ref={menuScrollRef}
-              className={`flex flex-1 flex-col overflow-y-auto overscroll-contain border-t px-5 pt-6 ${menuBorder}`}
+              className="flex flex-1 flex-col overflow-y-auto overscroll-contain px-5 pt-6"
             >
               {/* One flat list. Six links do not need sorting into named
                 sections, and the labels cost more height than the grouping

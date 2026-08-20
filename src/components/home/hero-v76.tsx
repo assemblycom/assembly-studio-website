@@ -389,7 +389,7 @@ export function HeroV76({
           white hero until the JS landed. The pre-paint script sets the attribute,
           so a variant is correct on the first paint. */}
       <section className="relative -mt-14 bg-white pb-24 md:-mt-16 [[data-theme=dark]_&]:bg-[#0a0a0a]">
-        <div className="relative overflow-hidden bg-[linear-gradient(180deg,#fcfcfd_0%,#f7f8fa_52%,#ffffff_100%)] [[data-theme=dark]_&]:bg-[var(--background)] [[data-theme=dark]_&]:bg-none">
+        <div className="relative overflow-hidden bg-white [[data-theme=dark]_&]:bg-[var(--background)]">
 
           <div className={`relative z-10 ${RAIL} pb-16 pt-36 md:pt-36 lg:pb-20`}>
             <div className="relative z-30 max-w-2xl">

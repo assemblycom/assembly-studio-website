@@ -107,7 +107,7 @@ export function BlogBrowser({
                 // Inset ring, like the gallery's: this is an overflow scroller,
                 // and an offset ring is drawn outside the chip where the
                 // scroller crops it.
-                className={`type-caption inline-flex h-8 shrink-0 items-center whitespace-nowrap rounded-lg px-3 leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground/40 ${
+                className={`type-body inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded-lg px-3.5 leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground/40 ${
                   active === filter
                     ? "bg-border text-foreground"
                     : "bg-transparent text-muted-foreground active:bg-border [@media(hover:hover)]:hover:bg-muted [@media(hover:hover)]:hover:text-foreground"

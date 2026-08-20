@@ -149,14 +149,14 @@ function CardIntake() {
   return (
     // v69-cover-column is the phone treatment: the row is held to the width it
     // was drawn at and centred, instead of stretching across the wider frame.
-    <div className="v69-cover-column v69-plot-grid v69-plot-grid--dots v69-plot-grid--fade flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="v69-cover-column v69-plot-grid v69-plot-grid--dots v69-plot-grid--fade flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       {/* Opaque, like every other record card in the set: the translucent pane
           let the dot field run straight through it, so the row read as printed
           into the paper rather than lying on it. */}
       <div className="flex w-full items-center gap-3 rounded-xl border border-black/[0.08] bg-[#FFFFFF] p-3 [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
         {/* Initials, not a photograph: the gallery is drawn art throughout, and a
             face is the one thing on it that would read as a real person. */}
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--v69-well)] text-[13px] leading-none text-[var(--v69-ink)] [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=light]_&]:text-[#5B5C53] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.12)]">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[var(--v69-well)] text-[13px] leading-none text-[var(--v69-ink)] [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:bg-[#e6e6e6] [[data-theme=light]_&]:text-[#595959] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.12)]">
           {initials}
         </span>
         <span className="min-w-0 flex-1">
@@ -218,7 +218,7 @@ const MOCK_SIGNATURE = {
 // pill was the heaviest mark on a near-white face, so the tag pulled ahead of the
 // figure it belongs to.
 const MOCK_UNIT_TAG =
-  "shrink-0 whitespace-nowrap rounded-md bg-[var(--v69-inner)] px-2 py-1 text-[11px] uppercase leading-none tracking-wide text-muted-foreground [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_&]:text-[#4A4A4A] [[data-theme=light]_.template-mock_&]:bg-[#E4E4DA] [[data-theme=light]_.template-mock_&]:text-[#4E4F46] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.11)] [[data-theme=dark]_&]:text-[#C9C9C9]";
+  "shrink-0 whitespace-nowrap rounded-md bg-[var(--v69-inner)] px-2 py-1 text-[11px] uppercase leading-none tracking-wide text-muted-foreground [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_&]:text-[#4A4A4A] [[data-theme=light]_.template-mock_&]:bg-[#e2e2e2] [[data-theme=light]_.template-mock_&]:text-[#4d4d4d] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.11)] [[data-theme=dark]_&]:text-[#C9C9C9]";
 
 // The panel face the forms cover's field rows and their remove controls share,
 // so a row and the button beside it are cut from one material.
@@ -277,7 +277,7 @@ function CardOnboarding() {
   return (
     // Dark keeps the project tracker's gradient face; light takes a flat warm
     // off-white instead.
-    <div className="flex h-full flex-col justify-center bg-[linear-gradient(160deg,#ffffff_0%,#f4f6f9_58%,#eceff3_100%)] p-3.5 [[data-theme=light]_&]:bg-none [[data-theme=light]_&]:bg-[var(--v69-card)] [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0] [[data-theme=dark]_&]:bg-none [[data-theme=dark]_&]:bg-[var(--v69-card)]">
+    <div className="flex h-full flex-col justify-center bg-[linear-gradient(160deg,#ffffff_0%,#f4f6f9_58%,#eceff3_100%)] p-3.5 [[data-theme=light]_&]:bg-none [[data-theme=light]_&]:bg-[var(--v69-card)] [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2] [[data-theme=dark]_&]:bg-none [[data-theme=dark]_&]:bg-[var(--v69-card)]">
       {/* Avatar + bar + percentage on their own tile — the same glass surface the
           help-desk rows use, so the row reads as a pane sitting on the card
           rather than a filled block. */}
@@ -294,7 +294,7 @@ function CardOnboarding() {
         {/* Dark takes a brighter fill than the shared well token: at #2b2b2b on a
             #262626 tile the disc was a step off nothing, so the initials floated
             with no shape around them. Light's warm chip already reads. */}
-        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--v69-well)] text-[11px] leading-none text-[var(--v69-ink)] [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=light]_&]:text-[#5B5C53] [[data-theme=dark]_&]:bg-[color-mix(in_srgb,var(--v69-ink)_20%,transparent)]">
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--v69-well)] text-[11px] leading-none text-[var(--v69-ink)] [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:bg-[#e6e6e6] [[data-theme=light]_&]:text-[#595959] [[data-theme=dark]_&]:bg-[color-mix(in_srgb,var(--v69-ink)_20%,transparent)]">
           {initials}
         </span>
         {/* On the translucent tile the shared well tone lands within a step of
@@ -662,7 +662,7 @@ function CardTimeTracker() {
       onMouseLeave={() => setPlay(0)}
       className="v69-accent-drift flex h-full items-center justify-center p-4"
     >
-      <div className="relative flex aspect-square h-full max-h-[230px] flex-col items-center justify-center gap-1.5 overflow-hidden rounded-full bg-[var(--v69-card)] px-3 [[data-theme=light]_&]:bg-[var(--v69-card)] [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0] [[data-theme=dark]_&]:bg-[#1B1B1B] [[data-theme=dark]_.template-mock_&]:bg-[var(--v69-well)]">
+      <div className="relative flex aspect-square h-full max-h-[230px] flex-col items-center justify-center gap-1.5 overflow-hidden rounded-full bg-[var(--v69-card)] px-3 [[data-theme=light]_&]:bg-[var(--v69-card)] [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2] [[data-theme=dark]_&]:bg-[#1B1B1B] [[data-theme=dark]_.template-mock_&]:bg-[var(--v69-well)]">
         {/* Dark-only: the watch face is so close in value to the card ground
             that it read as a flat cutout, so an inset ring carves it in — a
             hairline highlight along the top edge, a darker lower edge, and a
@@ -700,7 +700,7 @@ function CardTimeTracker() {
           // true circle into an oval.
           // Light drops the hairline: its fill is already a clear step off the
           // face, so the outline only added a hard edge inside a soft recess.
-          className={`my-0.5 rounded-lg bg-[var(--v69-card)] px-2 py-1.5 [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=dark]_&]:bg-[#2B2B2B] [[data-theme=dark]_.template-mock_&]:bg-[var(--v69-card)] ${MOCK_OUTLINE} [[data-theme=light]_&]:border-transparent [[data-theme=light]_.template-mock_&]:border-transparent`}
+          className={`my-0.5 rounded-lg bg-[var(--v69-card)] px-2 py-1.5 [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:bg-[#e6e6e6] [[data-theme=dark]_&]:bg-[#2B2B2B] [[data-theme=dark]_.template-mock_&]:bg-[var(--v69-card)] ${MOCK_OUTLINE} [[data-theme=light]_&]:border-transparent [[data-theme=light]_.template-mock_&]:border-transparent`}
         >
           <span className="flex items-center gap-[4px] py-0.5">
             {[..."09"].map((d, i) => (
@@ -823,7 +823,7 @@ function CardProposal() {
               // read as a hole punched through the glass.
               // No ring in either skin: the fill already steps off the panel, so
               // a hairline only drew a box around each row.
-              className="flex items-center justify-between rounded-lg bg-white px-3 py-3.5 ring-0 [[data-theme=light]_&]:bg-[var(--v69-card)] [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0] [[data-theme=dark]_&]:bg-[#3A3A3A]"
+              className="flex items-center justify-between rounded-lg bg-white px-3 py-3.5 ring-0 [[data-theme=light]_&]:bg-[var(--v69-card)] [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2] [[data-theme=dark]_&]:bg-[#3A3A3A]"
             >
               <div className="text-[11px] font-normal leading-tight text-[var(--v69-ink)]">
                 {title}
@@ -860,10 +860,12 @@ const CHAT_PLACEHOLDER = "Ask any question";
 
 function CardChat() {
   return (
-    <div className="v69-chat-cover flex h-full flex-col bg-[var(--v69-card)] p-3.5 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="v69-chat-cover flex h-full flex-col bg-[var(--v69-card)] p-2 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       {/* One panel, filling the card: a field lifted a step off the face behind
-          the shared hairline, its own contents pinned to the corners. */}
-      <div className="v69-chat-field flex h-full flex-col rounded-2xl bg-[var(--v69-inner)] p-3 ring-1 ring-[rgba(16,24,40,0.06)] [.template-mock_&]:ring-[rgba(16,24,40,0.10)] [[data-theme=dark]_&]:bg-[#2E2E2E] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.12)] [[data-theme=dark]_.template-mock_&]:ring-[rgba(255,255,255,0.20)]">
+          the shared hairline, its own contents pinned to the corners. Its radius
+          is the card's 16px less the 8px it is inset by, so the two sets of
+          corners run parallel instead of the inner one reading rounder. */}
+      <div className="v69-chat-field flex h-full flex-col rounded-lg bg-[var(--v69-inner)] p-2.5 ring-1 ring-[rgba(16,24,40,0.06)] [.template-mock_&]:ring-[rgba(16,24,40,0.10)] [[data-theme=dark]_&]:bg-[#2E2E2E] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.12)] [[data-theme=dark]_.template-mock_&]:ring-[rgba(255,255,255,0.20)]">
         <div className="flex items-center">
           <span
             className={`whitespace-nowrap text-[11px] leading-none text-muted-foreground ${MOCK_UPSCALED_META}`}
@@ -891,9 +893,10 @@ function CardChat() {
           >
             <path d="M8 3.5v9M3.5 8h9" />
           </svg>
-          {/* The send button is the card's one piece of colour — the brand
-              accent per theme, matching the ports and meters on the siblings. */}
-          <span className="flex size-7 items-center justify-center rounded-full bg-[#D9ED92] [[data-theme=dark]_&]:bg-[#7DA4FF]">
+          {/* The send button is the card's one piece of colour. Haze in both
+              themes: the zest fill read as a status green here rather than as
+              the brand, and the siblings' ports and meters are already blue. */}
+          <span className="flex size-7 items-center justify-center rounded-full bg-[#7DA4FF]">
             {/* Inter's own arrow rather than a drawn path — the mock is set in
                 Inter, so the glyph's weight and terminals match the type around
                 it instead of being a second arrow drawn to different rules. */}
@@ -930,7 +933,7 @@ function CardApproval() {
     // desk beside it rather than being the one card with a ramp.
     // bg-none is what actually drops the ramp — the card-face override only sets
     // a background *color*, which paints behind the gradient image.
-    <div className="flex h-full flex-col bg-[var(--v69-card)] [[data-theme=light]_&]:bg-[var(--v69-card)] [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0] [[data-theme=dark]_&]:bg-[linear-gradient(160deg,#232323_0%,#1b1b1b_58%,#151515_100%)] [[data-theme=dark]_.template-mock_&]:bg-[var(--v69-card)] [[data-theme=dark]_.template-mock_&]:bg-none">
+    <div className="flex h-full flex-col bg-[var(--v69-card)] [[data-theme=light]_&]:bg-[var(--v69-card)] [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2] [[data-theme=dark]_&]:bg-[linear-gradient(160deg,#232323_0%,#1b1b1b_58%,#151515_100%)] [[data-theme=dark]_.template-mock_&]:bg-[var(--v69-card)] [[data-theme=dark]_.template-mock_&]:bg-none">
       {/* The status tag alone in the corner, no item name: the preview under it is
           the thing being approved, and naming it as well made the cover read as a
           list row with a thumbnail. Stays put on hover — the render in the preview
@@ -949,7 +952,7 @@ function CardApproval() {
           reads as a foreign colour on this palette's warm face. The ring is
           redundant now that the panel has its own fill, and only stays for
           dark, where the panel is a near-black fill close to the card behind it. */}
-      <div className="relative mx-3.5 mb-3.5 flex-1 overflow-hidden rounded-xl ring-1 ring-[rgba(16,24,40,0.14)] [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=light]_&]:ring-0 [[data-theme=dark]_&]:bg-[#1B1B1B] [[data-theme=dark]_&]:ring-0 [.v72-mock-dark_&]:ring-0 [[data-theme=dark]_.template-mock_&]:bg-[var(--v69-well)]">
+      <div className="relative mx-3.5 mb-3.5 flex-1 overflow-hidden rounded-xl ring-1 ring-[rgba(16,24,40,0.14)] [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:bg-[#e6e6e6] [[data-theme=light]_&]:ring-0 [[data-theme=dark]_&]:bg-[#1B1B1B] [[data-theme=dark]_&]:ring-0 [.v72-mock-dark_&]:ring-0 [[data-theme=dark]_.template-mock_&]:bg-[var(--v69-well)]">
         <div
           className="v69-preview-dots absolute inset-0 grid place-items-center gap-[2px] p-2.5 text-muted-foreground"
           style={{
@@ -1012,7 +1015,7 @@ const PAPER_PEEK =
 
 function CardDocuments() {
   return (
-    <div className="h-full bg-[var(--v69-card)] [--fld-back:#E6E6E6] [--fld-edge:rgba(0,0,0,0.07)] [--fld-front:#F2F2F2] [--fld-paper:#FAFAFA] [.template-mock_&]:[--fld-back:#E8E8DD] [.template-mock_&]:[--fld-front:#F5F5F0] [.template-mock_&]:[--fld-paper:#ffffff] [--fld-ink:#262626] [[data-theme=dark]_&]:[--fld-back:#2c2c2c] [[data-theme=dark]_&]:[--fld-edge:rgba(255,255,255,0.09)] [[data-theme=dark]_&]:[--fld-front:#3a3a3a] [[data-theme=dark]_&]:[--fld-ink:#f2f2f2] [[data-theme=dark]_&]:[--fld-paper:#565656]">
+    <div className="h-full bg-[var(--v69-card)] [--fld-back:#E6E6E6] [--fld-edge:rgba(0,0,0,0.07)] [--fld-front:#F2F2F2] [--fld-paper:#FAFAFA] [.template-mock_&]:[--fld-back:#e6e6e6] [.template-mock_&]:[--fld-front:#f2f2f2] [.template-mock_&]:[--fld-paper:#ffffff] [--fld-ink:#262626] [[data-theme=dark]_&]:[--fld-back:#2c2c2c] [[data-theme=dark]_&]:[--fld-edge:rgba(255,255,255,0.09)] [[data-theme=dark]_&]:[--fld-front:#3a3a3a] [[data-theme=dark]_&]:[--fld-ink:#f2f2f2] [[data-theme=dark]_&]:[--fld-paper:#565656]">
       {/* v69-cover-square is the phone treatment: a folder stretched to 16:10
           stops reading as a folder, so it holds its square and centres. */}
       <div className="v69-cover-square relative h-full p-3">
@@ -1398,7 +1401,7 @@ function CardTracker() {
     // as a hole. It takes the flat card face there, and drops the ring with it —
     // nothing else in that row carries an outline. The hero strip keeps the
     // gradient, where the tile stands alone against the page.
-    <div className="flex h-full flex-col rounded-[14px] bg-[linear-gradient(160deg,#ffffff_0%,#f4f6f9_58%,#eceff3_100%)] p-3.5 [--v69-tracker-empty:#00000008] [[data-theme=light]_&]:bg-none [[data-theme=light]_&]:bg-[var(--v69-card)] [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0] [[data-theme=light]_&]:[--v69-tracker-empty:#00000012] [[data-theme=dark]_&]:bg-[linear-gradient(160deg,#232323_0%,#1b1b1b_58%,#151515_100%)] [[data-theme=dark]_&]:ring-1 [[data-theme=dark]_&]:ring-white/[0.08] [[data-theme=dark]_&]:[--v69-tracker-empty:#ffffff1a] [[data-theme=dark]_.template-mock-gallery_&]:bg-none [[data-theme=dark]_.template-mock-gallery_&]:bg-[var(--v69-card)] [[data-theme=dark]_.template-mock-gallery_&]:ring-0">
+    <div className="flex h-full flex-col rounded-[14px] bg-[linear-gradient(160deg,#ffffff_0%,#f4f6f9_58%,#eceff3_100%)] p-3.5 [--v69-tracker-empty:#00000008] [[data-theme=light]_&]:bg-none [[data-theme=light]_&]:bg-[var(--v69-card)] [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2] [[data-theme=light]_&]:[--v69-tracker-empty:#00000012] [[data-theme=dark]_&]:bg-[linear-gradient(160deg,#232323_0%,#1b1b1b_58%,#151515_100%)] [[data-theme=dark]_&]:ring-1 [[data-theme=dark]_&]:ring-white/[0.08] [[data-theme=dark]_&]:[--v69-tracker-empty:#ffffff1a] [[data-theme=dark]_.template-mock-gallery_&]:bg-none [[data-theme=dark]_.template-mock-gallery_&]:bg-[var(--v69-card)] [[data-theme=dark]_.template-mock-gallery_&]:ring-0">
       {/* Metric header: the count top-left, the unit pinned top-right. */}
       <div className="flex items-end gap-1 px-0.5">
         {/* Primary metric — clean, unstretched Inter (soft off-white, not pure).
@@ -1406,7 +1409,7 @@ function CardTracker() {
             near-white card #262626 was the one pure-black mark in the rail. The
             hero keeps full ink, where the figure carries the whole tile. */}
         <span
-          className="text-[34px] font-medium leading-none tracking-tight text-[var(--v69-ink)] [[data-theme=light]_.template-mock_&]:text-[#3B3C34] [[data-theme=dark]_&]:text-[#ededed]"
+          className="text-[34px] font-medium leading-none tracking-tight text-[var(--v69-ink)] [[data-theme=light]_.template-mock_&]:text-[#3a3a3a] [[data-theme=dark]_&]:text-[#ededed]"
           style={{
             fontFamily: "var(--font-diatype-mono), ui-monospace, monospace",
           }}
@@ -1580,7 +1583,7 @@ function CardSupport() {
     // v69-cover-support is a hook, not a style: the dotted ground it turns on is
     // scoped to the templates gallery in globals.css, so the home hero's rail
     // keeps this cover's plain face.
-    <div className="v69-cover-support flex h-full flex-col justify-center gap-2 bg-[var(--v69-card)] p-4 [[data-theme=light]_&]:bg-[var(--v69-card)] [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="v69-cover-support flex h-full flex-col justify-center gap-2 bg-[var(--v69-card)] p-4 [[data-theme=light]_&]:bg-[var(--v69-card)] [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       {SUPPORT_REQUESTS.map((r, i) => (
         <div
           key={r.title}
@@ -1616,7 +1619,7 @@ function CardSupport() {
           ) : (
             <SupportStatusIcon state={r.state} />
           )}
-          <p className="min-w-0 truncate text-[13px] leading-tight text-[var(--v69-ink)] [[data-theme=light]_&]:text-[#3B3C34] [[data-theme=light]_.template-mock-gallery_&]:text-[#1B1B1B]">
+          <p className="min-w-0 truncate text-[13px] leading-tight text-[var(--v69-ink)] [[data-theme=light]_&]:text-[#3a3a3a] [[data-theme=light]_.template-mock-gallery_&]:text-[#1B1B1B]">
             {r.title}
           </p>
         </div>
@@ -1646,7 +1649,7 @@ function CardBooking() {
     // ground, rather than the composer that made it. v69-cover-column is the
     // phone treatment — the row is held to the width it was drawn at and centred
     // instead of stretching across the wider frame.
-    <div className="v69-cover-column v69-plot-grid v69-plot-grid--lines flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="v69-cover-column v69-plot-grid v69-plot-grid--lines flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       {/* Opaque, not the glass pane the record covers use: over a dotted ground a
           translucent fill lets the field show through and the card reads as
           printed on the paper rather than lying on it. */}
@@ -1681,10 +1684,10 @@ function CardCalendar() {
       {/* A hairline on the seam: the two zones are close in value, so without a
           rule between them the strip read as a shadow falling on the surface
           rather than as a band above it. */}
-      <div className="v69-plot-grid v69-plot-grid--dots h-[42%] w-full shrink-0 border-b border-black/[0.07] bg-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:bg-[#EDEDE4] [[data-theme=dark]_&]:border-white/[0.09] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.04)]" />
+      <div className="v69-plot-grid v69-plot-grid--dots h-[42%] w-full shrink-0 border-b border-black/[0.07] bg-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:bg-[#ebebeb] [[data-theme=dark]_&]:border-white/[0.09] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.04)]" />
       {/* The surface the date is set on: a clear step lighter than the strip, so
           the two zones read as texture over paper rather than as one field. */}
-      <div className="flex flex-1 flex-col justify-start bg-[#FFFFFF] px-4 pt-3.5 [[data-theme=light]_.template-mock_&]:bg-[#FAFAF7] [[data-theme=dark]_&]:bg-[#1F1F1F]">
+      <div className="flex flex-1 flex-col justify-start bg-[#FFFFFF] px-4 pt-3.5 [[data-theme=light]_.template-mock_&]:bg-[#fafafa] [[data-theme=dark]_&]:bg-[#1F1F1F]">
         {/* The weekday is set in the mono face the site uses for every date and
             figure, and kept neutral: coloured, it read as a status rather than
             as the label on the date under it. */}
@@ -1714,7 +1717,7 @@ function CardCaseStatus() {
     // at a position ON, which is what the booking cover next to it is doing. A
     // status isn't at a coordinate, and sharing that ground made the two covers
     // read as one pair.
-    <div className="v69-cover-column v69-hatch-ground flex h-full items-center justify-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="v69-cover-column v69-hatch-ground flex h-full items-center justify-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       <span className="flex justify-center">
         <span className="relative inline-flex flex-col items-center">
           {/* Lime in light and periwinkle in dark, with the label on the dark ink
@@ -1755,13 +1758,13 @@ function CardDiscussion() {
       <div className="flex w-full flex-col gap-2">
       {/* Incoming: the neutral fill, tail on the left. */}
       <div className="relative w-fit max-w-[86%] self-start">
-        <div className="relative rounded-[16px] bg-[var(--v69-inner)] px-3.5 py-2.5 [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=dark]_&]:bg-[#343434]">
+        <div className="relative rounded-[16px] bg-[var(--v69-inner)] px-3.5 py-2.5 [[data-theme=light]_.template-mock_&]:bg-[#e6e6e6] [[data-theme=dark]_&]:bg-[#343434]">
           <span className={`block text-[13px] font-normal leading-snug text-[var(--v69-ink)] ${MOCK_UPSCALED_BODY}`}>
             Quick question on the timeline
           </span>
           <svg
             viewBox="0 0 14 14"
-            className="absolute -bottom-px left-2 size-3.5 -translate-x-1/2 scale-x-[-1] text-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:text-[#E7E7DE] [[data-theme=dark]_&]:text-[#343434]"
+            className="absolute -bottom-px left-2 size-3.5 -translate-x-1/2 scale-x-[-1] text-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:text-[#e6e6e6] [[data-theme=dark]_&]:text-[#343434]"
             fill="currentColor"
             aria-hidden
           >
@@ -1807,7 +1810,7 @@ function CardMarkup() {
     // on top of work, and the composer is the moment that conversation starts.
     // v69-cover-column is the phone treatment — the row is held to the width it
     // was drawn at and centred rather than stretching across the wider frame.
-    <div className="v69-cover-column v69-hatch-ground flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="v69-cover-column v69-hatch-ground flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       <div className="flex w-full items-center gap-2.5">
         {/* The commenter, as the one coloured mark on the cover. Periwinkle in
             light and lime in dark — whichever of the brand pair holds against
@@ -1848,7 +1851,7 @@ function CardResourceLibrary() {
     // was drawn at and centred, rather than stretching across the wider frame.
     // The hatched ground separates this from the internal library's dotted one —
     // both covers are a single record, so the ground is what tells them apart.
-    <div className="v69-cover-column v69-cover-column--tight v69-hatch-ground flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="v69-cover-column v69-cover-column--tight v69-hatch-ground flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       {/* Opaque, not the glass pane the other record covers use: over a hatched
           ground the translucent fill let the rules run straight through the card,
           so it read as printed on the paper rather than lying on it.
@@ -1858,7 +1861,7 @@ function CardResourceLibrary() {
       <div className="flex w-full items-center gap-3 rounded-xl border bg-[#FFFFFF] p-3 border-black/[0.08] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
         {/* The file's thumbnail slot. A glyph rather than a preview: at cover size
             a real thumbnail is a smudge, and the record is the point. */}
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--v69-well)] text-[var(--v69-ink)]/30 [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.1)]">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[var(--v69-well)] text-[var(--v69-ink)]/30 [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:bg-[#e6e6e6] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.1)]">
           <svg viewBox="0 0 24 24" className="size-[18px]" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
             <rect x="3" y="3" width="18" height="18" rx="3" />
             <circle cx="8.5" cy="8.5" r="1.6" />
@@ -1982,7 +1985,7 @@ function CardJargonQuest() {
       {/* In the light gallery the panel sits a step above the shared --v69-inner
           step: the pill below it is near-black and fills a third of the cover,
           so the darker recess made the whole card read heavy for that skin. */}
-      <div className="flex h-full flex-col rounded-[14px] bg-[var(--v69-inner)] p-3.5 [[data-theme=light]_.template-mock_&]:bg-[#F0F0EA] ring-1 ring-[rgba(16,24,40,0.06)] [.template-mock_&]:ring-[rgba(16,24,40,0.10)] [[data-theme=dark]_&]:bg-[#2E2E2E] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.12)] [[data-theme=dark]_.template-mock_&]:ring-[rgba(255,255,255,0.20)]">
+      <div className="flex h-full flex-col rounded-[14px] bg-[var(--v69-inner)] p-3.5 [[data-theme=light]_.template-mock_&]:bg-[#efefef] ring-1 ring-[rgba(16,24,40,0.06)] [.template-mock_&]:ring-[rgba(16,24,40,0.10)] [[data-theme=dark]_&]:bg-[#2E2E2E] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.12)] [[data-theme=dark]_.template-mock_&]:ring-[rgba(255,255,255,0.20)]">
         {/* The round as the rail's own unit tag — same chip, mono face and caps as
             TICKETS / OPEN / DRAFT — so the one piece of metadata on this card is
             set the way metadata is set everywhere else on the rail. It leads the
@@ -2000,7 +2003,7 @@ function CardJargonQuest() {
             ink, the way the site's primary button does in that skin — the brand
             periwinkle was the only hue on an otherwise neutral card and pulled
             harder than the question above it. */}
-        <div className="mt-auto flex h-10 w-full items-center justify-center rounded-full bg-[#262626] text-[13px] font-normal text-white [.template-mock_&]:bg-[color-mix(in_srgb,var(--v69-ink)_70%,transparent)] [[data-theme=light]_&]:bg-[#262626] [[data-theme=light]_&]:text-[rgba(255,255,255,0.95)] [[data-theme=light]_.template-mock_&]:bg-[#3D3D3A] [[data-theme=dark]_&]:bg-[#D9ED92] [[data-theme=dark]_&]:text-[#1B1B1B] [[data-theme=dark]_.template-mock_&]:bg-[#D9ED92] [[data-theme=dark]_.template-mock_&]:text-[#1B1B1B]">
+        <div className="mt-auto flex h-10 w-full items-center justify-center rounded-full bg-[#262626] text-[13px] font-normal text-white [.template-mock_&]:bg-[color-mix(in_srgb,var(--v69-ink)_70%,transparent)] [[data-theme=light]_&]:bg-[#262626] [[data-theme=light]_&]:text-[rgba(255,255,255,0.95)] [[data-theme=light]_.template-mock_&]:bg-[#3c3c3c] [[data-theme=dark]_&]:bg-[#D9ED92] [[data-theme=dark]_&]:text-[#1B1B1B] [[data-theme=dark]_.template-mock_&]:bg-[#D9ED92] [[data-theme=dark]_.template-mock_&]:text-[#1B1B1B]">
           Submit answer
         </div>
       </div>
@@ -2043,7 +2046,7 @@ function CardVoiceAI() {
     // site's lime-to-blue brand ramp, which made this the one card in the gallery
     // wearing a full-bleed gradient — it read as a different set from the covers
     // either side of it.
-    <div className="relative flex h-full bg-[var(--v69-card)] p-3 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="relative flex h-full bg-[var(--v69-card)] p-3 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       <div
         // A plain opaque face, carried by its fill alone. It was a pane of glass
         // on both skins — translucent over the ramp with a lit top lip, an inward
@@ -2250,14 +2253,14 @@ function CardDeliverable({
 function CardExport() {
   const pct = 68;
   return (
-    <div className="v69-plot-grid v69-plot-grid--lines flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="v69-plot-grid v69-plot-grid--lines flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       <span className="block w-full rounded-xl border border-black/[0.08] bg-[#FFFFFF] px-3 py-2.5 [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
         <span className="block truncate text-[13px] leading-none text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[12px]">
           Clients.csv
         </span>
         {/* The meter takes the periwinkle every other meter in the set runs in,
             rather than a green of its own. */}
-        <span className="mt-2.5 block h-[5px] w-full overflow-hidden rounded-full bg-[var(--v69-well)] [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.16)]">
+        <span className="mt-2.5 block h-[5px] w-full overflow-hidden rounded-full bg-[var(--v69-well)] [[data-theme=light]_.template-mock_&]:bg-[#e6e6e6] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.16)]">
           <span
             className="block h-full rounded-full bg-[#7DA4FF]"
             style={{ width: `${pct}%` }}
@@ -2357,7 +2360,7 @@ function CardForms() {
   return (
     // v69-cover-column is the phone treatment: the rows are held to the width
     // they were drawn at rather than stretching across the wider frame.
-    <div className="v69-cover-column v69-plot-grid v69-plot-grid--dots flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="v69-cover-column v69-plot-grid v69-plot-grid--dots flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       <span className="block w-full space-y-2">
         {FORM_FIELDS.map((field) => (
           <span key={field.label} className="flex items-stretch gap-2">
@@ -2417,7 +2420,7 @@ function CardForms() {
 // is an editor, and the empty body under a filled title is what it looks like.
 function CardHelpdesk() {
   return (
-    <div className="flex h-full items-stretch bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="flex h-full items-stretch bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       <span className="flex w-full flex-col overflow-hidden rounded-xl border border-black/[0.08] bg-[#FFFFFF] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
         <span className="flex items-center px-3 py-2.5">
           <span className="min-w-0 flex-1 truncate text-[13px] leading-none text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[12px]">
@@ -2440,10 +2443,10 @@ function CardHelpdesk() {
 // something to do.
 function CardHome() {
   return (
-    <div className="flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       {/* The selected state of a nav row — a well rather than a panel, because a
           sidebar row is recessed into its rail, not floated above it. */}
-      <span className="flex w-full items-center gap-2.5 rounded-xl bg-[var(--v69-well)] px-3 py-2.5 [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.1)]">
+      <span className="flex w-full items-center gap-2.5 rounded-xl bg-[var(--v69-well)] px-3 py-2.5 [[data-theme=light]_.template-mock_&]:bg-[#e6e6e6] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.1)]">
         <svg
           viewBox="0 0 24 24"
           className="size-4 shrink-0 text-muted-foreground"
@@ -2478,7 +2481,7 @@ const TASKS_ROWS = [
 
 function CardTasks() {
   return (
-    <div className="v69-cover-column flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="v69-cover-column flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       <span className="block w-full overflow-hidden rounded-xl border border-black/[0.08] bg-[#FFFFFF] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
         {/* The column head takes the covers' periwinkle in both themes, the way
             the Home row's count does — a column's colour is what identifies it on
@@ -2528,7 +2531,7 @@ const PROFILE_ROWS = [
 
 function CardProfileManager() {
   return (
-    <div className="flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       <span className="block w-full overflow-hidden rounded-xl border border-black/[0.08] bg-[#FFFFFF] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
         {PROFILE_ROWS.map((person, i) => (
           <span
@@ -2539,7 +2542,7 @@ function CardProfileManager() {
                 : ""
             }`}
           >
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--v69-well)] text-[11px] leading-none text-[var(--v69-ink)] [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_&]:text-[#5B5C53] [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.12)]">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--v69-well)] text-[11px] leading-none text-[var(--v69-ink)] [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_&]:text-[#595959] [[data-theme=light]_.template-mock_&]:bg-[#e6e6e6] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.12)]">
               {person.initials}
             </span>
             <span className="min-w-0 flex-1">
@@ -2565,20 +2568,20 @@ function CardMessages() {
   return (
     <div className="v69-cover-column flex h-full items-center bg-[var(--v69-card)] p-4">
       <span className="flex w-full items-end gap-2">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--v69-well)] text-[11px] leading-none text-[var(--v69-ink)] [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_&]:text-[#5B5C53] [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.12)]">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--v69-well)] text-[11px] leading-none text-[var(--v69-ink)] [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_&]:text-[#595959] [[data-theme=light]_.template-mock_&]:bg-[#e6e6e6] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.12)]">
           GK
         </span>
         <span className="min-w-0 flex-1">
           <span className="mb-1.5 block truncate pl-1 text-[11px] leading-none text-muted-foreground">
             Gus Kelly
           </span>
-          <span className="relative block rounded-[16px] bg-[var(--v69-inner)] px-3.5 py-2.5 [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=dark]_&]:bg-[#343434]">
+          <span className="relative block rounded-[16px] bg-[var(--v69-inner)] px-3.5 py-2.5 [[data-theme=light]_.template-mock_&]:bg-[#e6e6e6] [[data-theme=dark]_&]:bg-[#343434]">
             <span className="block text-[13px] leading-snug text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[12px]">
               I&rsquo;ve reviewed the proposal. Everything looks good!
             </span>
             <svg
               viewBox="0 0 14 14"
-              className="absolute -bottom-px left-2 size-3.5 -translate-x-1/2 scale-x-[-1] text-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:text-[#E7E7DE] [[data-theme=dark]_&]:text-[#343434]"
+              className="absolute -bottom-px left-2 size-3.5 -translate-x-1/2 scale-x-[-1] text-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:text-[#e6e6e6] [[data-theme=dark]_&]:text-[#343434]"
               fill="currentColor"
               aria-hidden
             >
@@ -2603,7 +2606,7 @@ const PAYMENT = {
 
 function CardPayments() {
   return (
-    <div className="v69-plot-grid v69-plot-grid--dots flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="v69-plot-grid v69-plot-grid--dots flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       <span className="block w-full overflow-hidden rounded-xl border border-black/[0.08] bg-[#FFFFFF] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
         <span className="flex items-center gap-2 px-3 py-2.5">
           <span
@@ -2654,7 +2657,7 @@ const XERO_OPTIONS = ["Exclude from mapping", "Logo Design", "Marketing Overhaul
 
 function CardXero() {
   return (
-    <div className="v69-cover-column v69-plot-grid v69-plot-grid--dots flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="v69-cover-column v69-plot-grid v69-plot-grid--dots flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       <span className="block w-full overflow-hidden rounded-xl border border-black/[0.08] bg-[#FFFFFF] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
         {/* The caret in the empty field is the one mark that makes this a list
             being searched rather than a menu sitting open. */}
@@ -2686,8 +2689,8 @@ function CardXero() {
 // ink rather than Intuit's green, so it sits in the set with everything else.
 function CardQuickBooks() {
   return (
-    <div className="flex h-full items-center justify-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
-      <span className="flex size-[104px] items-center justify-center rounded-[26px] bg-[var(--v69-well)] [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.09)]">
+    <div className="flex h-full items-center justify-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
+      <span className="flex size-[104px] items-center justify-center rounded-[26px] bg-[var(--v69-well)] [[data-theme=light]_&]:bg-[var(--v69-inner)] [[data-theme=light]_.template-mock_&]:bg-[#e6e6e6] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.09)]">
         {/* The approved mark, path for path, filled from one currentColor so it
             tracks the theme instead of carrying the file's own grey. Held back on
             the templates page, where the warm covers put it on a lighter tile
@@ -2715,7 +2718,7 @@ function CardAutoresponder() {
   return (
     // Hatched rather than ruled or plotted: the object here is a setting, not a
     // record at a position, which is what the plotted ground is for.
-    <div className="v69-hatch-ground flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="v69-hatch-ground flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       <span className="block w-full">
         <span className="block text-[11px] leading-none text-muted-foreground max-sm:[.template-mock-gallery_&]:text-[10px]">
           Enable auto responses
@@ -2748,7 +2751,7 @@ function CardAutoresponder() {
 // the whole point of the app, so it is the thing the cover draws.
 function CardContract() {
   return (
-    <div className="v69-plot-grid v69-plot-grid--dots flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="v69-plot-grid v69-plot-grid--dots flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       <span className="block w-full overflow-hidden rounded-xl border border-black/[0.08] bg-[#FFFFFF] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
         <span className="flex items-center gap-2 px-3 py-2.5">
           <span className="min-w-0 flex-1 truncate text-[13px] leading-none text-[var(--v69-ink)] max-sm:[.template-mock-gallery_&]:text-[12px]">
@@ -2784,7 +2787,7 @@ function CardTeamGuides() {
   const file = { name: "Team handbook.pdf", meta: "18 guides", size: "12MB" };
   const readPct = 76;
   return (
-    <div className="v69-plot-grid flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="v69-plot-grid flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       {/* Opaque, like every other record card in the set: through a translucent
           pane the ruled ground ran straight across the row. */}
       {/* Tighter gaps than the client library's row: this one carries a size and
@@ -2794,7 +2797,7 @@ function CardTeamGuides() {
         {/* The file's own thumbnail slot. A glyph rather than a preview: at this
             size a real thumbnail is a smudge, and the point is the record, not
             the artwork. */}
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--v69-well)] text-muted-foreground [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.1)]">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[var(--v69-well)] text-muted-foreground [[data-theme=light]_.template-mock_&]:bg-[#e6e6e6] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.1)]">
           <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
             <rect x="4" y="4" width="16" height="16" rx="3" />
             <path d="m5 16 4-4 4 4 2-2 4 4" strokeLinecap="round" strokeLinejoin="round" />
@@ -2851,7 +2854,7 @@ function CardDataRoom() {
     // version of this cover pinned them: the templates detail page renders these
     // mocks without the .v72-mock-dark skin, so --v69-ink there is still the
     // light-mode near-black and the names sat dark-on-dark.
-    <div className="v69-cover-column v69-plot-grid v69-plot-grid--dots v69-plot-grid--fade flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0] [[data-theme=dark]_&]:[--muted-foreground:#8F8F8F] [[data-theme=dark]_&]:[--v69-ink:#F2F2F2]">
+    <div className="v69-cover-column v69-plot-grid v69-plot-grid--dots v69-plot-grid--fade flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2] [[data-theme=dark]_&]:[--muted-foreground:#8F8F8F] [[data-theme=dark]_&]:[--v69-ink:#F2F2F2]">
       <div className="w-full overflow-hidden rounded-xl border border-black/[0.08] bg-[#FFFFFF] [[data-theme=dark]_&]:border-[rgba(255,255,255,0.09)] [[data-theme=dark]_&]:bg-[#303030]">
         {DATA_ROOM_ACCESS.map((row, i) => (
           <div
@@ -2873,7 +2876,7 @@ function CardDataRoom() {
             <span
               className={`shrink-0 rounded-full px-2 py-1 text-[10px] leading-none ${
                 row.state === "active"
-                  ? "bg-[var(--v69-well)] text-[var(--v69-ink)] [[data-theme=light]_.template-mock_&]:bg-[#E7E7DE] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.14)] [[data-theme=dark]_&]:text-[#EDEDED]"
+                  ? "bg-[var(--v69-well)] text-[var(--v69-ink)] [[data-theme=light]_.template-mock_&]:bg-[#e6e6e6] [[data-theme=dark]_&]:bg-[rgba(255,255,255,0.14)] [[data-theme=dark]_&]:text-[#EDEDED]"
                   : "text-muted-foreground ring-1 ring-inset ring-black/[0.10] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.16)]"
               }`}
             >
@@ -2967,7 +2970,7 @@ function CardProgressTracker() {
   return (
     // v69-cover-column is the phone treatment: the ruler holds the width it was
     // drawn at and centres, and the frame scales up around it.
-    <div className="v69-cover-column flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="v69-cover-column flex h-full items-center bg-[var(--v69-card)] p-4 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       <div className="relative w-full">
         {/* The axis. Every fourth tick runs full height, the rest half — the
             same rhythm a ruler uses to make a span countable at a glance. */}
@@ -3031,7 +3034,7 @@ function CardMassMessenger() {
     // Both skins run the card's own face now. Light used to invert it — a near-
     // black slab carrying a pale pill — which made this the one dark tile in a
     // gallery of off-white ones, louder than any card around it.
-    <div className="flex h-full items-center justify-center bg-[var(--v69-card)] p-5 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="flex h-full items-center justify-center bg-[var(--v69-card)] p-5 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       {/* A badge-and-label pill rather than a plain block: the lime disc gives
           the action a face, and the send glyph lives in it instead of trailing
           the text. Asymmetric padding — tight on the badge side, open on the
@@ -3405,7 +3408,7 @@ const NODE_CANVAS =
 // nodes rather than chips, and the cast shadow comes off entirely: scaled up it
 // read as a dark halo around each node rather than as lift.
 const NODE_SURFACE =
-  "rounded-xl [.template-mock_&]:rounded-md bg-[#FBFBF7] shadow-[0_1px_2px_rgba(16,24,40,0.08),0_6px_14px_-8px_rgba(16,24,40,0.18)] [.template-mock_&]:shadow-none ring-1 ring-[rgba(16,24,40,0.08)] [.template-mock_&]:ring-[rgba(16,24,40,0.15)] [[data-theme=dark]_&]:bg-[#323232] [[data-theme=dark]_&]:shadow-[0_1px_3px_rgba(0,0,0,0.5)] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.12)] [[data-theme=dark]_.template-mock_&]:ring-[rgba(255,255,255,0.20)]";
+  "rounded-xl [.template-mock_&]:rounded-md bg-[#fafafa] shadow-[0_1px_2px_rgba(16,24,40,0.08),0_6px_14px_-8px_rgba(16,24,40,0.18)] [.template-mock_&]:shadow-none ring-1 ring-[rgba(16,24,40,0.08)] [.template-mock_&]:ring-[rgba(16,24,40,0.15)] [[data-theme=dark]_&]:bg-[#323232] [[data-theme=dark]_&]:shadow-[0_1px_3px_rgba(0,0,0,0.5)] [[data-theme=dark]_&]:ring-[rgba(255,255,255,0.12)] [[data-theme=dark]_.template-mock_&]:ring-[rgba(255,255,255,0.20)]";
 const NODE_ACCENT = "#7DA4FF";
 
 function CardConditionalForms() {
@@ -3591,7 +3594,7 @@ const BLOCK_FACE =
 //    cool patch in a palette that is warm everywhere else. It takes the same warm
 //    step the unit tags use on this skin instead.
 const BLOCK_HOLE =
-  "bg-[#E7E7DE] [[data-theme=light]_.template-mock_&]:bg-[#E4E4DA] [[data-theme=dark]_&]:bg-[#3A3A3A]";
+  "bg-[#e6e6e6] [[data-theme=light]_.template-mock_&]:bg-[#e2e2e2] [[data-theme=dark]_&]:bg-[#3A3A3A]";
 
 function BlockCell({ code, radius }: { code: string; radius: string }) {
   return BLOCK_HUES_LIGHT[code] ? (
@@ -3643,7 +3646,7 @@ function CardServiceRequest() {
     // One object centred on an empty ground. It used to be the request written out
     // as a sentence across an ink-filled card — the only inverted face in the set,
     // and a paragraph where every sibling cover is a single object.
-    <div className="v69-intake-cover flex h-full items-center justify-center bg-[var(--v69-card)] p-5 [[data-theme=light]_.template-mock_&]:bg-[#F5F5F0]">
+    <div className="v69-intake-cover flex h-full items-center justify-center bg-[var(--v69-card)] p-5 [[data-theme=light]_.template-mock_&]:bg-[#f2f2f2]">
       {/* The track: a recess the segments sit in, one step off the card face. */}
       <div className="flex items-center gap-1 rounded-full bg-[var(--v69-inner)] p-1 [[data-theme=dark]_&]:bg-[#2E2E2E]">
         {INTAKE_SEGMENTS.map((segment, i) => {

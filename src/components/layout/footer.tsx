@@ -3,7 +3,12 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { FOOTER_COLUMNS, type FooterGroup, type NavLink } from "@/lib/constants";
+import {
+  FOOTER_COLUMNS,
+  X_URL,
+  type FooterGroup,
+  type NavLink,
+} from "@/lib/constants";
 import { DiaGradient } from "@/components/ui/dia-gradient";
 import type { ThemePreference } from "@/components/theme/theme-provider";
 
@@ -67,7 +72,7 @@ export function FooterAurora() {
 
 // Social links point off-site, so they keep opening in a new tab (newTab).
 const CONNECT: NavLink[] = [
-  { label: "X", href: "https://x.com/assemblycom", external: true, newTab: true },
+  { label: "X", href: X_URL, external: true, newTab: true },
   {
     label: "LinkedIn",
     href: "https://www.linkedin.com/company/assemblycom",

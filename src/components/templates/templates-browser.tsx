@@ -391,7 +391,7 @@ export function TemplatesBrowser({ templates }: Props) {
                     // overflow scroller, so it was clipped top and bottom on every
                     // chip and clipped again at the ends of the row. Drawn inside,
                     // there is nothing for the scroller to crop.
-                    className={`type-caption inline-flex h-8 shrink-0 items-center whitespace-nowrap rounded-lg px-3 leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground/40 ${
+                    className={`type-body inline-flex h-9 shrink-0 items-center whitespace-nowrap rounded-lg px-3.5 leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground/40 ${
                       active
                         ? "bg-border text-foreground"
                         : "bg-transparent text-muted-foreground active:bg-border [@media(hover:hover)]:hover:bg-muted [@media(hover:hover)]:hover:text-foreground"

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PrevNextPager } from "@/components/ui/pager";
+import { X_URL } from "@/lib/constants";
 import { UPDATES_PER_PAGE, updatesPath } from "@/lib/updates";
 import {
   dropEmptyParagraphs,
@@ -61,8 +62,20 @@ export default async function UpdatesPage({
       <div>
         <h1 className="type-display text-foreground">Updates</h1>
         <p className="type-lead mt-4 max-w-xl text-pretty text-muted-foreground">
-          Everything we ship to Assembly, as we ship it.
+          Trusted by 1M+ clients and counting.
         </p>
+
+        {/* The changelog is the one page people follow rather than visit, so it
+            carries the account that posts the same releases. The site's primary
+            button, as on /brand and /security. */}
+        <a
+          href={X_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-8 inline-block rounded-lg bg-foreground px-5 py-2.5 text-sm text-background transition-opacity hover:opacity-90"
+        >
+          Subscribe to updates
+        </a>
 
         <ol className="mt-14 md:mt-20">
           {entries.map((entry) => (
@@ -81,9 +94,13 @@ export default async function UpdatesPage({
               <div className="lg:grid lg:grid-cols-[16rem_minmax(0,40.5rem)] lg:gap-x-[10.5rem]">
                 {/* Sticky through its own entry: on the long releases the date
                     would otherwise scroll away from the section you're reading. */}
+                {/* The same muted chip the customers page tags its sectors
+                    with, in the mono face the site sets every date and figure
+                    in. w-fit rather than inline-block: sticky needs a block-level
+                    box, so the chip hugs its text without leaving the flow. */}
                 <time
                   dateTime={entry.date}
-                  className="mb-3 block text-sm text-muted-foreground lg:sticky lg:top-28 lg:mb-0 lg:self-start lg:pt-1.5"
+                  className="mb-3 block w-fit whitespace-nowrap rounded-md bg-muted px-2.5 py-1.5 font-mono text-[13px] uppercase tracking-wide text-muted-foreground lg:sticky lg:top-28 lg:mb-0 lg:self-start [[data-theme=dark]_&]:bg-white/[0.08]"
                 >
                   {formatEntryDate(entry.date)}
                 </time>

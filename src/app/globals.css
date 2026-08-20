@@ -1474,7 +1474,7 @@ html[data-theme="dark"] .v63-ring-solid::before {
   color: #6e6e6e;
 }
 [data-theme="light"] .template-mock .v69-chat-shimmer {
-  color: #5b5c53;
+  color: #595959;
 }
 @keyframes v69ChatSend {
   0% {
@@ -2011,13 +2011,13 @@ html[data-theme="dark"] .v63-ring-solid::before {
   /* Same three-step ladder the hero rail runs on (see rowTokens in
      hero-v76.tsx), so a widget reads identically in both places: the widget's
      ground, the surfaces sitting on it, and the recess for anything nested
-     inside a surface. Warm F5F5F0 family, matching the hero rail's palette —
-     was a cool grey that read as a different family from every hand-tuned
-     card on the home hero. */
-  --v69-card: #f5f5f0;
-  --v69-inner: #e7e7de;
-  --v69-well: #dcdcd0;
-  --v69-well-2: #cfcfc0;
+     inside a surface. The same equal-RGB grey family the hero rail runs on: the
+     warm off-white it used to carry read as a different material next to the
+     page's own neutral white. */
+  --v69-card: #f2f2f2;
+  --v69-inner: #e6e6e6;
+  --v69-well: #dbdbdb;
+  --v69-well-2: #cfcfcf;
 }
 
 /* On the templates page a cover IS the card, so the widest inset the covers are
@@ -2373,10 +2373,11 @@ html[data-theme="dark"] .v63-ring-solid::before {
     --template-mock-w: 288px;
     --template-mock-h: 180px;
   }
-  /* With the cover scaled up, the panel's 16px corner came out well rounder than
-     the card frame's own 14px. Drawn tighter so the two radii read as one. */
+  /* The gallery frame is 14px where the hero rail's card is 16px, so the panel
+     takes 14 less the 8px it is inset by. Same concentric rule as the base, one
+     step tighter for the smaller frame. */
   .template-mock-gallery .v69-chat-field {
-    border-radius: 11px;
+    border-radius: 6px;
   }
   /* Same case as the composer, one step further: the segmented control is a
      single small object on an empty ground, drawn at 224px on desktop and scaled

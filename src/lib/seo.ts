@@ -110,7 +110,7 @@ export const PAGE_SEO = {
   updates: {
     title: "Updates",
     description:
-      "Everything we ship to Assembly, as we ship it: new apps, platform changes, and fixes, dated and in order.",
+      "Everything we ship, as we ship it: new apps, platform changes, and fixes, dated and in order.",
     path: "/updates",
   },
   aiPolicy: {
