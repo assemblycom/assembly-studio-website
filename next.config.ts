@@ -18,6 +18,14 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Read at BUILD time and inlined, which is the whole point: it dates the
+  // hand-shipped pages in the sitemaps. A static page changes when the site is
+  // deployed and at no other moment, so "now" at build is its real lastmod —
+  // and reading the clock at request time would report a date on which nothing
+  // happened.
+  env: {
+    BUILD_TIME: new Date().toISOString(),
+  },
   // Screenshots are text-dense, so the default quality (75) reads as blurry.
   // Whitelist higher steps (Next 16 requires listing any non-default value).
   images: {

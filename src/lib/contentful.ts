@@ -56,6 +56,8 @@ export interface AppTemplateEntry {
   isHidden: boolean;
   featured: boolean;
   order?: number;
+  /** Contentful's own sys.updatedAt, for the sitemap's lastmod. */
+  updatedAt?: string;
 }
 
 /**
@@ -142,6 +144,7 @@ function toAppTemplate(entry: Entry<never>): AppTemplateEntry | null {
     isHidden: f.isHidden === true,
     featured: f.isFeatured === true,
     order: typeof f.order === "number" ? f.order : undefined,
+    updatedAt: entry.sys?.updatedAt,
   };
 }
 

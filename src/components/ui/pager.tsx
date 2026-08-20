@@ -156,3 +156,74 @@ export function Pager({
     </nav>
   );
 }
+
+// The quiet outline button the site already uses for a secondary action (see the
+// templates rail's "See all" and the gallery's reset), carrying the same chevron
+// the numbered paginator's steps do.
+// A square holding just the chevron on a phone, label and all from sm. At 375px
+// two labelled buttons either broke "Previous page" onto two lines inside its own
+// pill or, held on one line, filled the row end to end; the chevron alone says
+// the same thing in a control the thumb can still hit.
+const STEP_BUTTON =
+  "inline-flex size-9 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-border text-muted-foreground transition-colors hover:border-foreground/20 hover:text-foreground sm:h-auto sm:w-auto sm:px-4 sm:py-1.5";
+// The label the square drops. Hidden rather than absent so the markup carries it
+// once; the link's own aria-label is what a screen reader reads either way.
+const STEP_LABEL = "hidden sm:inline";
+
+/**
+ * Previous/next only, no numbering — the changelog's paginator.
+ *
+ * A numbered run tells you WHERE you are in an archive, which is the useful
+ * thing for the blog: you are hunting a post and the page number is a place to
+ * come back to. A changelog is read as a single stream backwards through time,
+ * and "page 11 of 17" is not a fact anyone needs; two steps say the only thing
+ * that matters, that there is more behind this. Notion's releases page settles
+ * on the same pair.
+ *
+ * The empty span holds the row's justification, so on the first page "Next page"
+ * still sits at the right edge instead of sliding over to the left.
+ */
+export function PrevNextPager({
+  current,
+  total,
+  label,
+  hrefFor,
+}: {
+  current: number;
+  total: number;
+  label: string;
+  hrefFor: (page: number) => string;
+}) {
+  if (total <= 1) return null;
+  return (
+    <nav
+      aria-label={label}
+      className="mt-16 flex items-center justify-between gap-3 md:mt-20"
+    >
+      {current > 1 ? (
+        <Link
+          href={hrefFor(current - 1)}
+          aria-label="Previous page"
+          className={STEP_BUTTON}
+        >
+          <StepIcon direction="prev" />
+          <span className={STEP_LABEL}>Previous page</span>
+        </Link>
+      ) : (
+        <span />
+      )}
+      {current < total ? (
+        <Link
+          href={hrefFor(current + 1)}
+          aria-label="Next page"
+          className={STEP_BUTTON}
+        >
+          <span className={STEP_LABEL}>Next page</span>
+          <StepIcon direction="next" />
+        </Link>
+      ) : (
+        <span />
+      )}
+    </nav>
+  );
+}

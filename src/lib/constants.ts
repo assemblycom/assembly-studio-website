@@ -270,6 +270,10 @@ export const FOOTER_GROUPS: { label: string; links: NavLink[] }[] = [
       { label: "Assembly Guide", href: GUIDE_URL, external: true },
       { label: "API reference", href: API_REFERENCE_URL, external: true },
       { label: "Trust center", href: TRUST_CENTER_URL, external: true, newTab: true },
+      // The HTML sitemap. Its own reason to exist is a crawler following links
+      // rather than the XML index, so it has to be linked from somewhere on
+      // every page — which is what the footer is.
+      { label: "Sitemap", href: "/sitemap" },
     ],
   },
   // Compare is hidden from the footer for now. The pages themselves are still

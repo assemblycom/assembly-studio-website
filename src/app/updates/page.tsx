@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
-import { Pager } from "@/components/ui/pager";
+import { PrevNextPager } from "@/components/ui/pager";
+import { UPDATES_PER_PAGE, updatesPath } from "@/lib/updates";
 import {
   dropEmptyParagraphs,
   dropUnservableFigures,
   getUpdates,
+  markStandaloneLinks,
   normalizeEntryHeadings,
 } from "@/lib/ghost";
 import { PAGE_SEO, pageMetadata } from "@/lib/seo";
@@ -16,9 +18,8 @@ export const metadata: Metadata = pageMetadata(PAGE_SEO.updates);
 // in 2021 — one page ran to four entries and another to thirty. A fixed count
 // pages evenly, and it reads the way the archive is actually read: newest first,
 // straight down, back through time.
-// Twenty, not the blog's sixty: a changelog entry carries several screenshots,
-// so twenty of them is already a long page.
-const ENTRIES_PER_PAGE = 20;
+// The size itself lives in lib/updates.ts, because sitemap-updates.xml lists one
+// URL per page of entries and has to slice them the same way.
 
 function formatEntryDate(date: string): string {
   return new Date(date).toLocaleDateString("en-US", {
@@ -39,15 +40,15 @@ export default async function UpdatesPage({
     getUpdates(),
   ]);
 
-  const total = Math.max(1, Math.ceil(posts.length / ENTRIES_PER_PAGE));
+  const total = Math.max(1, Math.ceil(posts.length / UPDATES_PER_PAGE));
   // An unknown, missing or out-of-range ?page lands on the newest rather than on
   // an empty page — the changelog's front page is always "what just shipped".
   const asked = Number(requested);
   const current =
     Number.isInteger(asked) && asked >= 1 && asked <= total ? asked : 1;
   const entries = posts.slice(
-    (current - 1) * ENTRIES_PER_PAGE,
-    current * ENTRIES_PER_PAGE,
+    (current - 1) * UPDATES_PER_PAGE,
+    current * UPDATES_PER_PAGE,
   );
 
   return (
@@ -65,12 +66,17 @@ export default async function UpdatesPage({
           {entries.map((entry) => (
             // The slug is the anchor, so a single update can be linked to even
             // though it has no page of its own.
+            // Entries are separated by space alone — no rule between them, the
+            // way Notion's releases and Framer's updates both read. The date in
+            // the left rail already opens each one, so the line was a second
+            // marker for a boundary that was never in doubt. The 5rem/7rem it
+            // used to sit inside is kept, now all of it above the entry.
             <li
               key={entry.slug}
               id={entry.slug}
-              className="scroll-mt-28 border-t border-border pt-10 first:border-t-0 first:pt-0 md:pt-14 [[data-theme=dark]_&]:border-[#383838]"
+              className="scroll-mt-28 pt-20 first:pt-0 md:pt-28"
             >
-              <div className="pb-10 md:pb-14 lg:grid lg:grid-cols-[16rem_minmax(0,40.5rem)] lg:gap-x-[10.5rem]">
+              <div className="lg:grid lg:grid-cols-[16rem_minmax(0,40.5rem)] lg:gap-x-[10.5rem]">
                 {/* Sticky through its own entry: on the long releases the date
                     would otherwise scroll away from the section you're reading. */}
                 <time
@@ -87,8 +93,12 @@ export default async function UpdatesPage({
                 <div
                   className="post-body updates-entry"
                   dangerouslySetInnerHTML={{
-                    __html: dropEmptyParagraphs(
-                      dropUnservableFigures(normalizeEntryHeadings(entry.html)),
+                    __html: markStandaloneLinks(
+                      dropEmptyParagraphs(
+                        dropUnservableFigures(
+                          normalizeEntryHeadings(entry.html),
+                        ),
+                      ),
                     ),
                   }}
                 />
@@ -97,11 +107,11 @@ export default async function UpdatesPage({
           ))}
         </ol>
 
-        <Pager
+        <PrevNextPager
           current={current}
           total={total}
           label="Changelog pages"
-          hrefFor={(page) => (page === 1 ? "/updates" : `/updates?page=${page}`)}
+          hrefFor={updatesPath}
         />
       </div>
     </div>

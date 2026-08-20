@@ -2570,6 +2570,31 @@ html[data-theme="dark"] .v63-ring-solid::before {
     margin-top: 2.5rem;
   }
 
+  /* A paragraph that is nothing but a link closes an entry: "Learn more about
+     X". The arrow is what makes it read as a way out of the entry rather than as
+     a sentence that happens to be underlined — and it is drawn on the PARAGRAPH,
+     not on the link, so the link's own rule stops at the last word instead of
+     running under the glyph.
+     Marked server-side by markStandaloneLinks (see lib/ghost.ts): CSS cannot see
+     text nodes, so :has(> a:only-child) would also match "See our release page."
+     and hang an arrow off the end of a sentence. */
+  .updates-entry p.entry-link {
+    color: var(--foreground);
+  }
+  .updates-entry p.entry-link::after {
+    content: "\2192";
+    display: inline-block;
+    margin-left: 0.4em;
+    transition: transform 200ms;
+  }
+  /* Follows the link's own hover: the arrow leans the way it is going. Held to
+     hover devices — on a touch screen :hover sticks after a tap. */
+  @media (hover: hover) {
+    .updates-entry p.entry-link:hover::after {
+      transform: translateX(3px);
+    }
+  }
+
   /* ── The changelog's heading ranks ──────────────────────────────────────
      A blog post is ONE article on its own page, so its section head can be a
      display size. A changelog page is thirty entries stacked under one h1, each

@@ -63,8 +63,14 @@ export interface GhostPost {
   authorSlug?: string;
   /** The author's profile picture, for the bylines on the index's cards. */
   authorImage?: string;
-  /** ISO date. */
+  /** ISO date the post was published. */
   date: string;
+  /**
+   * ISO date the post was last EDITED, which is what a sitemap's lastmod wants:
+   * a typo fixed on a 2024 post is a reason to recrawl it, its publish date is
+   * not. The RSS feed doesn't carry one, so there it falls back to `date`.
+   */
+  updatedAt: string;
   /** Feature image, absent on posts that have none. */
   image?: string;
   /** The post body, as Ghost renders it. */
@@ -304,6 +310,10 @@ function parseItems(xml: string): GhostPost[] {
         date: published
           ? new Date(published).toISOString()
           : new Date(0).toISOString(),
+        // The feed carries no edit date, so publication is the best it can do.
+        updatedAt: published
+          ? new Date(published).toISOString()
+          : new Date(0).toISOString(),
         image,
         // The feed carries neither the featured flag nor the template, so an
         // RSS-backed post gets the defaults: a contents rail, and no claim to
@@ -343,6 +353,7 @@ interface ContentApiPost {
   html?: string;
   feature_image?: string | null;
   published_at?: string;
+  updated_at?: string;
   featured?: boolean;
   custom_template?: string | null;
   primary_tag?: { name: string } | null;
@@ -402,6 +413,8 @@ async function fetchFromContentApi(
         authorSlug: post.primary_author?.slug,
         authorImage: post.primary_author?.profile_image ?? undefined,
         date: post.published_at ?? new Date(0).toISOString(),
+        updatedAt:
+          post.updated_at ?? post.published_at ?? new Date(0).toISOString(),
         image: post.feature_image ?? undefined,
         ...withBody(post.html ?? "", Boolean(post.feature_image)),
       })),
@@ -667,6 +680,35 @@ export function normalizeEntryHeadings(html: string): string {
   return html
     .replace(/<(\/?)h3([\s>])/gi, "<$1h2$2")
     .replace(/<(\/?)h4([\s>])/gi, "<$1h3$2");
+}
+
+/**
+ * Marks a paragraph whose WHOLE content is one link, so the changelog can draw
+ * it as a closing "read more" line with an arrow rather than as a stray
+ * sentence. A link inside a sentence is untouched: the arrow is a promise that
+ * the line goes somewhere, and mid-paragraph there is nothing for it to point
+ * from.
+ *
+ * Matched here rather than in CSS because CSS cannot see text nodes —
+ * `p:has(> a:only-child)` is also true of "See our release page." and would
+ * hang an arrow off the end of a sentence.
+ */
+export function markStandaloneLinks(html: string): string {
+  return html.replace(
+    /<p([^>]*)>(\s*<a\b[^>]*>(?:(?!<\/p>)[\s\S])*?<\/a>\s*)<\/p>/gi,
+    (whole, attrs: string, inner: string) => {
+      // One link and nothing else — a second <a> means it is a line of links,
+      // not a single destination.
+      if ((inner.match(/<a\b/gi) ?? []).length !== 1) return whole;
+      if (/\bclass\s*=/.test(attrs)) {
+        return `<p${attrs.replace(
+          /\bclass\s*=\s*("|')(.*?)\1/i,
+          (_m, q: string, cls: string) => `class=${q}${cls} entry-link${q}`,
+        )}>${inner}</p>`;
+      }
+      return `<p${attrs} class="entry-link">${inner}</p>`;
+    },
+  );
 }
 
 // Ghost's editor leaves an empty paragraph behind wherever a writer pressed
