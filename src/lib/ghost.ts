@@ -303,7 +303,7 @@ function parseItems(xml: string): GhostPost[] {
     return [
       {
         slug,
-        title,
+        title: withoutTitleEmoji(title),
         excerpt: tag(item, "description") ?? "",
         category: tag(item, "category"),
         author: tag(item, "dc:creator") ?? "Assembly",
@@ -343,6 +343,27 @@ async function fetchFromRss(source: GhostSource): Promise<GhostPost[]> {
   }
 
   return posts;
+}
+
+/**
+ * Strips emoji from a post title.
+ *
+ * The CMS lets an author end a headline with a pictograph, which the site's own
+ * type never uses — it reads as a stray glyph in the h1, in the card, in the
+ * tab title and in the social card alike. Cleaned at the source rather than per
+ * surface, so no surface can be the one that forgot.
+ *
+ * Symbol and pictograph ranges only. Punctuation, dashes and quotes live below
+ * these blocks and are left alone.
+ */
+export function withoutTitleEmoji(title: string): string {
+  return title
+    .replace(
+      /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]/gu,
+      "",
+    )
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 interface ContentApiPost {
@@ -406,7 +427,7 @@ async function fetchFromContentApi(
         featured: post.featured,
         showToc: !NO_TOC_TEMPLATE.test(post.custom_template ?? ""),
         slug: post.slug,
-        title: post.title,
+        title: withoutTitleEmoji(post.title),
         excerpt: post.custom_excerpt ?? post.excerpt ?? "",
         category: post.primary_tag?.name,
         author: post.primary_author?.name ?? "Assembly",
@@ -756,6 +777,29 @@ export function dropUnservableFigures(html: string): string {
     .replace(/<img\b[^>]*>/gi, (img) =>
       img.includes(DEAD_IMAGE_HOST) ? "" : img,
     );
+}
+
+/**
+ * Lifts a pull quote that sits directly under an image to above it.
+ *
+ * A quote placed right after a figure reads as that image's caption — the eye
+ * takes the two as one unit, and the attribution below it looks like a credit
+ * line. Ahead of the image it reads as what it is: a voice interrupting the
+ * prose, with the screenshot as the thing it is talking about.
+ *
+ * Positional, not keyed to a post: the fix is the same wherever the pattern
+ * appears, and it is a pattern an editor can reintroduce in the CMS at any time.
+ */
+export function quotesAboveFigures(html: string): string {
+  return html.replace(
+    // The figure body is written so it cannot contain a </figure> of its own.
+    // A plain lazy [\s\S]*? backtracks past the first close tag looking for a
+    // blockquote, so one quote lifted itself above four figures and two
+    // headings — everything from the section's first image onward.
+    /(<figure\b[^>]*>(?:(?!<\/figure>)[\s\S])*<\/figure>)(\s*)(<blockquote\b[^>]*>(?:(?!<\/blockquote>)[\s\S])*<\/blockquote>)/gi,
+    (_whole, figure: string, gap: string, quote: string) =>
+      `${quote}${gap}${figure}`,
+  );
 }
 
 // Every docs link written before the docs moved is dead. ReadMe served them at

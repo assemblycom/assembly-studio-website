@@ -7,6 +7,7 @@ import {
   postContents,
   getPost,
   getPosts,
+  quotesAboveFigures,
   splitFaq,
   withHeadingIds,
   withImageSizes,
@@ -65,7 +66,9 @@ export default async function BlogPostPage({
   const post = await getPost(slug);
   if (!post) notFound();
 
-  const { html, headings } = withHeadingIds(post.html);
+  // Quotes lifted before the ids are assigned, so heading order is read off the
+  // markup the page actually renders.
+  const { html, headings } = withHeadingIds(quotesAboveFigures(post.html));
   // Both rails list the same sections under the same labels.
   const contents = postContents(headings, post.title);
   // The trailing FAQ is rendered as the site's accordion rather than as a run
