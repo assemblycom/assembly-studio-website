@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { Pager } from "@/components/ui/pager";
 import {
   dropEmptyParagraphs,
   dropUnservableFigures,
@@ -10,13 +10,15 @@ import { PAGE_SEO, pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata(PAGE_SEO.updates);
 
-// Six years of changelog is far more HTML than one page should carry, so a year
-// is the unit the page serves. The chips are links rather than a client filter
-// for the same reason: filtering in the browser would mean shipping all six
-// years' bodies to filter between them.
-function yearOf(date: string): string {
-  return date.slice(0, 4);
-}
+// Six years of changelog is far more HTML than one page should carry, so the
+// page serves a slice of it. It used to serve a YEAR, chosen from a row of year
+// chips, which meant the unit of reading depended on how much happened to ship
+// in 2021 — one page ran to four entries and another to thirty. A fixed count
+// pages evenly, and it reads the way the archive is actually read: newest first,
+// straight down, back through time.
+// Twenty, not the blog's sixty: a changelog entry carries several screenshots,
+// so twenty of them is already a long page.
+const ENTRIES_PER_PAGE = 20;
 
 function formatEntryDate(date: string): string {
   return new Date(date).toLocaleDateString("en-US", {
@@ -30,18 +32,23 @@ function formatEntryDate(date: string): string {
 export default async function UpdatesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ year?: string }>;
+  searchParams: Promise<{ page?: string }>;
 }) {
-  const [{ year: requested }, posts] = await Promise.all([
+  const [{ page: requested }, posts] = await Promise.all([
     searchParams,
     getUpdates(),
   ]);
 
-  const years = [...new Set(posts.map((post) => yearOf(post.date)))];
-  // An unknown or missing ?year lands on the newest rather than on an empty
-  // page — the changelog's front page is always "what just shipped".
-  const active = requested && years.includes(requested) ? requested : years[0];
-  const entries = posts.filter((post) => yearOf(post.date) === active);
+  const total = Math.max(1, Math.ceil(posts.length / ENTRIES_PER_PAGE));
+  // An unknown, missing or out-of-range ?page lands on the newest rather than on
+  // an empty page — the changelog's front page is always "what just shipped".
+  const asked = Number(requested);
+  const current =
+    Number.isInteger(asked) && asked >= 1 && asked <= total ? asked : 1;
+  const entries = posts.slice(
+    (current - 1) * ENTRIES_PER_PAGE,
+    current * ENTRIES_PER_PAGE,
+  );
 
   return (
     // The same rail the nav and every other page run on, so the page's left
@@ -54,33 +61,7 @@ export default async function UpdatesPage({
           Everything we ship to Assembly, as we ship it.
         </p>
 
-        {/* The blog's filter row, as links. Scrolls on a phone rather than
-            wrapping, so the years stay one row of options.
-            Pulled left by the chip's own 12px of padding at every width, so the
-            first YEAR sits on the page's rail with the h1 and the line under it.
-            Aligning the chip's BOX instead left its label indented past the
-            heading, and the row read as one notch out of the column. */}
-        <nav
-          aria-label="Filter updates by year"
-          className="-ml-6 -mr-6 mt-10 flex items-center gap-1 overflow-x-auto pl-3 pr-6 [-ms-overflow-style:none] [scrollbar-width:none] sm:-ml-3 sm:mr-0 sm:pl-0 sm:pr-0 md:mt-12 [&::-webkit-scrollbar]:hidden"
-        >
-          {years.map((year) => (
-            <Link
-              key={year}
-              href={year === years[0] ? "/updates" : `/updates?year=${year}`}
-              aria-current={year === active ? "page" : undefined}
-              className={`shrink-0 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm transition-colors ${
-                year === active
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {year}
-            </Link>
-          ))}
-        </nav>
-
-        <ol className="mt-12 md:mt-16">
+        <ol className="mt-14 md:mt-20">
           {entries.map((entry) => (
             // The slug is the anchor, so a single update can be linked to even
             // though it has no page of its own.
@@ -116,11 +97,12 @@ export default async function UpdatesPage({
           ))}
         </ol>
 
-        {entries.length === 0 && (
-          <p className="mt-12 text-muted-foreground">
-            Nothing published in {active}.
-          </p>
-        )}
+        <Pager
+          current={current}
+          total={total}
+          label="Changelog pages"
+          hrefFor={(page) => (page === 1 ? "/updates" : `/updates?page=${page}`)}
+        />
       </div>
     </div>
   );

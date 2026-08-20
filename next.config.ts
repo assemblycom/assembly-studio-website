@@ -28,6 +28,24 @@ const nextConfig: NextConfig = {
       hostname,
     })),
   },
+  // The embeds listing moved up from /embeds/directory to /embeds, and an
+  // embed's own page from /embeds/directory/{slug} to /embed/{slug}. Permanent,
+  // so anything already linking or indexing the old shape hands its ranking to
+  // the new one rather than dropping a 404.
+  async redirects() {
+    return [
+      {
+        source: "/embeds/directory",
+        destination: "/embeds",
+        permanent: true,
+      },
+      {
+        source: "/embeds/directory/:slug",
+        destination: "/embed/:slug",
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     return [
       {

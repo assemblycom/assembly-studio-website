@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { formatPostDate, type PostCard } from "@/lib/ghost";
 import { FIELD_CLS } from "@/components/ui/select-menu";
+import { Pager } from "@/components/ui/pager";
 import { PostByline } from "./post-byline";
 
 const ALL = "All";
@@ -12,26 +13,6 @@ const ALL = "All";
 // paginator to work for anyone browsing rather than searching; sixty is five
 // pages, which is a run you can actually walk.
 const PAGE_SIZE = 60;
-// Pages either side of the current one before the run collapses to an ellipsis.
-const PAGE_WINDOW = 1;
-
-/**
- * The page numbers to render, with `null` standing in for a gap. First and last
- * are always present so the ends of the archive stay one click away.
- */
-function pageItems(current: number, total: number): (number | null)[] {
-  const items: (number | null)[] = [];
-  for (let page = 1; page <= total; page++) {
-    const near = Math.abs(page - current) <= PAGE_WINDOW;
-    if (page === 1 || page === total || near) {
-      items.push(page);
-    } else if (items[items.length - 1] !== null) {
-      items.push(null);
-    }
-  }
-  return items;
-}
-
 /**
  * The card grid, with a search box and tag filters where there is more than one
  * shelf to choose between. The author pages reuse it without `categories`,
@@ -103,24 +84,33 @@ export function BlogBrowser({
 
       {showFilters && (
         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          {/* Only the chosen shelf is drawn as a key; the rest sit as plain
-              labels, so the row reads as one selected thing among options
-              rather than a rank of buttons competing with the cards. */}
+          {/* The templates gallery's own filter strip, chip for chip. Selection
+              reads as selection there rather than as a call to action: the
+              current shelf is held on a wash of the foreground — the same
+              idiom the nav and footer segmented controls use — instead of the
+              solid black pill, which made the filter you had already applied
+              look like the thing to click next. */}
           {/* One line at every width. Wrapped, the shelves broke to a second row
               on a phone and the selected key sat alone above the rest, which
               read as two groups; scrolling keeps them one row of options. The
-              gutters are negative-margined back out so the first and last chip
-              still line up with the cards, and the scrollbar is hidden because
-              the row is short enough to swipe. */}
-          <div className="-mx-6 flex items-center gap-1 overflow-x-auto px-6 [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+              gutters are negative-margined back out, less the chip's own 12px of
+              padding, so the first chip's LABEL lands on the rail the cards
+              below start from rather than its box. The scrollbar is hidden
+              because the row is short enough to swipe. */}
+          <div className="-ml-6 -mr-6 flex items-center gap-2 overflow-x-auto pl-3 pr-6 [-ms-overflow-style:none] [scrollbar-width:none] sm:-ml-3 sm:mr-0 sm:pl-0 sm:pr-0 [&::-webkit-scrollbar]:hidden">
             {[ALL, ...categories].map((filter) => (
               <button
                 key={filter}
+                type="button"
+                aria-pressed={active === filter}
                 onClick={() => select(filter)}
-                className={`shrink-0 whitespace-nowrap rounded-lg px-3 py-1.5 text-sm transition-colors ${
+                // Inset ring, like the gallery's: this is an overflow scroller,
+                // and an offset ring is drawn outside the chip where the
+                // scroller crops it.
+                className={`type-caption inline-flex h-8 shrink-0 items-center whitespace-nowrap rounded-lg px-3 leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-foreground/40 ${
                   active === filter
-                    ? "bg-foreground text-background"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? "bg-foreground/[0.10] text-foreground"
+                    : "bg-transparent text-muted-foreground active:bg-foreground/[0.08] [@media(hover:hover)]:hover:bg-foreground/[0.05] [@media(hover:hover)]:hover:text-foreground"
                 }`}
               >
                 {filter}
@@ -224,84 +214,13 @@ export function BlogBrowser({
         </div>
       )}
 
-      {total > 1 && (
-        <nav
-          aria-label="Blog pages"
-          className="mt-14 flex items-center justify-center gap-2"
-        >
-          <PageStep
-            direction="prev"
-            disabled={currentPage === 1}
-            onClick={() => goTo(currentPage - 1)}
-          />
-
-          {pageItems(currentPage, total).map((page, i) =>
-            page === null ? (
-              <span
-                key={`gap-${i}`}
-                aria-hidden
-                className="px-1 text-sm text-muted-foreground"
-              >
-                &hellip;
-              </span>
-            ) : (
-              <button
-                key={page}
-                onClick={() => goTo(page)}
-                aria-label={`Page ${page}`}
-                aria-current={page === currentPage ? "page" : undefined}
-                className={`h-9 min-w-9 rounded-lg border px-2.5 text-sm transition-colors ${
-                  page === currentPage
-                    ? "border-foreground bg-foreground text-background"
-                    : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
-                }`}
-              >
-                {page}
-              </button>
-            ),
-          )}
-
-          <PageStep
-            direction="next"
-            disabled={currentPage === total}
-            onClick={() => goTo(currentPage + 1)}
-          />
-        </nav>
-      )}
+      <Pager
+        current={currentPage}
+        total={total}
+        label="Blog pages"
+        onSelect={goTo}
+      />
     </>
   );
 }
 
-/** Previous/next arrow, kept the same square as the numbered keys. */
-function PageStep({
-  direction,
-  disabled,
-  onClick,
-}: {
-  direction: "prev" | "next";
-  disabled: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      aria-label={direction === "prev" ? "Previous page" : "Next page"}
-      className="flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
-    >
-      <svg
-        width="15"
-        height="15"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden
-      >
-        <path d={direction === "prev" ? "m14.5 5-7 7 7 7" : "m9.5 5 7 7-7 7"} />
-      </svg>
-    </button>
-  );
-}

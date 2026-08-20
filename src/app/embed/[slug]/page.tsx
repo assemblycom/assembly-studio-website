@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description:
         embed.description ??
         `Show ${embed.name} inside your Assembly client experience.`,
-      path: `/embeds/directory/${embed.slug}`,
+      path: `/embed/${embed.slug}`,
     },
     ogImageFor(embed.name),
   );
@@ -52,7 +52,7 @@ export default async function EmbedPage({ params }: Props) {
             className="type-caption text-muted-foreground"
           >
             <Link
-              href="/embeds/directory"
+              href="/embeds"
               className="transition-colors hover:text-foreground"
             >
               Embeds
@@ -65,7 +65,7 @@ export default async function EmbedPage({ params }: Props) {
 
           <div className="mt-6 flex items-center gap-4">
             {embed.icon && (
-              // On a white tile, like the directory cards: these are the
+              // On a white tile, like the listing's cards: these are the
               // services' own logos, drawn for a light ground.
               <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-white ring-1 ring-inset ring-border">
                 <Image

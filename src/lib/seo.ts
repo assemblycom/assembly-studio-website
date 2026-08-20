@@ -63,7 +63,7 @@ export const PAGE_SEO = {
     title: "Embeds",
     description:
       "Every external app you can embed in your Assembly client experience \u2014 scheduling, dashboards, design review, support \u2014 with setup steps for each.",
-    path: "/embeds/directory",
+    path: "/embeds",
   },
   definitions: {
     title: "Definitions",

@@ -135,6 +135,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...definitions.map((d) => entry(`/definitions/${d.slug}`)),
     // Hidden embeds are left out the way hidden templates are: the page exists,
     // but nothing of ours points at it.
-    ...embeds.map((e) => entry(`/embeds/directory/${e.slug}`)),
+    ...embeds.map((e) => entry(`/embed/${e.slug}`)),
   ];
 }

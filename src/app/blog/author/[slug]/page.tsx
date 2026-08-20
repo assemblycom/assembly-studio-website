@@ -81,7 +81,12 @@ export default async function AuthorPage({
               {author.bio}
             </p>
           )}
-          <p className="type-caption mt-3 text-muted-foreground">
+          {/* The post count as the site's mono chip — the same tag the post
+              header and the legal pages use, so a count reads as a piece of
+              metadata rather than as a third line of the bio. Not uppercased,
+              unlike those two: the figure is the point here, and caps only
+              reach the word beside it. */}
+          <p className="mt-4 inline-flex items-center rounded-sm bg-muted px-2.5 py-1 text-xs leading-none tracking-[0.02em] text-muted-foreground tabular-nums [font-family:var(--font-diatype-mono),ui-monospace,monospace] [[data-theme=dark]_&]:bg-white/[0.06]">
             {author.postCount} {author.postCount === 1 ? "post" : "posts"}
           </p>
         </div>
