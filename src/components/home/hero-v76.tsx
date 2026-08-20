@@ -381,7 +381,6 @@ export function HeroV76({
         darkTop={dark}
         hideDemo
         maxWidthClass="max-w-[1600px]"
-        narrowOnScroll
         restPaddingClass="px-6 md:px-10"
       />
       {/* Theme-dependent colour here is written as a data-theme variant, not as a

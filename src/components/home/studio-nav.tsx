@@ -33,7 +33,6 @@ export function StudioNav({
   softGlass = false,
   maxWidthClass,
   restPaddingClass,
-  narrowOnScroll = false,
   hideDemo = false,
   minimal = false,
   themeToggle,
@@ -50,9 +49,6 @@ export function StudioNav({
   // Override the at-rest horizontal padding so the nav clears a rounded hero
   // panel's edge on narrower layouts (V63).
   restPaddingClass?: string;
-  // Narrow the nav to the content rail once scrolled past the hero (home only);
-  // other pages keep a constant width.
-  narrowOnScroll?: boolean;
   // Hide the "Book a demo" CTA (both desktop and the mobile menu) — dropped for
   // launch on some heroes.
   hideDemo?: boolean;
@@ -82,24 +78,6 @@ export function StudioNav({
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
   }, []);
-
-  // Home nav only: the nav narrows through the content, then widens back out
-  // once the (wide) footer scrolls into view so it matches the footer width.
-  const [atFooter, setAtFooter] = useState(false);
-  useEffect(() => {
-    if (!narrowOnScroll) return;
-    const footer = document.querySelector("footer");
-    if (!footer) return;
-    // Fire only once the footer is clearly in view (30% up from the bottom),
-    // not the instant its top grazes the viewport edge — otherwise tiny scroll
-    // moves toggle it on/off and the width transition jitters.
-    const io = new IntersectionObserver(
-      ([entry]) => setAtFooter(entry.isIntersecting),
-      { threshold: 0, rootMargin: "0px 0px -30% 0px" },
-    );
-    io.observe(footer);
-    return () => io.disconnect();
-  }, [narrowOnScroll]);
 
   // Close the mobile menu once the route actually changes, rather than on the
   // link's click. Keeping the overlay up until the new page is active means it
@@ -283,16 +261,12 @@ export function StudioNav({
     ? "none"
     : "max-width 620ms cubic-bezier(0.65, 0, 0.35, 1), height 450ms cubic-bezier(0.22, 1, 0.36, 1)";
 
-  // Wide at rest (matching the hero), then narrowing to the content rail
-  // (1100px) once scrolled past the hero, so the nav settles in line with the
-  // page content below.
+  // One width for the whole scroll. Home used to narrow the bar to the content
+  // rail once past the hero and widen it again over the footer, which read as
+  // the nav stepping sideways twice per page — it now holds its rail and only
+  // the surface under it changes.
   const maxWidth = fullWidth ? "max-w-none" : (maxWidthClass ?? "max-w-7xl");
-  // On home, the nav narrows while scrolled through the content, then widens
-  // back out over the (wide) footer. 1280 (not 1200) so the nav's own px-10
-  // gutter lands its content exactly on the 1200px rail lines, aligning the
-  // logo with the rails. Other pages keep maxWidth throughout.
-  const narrowed = narrowOnScroll && !fullWidth && scrolled && !atFooter;
-  const contentRail = `${narrowed ? "max-w-[1280px]" : maxWidth} ${fullWidth ? "px-8" : (restPaddingClass ?? "px-6")}`;
+  const contentRail = `${maxWidth} ${fullWidth ? "px-8" : (restPaddingClass ?? "px-6")}`;
 
   // Content colors flip when the bar is on a dark surface. Light content always
   // sits over a dark surface (the scrolled dark pill or a dark hero/theme), so
