@@ -19,8 +19,14 @@ export interface Template {
   industries?: string[];
   /** Surfaced in the curated set on the homepage. */
   featured?: boolean;
-  /** Lower sorts first within the featured / non-featured groups. */
-  order?: number;
+  /**
+   * Contentful's "Rank" — the same integer the product's own Add-an-App picker
+   * orders by, so the gallery lists apps and templates in one sequence rather
+   * than in two groups. Lower sorts first; no rank sorts last. Core apps and
+   * templates share the scale, which is the point: rank 6 is rank 6 whether it
+   * is a core app or a template.
+   */
+  rank?: number;
   /** Template relies on AI — drives the "AI" capability tag. */
   usesAI?: boolean;
   /** Optional preview image shown on the card in place of the grey placeholder. */

@@ -55,7 +55,8 @@ export interface AppTemplateEntry {
    */
   isHidden: boolean;
   featured: boolean;
-  order?: number;
+  /** Contentful's "Rank" field, whose api id is still `order`. */
+  rank?: number;
   /** Contentful's own sys.updatedAt, for the sitemap's lastmod. */
   updatedAt?: string;
 }
@@ -143,7 +144,7 @@ function toAppTemplate(entry: Entry<never>): AppTemplateEntry | null {
     templateId: typeof f.templateId === "string" ? f.templateId : undefined,
     isHidden: f.isHidden === true,
     featured: f.isFeatured === true,
-    order: typeof f.order === "number" ? f.order : undefined,
+    rank: typeof f.order === "number" ? f.order : undefined,
     updatedAt: entry.sys?.updatedAt,
   };
 }

@@ -144,14 +144,18 @@ export function TemplatesBrowser({ templates }: Props) {
         .toLowerCase();
       return haystack.includes(q);
     });
-    // Featured (popular) first, then whatever order the CMS gives them, then
-    // alphabetically for anything left unordered.
+    // Rank, the way the product's own Add-an-App picker orders these, then
+    // alphabetically for anything unranked.
+    //
+    // It used to lead with the CMS's Featured flag, and every entry carrying that
+    // flag is a core app — so the gallery opened on Autoresponder (rank 101) and
+    // Exporter (no rank at all) while the onboarding wizard at rank 1 sat below
+    // the fold. Core apps and templates share one rank scale, so sorting on it
+    // alone is what interleaves them. The flag itself is marked deprecated in
+    // Contentful; the homepage's curated strip is the only thing still reading it.
     return [...matched].sort((a, b) => {
-      const byFeatured =
-        Number(Boolean(b.featured)) - Number(Boolean(a.featured));
-      if (byFeatured !== 0) return byFeatured;
-      const byOrder = (a.order ?? Infinity) - (b.order ?? Infinity);
-      if (byOrder !== 0) return byOrder;
+      const byRank = (a.rank ?? Infinity) - (b.rank ?? Infinity);
+      if (byRank !== 0) return byRank;
       return a.title.localeCompare(b.title);
     });
   }, [templates, selected, query]);

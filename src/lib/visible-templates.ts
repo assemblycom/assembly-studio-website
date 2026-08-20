@@ -49,7 +49,7 @@ function fromEntry(entry: AppTemplateEntry): Template {
     images: entry.images.map((image) => image.url),
     previewCount: entry.images.length || 1,
     featured: entry.featured,
-    order: entry.order,
+    rank: entry.rank,
     listed: !entry.isHidden,
   };
 }
@@ -61,7 +61,26 @@ async function resolve(entries: AppTemplateEntry[]): Promise<Template[]> {
   const committedSlugs = new Set(committed.map((t) => t.slug));
   const cmsOnly = entries.filter((e) => !committedSlugs.has(e.slug));
   warnUnmatched(cmsOnly);
-  return [...committed, ...cmsOnly.map(fromEntry)];
+  return [...committed.map(withRank(bySlug)), ...cmsOnly.map(fromEntry)];
+}
+
+/**
+ * Rank is the one CMS field a committed record does not carry its own copy of,
+ * so it has to be layered on here.
+ *
+ * Everything else about a committed template deliberately wins over the CMS —
+ * the cover mock, the industry tags, the one-line card copy. Rank is different
+ * in kind: it is not content, it is the position marketing gives the entry, and
+ * it is the same integer the product's own picker sorts by. Left off, every
+ * committed template read as unranked and sorted below the core apps, which
+ * carry no committed record and so were the only entries with a rank at all —
+ * which is exactly the two-groups ordering this was meant to remove.
+ */
+function withRank(bySlug: Map<string, AppTemplateEntry>) {
+  return (template: Template): Template => ({
+    ...template,
+    rank: bySlug.get(template.slug)?.rank,
+  });
 }
 
 /**
