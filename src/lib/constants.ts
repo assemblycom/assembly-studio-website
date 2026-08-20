@@ -71,6 +71,11 @@ export const NAV_ENTRIES: NavEntry[] = [
         href: "/blog",
         description: "Product news, and guides for service firms",
       },
+      {
+        label: "Updates",
+        href: "/updates",
+        description: "Everything we ship, as we ship it",
+      },
       // External docs, but opening in the same tab (newTab omitted) — a new tab
       // read as a jarring context switch from a primary nav item.
       {
@@ -254,6 +259,7 @@ export const FOOTER_GROUPS: { label: string; links: NavLink[] }[] = [
     label: "Resources",
     links: [
       { label: "Blog", href: "/blog" },
+      { label: "Updates", href: "/updates" },
       { label: "Customers", href: "/customers" },
       { label: "Brand", href: "/brand" },
       { label: "Definitions", href: "/definitions" },

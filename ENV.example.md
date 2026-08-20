@@ -66,6 +66,21 @@ Set it in `.env.local` for local work, and in the Vercel project's environment
 variables for staging and production. Read server-side only; it never reaches
 the browser.
 
+## Ghost, again (optional) — the `/updates` changelog
+
+`/updates` reads a **second, separate Ghost instance** (`copilot-updates.ghost.io`),
+not a tag on the blog. It has its own key, and the two are not interchangeable.
+**Not set** → the changelog falls back to that instance's RSS feed and shows only
+the newest 15 entries instead of all 170. **Set** → the whole archive back to 2020.
+
+| Variable | Needed for | Notes |
+| --- | --- | --- |
+| `GHOST_UPDATES_CONTENT_API_KEY` | The full archive rather than the newest 15 | The updates Ghost admin → **Settings → Integrations → Custom** → **Content API key**. 26 characters, no colon. Read-only. |
+| `GHOST_UPDATES_API_URL` | Pointing at a different Ghost | Defaults to `https://copilot-updates.ghost.io`. Leave unset. |
+
+Set it in `.env.local` locally and in the Vercel project's environment variables
+for Production, Staging, and Preview. Read server-side only.
+
 ## Contentful (optional) — the `/templates` gallery
 
 Lets the templates be edited without a pull request. **Not set** → the site uses

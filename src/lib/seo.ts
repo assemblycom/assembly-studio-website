@@ -83,6 +83,12 @@ export const PAGE_SEO = {
       "Product announcements, notes from the team, and practical guides to building client-facing apps for professional service firms.",
     path: "/blog",
   },
+  updates: {
+    title: "Updates",
+    description:
+      "Everything we ship to Assembly, as we ship it: new apps, platform changes, and fixes, dated and in order.",
+    path: "/updates",
+  },
   aiPolicy: {
     title: "AI Policy",
     description:

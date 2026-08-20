@@ -1,21 +1,36 @@
 /**
- * The blog's posts come from the Ghost instance the marketing blog already runs
- * on (copilot-blog.ghost.io).
+ * Ghost, twice. The marketing blog and the changelog are two separate Ghost
+ * instances with separate keys, so everything here takes the instance it is
+ * reading as an argument rather than closing over one.
  *
- * Two ways in, picked by whether a key is configured:
+ * Two ways into each, picked by whether that instance has a key configured:
  *
- *   • GHOST_CONTENT_API_KEY set — the Content API, which returns the whole
- *     archive. This is the one we want.
- *   • no key — the public RSS feed, which needs no credentials but which this
- *     instance caps at the newest 15 posts (its /rss/2/ page 404s).
+ *   • key set — the Content API, which returns the whole archive. This is the
+ *     one we want.
+ *   • no key — the public RSS feed, which needs no credentials but which Ghost
+ *     caps at the newest 15 posts (its /rss/2/ page 404s).
  *
- * Everything downstream reads GhostPost and neither knows nor cares which of
- * the two produced it.
+ * Everything downstream reads GhostPost and neither knows nor cares which
+ * instance, or which of the two transports, produced it.
  */
 
+/** One Ghost instance: where it lives, and the read-only key for it if we have one. */
+interface GhostSource {
+  url: string;
+  key?: string;
+}
 
-const GHOST_URL = process.env.GHOST_API_URL ?? "https://copilot-blog.ghost.io";
-const CONTENT_API_KEY = process.env.GHOST_CONTENT_API_KEY;
+/** The marketing blog, behind /blog. */
+const BLOG: GhostSource = {
+  url: process.env.GHOST_API_URL ?? "https://copilot-blog.ghost.io",
+  key: process.env.GHOST_CONTENT_API_KEY,
+};
+
+/** The changelog, behind /updates. A different instance, not a tag on the blog. */
+const UPDATES: GhostSource = {
+  url: process.env.GHOST_UPDATES_API_URL ?? "https://copilot-updates.ghost.io",
+  key: process.env.GHOST_UPDATES_CONTENT_API_KEY,
+};
 
 // Well under the API's 100 maximum: at 100 a page of posts came back over 5MB,
 // and Next refuses to put anything over 2MB in its data cache, so every
@@ -300,11 +315,12 @@ function parseItems(xml: string): GhostPost[] {
   });
 }
 
-async function fetchFromRss(): Promise<GhostPost[]> {
+async function fetchFromRss(source: GhostSource): Promise<GhostPost[]> {
   const posts: GhostPost[] = [];
 
   for (let page = 1; page <= MAX_PAGES; page++) {
-    const url = page === 1 ? `${GHOST_URL}/rss/` : `${GHOST_URL}/rss/${page}/`;
+    const url =
+      page === 1 ? `${source.url}/rss/` : `${source.url}/rss/${page}/`;
     const response = await fetch(url, {
       next: { revalidate: REVALIDATE_SECONDS },
     });
@@ -345,12 +361,15 @@ export interface GhostAuthor {
   postCount: number;
 }
 
-async function fetchFromContentApi(key: string): Promise<GhostPost[]> {
+async function fetchFromContentApi(
+  source: GhostSource,
+  key: string,
+): Promise<GhostPost[]> {
   const posts: GhostPost[] = [];
 
   for (let page = 1; page <= MAX_PAGES; page++) {
     const url =
-      `${GHOST_URL}/ghost/api/content/posts/` +
+      `${source.url}/ghost/api/content/posts/` +
       `?key=${key}&limit=${API_PAGE_SIZE}&page=${page}` +
       `&include=tags,authors&order=published_at%20desc`;
 
@@ -358,12 +377,12 @@ async function fetchFromContentApi(key: string): Promise<GhostPost[]> {
       next: { revalidate: REVALIDATE_SECONDS },
     });
     if (!response.ok) {
-      // A bad key shouldn't take the blog down: fall back to the public feed
+      // A bad key shouldn't take the page down: fall back to the public feed
       // and say why in the build log.
       console.error(
         `Ghost Content API returned ${response.status}; falling back to RSS`,
       );
-      return fetchFromRss();
+      return fetchFromRss(source);
     }
 
     const { posts: batch } = (await response.json()) as {
@@ -394,14 +413,27 @@ async function fetchFromContentApi(key: string): Promise<GhostPost[]> {
   return posts;
 }
 
-// One fetch per render pass, however many of these pages ask for the list.
-let cached: Promise<GhostPost[]> | undefined;
+// One fetch per instance per render pass, however many pages ask for the list.
+const cached = new Map<string, Promise<GhostPost[]>>();
+
+function getFrom(source: GhostSource): Promise<GhostPost[]> {
+  let pending = cached.get(source.url);
+  if (!pending) {
+    pending = source.key
+      ? fetchFromContentApi(source, source.key)
+      : fetchFromRss(source);
+    cached.set(source.url, pending);
+  }
+  return pending;
+}
 
 export function getPosts(): Promise<GhostPost[]> {
-  cached ??= CONTENT_API_KEY
-    ? fetchFromContentApi(CONTENT_API_KEY)
-    : fetchFromRss();
-  return cached;
+  return getFrom(BLOG);
+}
+
+/** The changelog's entries, newest first. A different Ghost from getPosts(). */
+export function getUpdates(): Promise<GhostPost[]> {
+  return getFrom(UPDATES);
 }
 
 export async function getPost(slug: string): Promise<GhostPost | undefined> {
@@ -438,11 +470,11 @@ interface ContentApiAuthor {
  * a key there are no author pages — the bylines simply stay unlinked.
  */
 async function fetchAuthors(): Promise<GhostAuthor[]> {
-  if (!CONTENT_API_KEY) return [];
+  if (!BLOG.key) return [];
 
   const response = await fetch(
-    `${GHOST_URL}/ghost/api/content/authors/` +
-      `?key=${CONTENT_API_KEY}&limit=all&include=count.posts`,
+    `${BLOG.url}/ghost/api/content/authors/` +
+      `?key=${BLOG.key}&limit=all&include=count.posts`,
     { next: { revalidate: REVALIDATE_SECONDS } },
   );
   if (!response.ok) {
@@ -619,6 +651,19 @@ export function splitFaq(html: string): {
  * screen, softer on a retina one. The slot the page actually draws is passed in
  * here instead.
  */
+/**
+ * Most changelog entries head their sections with <h3> and never use an <h2>:
+ * the level is the writer's habit rather than a hierarchy, and left alone those
+ * heads render a pixel larger than the body text beside them while the entries
+ * that do use <h2> get a proper one. Where an entry has no <h2> at all, its
+ * <h3>s are its top level and are promoted to say so. An entry that uses both
+ * is already ranked, and is left alone.
+ */
+export function normalizeEntryHeadings(html: string): string {
+  if (/<h2[\s>]/i.test(html)) return html;
+  return html.replace(/<(\/?)h3([\s>])/gi, "<$1h2$2");
+}
+
 export function withImageSizes(html: string, sizes: string): string {
   return html.replace(/<img\b[^>]*>/g, (tag) =>
     /\ssizes\s*=/i.test(tag)

@@ -46,6 +46,7 @@ const HINTS: Record<string, { changeFrequency: Frequency; priority: number }> = 
   "/definitions": { changeFrequency: "monthly", priority: 0.5 },
   "/comparison": { changeFrequency: "monthly", priority: 0.7 },
   "/blog": { changeFrequency: "weekly", priority: 0.7 },
+  "/updates": { changeFrequency: "weekly", priority: 0.6 },
   "/demo": { changeFrequency: "monthly", priority: 0.6 },
 };
 
