@@ -92,6 +92,8 @@ export interface EmbedEntry {
   website?: string;
   /** Listed or not. A hidden embed keeps its page, like a hidden template. */
   isHidden: boolean;
+  /** Contentful's own sys.updatedAt, for the sitemap's lastmod. */
+  updatedAt?: string;
 }
 
 const client =
@@ -221,6 +223,7 @@ function toEmbed(entry: Entry<never>): EmbedEntry | null {
     audience: typeof f.appsType === "string" ? f.appsType : undefined,
     website: typeof f.website === "string" ? f.website : undefined,
     isHidden: f.isHidden === true,
+    updatedAt: entry.sys?.updatedAt,
   };
 }
 

@@ -116,17 +116,16 @@ function titleFromPath(path: string): string {
 /**
  * The hand-shipped pages, plus the data-driven ones whose content lives in the
  * repo or in Contentful rather than in Ghost: solutions, features, comparisons,
- * customers, jobs, embeds.
+ * customers, jobs. The embed pages have a sitemap of their own.
  *
  * Build-time only — it walks the filesystem. See findStaticRoutes.
  */
 export async function mainUrls(): Promise<SitemapUrl[]> {
-  const [solutions, features, comparisons, roles, embeds] = await Promise.all([
+  const [solutions, features, comparisons, roles] = await Promise.all([
     getSolutions(),
     getFeaturePages(),
     getComparisons(),
     getOpenRoles(),
-    getListedEmbeds(),
   ]);
 
   const at = (path: string, title = titleFromPath(path)): SitemapUrl => ({
@@ -159,9 +158,6 @@ export async function mainUrls(): Promise<SitemapUrl[]> {
     ...roles
       .filter((role) => role.slug)
       .map((role) => at(`/jobs/${role.slug}`, role.title)),
-    // Hidden embeds are left out the way hidden templates are: the page exists,
-    // but nothing of ours points at it.
-    ...embeds.map((e) => at(`/embed/${e.slug}`, e.name)),
   ];
 }
 
@@ -180,6 +176,25 @@ export async function templateUrls(): Promise<SitemapUrl[]> {
     path: `/templates/${template.slug}`,
     lastModified: edited.get(template.slug) ?? BUILD_TIME,
     title: template.title,
+  }));
+}
+
+/**
+ * /embed/[slug] — the embeddable-app pages, from Contentful.
+ *
+ * Their own sitemap rather than a tail on sitemap-main.xml: there are far more
+ * of them than there are hand-shipped pages, and they are a content set with a
+ * source, so they belong beside templates and the glossary.
+ *
+ * Hidden embeds are left out the way hidden templates are: the page exists, but
+ * nothing of ours points at it.
+ */
+export async function embedUrls(): Promise<SitemapUrl[]> {
+  const embeds = await getListedEmbeds();
+  return embeds.map((embed) => ({
+    path: `/embed/${embed.slug}`,
+    lastModified: embed.updatedAt ?? BUILD_TIME,
+    title: embed.name,
   }));
 }
 
@@ -255,7 +270,7 @@ export const DOCS_SITEMAP = `${SITE_URL}/docs/sitemap.xml`;
 export { DOCS_URL };
 
 /**
- * The four content sitemaps. Kept apart from main() because these can be
+ * The five content sitemaps. Kept apart from main() because these can be
  * regenerated in a lambda — they only talk to Ghost and Contentful — while main
  * has to be built with the filesystem in reach.
  */
@@ -272,4 +287,5 @@ export const CONTENT_GROUPS: {
     urls: definitionUrls,
   },
   { file: "sitemap-templates.xml", heading: "Templates", urls: templateUrls },
+  { file: "sitemap-embeds.xml", heading: "Embeds", urls: embedUrls },
 ];

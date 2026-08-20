@@ -4,6 +4,7 @@ import { DOCS_URL } from "@/lib/constants";
 import {
   blogUrls,
   definitionUrls,
+  embedUrls,
   mainUrls,
   templateUrls,
   updatesUrls,
@@ -43,7 +44,9 @@ function Section({
 }) {
   if (urls && urls.length === 0) return null;
   return (
-    <section className="border-t border-border pt-8 [[data-theme=dark]_&]:border-[#383838]">
+    // The rule separates one section from the next, so the first one goes
+    // without: under the page title it read as a line belonging to the title.
+    <section className="border-t border-border pt-8 first:border-t-0 first:pt-0 [[data-theme=dark]_&]:border-[#383838]">
       <h2 className="type-h4 text-foreground">{heading}</h2>
       {/* Two or three columns of links rather than one long ladder: these are
           scanned for a name, not read in order. */}
@@ -65,13 +68,15 @@ function Section({
 }
 
 export default async function SitemapPage() {
-  const [main, templates, blog, updates, definitions] = await Promise.all([
-    mainUrls(),
-    templateUrls(),
-    blogUrls(),
-    updatesUrls(),
-    definitionUrls(),
-  ]);
+  const [main, templates, embeds, blog, updates, definitions] =
+    await Promise.all([
+      mainUrls(),
+      templateUrls(),
+      embedUrls(),
+      blogUrls(),
+      updatesUrls(),
+      definitionUrls(),
+    ]);
 
   return (
     <div className="mx-auto max-w-[1200px] px-6 pb-24 pt-16 md:px-10 md:pb-32 md:pt-24">
@@ -83,6 +88,7 @@ export default async function SitemapPage() {
       <div className="mt-14 flex flex-col gap-12 md:mt-20 md:gap-16">
         <Section heading="Pages" urls={main} />
         <Section heading="Templates" urls={templates} />
+        <Section heading="Embeds" urls={embeds} />
         <Section heading="Blog" urls={blog} />
         <Section heading="Updates" urls={updates} />
         <Section heading="Definitions" urls={definitions} />
