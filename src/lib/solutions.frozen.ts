@@ -22,7 +22,7 @@ export const FROZEN_SOLUTIONS: CmsPage[] = [
     },
     "noIndex": false,
     "hero": {
-      "title": "The accounting client portal your clients won't ignore",
+      "title": "The accounting client portal you can build on",
       "description": "Built for how accountants work and designed for how clients think — so your branded portal becomes the hub your clients actually return to. Onboarding, file requests, contracts, billing, and messaging in one place.",
       "ctas": [
         {
